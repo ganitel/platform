@@ -1,0 +1,358 @@
+name: 🚀 Deploy to Staging
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+  DOCKER_COMPOSE_FILE: docker-compose.staging.yml
+
+jobs:
+  test:
+    name: 🧪 Run Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: ganitel_test_db
+          POSTGRES_USER: ganitel_test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-test.txt
+      
+      - name: 🧪 Run tests
+        env:
+          ENVIRONMENT: test
+          TESTING: "true"
+          CI: "true"
+          GITHUB_ACTIONS: "true"
+          DATABASE_URL: postgresql://ganitel_test_user:test_password@localhost:5432/ganitel_test_db
+          POSTGRES_SERVER: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: ganitel_test_db
+          POSTGRES_USER: ganitel_test_user
+          POSTGRES_PASSWORD: test_password
+          REDIS_URL: redis://localhost:6379/0
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          SECRET_KEY: test-secret-key-for-ci-only-minimum-32-characters-long
+          DEBUG: "False"
+          ACCESS_TOKEN_EXPIRE_MINUTES: 30
+          REFRESH_TOKEN_EXPIRE_DAYS: 7
+        run: |
+          pytest -v --tb=short --maxfail=3 --cov=app --cov-report=html --cov-report=term
+      
+      - name: 📤 Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov/
+          retention-days: 30
+
+  deploy:
+    name: 🚀 Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 🔐 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
+            echo "❌ Error: SSH_PRIVATE_KEY secret is empty or not set"
+            exit 1
+          fi
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          if [ ! -s ~/.ssh/id_rsa ]; then
+            echo "❌ Error: SSH key file is empty after writing"
+            exit 1
+          fi
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+          echo "✅ SSH key configured successfully"
+      
+      - name: ✅ Validate secrets
+        run: |
+          echo "Validating required secrets..."
+          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
+            echo "❌ SSH_PRIVATE_KEY is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then
+            echo "❌ VPS_HOST is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_USER }}" ]; then
+            echo "❌ VPS_USER is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.DEPLOY_PATH }}" ]; then
+            echo "❌ DEPLOY_PATH is not set"
+            exit 1
+          fi
+          echo "✅ All deployment secrets are configured"
+      
+      - name: 🔌 Test VPS connection
+        run: |
+          echo "Testing SSH connection to VPS..."
+          ssh -o ConnectTimeout=10 ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "echo '✅ SSH connection successful'"
+      
+      - name: 📦 Setup Git repository on VPS
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
+          set -e
+          DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}"
+          echo "🔍 Checking deployment directory: $DEPLOY_PATH"
+          mkdir -p "$DEPLOY_PATH"
+          cd "$DEPLOY_PATH"
+          if [ ! -d ".git" ]; then
+            echo "📦 Initializing Git repository..."
+            git init
+            git remote add origin git@github.com:${{ github.repository }}.git
+          fi
+          git remote set-url origin git@github.com:${{ github.repository }}.git || \
+            git remote add origin git@github.com:${{ github.repository }}.git
+          if [ -f ".env.staging" ]; then
+            echo "💾 Backing up .env.staging..."
+            cp .env.staging /tmp/.env.staging.backup.$(date +%Y%m%d_%H%M%S)
+          fi
+          echo "✅ Git repository ready"
+          ENDSSH
+      
+      - name: 🔄 Pull latest code from develop
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
+          set -e
+          cd "${{ secrets.DEPLOY_PATH }}"
+          echo "🔄 Fetching latest changes from develop..."
+          git fetch origin develop
+          echo "📋 Changes to be applied:"
+          git log HEAD..origin/develop --oneline || echo "No commits to show"
+          echo "⚠️  Resetting to origin/develop..."
+          git reset --hard origin/develop
+          git checkout -B develop origin/develop
+          git clean -fd
+          echo "✅ Code synchronized with develop branch"
+          echo "📍 Current commit: $(git rev-parse --short HEAD)"
+          ENDSSH
+      
+      - name: 📝 Create deployment info
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
+          cd "${{ secrets.DEPLOY_PATH }}"
+          cat > deployment-info.txt << EOF
+          Deployment Information
+          =====================
+          Deployed at: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          Commit SHA: ${{ github.sha }}
+          Commit Message: ${{ github.event.head_commit.message }}
+          Deployed by: ${{ github.actor }}
+          Branch: develop
+          Workflow: ${{ github.run_id }}
+          EOF
+          cat deployment-info.txt
+          ENDSSH
+      
+      - name: 💾 Backup database
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
+          set -e
+          cd "${{ secrets.DEPLOY_PATH }}"
+          if docker-compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file .env.staging ps | grep -q "Up"; then
+            echo "💾 Creating database backup..."
+            mkdir -p backups
+            BACKUP_FILE="backups/backup_$(date +%Y%m%d_%H%M%S).sql"
+            docker-compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file .env.staging exec -T db \
+              pg_dump -U ganitel_user ganitel_staging_db > "$BACKUP_FILE" 2>/dev/null || true
+            if [ -f "$BACKUP_FILE" ]; then
+              echo "✅ Database backup created: $BACKUP_FILE"
+              ls -t backups/backup_*.sql | tail -n +6 | xargs -r rm
+            else
+              echo "⚠️  No database to backup"
+            fi
+          else
+            echo "⚠️  No running containers to backup"
+          fi
+          ENDSSH
+      
+      - name: 🛑 Stop existing containers
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
+          cd "${{ secrets.DEPLOY_PATH }}"
+          echo "🛑 Stopping existing containers..."
+          docker-compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file .env.staging down || echo "No containers to stop"
+          echo "✅ Containers stopped"
+          ENDSSH
+      
+      - name: 🏗️ Build and start services
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
+          set -e
+          cd "${{ secrets.DEPLOY_PATH }}"
+          if [ ! -f ".env.staging" ]; then
+            echo "⚠️  Warning: .env.staging not found!"
+            if [ -f ".env.staging.example" ]; then
+              cp .env.staging.example .env.staging
+              echo "⚠️  IMPORTANT: Configure .env.staging with real values!"
+            else
+              echo "❌ Error: No .env.staging found"
+              exit 1
+            fi
+          fi
+          echo "🏗️  Building Docker images..."
+          docker-compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file .env.staging build --no-cache
+          echo "🚀 Starting services..."
+          docker-compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file .env.staging up -d
+          echo "⏳ Waiting for services to start..."
+          sleep 30
+          echo "✅ Services started"
+          ENDSSH
+      
+      - name: 🔄 Run database migrations
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
+          set -e
+          cd "${{ secrets.DEPLOY_PATH }}"
+          echo "🔄 Running database migrations..."
+          docker-compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file .env.staging exec -T app alembic upgrade head
+          echo "✅ Migrations completed"
+          ENDSSH
+      
+      - name: ✅ Health check
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
+          set -e
+          cd "${{ secrets.DEPLOY_PATH }}"
+          echo "🔍 Running health check..."
+          for i in {1..10}; do
+            if curl -f http://localhost:8000/api/v1/health/ > /dev/null 2>&1; then
+              echo "✅ Health check passed!"
+              curl http://localhost:8000/api/v1/health/
+              exit 0
+            fi
+            echo "⏳ Attempt $i/10 - Waiting for app..."
+            sleep 5
+          done
+          echo "❌ Health check failed"
+          echo "📋 Container logs:"
+          docker-compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file .env.staging logs --tail=50 app
+          exit 1
+          ENDSSH
+      
+      - name: 📊 Show deployment status
+        if: always()
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
+          cd "${{ secrets.DEPLOY_PATH }}"
+          echo "📊 Deployment status:"
+          docker-compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file .env.staging ps
+          echo ""
+          echo "📍 Git status:"
+          git log -1 --oneline
+          ENDSSH
+      
+      - name: 🧹 Cleanup
+        if: always()
+        run: |
+          rm -f ~/.ssh/id_rsa
+
+  notify:
+    name: 📧 Notify
+    runs-on: ubuntu-latest
+    needs: [test, deploy]
+    if: always()
+    
+    steps:
+      - name: 📧 Send success notification
+        if: needs.deploy.result == 'success'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: ✅ Staging Deployment Successful
+          to: ${{ secrets.MAIL_USERNAME }}
+          from: GitHub Actions <${{ secrets.MAIL_USERNAME }}>
+          html_body: |
+            <h2>✅ Deployment Successful!</h2>
+            <p><strong>Repository:</strong> ${{ github.repository }}</p>
+            <p><strong>Branch:</strong> develop</p>
+            <p><strong>Commit:</strong> ${{ github.sha }}</p>
+            <p><strong>Author:</strong> ${{ github.actor }}</p>
+            <p><strong>Message:</strong> ${{ github.event.head_commit.message }}</p>
+            <hr>
+            <h3>🔗 Links:</h3>
+            <ul>
+              <li><a href="https://staging.ganitel.com">Staging</a></li>
+              <li><a href="https://staging.ganitel.com/docs">API Docs</a></li>
+              <li><a href="https://staging.ganitel.com/api/v1/health/">Health</a></li>
+              <li><a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">Workflow</a></li>
+            </ul>
+      
+      - name: 📧 Send failure notification
+        if: needs.test.result == 'failure' || needs.deploy.result == 'failure'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: ❌ Staging Deployment Failed
+          to: ${{ secrets.MAIL_USERNAME }}
+          from: GitHub Actions <${{ secrets.MAIL_USERNAME }}>
+          html_body: |
+            <h2>❌ Deployment Failed!</h2>
+            <p><strong>Repository:</strong> ${{ github.repository }}</p>
+            <p><strong>Branch:</strong> develop</p>
+            <p><strong>Commit:</strong> ${{ github.sha }}</p>
+            <p><strong>Author:</strong> ${{ github.actor }}</p>
+            <hr>
+            <h3>Status:</h3>
+            <ul>
+              <li><strong>Tests:</strong> ${{ needs.test.result }}</li>
+              <li><strong>Deploy:</strong> ${{ needs.deploy.result }}</li>
+            </ul>
+            <p><a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Logs</a></p>

@@ -1,0 +1,38 @@
+[run]
+# Coverage configuration for Ganitel Backend
+source = app
+omit =
+    */tests/*
+    */test_*.py
+    */__pycache__/*
+    */site-packages/*
+    */venv/*
+    */.venv/*
+    */migrations/*
+    */scripts/*
+
+[report]
+# Report configuration
+precision = 2
+show_missing = True
+skip_covered = False
+
+# Exclude lines from coverage
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    def __str__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod
+    @abc.abstractmethod
+    pass
+
+[html]
+directory = htmlcov
+title = Ganitel Backend Coverage Report
+
+[xml]
+output = coverage.xml

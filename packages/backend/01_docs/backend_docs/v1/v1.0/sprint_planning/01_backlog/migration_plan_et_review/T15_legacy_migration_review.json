@@ -1,0 +1,79 @@
+{
+  "ticket": "T15",
+  "title": "Legacy migration ETL review",
+  "generated_at": "2026-02-24T11:00:00Z",
+  "source": "residencemg_backup.sql",
+  "runs": {
+    "first_run": {
+      "dry_run": false,
+      "source_counts": {
+        "users": 182,
+        "regions": 10,
+        "cities": 5,
+        "house_types": 4,
+        "houses": 326,
+        "facilities": 17
+      },
+      "migration_stats": {
+        "users_created": 179,
+        "users_updated": 3,
+        "users_mapped": 182,
+        "locations_created": 0,
+        "locations_updated": 3,
+        "property_types_mapped": 4,
+        "properties_created": 326,
+        "properties_updated": 0,
+        "services_created": 326,
+        "services_updated": 0,
+        "amenities_created": 17,
+        "amenities_updated": 0,
+        "property_amenities_linked": 2977,
+        "anomalies": 0
+      },
+      "anomalies_count": 0
+    },
+    "second_run": {
+      "dry_run": false,
+      "source_counts": {
+        "users": 182,
+        "regions": 10,
+        "cities": 5,
+        "house_types": 4,
+        "houses": 326,
+        "facilities": 17
+      },
+      "migration_stats": {
+        "users_created": 0,
+        "users_updated": 6,
+        "users_mapped": 182,
+        "locations_created": 0,
+        "locations_updated": 0,
+        "property_types_mapped": 4,
+        "properties_created": 0,
+        "properties_updated": 0,
+        "services_created": 0,
+        "services_updated": 0,
+        "amenities_created": 0,
+        "amenities_updated": 0,
+        "property_amenities_linked": 0,
+        "anomalies": 0
+      },
+      "anomalies_count": 0
+    }
+  },
+  "acceptance_review": {
+    "scope_loaded": true,
+    "report_generated": true,
+    "idempotent_inserts_and_links": true,
+    "strict_zero_update_idempotence": false,
+    "notes": [
+      "Second run produced zero creates and zero new links across all migrated domains.",
+      "Second run still updated 6 users; this indicates residual non-stable update behavior for user rows."
+    ]
+  },
+  "recommended_follow_up": [
+    "Inspect which 6 users are updated repeatedly and which fields are changing.",
+    "Stabilize user normalization/update logic so second run yields users_updated = 0.",
+    "Re-run ETL a third time to confirm fully stable idempotence."
+  ]
+}

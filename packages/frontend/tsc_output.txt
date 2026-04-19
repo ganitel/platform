@@ -1,0 +1,9 @@
+client/components/SearchBar.tsx(3,29): error TS6142: Module './SearchModal' was resolved to '/home/kseme/Documents/Hans_Projet/Ganitel/ganitel_frontend/client/components/SearchModal.tsx', but '--jsx' is not set.
+client/components/SearchBar.tsx(9,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+client/components/SearchBar.tsx(10,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+client/components/SearchBar.tsx(11,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+client/components/SearchBar.tsx(15,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+client/components/SearchBar.tsx(16,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+client/components/SearchBar.tsx(20,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+client/components/SearchBar.tsx(24,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+client/components/SearchBar.tsx(28,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.

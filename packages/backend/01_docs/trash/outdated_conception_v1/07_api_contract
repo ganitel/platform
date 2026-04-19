@@ -1,0 +1,294 @@
+
+## ✅ Ganitel MVP – REST API Documentation (Structured)
+
+Here’s a clean version of what an actual API documentation might look like, starting with **Auth**, **Listings**, and **Bookings**.
+
+I'll follow this format per endpoint:
+
+* **Method + Path**
+* **Description**
+* **Auth required?**
+* **Request body (example)**
+* **Response (example)**
+
+---
+
+## 1. 📲 Authentication
+
+---
+
+### `POST /auth/request-otp`
+
+**Description:**
+Send OTP code to a user's WhatsApp.
+
+**Auth required:** ❌
+
+**Request Body:**
+
+```json
+{
+  "whatsapp": "+237690000000"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "OTP sent to WhatsApp"
+}
+```
+
+---
+
+### `POST /auth/verify-otp`
+
+**Description:**
+Verify OTP and authenticate user.
+
+**Auth required:** ❌
+
+**Request Body:**
+
+```json
+{
+  "whatsapp": "+237690000000",
+  "otp": "123456"
+}
+```
+
+**Response:**
+
+```json
+{
+  "token": "JWT_TOKEN_HERE",
+  "user": {
+    "id": "uuid",
+    "role": "traveler",
+    "first_name": "Loic",
+    "origin": "France"
+  }
+}
+```
+
+---
+
+### `GET /auth/me`
+
+**Description:**
+Get current logged-in user's profile.
+
+**Auth required:** ✅
+
+**Response:**
+
+```json
+{
+  "id": "uuid",
+  "first_name": "Loic",
+  "last_name": "Mendeng",
+  "whatsapp": "+237...",
+  "avatar_url": "...",
+  "origin": "France",
+  "role": "traveler"
+}
+```
+
+---
+
+### `PUT /auth/profile`
+
+**Description:**
+Update user profile.
+
+**Auth required:** ✅
+
+**Request Body:**
+
+```json
+{
+  "first_name": "Loic",
+  "last_name": "Mendeng",
+  "avatar_url": "https://cdn.ganitel.com/avatar.png"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "user": {
+    "first_name": "Loic",
+    "last_name": "Mendeng",
+    "avatar_url": "..."
+  }
+}
+```
+
+---
+
+## 2. 🏠 Listings
+
+---
+
+### `GET /listings`
+
+**Description:**
+Get list of public listings. Filters supported via query params.
+
+**Auth required:** ❌
+
+**Query Params:**
+
+* `city`
+* `min_price`
+* `max_price`
+* `amenity_ids[]`
+* `guest_count`
+* `available_from`
+* `available_to`
+
+**Response (simplified):**
+
+```json
+[
+  {
+    "id": "uuid",
+    "title": "Modern Apartment",
+    "price_per_night": 25000,
+    "city": "Yaoundé",
+    "main_image": "https://...",
+    "rating": 4.5
+  },
+  ...
+]
+```
+
+---
+
+### `GET /listings/:id`
+
+**Description:**
+Get full detail of a listing.
+
+**Auth required:** ❌
+
+**Response:**
+
+```json
+{
+  "id": "uuid",
+  "title": "Modern Apartment",
+  "description": "...",
+  "price_per_night": 25000,
+  "capacity": 4,
+  "rooms": 2,
+  "images": [ "...", "..." ],
+  "amenities": ["Wi-Fi", "Pool"],
+  "host": {
+    "id": "uuid",
+    "first_name": "Marie",
+    "avatar_url": "..."
+  },
+  "availability": ["2025-09-20", "2025-09-21", ...],
+  "reviews": [...]
+}
+```
+
+---
+
+### `POST /listings`
+
+**Description:**
+Create a new listing. Host only.
+
+**Auth required:** ✅ (role: host)
+
+**Request Body:**
+
+```json
+{
+  "title": "Chic Studio",
+  "description": "...",
+  "price_per_night": 20000,
+  "address": "Bastos",
+  "city": "Yaoundé",
+  "rooms": 1,
+  "capacity": 2,
+  "amenity_ids": ["uuid", "uuid"]
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "listing_id": "uuid"
+}
+```
+
+---
+
+## 3. 📅 Bookings
+
+---
+
+### `POST /bookings`
+
+**Description:**
+Traveler creates a booking.
+
+**Auth required:** ✅
+
+**Request Body:**
+
+```json
+{
+  "listing_id": "uuid",
+  "start_date": "2025-10-01",
+  "end_date": "2025-10-07",
+  "guest_count": 2,
+  "message_to_host": "Can I check in late?"
+}
+```
+
+**Response:**
+
+```json
+{
+  "booking_id": "uuid",
+  "status": "pending",
+  "total_price": 120000
+}
+```
+
+---
+
+### `GET /my/bookings`
+
+**Description:**
+See current traveler bookings.
+
+**Auth required:** ✅
+
+**Response:**
+
+```json
+[
+  {
+    "id": "uuid",
+    "listing_title": "Chic Studio",
+    "start_date": "2025-10-01",
+    "end_date": "2025-10-07",
+    "status": "confirmed"
+  }
+]
+```
+
+---
+
+
