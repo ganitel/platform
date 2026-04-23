@@ -53,7 +53,7 @@ dev = [
     "memory-profiler==0.61.0",
     "requests-mock==1.11.0",
     "ruff>=0.8.0",
-    "ty>=0.0.1a6",
+    "ty>=0.0.31",
 ]
 
 [tool.ruff]
@@ -67,7 +67,7 @@ ignore = ["E501"]
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
 
-[tool.ty]
+[tool.ty.environment]
 python-version = "3.11"
 
 [tool.pytest.ini_options]

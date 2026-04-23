@@ -1,12 +1,29 @@
 """
 Ganitel V2 Backend - Main API Router
 """
+
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
-    auth, users, services, health, admin, bookings, payments,
-    wallets, reviews, wishlists, notifications, coupons, complaints, upload,
-    surveys, policies, support_requests, analytics, reference_data
+    auth,
+    users,
+    services,
+    health,
+    admin,
+    bookings,
+    payments,
+    wallets,
+    reviews,
+    wishlists,
+    notifications,
+    coupons,
+    complaints,
+    upload,
+    surveys,
+    policies,
+    support_requests,
+    analytics,
+    reference_data,
 )
 
 api_router = APIRouter()

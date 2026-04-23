@@ -85,6 +85,10 @@ TEST_PRE_local := $(MAKE) --no-print-directory local-test-db-start
 TEST_PRE_staging := $(COMPOSE_staging) --profile test up -d db redis
 
 PHONY_TARGETS := help all-up all-down all-logs status clean clean-all install install-with-tests rebuild local-test-db-start local-test-db-stop local-test-db-clean local-db-reinit
+PHONY_TARGETS += local-dev local-migrate local-migrate-status local-migrate-history local-shell-app local-admin-create
+PHONY_TARGETS += local-lint local-format local-typecheck local-check
+PHONY_TARGETS += local-test local-test-unit local-test-integration local-test-fast local-test-cov local-test-specific local-test-auth local-test-booking local-test-service
+PHONY_TARGETS += local-legacy-migrate-dry local-legacy-migrate-apply
 
 LEGACY_SQL_DUMP_local ?= $(CURDIR)/residencemg_backup.sql
 LEGACY_SQL_DUMP_staging ?= $(CURDIR)/residencemg_backup.sql
@@ -366,6 +370,9 @@ help: ## Show available targets
 	@echo "  local-test-db-start, local-test-db-stop, local-test-db-clean"
 	@echo "  local-db-reinit"
 	@echo ""
+	@echo "Local (uv) — lint & types:"
+	@echo "  local-lint, local-format, local-typecheck, local-check"
+	@echo ""
 	@for env in $(ENVS); do \
 		echo "$$env targets:"; \
 		echo "  $$env-build $$env-up $$env-down $$env-down-v $$env-delete $$env-restart $$env-stop $$env-start $$env-ps"; \
@@ -462,6 +469,11 @@ local-format: ## Format with ruff
 	uv run ruff format .
 
 local-typecheck: ## Type check with ty
+	uv run ty check .
+
+local-check: ## Ruff lint + format check + ty (same as CI)
+	uv run ruff check .
+	uv run ruff format --check .
 	uv run ty check .
 
 local-test: ## Run all tests locally via uv

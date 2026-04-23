@@ -952,7 +952,7 @@ dev = [
     { name = "requests-mock", specifier = "==1.11.0" },
     { name = "responses", specifier = "==0.24.1" },
     { name = "ruff", specifier = ">=0.8.0" },
-    { name = "ty", specifier = ">=0.0.1a6" },
+    { name = "ty", specifier = ">=0.0.31" },
 ]
 
 [[package]]

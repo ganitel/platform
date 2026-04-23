@@ -123,6 +123,19 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ./scripts/migrate.sh       # Migration helper
 ```
 
+#### Lint and types (Ruff + ty)
+
+From `packages/backend` with [uv](https://github.com/astral-sh/uv) (`uv sync` installs dev tools):
+
+```bash
+make local-lint        # ruff check
+make local-format      # ruff format (write)
+make local-typecheck   # ty check
+make local-check       # ruff check + ruff format --check + ty (matches CI)
+```
+
+Configuration lives in `pyproject.toml` (`[tool.ruff]`, `[tool.ty.environment]`).
+
 #### Makefile Commands
 ```bash
 make help          # Show all available commands

@@ -132,9 +132,8 @@ cd /opt/ganitel-backend
 cp .env.staging.example .env.staging
 nano .env.staging  # Edit with your actual values
 
-# 5. Make sure Apache is configured
-sudo a2enmod proxy proxy_http ssl headers rewrite
-sudo systemctl restart apache2
+# 5. Configure host nginx as reverse proxy to the app (see nginx/staging-host.conf in this repo)
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ### Step 2: Configure GitHub Secrets
@@ -292,10 +291,10 @@ curl https://staging.ganitel.com/api/v1/health/
 - ✅ Check if containers are running: `docker-compose ps`
 - ✅ View application logs: `docker-compose logs app`
 - ✅ Verify .env.staging has correct values
-- ✅ Check Apache configuration and restart: `sudo systemctl restart apache2`
+- ✅ Check nginx configuration and reload: `sudo nginx -t && sudo systemctl reload nginx`
 
 ### Deployment succeeded but site not accessible
-- ✅ Check Apache logs: `sudo tail -f /var/log/apache2/staging_ganitel_error.log`
+- ✅ Check nginx logs: `sudo tail -f /var/log/nginx/staging_ganitel_error.log`
 - ✅ Verify DNS points to VPS: `dig staging.ganitel.com`
 - ✅ Check SSL certificate: `sudo certbot certificates`
 - ✅ Test local connection: `curl http://localhost:8000/api/v1/health/`
