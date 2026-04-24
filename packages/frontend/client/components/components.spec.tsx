@@ -4,6 +4,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { MOCK_PROPERTIES, getMockPropertyDetail } from "@/mockData";
 import { servicesService } from "@/services/services.service";
+import { BookingProvider } from "@/contexts/BookingContext";
 
 import { AccompaniedServices } from "./AccompaniedServices";
 import { AmenitiesList } from "./AmenitiesList";
@@ -70,8 +71,12 @@ describe("components smoke tests", () => {
   });
 
   it("renders BookingFooter", () => {
-    renderWithRouter(
-      <BookingFooter price={120} nights={2} checkIn="2025-08-01" checkOut="2025-08-03" />
+    render(
+      <MemoryRouter>
+        <BookingProvider>
+          <BookingFooter price={120} nights={2} checkIn="2025-08-01" checkOut="2025-08-03" />
+        </BookingProvider>
+      </MemoryRouter>
     );
     expect(screen.getByRole("button", { name: "Book this property" })).toBeInTheDocument();
   });

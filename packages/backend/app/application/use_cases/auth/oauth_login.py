@@ -5,9 +5,8 @@ Ganitel V2 Backend - OAuth Login Use Case
 import secrets
 from datetime import UTC, datetime
 
-from passlib.context import CryptContext
-
 from app.config import get_settings
+from app.core.password import hash_password
 from app.domain.entities.user import User, UserStatus, UserType
 from app.domain.repositories.user_repository import IUserRepository
 from app.exceptions import ConflictError, ValidationError
@@ -18,7 +17,6 @@ from app.infrastructure.external_apis.oauth_client import (
 from app.utils.security import create_access_token
 
 settings = get_settings()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class OAuthLoginUseCase:
@@ -178,7 +176,7 @@ class OAuthLoginUseCase:
 
         # Generate random password (user won't use it)
         random_password = secrets.token_urlsafe(32)
-        hashed_password = pwd_context.hash(random_password)
+        hashed_password = hash_password(random_password)
 
         # Create user
         user = User(

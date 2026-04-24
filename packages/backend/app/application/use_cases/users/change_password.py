@@ -4,12 +4,9 @@ Ganitel V2 Backend - Change Password Use Case
 
 from uuid import UUID
 
-from passlib.context import CryptContext
-
+from app.core.password import hash_password, verify_password
 from app.domain.repositories.user_repository import IUserRepository
 from app.exceptions import AuthorizationError, UserNotFoundError, ValidationError
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class ChangePasswordUseCase:
@@ -57,11 +54,11 @@ class ChangePasswordUseCase:
         if not user.hashed_password:
             raise AuthorizationError("Password not set for this account")
 
-        if not pwd_context.verify(current_password, user.hashed_password):
+        if not verify_password(current_password, user.hashed_password):
             raise AuthorizationError("Current password is incorrect")
 
         # Hash new password
-        new_hashed_password = pwd_context.hash(new_password)
+        new_hashed_password = hash_password(new_password)
 
         # Update password
         success = self.user_repository.change_password(user_id, new_hashed_password)

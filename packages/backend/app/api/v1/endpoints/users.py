@@ -5,6 +5,8 @@ Ganitel V2 Backend - User Management Endpoints
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.core.password import hash_password, verify_password
+
 from app.api.v1.schemas.booking_schemas import BookingListResponse, BookingResponse
 from app.api.v1.schemas.user_schemas import (
     ChangePasswordRequest,
@@ -139,13 +141,10 @@ async def change_password(
     Change current user's password
     """
     try:
-        from passlib.context import CryptContext
-
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         user_repository = UserRepository(db)
 
         # Verify current password
-        if not pwd_context.verify(
+        if not verify_password(
             password_data.current_password, current_user.hashed_password
         ):
             raise HTTPException(
@@ -154,7 +153,7 @@ async def change_password(
             )
 
         # Hash new password
-        new_hashed_password = pwd_context.hash(password_data.new_password)
+        new_hashed_password = hash_password(password_data.new_password)
 
         # Update password
         success = user_repository.change_password(current_user.id, new_hashed_password)

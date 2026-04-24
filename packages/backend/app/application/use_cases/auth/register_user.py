@@ -5,13 +5,10 @@ Ganitel V2 Backend - Register User Use Case
 from typing import ClassVar
 from uuid import uuid4
 
-from passlib.context import CryptContext
-
+from app.core.password import hash_password
 from app.domain.entities.user import User, UserStatus, UserType
 from app.domain.repositories.user_repository import IUserRepository
 from app.exceptions import AuthorizationError, ConflictError, ValidationError
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class RegisterUserUseCase:
@@ -126,7 +123,7 @@ class RegisterUserUseCase:
         # Hash password if provided
         hashed_password = None
         if password:
-            hashed_password = pwd_context.hash(password)
+            hashed_password = hash_password(password)
 
         # Determine initial status based on user type
         # According to architecture: new users start as "inactive" (pending verification)

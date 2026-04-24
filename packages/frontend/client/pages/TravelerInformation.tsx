@@ -117,7 +117,7 @@ export default function TravelerInformation() {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const newErrors: Partial<Record<keyof TravelerFormData, string>> = {};
-        error.errors.forEach((err) => {
+        error.issues.forEach((err) => {
           if (err.path[0]) {
             newErrors[err.path[0] as keyof TravelerFormData] = err.message;
           }

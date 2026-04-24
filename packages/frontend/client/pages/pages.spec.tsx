@@ -80,9 +80,9 @@ describe("pages smoke tests", () => {
     expect(screen.getByText("Negotiate your Stay")).toBeInTheDocument();
   });
 
-  it("renders PaymentMethod", () => {
+  it("renders PaymentMethod", async () => {
     renderPage(<PaymentMethod />, { route: "/booking/payment", path: "/booking/payment" });
-    expect(screen.getAllByText("Payment Method").length).toBeGreaterThan(0);
+    expect((await screen.findAllByText("Payment method")).length).toBeGreaterThan(0);
   });
 
   it("renders PaymentProgress", () => {
@@ -90,14 +90,14 @@ describe("pages smoke tests", () => {
     expect(screen.getByText("Payment in Progress")).toBeInTheDocument();
   });
 
-  it("renders PaymentSuccess", () => {
+  it("renders PaymentSuccess", async () => {
     renderPage(<PaymentSuccess />, { route: "/booking/payment-success", path: "/booking/payment-success" });
-    expect(screen.getByText("Booking confirmed!")).toBeInTheDocument();
+    expect(await screen.findByText("Price details")).toBeInTheDocument();
   });
 
-  it("renders ReviewInformation", () => {
+  it("renders ReviewInformation", async () => {
     renderPage(<ReviewInformation />, { route: "/booking/review", path: "/booking/review" });
-    expect(screen.getByText("Review Information")).toBeInTheDocument();
+    expect(await screen.findByText("Review informations")).toBeInTheDocument();
   });
 
   it("renders RequestSent", () => {
@@ -105,9 +105,9 @@ describe("pages smoke tests", () => {
     expect(screen.getByText("Negotiation request sent")).toBeInTheDocument();
   });
 
-  it("renders TravelerInformation", () => {
+  it("renders TravelerInformation", async () => {
     renderPage(<TravelerInformation />, { route: "/booking/confirm", path: "/booking/confirm" });
-    expect(screen.getByText("Traveler Information")).toBeInTheDocument();
+    expect(await screen.findByText("Booking informations")).toBeInTheDocument();
   });
 
   it("renders SignIn", () => {
@@ -120,9 +120,9 @@ describe("pages smoke tests", () => {
     expect(screen.getByText("Inscription")).toBeInTheDocument();
   });
 
-  it("renders Profile", () => {
+  it("renders Profile", async () => {
     renderPage(<Profile />, { route: "/profile", path: "/profile" });
-    expect(screen.getByText("COMPTE")).toBeInTheDocument();
+    expect(await screen.findByText("MyProfile")).toBeInTheDocument();
   });
 
   it("renders NotFound", () => {

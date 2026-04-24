@@ -14,20 +14,11 @@ from app.domain.entities.user import UserStatus
 from app.domain.repositories.user_repository import IUserRepository
 from app.exceptions import AuthorizationError, UserNotFoundError, ValidationError
 
+from app.core.password import hash_password, verify_password
+
 settings = get_settings()
-pwd_context = None
 DUMMY_PASSWORD_HASH = "$2b$12$zR/pJ0d6fV7GQogfW1VxE.rmy9jre7hN3Qj0x2I8wYh6w8d6l0w2K"
 MIN_AUTH_FAILURE_DURATION_SECONDS = 0.50
-
-
-def get_pwd_context():
-    """Lazy import of password context"""
-    global pwd_context
-    if pwd_context is None:
-        from passlib.context import CryptContext
-
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    return pwd_context
 
 
 def _enforce_min_auth_failure_duration(start_time: float) -> None:
@@ -96,8 +87,7 @@ class LoginUserUseCase:
         if not user:
             # Run a dummy hash verification to reduce timing differences
             # between existing and non-existing identifiers.
-            pwd_ctx = get_pwd_context()
-            pwd_ctx.verify(password, DUMMY_PASSWORD_HASH)
+            verify_password(password, DUMMY_PASSWORD_HASH)
             _enforce_min_auth_failure_duration(auth_start_time)
             raise UserNotFoundError("Invalid credentials")
 
@@ -127,8 +117,7 @@ class LoginUserUseCase:
             _enforce_min_auth_failure_duration(auth_start_time)
             raise AuthorizationError("Password not set for this account")
 
-        pwd_ctx = get_pwd_context()
-        if not pwd_ctx.verify(password, user.hashed_password):
+        if not verify_password(password, user.hashed_password):
             _enforce_min_auth_failure_duration(auth_start_time)
             raise AuthorizationError("Invalid credentials")
 
