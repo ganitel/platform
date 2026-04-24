@@ -152,6 +152,7 @@ export default function SearchResults() {
 
             {/* Search Modal */}
             <SearchModal
+                key={String(isSearchModalOpen)}
                 isOpen={isSearchModalOpen}
                 onClose={() => setIsSearchModalOpen(false)}
                 mode="modify"

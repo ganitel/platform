@@ -26,6 +26,7 @@ export function SearchBar() {
       </div>
 
       <SearchModal
+        key={String(isSearchModalOpen)}
         isOpen={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
       />

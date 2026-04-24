@@ -35,54 +35,23 @@ export default function TravelerInformation() {
   const propertyData = location.state?.propertyData;
   const bookingData = location.state?.bookingData;
 
-  const [formData, setFormData] = useState<TravelerFormData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    countryCode: "+33", // France as in the screenshot
-    whatsappNumber: "",
+  const [formData, setFormData] = useState<TravelerFormData>(() => {
+    const travelerInfo = booking?.travelerInfo;
+    if (!travelerInfo) return { firstName: "", lastName: "", email: "", countryCode: "+33", whatsappNumber: "" };
+    const matched = COUNTRY_CODES.find(c => travelerInfo.phone?.startsWith(c.code));
+    return {
+      firstName: travelerInfo.firstName || "",
+      lastName: travelerInfo.lastName || "",
+      email: travelerInfo.email || "",
+      countryCode: matched?.code ?? "+33",
+      whatsappNumber: matched ? travelerInfo.phone.substring(matched.code.length) : "",
+    };
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof TravelerFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Get saved data from context only ONCE on mount
-  useEffect(() => {
-    // Only load if form is currently empty
-    if (booking?.travelerInfo) {
-      const { travelerInfo } = booking;
-      
-      let countryCode = "+33";
-      let whatsappNumber = "";
-      
-      if (travelerInfo.phone) {
-        const matchedCountry = COUNTRY_CODES.find(c => 
-          travelerInfo.phone.startsWith(c.code)
-        );
-        
-        if (matchedCountry) {
-          countryCode = matchedCountry.code;
-          whatsappNumber = travelerInfo.phone.substring(matchedCountry.code.length);
-        }
-      }
-      
-      setFormData(prev => {
-        // Only update if current form is still empty
-        if (!prev.firstName && !prev.lastName && !prev.email) {
-          return {
-            firstName: travelerInfo.firstName || "",
-            lastName: travelerInfo.lastName || "",
-            email: travelerInfo.email || "",
-            countryCode,
-            whatsappNumber,
-          };
-        }
-        return prev;
-      });
-    }
-  }, [booking?.travelerInfo]); // Only depend on context data
 
   // Persist form data to context on every change
   useEffect(() => {

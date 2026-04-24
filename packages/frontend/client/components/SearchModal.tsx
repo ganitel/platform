@@ -41,12 +41,6 @@ export function SearchModal({
         return Array.from(new Set([...cities, ...addresses])).sort();
     }, []);
 
-    useEffect(() => {
-        if (isOpen) {
-            setCurrentStep(initialStep);
-        }
-    }, [isOpen, initialStep]);
-
     const [searchParams, setSearchParams] = useState<SearchParams>({
         destination: "",
         checkIn: undefined,
@@ -55,22 +49,19 @@ export function SearchModal({
         rooms: 1,
     });
 
-    const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
+    // Track when the user has explicitly selected a location to suppress suggestions
+    const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (searchParams.destination.trim() === "") {
-            setFilteredLocations([]);
-            return;
-        }
-        const filtered = availableLocations.filter(loc =>
+    const filteredLocations = useMemo(() => {
+        if (searchParams.destination.trim() === "" || searchParams.destination === selectedDestination) return [];
+        return availableLocations.filter(loc =>
             loc.toLowerCase().includes(searchParams.destination.toLowerCase())
         );
-        setFilteredLocations(filtered);
-    }, [searchParams.destination, availableLocations]);
+    }, [searchParams.destination, selectedDestination, availableLocations]);
 
     const handleLocationSelect = (location: string) => {
         setSearchParams({ ...searchParams, destination: location });
-        setFilteredLocations([]);
+        setSelectedDestination(location);
         if (mode === "wizard") {
             setCurrentStep("dates");
         }
