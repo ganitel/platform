@@ -1,11 +1,11 @@
 """
 Ganitel V2 Backend - Database Connection and Session Management
 """
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import QueuePool
 import logging
+
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import QueuePool
 
 from app.config import get_settings
 
@@ -38,7 +38,7 @@ def get_db() -> Session:
     db = SessionLocal()
     try:
         yield db
-    except Exception as e:
+    except Exception:
         logger.exception("Request failed while database session was active")
         db.rollback()
         raise

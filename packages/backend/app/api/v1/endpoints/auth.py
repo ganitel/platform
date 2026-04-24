@@ -3,43 +3,53 @@ Ganitel V2 Backend - Authentication Endpoints
 """
 import logging
 from uuid import UUID, uuid4
-from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, Query
+import redis
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-import redis
 
-from app.database import get_db
-from app.dependencies import get_redis, get_current_active_user
-from app.core.oauth_exchange import create_oauth_exchange_code, consume_oauth_exchange_code
-from app.infrastructure.repositories.user_repository import UserRepository
-from app.application.use_cases.auth import (
-    RegisterUserUseCase,
-    LoginUserUseCase,
-    RefreshTokenUseCase,
-    ForgotPasswordUseCase,
-    ResetPasswordUseCase,
-    VerifyResetTokenUseCase,
-    OAuthLoginUseCase
-)
-from app.infrastructure.external_apis.oauth_client import GoogleOAuthClient, FacebookOAuthClient
-from app.domain.entities.user import User
-from app.core.ratelimit import limiter
 from app.api.v1.schemas.user_schemas import (
+    ForgotPasswordRequest,
+    MessageResponse,
+    OAuthCodeExchangeRequest,
+    RefreshTokenRequest,
+    ResetPasswordRequest,
+    TokenResponse,
     UserCreateRequest,
     UserLoginRequest,
     UserResponse,
-    TokenResponse,
-    RefreshTokenRequest,
-    MessageResponse,
-    ForgotPasswordRequest,
-    ResetPasswordRequest,
-    VerifyResetTokenRequest,
-    OAuthCodeExchangeRequest,
+)
+from app.application.use_cases.auth import (
+    ForgotPasswordUseCase,
+    LoginUserUseCase,
+    OAuthLoginUseCase,
+    RefreshTokenUseCase,
+    RegisterUserUseCase,
+    ResetPasswordUseCase,
+    VerifyResetTokenUseCase,
 )
 from app.config import get_settings
-from app.exceptions import GanitelException, ValidationError, ConflictError, UserNotFoundError, AuthorizationError
+from app.core.oauth_exchange import (
+    consume_oauth_exchange_code,
+    create_oauth_exchange_code,
+)
+from app.core.ratelimit import limiter
+from app.database import get_db
+from app.dependencies import get_current_active_user, get_redis
+from app.domain.entities.user import User
+from app.exceptions import (
+    AuthorizationError,
+    ConflictError,
+    GanitelException,
+    UserNotFoundError,
+    ValidationError,
+)
+from app.infrastructure.external_apis.oauth_client import (
+    FacebookOAuthClient,
+    GoogleOAuthClient,
+)
+from app.infrastructure.repositories.user_repository import UserRepository
 from app.utils.security import create_access_token
 
 router = APIRouter()
@@ -51,7 +61,7 @@ def _raise_unhandled_auth_error(
     request: Request,
     public_message: str,
     route: str,
-    context: Optional[dict] = None,
+    context: dict | None = None,
 ) -> None:
     request_id = request.headers.get("X-Request-ID") or str(uuid4())
     extra_context = {
@@ -88,18 +98,18 @@ async def register_user(
 ):
     """
     Register a new user
-    
+
     Supports registration for:
     - Travelers: Can register with email+password or phone
     - Providers: Can register with email+password or phone
     - Admins: Must be created via internal controlled process
-    
+
     New users start with status: PENDING_VERIFICATION
     """
     try:
         user_repository = UserRepository(db)
         register_use_case = RegisterUserUseCase(user_repository)
-        
+
         user = register_use_case.execute(
             email=user_data.email,
             phone=user_data.phone,
@@ -110,7 +120,7 @@ async def register_user(
             country=user_data.country,
             city=user_data.city
         )
-        
+
         return UserResponse(
             id=str(user.id),
             email=user.email,
@@ -130,7 +140,7 @@ async def register_user(
             created_at=user.created_at,
             updated_at=user.updated_at
         )
-        
+
     except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -171,16 +181,16 @@ async def login_for_access_token(
 ):
     """
     User login endpoint
-    
+
     Authenticates user with email/phone and password.
     Returns JWT access token and refresh token.
-    
+
     Refresh token is stored in HTTP-only cookie for security.
     """
     # Check for lockout
     lockout_key = f"lockout:{user_credentials.identifier}"
     lockout_count = redis_client.get(lockout_key)
-    
+
     if lockout_count and int(lockout_count) >= 5:
         # Lockout for 15 minutes after 5 failures
         raise HTTPException(
@@ -191,13 +201,13 @@ async def login_for_access_token(
     try:
         user_repository = UserRepository(db)
         login_use_case = LoginUserUseCase(user_repository)
-        
+
         token_data = login_use_case.execute(
             identifier=user_credentials.identifier,
             password=user_credentials.password,
             redis_client=redis_client
         )
-        
+
         # Reset lockout on success
         redis_client.delete(lockout_key)
 
@@ -210,14 +220,14 @@ async def login_for_access_token(
             samesite="lax",
             max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
         )
-        
+
         return TokenResponse(
             access_token=token_data.access_token,
             token_type=token_data.token_type,
             refresh_token=token_data.refresh_token
         )
-        
-    except (ValidationError, UserNotFoundError, AuthorizationError) as e:
+
+    except (ValidationError, UserNotFoundError, AuthorizationError):
         # Increment failed attempt count
         redis_client.incrby(lockout_key, 1)
         redis_client.expire(lockout_key, 900)  # 15 minutes
@@ -253,19 +263,19 @@ async def logout_user(
 ):
     """
     Logout user endpoint
-    
+
     Invalidates refresh token in Redis and removes cookie.
     """
     try:
         # Delete refresh token from Redis
         refresh_key = f"refresh_token:{current_user.id}"
         redis_client.delete(refresh_key)
-        
+
         # Remove cookie
         response.delete_cookie(key="refresh_token")
-        
+
         return MessageResponse(message="Successfully logged out")
-        
+
     except Exception as e:
         _raise_unhandled_auth_error(
             request=request,
@@ -282,14 +292,14 @@ async def logout_user(
 async def refresh_access_token(
     request: Request,
     response: Response,
-    refresh_request: Optional[RefreshTokenRequest] = None,
-    refresh_token_query: Optional[str] = Query(default=None, alias="refresh_token"),
+    refresh_request: RefreshTokenRequest | None = None,
+    refresh_token_query: str | None = Query(default=None, alias="refresh_token"),
     db: Session = Depends(get_db),
     redis_client: redis.Redis = Depends(get_redis)
 ):
     """
     Refresh access token endpoint
-    
+
     Uses refresh token from cookie or request body to generate new tokens.
     """
     refresh_token = refresh_request.refresh_token if refresh_request else None
@@ -297,22 +307,22 @@ async def refresh_access_token(
         refresh_token = refresh_token_query
     if not refresh_token:
         refresh_token = request.cookies.get("refresh_token")
-    
+
     if not refresh_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token missing"
         )
-    
+
     try:
         user_repository = UserRepository(db)
         refresh_use_case = RefreshTokenUseCase(user_repository)
-        
+
         token_data = refresh_use_case.execute(
             refresh_token=refresh_token,
             redis_client=redis_client
         )
-        
+
         # Update refresh token cookie
         response.set_cookie(
             key="refresh_token",
@@ -322,13 +332,13 @@ async def refresh_access_token(
             samesite="lax",
             max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
         )
-        
+
         return TokenResponse(
             access_token=token_data.access_token,
             token_type=token_data.token_type,
             refresh_token=token_data.refresh_token
         )
-        
+
     except AuthorizationError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -354,23 +364,23 @@ async def forgot_password(
 ):
     """
     Forgot password endpoint
-    
+
     Initiates password reset process by sending reset link to email/phone.
     """
     try:
         user_repository = UserRepository(db)
         forgot_password_use_case = ForgotPasswordUseCase(user_repository)
-        
+
         result = forgot_password_use_case.execute(
             email=request_data.email,
             phone=request_data.phone
         )
-        
+
         return MessageResponse(
             message=result.get("message", "Password reset link sent"),
             success=result.get("success", True)
         )
-        
+
     except (ValidationError, UserNotFoundError, GanitelException):
         # Always return success message to prevent user enumeration
         return MessageResponse(
@@ -397,20 +407,20 @@ async def verify_reset_token(
 ):
     """
     Verify reset token endpoint
-    
+
     Verifies if a password reset token is valid and not expired.
     """
     try:
         user_repository = UserRepository(db)
         verify_token_use_case = VerifyResetTokenUseCase(user_repository)
-        
+
         result = verify_token_use_case.execute(token)
-        
+
         return MessageResponse(
             message=result.get("message", "Token is valid"),
             success=result.get("success", True)
         )
-        
+
     except AuthorizationError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -436,23 +446,23 @@ async def reset_password(
 ):
     """
     Reset password endpoint
-    
+
     Resets user password using a valid reset token.
     """
     try:
         user_repository = UserRepository(db)
         reset_password_use_case = ResetPasswordUseCase(user_repository)
-        
+
         result = reset_password_use_case.execute(
             token=request_data.token,
             new_password=request_data.new_password
         )
-        
+
         return MessageResponse(
             message=result.get("message", "Password reset successfully"),
             success=result.get("success", True)
         )
-        
+
     except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -489,7 +499,7 @@ async def get_google_oauth_url(request: Request):
     try:
         url = await GoogleOAuthClient.get_authorization_url()
         return {"url": url}
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to generate OAuth URL"
@@ -510,7 +520,7 @@ async def google_oauth_callback(
     try:
         user_repository = UserRepository(db)
         oauth_use_case = OAuthLoginUseCase(user_repository)
-        
+
         result = await oauth_use_case.execute_google(code)
 
         exchange_code = create_oauth_exchange_code(
@@ -524,7 +534,7 @@ async def google_oauth_callback(
             f"?code={exchange_code}&provider=google"
         )
         return RedirectResponse(url=redirect_url)
-        
+
     except ValidationError as e:
         request_id = request.headers.get("X-Request-ID") or str(uuid4())
         logger.warning(
@@ -557,7 +567,7 @@ async def get_facebook_oauth_url(request: Request):
     try:
         url = await FacebookOAuthClient.get_authorization_url()
         return {"url": url}
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to generate OAuth URL"
@@ -578,7 +588,7 @@ async def facebook_oauth_callback(
     try:
         user_repository = UserRepository(db)
         oauth_use_case = OAuthLoginUseCase(user_repository)
-        
+
         result = await oauth_use_case.execute_facebook(code)
 
         exchange_code = create_oauth_exchange_code(
@@ -592,7 +602,7 @@ async def facebook_oauth_callback(
             f"?code={exchange_code}&provider=facebook"
         )
         return RedirectResponse(url=redirect_url)
-        
+
     except ValidationError as e:
         request_id = request.headers.get("X-Request-ID") or str(uuid4())
         logger.warning(

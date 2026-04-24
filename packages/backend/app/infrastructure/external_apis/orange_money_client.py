@@ -1,8 +1,9 @@
 """
 Ganitel V2 Backend - Orange Money Payment Client
 """
+
 import httpx
-from typing import Dict, Optional
+
 from app.config import get_settings
 
 settings = get_settings()
@@ -10,9 +11,9 @@ settings = get_settings()
 
 class OrangeMoneyClient:
     """Orange Money payment client"""
-    
+
     @staticmethod
-    async def get_token() -> Optional[str]:
+    async def get_token() -> str | None:
         """Get Orange Money API token"""
         try:
             async with httpx.AsyncClient() as client:
@@ -29,19 +30,19 @@ class OrangeMoneyClient:
                 return data.get("access_token")
         except Exception:
             return None
-    
+
     @staticmethod
     async def initiate_payment(
         amount: float,
         phone_number: str,
         order_id: str,
         callback_url: str
-    ) -> Dict:
+    ) -> dict:
         """Initiate Orange Money payment"""
         token = await OrangeMoneyClient.get_token()
         if not token:
             raise Exception("Failed to get Orange Money token")
-        
+
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 settings.ORANGE_MONEY_PAYMENT_URL,

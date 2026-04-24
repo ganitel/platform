@@ -1,23 +1,27 @@
 """
 Ganitel V2 Backend - Wallet Endpoints
 """
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from uuid import UUID
 
+from app.api.v1.schemas.wallet_schemas import (
+    AddBalanceRequest,
+    TransactionResponse,
+    WalletResponse,
+)
+from app.application.use_cases.wallets.add_balance import AddBalanceUseCase
+from app.application.use_cases.wallets.create_wallet import CreateWalletUseCase
 from app.database import get_db
 from app.dependencies import get_current_active_user
 from app.domain.entities.user import User
-from app.infrastructure.repositories.wallet_repository import WalletRepository
-from app.infrastructure.repositories.transaction_repository import TransactionRepository
-from app.application.use_cases.wallets.create_wallet import CreateWalletUseCase
-from app.application.use_cases.wallets.add_balance import AddBalanceUseCase
-from app.api.v1.schemas.wallet_schemas import (
-    WalletResponse,
-    AddBalanceRequest,
-    TransactionResponse
+from app.exceptions import (
+    ConflictError,
+    NotFoundError,
+    ValidationError,
 )
-from app.exceptions import GanitelException, ValidationError, ConflictError, NotFoundError
+from app.infrastructure.repositories.transaction_repository import TransactionRepository
+from app.infrastructure.repositories.wallet_repository import WalletRepository
 
 router = APIRouter(prefix="/wallets", tags=["wallets"])
 
@@ -31,9 +35,9 @@ async def create_wallet(
     try:
         wallet_repository = WalletRepository(db)
         use_case = CreateWalletUseCase(wallet_repository)
-        
+
         wallet = use_case.execute(current_user.id)
-        
+
         return WalletResponse(
             id=str(wallet.id),
             user_id=str(wallet.user_id),
@@ -51,7 +55,7 @@ async def create_wallet(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(e)
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create wallet"
@@ -67,10 +71,10 @@ async def get_my_wallet(
     try:
         wallet_repository = WalletRepository(db)
         wallet = wallet_repository.get_by_user_id(current_user.id)
-        
+
         if not wallet:
             raise NotFoundError("Wallet not found")
-        
+
         return WalletResponse(
             id=str(wallet.id),
             user_id=str(wallet.user_id),
@@ -88,7 +92,7 @@ async def get_my_wallet(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get wallet"
@@ -106,14 +110,14 @@ async def add_balance(
         wallet_repository = WalletRepository(db)
         transaction_repository = TransactionRepository(db)
         use_case = AddBalanceUseCase(wallet_repository, transaction_repository)
-        
+
         result = use_case.execute(
             user_id=current_user.id,
             amount=request.amount,
             is_bonus=request.is_bonus,
             description=request.description
         )
-        
+
         transaction = result["transaction"]
         return TransactionResponse(
             id=str(transaction.id),
@@ -137,7 +141,7 @@ async def add_balance(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to add balance"

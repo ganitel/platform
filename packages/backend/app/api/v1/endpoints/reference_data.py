@@ -2,27 +2,26 @@
 Ganitel V2 Backend - Reference Data Endpoints
 Endpoints for accessing locations, property types, amenities, etc.
 """
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from typing import List
 
 from app.database import get_db
+from app.domain.entities.amenity import Amenity
+from app.domain.entities.amenity_category import AmenityCategory
 from app.domain.entities.location import Location
 from app.domain.entities.property_type import PropertyType
-from app.domain.entities.amenity_category import AmenityCategory
-from app.domain.entities.amenity import Amenity
-from pydantic import BaseModel
-from datetime import datetime
-from typing import Optional
 
 
 # Response schemas
 class LocationResponse(BaseModel):
     id: str
     name: str
-    region: Optional[str]
+    region: str | None
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -31,7 +30,7 @@ class PropertyTypeResponse(BaseModel):
     id: str
     name: str
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -40,9 +39,9 @@ class AmenityResponse(BaseModel):
     id: str
     name_en: str
     name_fr: str
-    icon_path: Optional[str]
+    icon_path: str | None
     category_id: str
-    
+
     class Config:
         from_attributes = True
 
@@ -51,11 +50,11 @@ class AmenityCategoryResponse(BaseModel):
     id: str
     name_en: str
     name_fr: str
-    icon_path: Optional[str]
+    icon_path: str | None
     display_order: int
-    amenities: List[AmenityResponse] = []
+    amenities: list[AmenityResponse] = []
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -64,7 +63,7 @@ class AmenityCategoryResponse(BaseModel):
 router = APIRouter(tags=["reference_data"])
 
 
-@router.get("/locations", response_model=List[LocationResponse])
+@router.get("/locations", response_model=list[LocationResponse])
 async def get_locations(
     db: Session = Depends(get_db)
 ):
@@ -87,17 +86,17 @@ async def get_location(
         Location.id == location_id,
         Location.deleted_at.is_(None)
     ).first()
-    
+
     if not location:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Location not found"
         )
-    
+
     return location
 
 
-@router.get("/property-types", response_model=List[PropertyTypeResponse])
+@router.get("/property-types", response_model=list[PropertyTypeResponse])
 async def get_property_types(
     db: Session = Depends(get_db)
 ):
@@ -122,17 +121,17 @@ async def get_property_type(
         PropertyType.id == property_type_id,
         PropertyType.deleted_at.is_(None)
     ).first()
-    
+
     if not property_type:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Property type not found"
         )
-    
+
     return property_type
 
 
-@router.get("/amenity-categories", response_model=List[AmenityCategoryResponse])
+@router.get("/amenity-categories", response_model=list[AmenityCategoryResponse])
 async def get_amenity_categories(
     db: Session = Depends(get_db)
 ):
@@ -157,29 +156,29 @@ async def get_amenity_category(
         AmenityCategory.id == category_id,
         AmenityCategory.deleted_at.is_(None)
     ).first()
-    
+
     if not category:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Amenity category not found"
         )
-    
+
     return category
 
 
-@router.get("/amenities", response_model=List[AmenityResponse])
+@router.get("/amenities", response_model=list[AmenityResponse])
 async def get_amenities(
-    category_id: Optional[str] = None,
+    category_id: str | None = None,
     db: Session = Depends(get_db)
 ):
     """
     Get all amenities, optionally filtered by category
     """
     query = db.query(Amenity).filter(Amenity.deleted_at.is_(None))
-    
+
     if category_id:
         query = query.filter(Amenity.category_id == category_id)
-    
+
     amenities = query.all()
     return amenities
 
@@ -196,11 +195,11 @@ async def get_amenity(
         Amenity.id == amenity_id,
         Amenity.deleted_at.is_(None)
     ).first()
-    
+
     if not amenity:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Amenity not found"
         )
-    
+
     return amenity

@@ -1,18 +1,22 @@
 """
 Ganitel V2 Backend - Complaint Endpoints
 """
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from uuid import UUID
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.api.v1.schemas.complaint_schemas import (
+    ComplaintCreateRequest,
+    ComplaintResponse,
+)
+from app.application.use_cases.complaints.create_complaint import CreateComplaintUseCase
 from app.database import get_db
 from app.dependencies import get_current_active_user
 from app.domain.entities.user import User
+from app.exceptions import NotFoundError, ValidationError
 from app.infrastructure.repositories.complaint_repository import ComplaintRepository
 from app.infrastructure.repositories.user_repository import UserRepository
-from app.application.use_cases.complaints.create_complaint import CreateComplaintUseCase
-from app.api.v1.schemas.complaint_schemas import ComplaintCreateRequest, ComplaintResponse
-from app.exceptions import ValidationError, NotFoundError
 
 router = APIRouter(prefix="/complaints", tags=["complaints"])
 
@@ -28,7 +32,7 @@ async def create_complaint(
         complaint_repository = ComplaintRepository(db)
         user_repository = UserRepository(db)
         use_case = CreateComplaintUseCase(complaint_repository, user_repository)
-        
+
         complaint = use_case.execute(
             user_id=current_user.id,
             subject=request.subject,
@@ -38,7 +42,7 @@ async def create_complaint(
             service_id=UUID(request.service_id) if request.service_id else None,
             priority=request.priority
         )
-        
+
         return ComplaintResponse(
             id=str(complaint.id),
             user_id=str(complaint.user_id),
@@ -64,7 +68,7 @@ async def create_complaint(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create complaint"
@@ -82,7 +86,7 @@ async def get_my_complaints(
     try:
         repository = ComplaintRepository(db)
         complaints = repository.get_by_user_id(current_user.id, skip, limit)
-        
+
         return [
             ComplaintResponse(
                 id=str(c.id),
@@ -101,7 +105,7 @@ async def get_my_complaints(
             )
             for c in complaints
         ]
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get complaints"

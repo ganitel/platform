@@ -3,12 +3,10 @@ Ganitel V2 Backend - Booking Entity
 """
 from __future__ import annotations
 
-from datetime import datetime, date
+from datetime import date, datetime
 from enum import Enum
-from typing import Optional
-from uuid import UUID
 
-from sqlalchemy import Column, Date, Numeric, String, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Date, ForeignKey, Numeric, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as pgUUID
 
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity
@@ -28,7 +26,7 @@ class BookingStatus(str, Enum):
 class Booking(AuditableEntity, SoftDeleteEntity):
     """
     Booking entity representing reservations made by travelers
-    
+
     NOTE: An EXCLUSION constraint is enforced at the database level to prevent overlapping
     bookings for the same service. The constraint allows only one booking per service for
     any given date range (using daterange with && overlap operator).
@@ -62,7 +60,7 @@ class Booking(AuditableEntity, SoftDeleteEntity):
     def cancel(self):
         """Cancel booking"""
         if not self.can_be_cancelled():
-            raise ValueError("Booking cannot be cancelled from status {}".format(self.status))
+            raise ValueError(f"Booking cannot be cancelled from status {self.status}")
         self.status = BookingStatus.CANCELLED.value
         self.updated_at = datetime.utcnow()
 

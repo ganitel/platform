@@ -1,17 +1,20 @@
 """
 Ganitel V2 Backend - Notification Endpoints
 """
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from uuid import UUID
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.api.v1.schemas.notification_schemas import (
+    NotificationResponse,
+)
 from app.database import get_db
 from app.dependencies import get_current_active_user
 from app.domain.entities.user import User
-from app.infrastructure.repositories.notification_repository import NotificationRepository
-from app.application.use_cases.notifications.create_notification import CreateNotificationUseCase
-from app.api.v1.schemas.notification_schemas import NotificationResponse, NotificationCreateRequest
-from app.exceptions import ValidationError
+from app.infrastructure.repositories.notification_repository import (
+    NotificationRepository,
+)
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
@@ -28,7 +31,7 @@ async def get_my_notifications(
     try:
         repository = NotificationRepository(db)
         notifications = repository.get_by_user_id(current_user.id, skip, limit, unread_only)
-        
+
         return [
             NotificationResponse(
                 id=str(n.id),
@@ -49,7 +52,7 @@ async def get_my_notifications(
             )
             for n in notifications
         ]
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get notifications"
@@ -66,7 +69,7 @@ async def get_unread_count(
         repository = NotificationRepository(db)
         count = repository.get_unread_count(current_user.id)
         return {"unread_count": count}
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get unread count"
@@ -89,7 +92,7 @@ async def mark_as_read(
                 detail="Notification not found"
             )
         return {"message": "Notification marked as read", "success": True}
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to mark notification as read"
@@ -106,7 +109,7 @@ async def mark_all_as_read(
         repository = NotificationRepository(db)
         success = repository.mark_all_as_read(current_user.id)
         return {"message": "All notifications marked as read", "success": success}
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to mark all as read"

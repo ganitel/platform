@@ -1,10 +1,12 @@
 """
 Ganitel V2 Backend - Service API Schemas
 """
-from typing import Optional, List, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel, validator
 from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel, validator
+
 
 class ServiceType(str, Enum):
     ACCOMMODATION = "accommodation"
@@ -36,29 +38,29 @@ class ServiceStatus(str, Enum):
 class ServiceCreateRequest(BaseModel):
     title: str
     description: str
-    short_description: Optional[str] = None
+    short_description: str | None = None
     service_type: ServiceType
-    accommodation_type: Optional[AccommodationType] = None
+    accommodation_type: AccommodationType | None = None
     country: str
     city: str
     address: str
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
+    latitude: float | None = None
+    longitude: float | None = None
     base_price: float
     currency: str = "XAF"
-    max_guests: Optional[int] = None
-    bedrooms: Optional[int] = None
-    bathrooms: Optional[int] = None
-    beds: Optional[int] = None
-    amenities: Optional[List[str]] = []
-    house_rules: Optional[List[str]] = []
-    images: Optional[List[str]] = []
+    max_guests: int | None = None
+    bedrooms: int | None = None
+    bathrooms: int | None = None
+    beds: int | None = None
+    amenities: list[str] | None = []
+    house_rules: list[str] | None = []
+    images: list[str] | None = []
     instant_book: bool = False
     min_stay: int = 1
-    max_stay: Optional[int] = None
+    max_stay: int | None = None
     check_in_time: str = "15:00"
     check_out_time: str = "11:00"
-    
+
     @validator('title')
     def validate_title(cls, v):
         if len(v.strip()) < 10:
@@ -66,13 +68,13 @@ class ServiceCreateRequest(BaseModel):
         if len(v.strip()) > 200:
             raise ValueError('Title must be less than 200 characters')
         return v.strip()
-    
+
     @validator('description')
     def validate_description(cls, v):
         if len(v.strip()) < 50:
             raise ValueError('Description must be at least 50 characters long')
         return v.strip()
-    
+
     @validator('base_price')
     def validate_price(cls, v):
         if v <= 0:
@@ -80,25 +82,25 @@ class ServiceCreateRequest(BaseModel):
         if v > 10000000:
             raise ValueError('Base price is too high')
         return v
-    
+
     @validator('latitude')
     def validate_latitude(cls, v):
         if v is not None and (v < -90 or v > 90):
             raise ValueError('Latitude must be between -90 and 90')
         return v
-    
+
     @validator('longitude')
     def validate_longitude(cls, v):
         if v is not None and (v < -180 or v > 180):
             raise ValueError('Longitude must be between -180 and 180')
         return v
-    
+
     @validator('max_guests', 'bedrooms', 'bathrooms', 'beds')
     def validate_positive_integers(cls, v):
         if v is not None and v < 0:
             raise ValueError('Value cannot be negative')
         return v
-    
+
     @validator('min_stay')
     def validate_min_stay(cls, v):
         if v < 1:
@@ -106,29 +108,29 @@ class ServiceCreateRequest(BaseModel):
         return v
 
 class ServiceUpdateRequest(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    short_description: Optional[str] = None
-    base_price: Optional[float] = None
-    max_guests: Optional[int] = None
-    bedrooms: Optional[int] = None
-    bathrooms: Optional[int] = None
-    beds: Optional[int] = None
-    amenities: Optional[List[str]] = None
-    house_rules: Optional[List[str]] = None
-    instant_book: Optional[bool] = None
-    min_stay: Optional[int] = None
-    max_stay: Optional[int] = None
-    check_in_time: Optional[str] = None
-    check_out_time: Optional[str] = None
+    title: str | None = None
+    description: str | None = None
+    short_description: str | None = None
+    base_price: float | None = None
+    max_guests: int | None = None
+    bedrooms: int | None = None
+    bathrooms: int | None = None
+    beds: int | None = None
+    amenities: list[str] | None = None
+    house_rules: list[str] | None = None
+    instant_book: bool | None = None
+    min_stay: int | None = None
+    max_stay: int | None = None
+    check_in_time: str | None = None
+    check_out_time: str | None = None
 
 # Response Schemas
 class ServiceLocationResponse(BaseModel):
     country: str
     city: str
     address: str
-    latitude: Optional[float]
-    longitude: Optional[float]
+    latitude: float | None
+    longitude: float | None
 
 class ServicePricingResponse(BaseModel):
     base_price: float
@@ -136,10 +138,10 @@ class ServicePricingResponse(BaseModel):
     price_per: str
 
 class ServiceCapacityResponse(BaseModel):
-    max_guests: Optional[int]
-    bedrooms: Optional[int]
-    bathrooms: Optional[int]
-    beds: Optional[int]
+    max_guests: int | None
+    bedrooms: int | None
+    bathrooms: int | None
+    beds: int | None
 
 class ServiceRatingResponse(BaseModel):
     average: float
@@ -148,9 +150,9 @@ class ServiceRatingResponse(BaseModel):
 class ServiceBookingInfoResponse(BaseModel):
     instant_book: bool
     min_stay: int
-    max_stay: Optional[int]
-    check_in_time: Optional[str]
-    check_out_time: Optional[str]
+    max_stay: int | None
+    check_in_time: str | None
+    check_out_time: str | None
 
 class ServiceStatsResponse(BaseModel):
     view_count: int
@@ -160,25 +162,25 @@ class ServiceResponse(BaseModel):
     id: str
     title: str
     description: str
-    short_description: Optional[str]
+    short_description: str | None
     service_type: ServiceType
-    accommodation_type: Optional[AccommodationType]
+    accommodation_type: AccommodationType | None
     status: ServiceStatus
     provider_id: str
     location: ServiceLocationResponse
     pricing: ServicePricingResponse
     capacity: ServiceCapacityResponse
-    amenities: List[str]
-    house_rules: List[str]
-    images: List[str]
-    primary_image: Optional[str]
+    amenities: list[str]
+    house_rules: list[str]
+    images: list[str]
+    primary_image: str | None
     rating: ServiceRatingResponse
     booking_info: ServiceBookingInfoResponse
     stats: ServiceStatsResponse
-    slug: Optional[str]
+    slug: str | None
     created_at: datetime
     updated_at: datetime
-    
+
     @classmethod
     def from_orm(cls, service):
         return cls(
@@ -231,25 +233,25 @@ class ServiceResponse(BaseModel):
             created_at=service.created_at,
             updated_at=service.updated_at
         )
-    
+
     class Config:
         from_attributes = True
 
 class ServiceListResponse(BaseModel):
-    services: List[ServiceResponse]
+    services: list[ServiceResponse]
     total: int
     page: int
     per_page: int
     pages: int
 
 class ServiceSearchFilters(BaseModel):
-    query: Optional[str]
-    service_type: Optional[str]
-    location: Optional[str]
-    price_range: Optional[str]
-    amenities: Optional[List[str]]
-    guests: Optional[int]
-    dates: Optional[str]
+    query: str | None
+    service_type: str | None
+    location: str | None
+    price_range: str | None
+    amenities: list[str] | None
+    guests: int | None
+    dates: str | None
 
 class ServiceSearchPagination(BaseModel):
     total: int
@@ -260,7 +262,7 @@ class ServiceSearchPagination(BaseModel):
     has_prev: bool
 
 class ServiceSearchResponse(BaseModel):
-    services: List[Dict[str, Any]]
+    services: list[dict[str, Any]]
     pagination: ServiceSearchPagination
     filters_applied: ServiceSearchFilters
 

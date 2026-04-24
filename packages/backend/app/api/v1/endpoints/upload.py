@@ -5,16 +5,24 @@ import logging
 import mimetypes
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Request, Query
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    Query,
+    Request,
+    UploadFile,
+    status,
+)
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from typing import List
 
 from app.database import get_db
 from app.dependencies import get_current_active_user
 from app.domain.entities.user import User
-from app.infrastructure.services.upload_service import UploadService
 from app.infrastructure.services.media_access_service import MediaAccessService
+from app.infrastructure.services.upload_service import UploadService
 
 router = APIRouter(prefix="/upload", tags=["upload"])
 logger = logging.getLogger(__name__)
@@ -62,7 +70,7 @@ async def upload_image(
 @router.post("/images", response_model=dict)
 async def upload_multiple_images(
     request: Request,
-    files: List[UploadFile] = File(...),
+    files: list[UploadFile] = File(...),
     subdirectory: str = "images",
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)

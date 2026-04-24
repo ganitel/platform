@@ -1,7 +1,6 @@
 """
 Ganitel V2 Backend - Update Service Use Case
 """
-from typing import Optional, List
 from uuid import UUID
 
 from app.domain.entities.service import Service, ServiceStatus

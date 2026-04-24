@@ -4,7 +4,7 @@ Ganitel V2 Backend - Get Booking Details Use Case
 from uuid import UUID
 
 from app.domain.repositories.booking_repository import IBookingRepository
-from app.exceptions import BookingNotFoundError, AuthorizationError
+from app.exceptions import AuthorizationError, BookingNotFoundError
 
 
 class GetBookingUseCase:

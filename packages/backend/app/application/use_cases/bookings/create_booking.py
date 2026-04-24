@@ -2,7 +2,6 @@
 Ganitel V2 Backend - Create Booking Use Case
 """
 from datetime import date
-from typing import Optional
 from uuid import UUID, uuid4
 
 from app.domain.entities.booking import Booking, BookingStatus
@@ -39,7 +38,7 @@ class CreateBookingUseCase:
         start_date: date,
         end_date: date,
         guests: int,
-        notes: Optional[str] = None,
+        notes: str | None = None,
     ) -> Booking:
         """Create booking after validating inputs"""
 

@@ -1,9 +1,10 @@
 """
 Ganitel V2 Backend - Transaction Entity
 """
-from sqlalchemy import Column, String, Numeric, Integer, ForeignKey, Text
-from sqlalchemy.dialects.postgresql import UUID
 from enum import Enum
+
+from sqlalchemy import Column, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy.dialects.postgresql import UUID
 
 from app.domain.entities.base import AuditableEntity
 
@@ -34,13 +35,13 @@ class Transaction(AuditableEntity):
     Transaction entity for wallet transactions
     """
     __tablename__ = "transactions"
-    
+
     # Relationships
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     wallet_id = Column(UUID(as_uuid=True), ForeignKey("wallets.id"), nullable=True, index=True)
     booking_id = Column(UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=True, index=True)
     payment_id = Column(UUID(as_uuid=True), ForeignKey("payments.id"), nullable=True, index=True)
-    
+
     # Transaction Information
     transaction_type = Column(String(50), nullable=False, index=True)
     amount = Column(Numeric(10, 2), nullable=False)
@@ -48,10 +49,10 @@ class Transaction(AuditableEntity):
     currency = Column(String(10), default="XAF", nullable=False)
     description = Column(Text, nullable=True)
     status = Column(String(20), default=TransactionStatus.PENDING.value, nullable=False, index=True)
-    
+
     # Reference
     reference = Column(String(100), unique=True, nullable=True, index=True)
-    
+
     def __repr__(self):
         return f"<Transaction(id={self.id}, type={self.transaction_type}, amount={self.amount}, status={self.status})>"
 

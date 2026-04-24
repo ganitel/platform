@@ -1,58 +1,60 @@
 """
 Ganitel V2 Backend - Services Endpoints
 """
+from datetime import date
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
-from typing import Optional, List
-from datetime import date
 
-from app.database import get_db
-from app.dependencies import get_current_active_user, get_current_provider, get_optional_current_user
-from app.infrastructure.repositories.service_repository import ServiceRepository
-from app.infrastructure.repositories.user_repository import UserRepository
+from app.api.v1.schemas.service_schemas import (
+    MessageResponse,
+    ServiceCreateRequest,
+    ServiceListResponse,
+    ServiceResponse,
+    ServiceSearchResponse,
+    ServiceUpdateRequest,
+)
 from app.application.use_cases.services import (
     CreateServiceUseCase,
-    SearchServicesUseCase,
-    GetServiceUseCase,
-    UpdateServiceUseCase,
     DeleteServiceUseCase,
+    GetServiceUseCase,
+    SearchServicesUseCase,
+    UpdateServiceUseCase,
 )
+from app.database import get_db
+from app.dependencies import (
+    get_current_provider,
+    get_optional_current_user,
+)
+from app.domain.entities.service import ServiceType
 from app.domain.entities.user import User
-from app.domain.entities.service import ServiceType, AccommodationType
-from app.api.v1.schemas.service_schemas import (
-    ServiceCreateRequest,
-    ServiceUpdateRequest,
-    ServiceResponse,
-    ServiceListResponse,
-    ServiceSearchResponse,
-    MessageResponse
-)
 from app.exceptions import GanitelException
+from app.infrastructure.repositories.service_repository import ServiceRepository
+from app.infrastructure.repositories.user_repository import UserRepository
 
 router = APIRouter()
 
 @router.get("/search", response_model=ServiceSearchResponse)
 async def search_services(
-    q: Optional[str] = Query(None, description="Search query"),
-    service_type: Optional[ServiceType] = Query(None, description="Service type filter"),
-    country: Optional[str] = Query(None, description="Country filter"),
-    city: Optional[str] = Query(None, description="City filter"),
-    min_price: Optional[float] = Query(None, ge=0, description="Minimum price"),
-    max_price: Optional[float] = Query(None, ge=0, description="Maximum price"),
-    amenities: Optional[str] = Query(None, description="Comma-separated amenities"),
-    guests: Optional[int] = Query(None, ge=1, description="Number of guests"),
-    check_in: Optional[date] = Query(None, description="Check-in date (YYYY-MM-DD)"),
-    check_out: Optional[date] = Query(None, description="Check-out date (YYYY-MM-DD)"),
-    lat: Optional[float] = Query(None, ge=-90, le=90, description="Latitude"),
-    lng: Optional[float] = Query(None, ge=-180, le=180, description="Longitude"),
-    radius: Optional[float] = Query(10.0, ge=0.1, le=100, description="Search radius in km"),
+    q: str | None = Query(None, description="Search query"),
+    service_type: ServiceType | None = Query(None, description="Service type filter"),
+    country: str | None = Query(None, description="Country filter"),
+    city: str | None = Query(None, description="City filter"),
+    min_price: float | None = Query(None, ge=0, description="Minimum price"),
+    max_price: float | None = Query(None, ge=0, description="Maximum price"),
+    amenities: str | None = Query(None, description="Comma-separated amenities"),
+    guests: int | None = Query(None, ge=1, description="Number of guests"),
+    check_in: date | None = Query(None, description="Check-in date (YYYY-MM-DD)"),
+    check_out: date | None = Query(None, description="Check-out date (YYYY-MM-DD)"),
+    lat: float | None = Query(None, ge=-90, le=90, description="Latitude"),
+    lng: float | None = Query(None, ge=-180, le=180, description="Longitude"),
+    radius: float | None = Query(10.0, ge=0.1, le=100, description="Search radius in km"),
     sort: str = Query("relevance", description="Sort by: relevance, price_low, price_high, rating, newest"),
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(20, ge=1, le=100, description="Results per page"),
     db: Session = Depends(get_db),
-    current_user: Optional[User] = Depends(get_optional_current_user)
+    current_user: User | None = Depends(get_optional_current_user)
 ):
     """
     Search services with filters
@@ -60,15 +62,15 @@ async def search_services(
     try:
         service_repository = ServiceRepository(db)
         search_use_case = SearchServicesUseCase(service_repository)
-        
+
         # Parse amenities
         amenities_list = None
         if amenities:
             amenities_list = [a.strip() for a in amenities.split(",") if a.strip()]
-        
+
         # Calculate skip for pagination
         skip = (page - 1) * per_page
-        
+
         # Execute search
         search_result = search_use_case.execute(
             query=q,
@@ -88,10 +90,10 @@ async def search_services(
             skip=skip,
             limit=per_page
         )
-        
+
         return ServiceSearchResponse(**search_result)
-        
-    except Exception as e:
+
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Search failed. Please try again."
@@ -99,9 +101,9 @@ async def search_services(
 
 @router.get("/", response_model=ServiceListResponse)
 async def list_services(
-    service_type: Optional[ServiceType] = Query(None),
-    country: Optional[str] = Query(None),
-    city: Optional[str] = Query(None),
+    service_type: ServiceType | None = Query(None),
+    country: str | None = Query(None),
+    city: str | None = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db)
@@ -111,7 +113,7 @@ async def list_services(
     """
     try:
         service_repository = ServiceRepository(db)
-        
+
         if service_type or country or city:
             criteria = {}
             if service_type:
@@ -120,13 +122,13 @@ async def list_services(
                 criteria['country'] = country
             if city:
                 criteria['city'] = city
-            
+
             services = service_repository.find_by_criteria(criteria, skip=skip, limit=limit)
             total = service_repository.count(criteria)
         else:
             services = service_repository.get_active_services(skip=skip, limit=limit)
             total = service_repository.count({"status": "active"})
-        
+
         return ServiceListResponse(
             services=[ServiceResponse.from_orm(service) for service in services],
             total=total,
@@ -134,8 +136,8 @@ async def list_services(
             per_page=limit,
             pages=(total + limit - 1) // limit
         )
-        
-    except Exception as e:
+
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve services"
@@ -145,7 +147,7 @@ async def list_services(
 async def get_service(
     service_id: str,
     db: Session = Depends(get_db),
-    current_user: Optional[User] = Depends(get_optional_current_user)
+    current_user: User | None = Depends(get_optional_current_user)
 ):
     """
     Get service by ID
@@ -156,7 +158,7 @@ async def get_service(
         service = get_use_case.execute(UUID(service_id))
         service_repository.update_view_count(service.id)
         return ServiceResponse.from_orm(service)
-        
+
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -183,7 +185,7 @@ async def create_service(
         service_repository = ServiceRepository(db)
         user_repository = UserRepository(db)
         create_use_case = CreateServiceUseCase(service_repository, user_repository)
-        
+
         # Create service
         service = create_use_case.execute(
             provider_id=str(current_user.id),
@@ -212,15 +214,15 @@ async def create_service(
             check_in_time=service_data.check_in_time,
             check_out_time=service_data.check_out_time
         )
-        
+
         return ServiceResponse.from_orm(service)
-        
+
     except GanitelException as e:
         raise HTTPException(
             status_code=e.status_code,
             detail=e.message
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Service creation failed. Please try again."
@@ -294,14 +296,14 @@ async def get_my_services(
     """
     try:
         service_repository = ServiceRepository(db)
-        
+
         services = service_repository.get_by_provider_id(
             current_user.id, skip=skip, limit=limit
         )
-        
+
         # Count total services for this provider
         total = service_repository.count({"provider_id": current_user.id})
-        
+
         return ServiceListResponse(
             services=[ServiceResponse.from_orm(service) for service in services],
             total=total,
@@ -309,14 +311,14 @@ async def get_my_services(
             per_page=limit,
             pages=(total + limit - 1) // limit
         )
-        
-    except Exception as e:
+
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve your services"
         )
 
-@router.get("/featured", response_model=List[ServiceResponse])
+@router.get("/featured", response_model=list[ServiceResponse])
 async def get_featured_services(
     limit: int = Query(10, ge=1, le=50),
     db: Session = Depends(get_db)
@@ -327,10 +329,10 @@ async def get_featured_services(
     try:
         service_repository = ServiceRepository(db)
         services = service_repository.get_featured_services(limit=limit)
-        
+
         return [ServiceResponse.from_orm(service) for service in services]
-        
-    except Exception as e:
+
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve featured services"

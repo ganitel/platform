@@ -1,25 +1,25 @@
 """
 Ganitel V2 Backend - User Management Endpoints
 """
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
-from typing import Optional
 
-from app.database import get_db
-from app.dependencies import get_current_active_user, get_current_admin
-from app.infrastructure.repositories.user_repository import UserRepository
-from app.infrastructure.repositories.booking_repository import BookingRepository
-from app.domain.entities.user import User
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+
+from app.api.v1.schemas.booking_schemas import BookingListResponse, BookingResponse
 from app.api.v1.schemas.user_schemas import (
-    UserResponse,
-    UserPublicResponse,
-    UserUpdateRequest,
     ChangePasswordRequest,
     MessageResponse,
-    UserListResponse
+    UserListResponse,
+    UserPublicResponse,
+    UserResponse,
+    UserUpdateRequest,
 )
-from app.api.v1.schemas.booking_schemas import BookingListResponse, BookingResponse
 from app.application.use_cases.bookings.get_user_bookings import GetUserBookingsUseCase
+from app.database import get_db
+from app.dependencies import get_current_active_user, get_current_admin
+from app.domain.entities.user import User
+from app.infrastructure.repositories.booking_repository import BookingRepository
+from app.infrastructure.repositories.user_repository import UserRepository
 
 router = APIRouter()
 
@@ -61,16 +61,16 @@ async def update_current_user_profile(
     """
     try:
         user_repository = UserRepository(db)
-        
+
         # Update user fields
         update_data = user_update.dict(exclude_unset=True)
         for field, value in update_data.items():
             if hasattr(current_user, field):
                 setattr(current_user, field, value)
-        
+
         # Save changes
         updated_user = user_repository.update(current_user)
-        
+
         return UserResponse(
             id=str(updated_user.id),
             email=updated_user.email,
@@ -90,8 +90,8 @@ async def update_current_user_profile(
             created_at=updated_user.created_at,
             updated_at=updated_user.updated_at
         )
-        
-    except Exception as e:
+
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Profile update failed. Please try again."
@@ -136,20 +136,20 @@ async def change_password(
     """
     try:
         from passlib.context import CryptContext
-        
+
         pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         user_repository = UserRepository(db)
-        
+
         # Verify current password
         if not pwd_context.verify(password_data.current_password, current_user.hashed_password):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Current password is incorrect"
             )
-        
+
         # Hash new password
         new_hashed_password = pwd_context.hash(password_data.new_password)
-        
+
         # Update password
         success = user_repository.change_password(current_user.id, new_hashed_password)
         if not success:
@@ -157,12 +157,12 @@ async def change_password(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Password change failed"
             )
-        
+
         return MessageResponse(message="Password changed successfully")
-        
+
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Password change failed. Please try again."
@@ -178,16 +178,16 @@ async def get_user_public_profile(
     """
     try:
         from uuid import UUID
-        
+
         user_repository = UserRepository(db)
         user = user_repository.get_by_id(UUID(user_id))
-        
+
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-        
+
         return UserPublicResponse(
             id=str(user.id),
             first_name=user.first_name,
@@ -198,7 +198,7 @@ async def get_user_public_profile(
             country=user.country,
             city=user.city
         )
-        
+
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -206,7 +206,7 @@ async def get_user_public_profile(
         )
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve user profile"
@@ -217,9 +217,9 @@ async def get_user_public_profile(
 async def list_users(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    search: Optional[str] = Query(None),
-    user_type: Optional[str] = Query(None),
-    status: Optional[str] = Query(None),
+    search: str | None = Query(None),
+    user_type: str | None = Query(None),
+    status: str | None = Query(None),
     current_user: User = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
@@ -228,7 +228,7 @@ async def list_users(
     """
     try:
         user_repository = UserRepository(db)
-        
+
         if search:
             users = user_repository.search_users(search, skip=skip, limit=limit)
             total = len(users)  # Simplified for now
@@ -238,10 +238,10 @@ async def list_users(
                 filters['user_type'] = user_type
             if status:
                 filters['status'] = status
-            
+
             users = user_repository.find_by_criteria(filters, skip=skip, limit=limit)
             total = user_repository.count(filters)
-        
+
         return UserListResponse(
             users=[
                 UserResponse(
@@ -269,8 +269,8 @@ async def list_users(
             per_page=limit,
             pages=(total + limit - 1) // limit
         )
-        
-    except Exception as e:
+
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve users"
@@ -288,10 +288,11 @@ async def update_user_status(
     """
     try:
         from uuid import UUID
+
         from app.domain.entities.user import UserStatus
-        
+
         user_repository = UserRepository(db)
-        
+
         # Validate status
         try:
             status_enum = UserStatus(new_status)
@@ -300,7 +301,7 @@ async def update_user_status(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid status value"
             )
-        
+
         # Update status
         success = user_repository.update_status(UUID(user_id), status_enum)
         if not success:
@@ -308,9 +309,9 @@ async def update_user_status(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-        
+
         return MessageResponse(message=f"User status updated to {new_status}")
-        
+
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -318,7 +319,7 @@ async def update_user_status(
         )
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Status update failed"

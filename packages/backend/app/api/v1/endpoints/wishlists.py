@@ -1,18 +1,19 @@
 """
 Ganitel V2 Backend - Wishlist Endpoints
 """
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from uuid import UUID
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.api.v1.schemas.user_schemas import MessageResponse
+from app.application.use_cases.wishlists.toggle_wishlist import ToggleWishlistUseCase
 from app.database import get_db
 from app.dependencies import get_current_active_user
 from app.domain.entities.user import User
-from app.infrastructure.repositories.wishlist_repository import WishlistRepository
-from app.infrastructure.repositories.service_repository import ServiceRepository
-from app.application.use_cases.wishlists.toggle_wishlist import ToggleWishlistUseCase
-from app.api.v1.schemas.user_schemas import MessageResponse
 from app.exceptions import NotFoundError
+from app.infrastructure.repositories.service_repository import ServiceRepository
+from app.infrastructure.repositories.wishlist_repository import WishlistRepository
 
 router = APIRouter(prefix="/wishlists", tags=["wishlists"])
 
@@ -28,9 +29,9 @@ async def toggle_wishlist(
         wishlist_repository = WishlistRepository(db)
         service_repository = ServiceRepository(db)
         use_case = ToggleWishlistUseCase(wishlist_repository, service_repository)
-        
+
         result = use_case.execute(current_user.id, service_id)
-        
+
         return MessageResponse(
             message=result["message"],
             success=True
@@ -40,7 +41,7 @@ async def toggle_wishlist(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to toggle wishlist"
@@ -58,7 +59,7 @@ async def get_my_wishlist(
     try:
         wishlist_repository = WishlistRepository(db)
         wishlist_items = wishlist_repository.get_by_user_id(current_user.id, skip, limit)
-        
+
         return [
             {
                 "id": str(item.id),
@@ -67,7 +68,7 @@ async def get_my_wishlist(
             }
             for item in wishlist_items
         ]
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get wishlist"

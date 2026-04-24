@@ -2,11 +2,8 @@
 Ganitel V2 Backend - Booking Schemas
 """
 from datetime import date, datetime
-from typing import Optional, List
 
 from pydantic import BaseModel, Field, validator
-
-from app.domain.entities.booking import BookingStatus
 
 
 class BookingCreateRequest(BaseModel):
@@ -14,7 +11,7 @@ class BookingCreateRequest(BaseModel):
     start_date: date
     end_date: date
     guests: int = Field(..., gt=0)
-    notes: Optional[str] = Field(None, max_length=500)
+    notes: str | None = Field(None, max_length=500)
 
     @validator("end_date")
     def validate_dates(cls, end_date, values):
@@ -33,9 +30,9 @@ class BookingResponse(BaseModel):
     guests: int
     status: str  # Changed from BookingStatus enum to str
     total_amount: float
-    negotiated_price: Optional[float]
+    negotiated_price: float | None
     currency: str
-    notes: Optional[str]
+    notes: str | None
     created_at: datetime
     updated_at: datetime
 
@@ -63,7 +60,7 @@ class BookingResponse(BaseModel):
 
 
 class BookingListResponse(BaseModel):
-    bookings: List[BookingResponse]
+    bookings: list[BookingResponse]
     total: int
     page: int
     per_page: int

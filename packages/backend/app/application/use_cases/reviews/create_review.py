@@ -1,18 +1,18 @@
 """
 Ganitel V2 Backend - Create Review Use Case
 """
-from uuid import UUID
 from decimal import Decimal
+from uuid import UUID
 
+from app.domain.entities.review import Review
 from app.domain.repositories.review_repository import IReviewRepository
 from app.domain.repositories.service_repository import IServiceRepository
-from app.domain.entities.review import Review
-from app.exceptions import ValidationError, ConflictError, NotFoundError
-from sqlalchemy import func
+from app.exceptions import ConflictError, NotFoundError, ValidationError
+
 
 class CreateReviewUseCase:
     """Use case for creating a review"""
-    
+
     def __init__(
         self,
         review_repository: IReviewRepository,
@@ -20,7 +20,7 @@ class CreateReviewUseCase:
     ):
         self.review_repository = review_repository
         self.service_repository = service_repository
-    
+
     def execute(
         self,
         service_id: UUID,
@@ -37,7 +37,7 @@ class CreateReviewUseCase:
     ) -> Review:
         """
         Create a review
-        
+
         Args:
             service_id: Service ID
             user_id: User ID
@@ -50,24 +50,24 @@ class CreateReviewUseCase:
             accuracy_rating: Accuracy rating
             location_rating: Location rating
             value_rating: Value rating
-            
+
         Returns:
             Review: Created review
         """
         # Validate rating
         if overall_rating < 1 or overall_rating > 5:
             raise ValidationError("Rating must be between 1 and 5")
-        
+
         # Check if service exists
         service = self.service_repository.get_by_id(service_id)
         if not service:
             raise NotFoundError("Service not found")
-        
+
         # Check if review already exists
         existing_review = self.review_repository.get_by_service_and_user(service_id, user_id)
         if existing_review:
             raise ConflictError("Review already exists for this service")
-        
+
         # Create review
         review = Review(
             service_id=service_id,
@@ -83,9 +83,9 @@ class CreateReviewUseCase:
             value_rating=value_rating,
             status="published"
         )
-        
+
         review = self.review_repository.create(review)
-        
+
         # Update service average rating
         avg_rating = self.review_repository.get_average_rating(service_id)
         service.average_rating = Decimal(str(avg_rating))
@@ -93,6 +93,6 @@ class CreateReviewUseCase:
         all_reviews = self.review_repository.get_by_service_id(service_id, skip=0, limit=10000)
         service.review_count = len(all_reviews)
         self.service_repository.update(service)
-        
+
         return review
 

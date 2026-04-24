@@ -1,17 +1,22 @@
 """
 Ganitel V2 Backend - Add Balance Use Case
 """
-from uuid import UUID
 from decimal import Decimal
+from uuid import UUID
 
-from app.domain.repositories.wallet_repository import IWalletRepository
+from app.domain.entities.transaction import (
+    Transaction,
+    TransactionStatus,
+    TransactionType,
+)
 from app.domain.repositories.transaction_repository import ITransactionRepository
-from app.domain.entities.transaction import Transaction, TransactionType, TransactionStatus
-from app.exceptions import ValidationError, NotFoundError
+from app.domain.repositories.wallet_repository import IWalletRepository
+from app.exceptions import NotFoundError, ValidationError
+
 
 class AddBalanceUseCase:
     """Use case for adding balance to wallet"""
-    
+
     def __init__(
         self,
         wallet_repository: IWalletRepository,
@@ -19,7 +24,7 @@ class AddBalanceUseCase:
     ):
         self.wallet_repository = wallet_repository
         self.transaction_repository = transaction_repository
-    
+
     def execute(
         self,
         user_id: UUID,
@@ -29,28 +34,28 @@ class AddBalanceUseCase:
     ) -> dict:
         """
         Add balance to wallet
-        
+
         Args:
             user_id: User ID
             amount: Amount to add
             is_bonus: Whether this is a bonus
             description: Transaction description
-            
+
         Returns:
             dict: Updated wallet and transaction info
         """
         if amount <= 0:
             raise ValidationError("Amount must be greater than zero")
-        
+
         # Get wallet
         wallet = self.wallet_repository.get_by_user_id(user_id)
         if not wallet:
             raise NotFoundError("Wallet not found")
-        
+
         # Add balance
         wallet.add_balance(float(amount), is_bonus=is_bonus)
         wallet = self.wallet_repository.update(wallet)
-        
+
         # Create transaction
         transaction = Transaction(
             user_id=user_id,
@@ -62,7 +67,7 @@ class AddBalanceUseCase:
             status=TransactionStatus.COMPLETED.value
         )
         transaction = self.transaction_repository.create(transaction)
-        
+
         return {
             "wallet": wallet,
             "transaction": transaction

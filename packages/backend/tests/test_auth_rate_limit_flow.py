@@ -88,8 +88,8 @@ class DummyLoginUserUseCase:
 
 @pytest.fixture
 def rate_limited_auth_client(monkeypatch):
-    import app.core.ratelimit as ratelimit_module
     import app.api.v1.endpoints.auth as auth_module
+    import app.core.ratelimit as ratelimit_module
 
     original_limiter = ratelimit_module.limiter
 

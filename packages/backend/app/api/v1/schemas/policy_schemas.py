@@ -1,16 +1,17 @@
 """
 Ganitel V2 Backend - Policy API Schemas
 """
-from typing import Optional
 from datetime import datetime
+
 from pydantic import BaseModel, Field
+
 
 class PolicyCreateRequest(BaseModel):
     """Create policy request schema"""
     title: str = Field(..., max_length=200, description="Policy title")
     content: str = Field(..., description="Policy content")
     policy_type: str = Field(..., description="Policy type")
-    slug: Optional[str] = Field(None, description="URL slug (auto-generated if not provided)")
+    slug: str | None = Field(None, description="URL slug (auto-generated if not provided)")
     display_order: int = Field(0, description="Display order")
 
 class PolicyResponse(BaseModel):
@@ -19,13 +20,13 @@ class PolicyResponse(BaseModel):
     title: str
     content: str
     policy_type: str
-    slug: Optional[str]
+    slug: str | None
     is_active: bool
     display_order: int
     version: str
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 

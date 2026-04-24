@@ -1,23 +1,24 @@
 """
 Ganitel V2 Backend - Coupon API Schemas
 """
-from typing import Optional, List
 from datetime import datetime
 from decimal import Decimal
+
 from pydantic import BaseModel, Field
+
 
 class CouponResponse(BaseModel):
     """Coupon response schema"""
     id: str
     code: str
     name: str
-    description: Optional[str]
+    description: str | None
     coupon_type: str
     discount_value: Decimal
-    minimum_amount: Optional[Decimal]
-    maximum_discount: Optional[Decimal]
+    minimum_amount: Decimal | None
+    maximum_discount: Decimal | None
     currency: str
-    usage_limit: Optional[int]
+    usage_limit: int | None
     usage_limit_per_user: int
     used_count: int
     valid_from: datetime
@@ -25,7 +26,7 @@ class CouponResponse(BaseModel):
     status: str
     applicable_to_all_services: bool
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 

@@ -1,17 +1,16 @@
 """
 Ganitel V2 Backend - FastAPI Dependencies
 """
-from typing import Optional, Generator
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
-from jose import JWTError, jwt
-import redis
-
-from app.database import get_db
-from app.config import get_settings
 from uuid import UUID
 
+import redis
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
+from sqlalchemy.orm import Session
+
+from app.config import get_settings
+from app.database import get_db
 from app.domain.entities.user import User, UserType
 from app.infrastructure.repositories.user_repository import UserRepository
 
@@ -27,7 +26,7 @@ def get_redis() -> redis.Redis:
     return redis_client
 
 def get_current_user_id(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
+    credentials: HTTPAuthorizationCredentials | None = Depends(security)
 ) -> str:
     """
     Extract user ID from JWT token
@@ -39,7 +38,7 @@ def get_current_user_id(
             detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     try:
         payload = jwt.decode(
             credentials.credentials,
@@ -142,15 +141,15 @@ def get_current_admin(
 
 # Optional authentication (for public endpoints that can benefit from user context)
 def get_optional_current_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False)),
+    credentials: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False)),
     db: Session = Depends(get_db)
-) -> Optional[User]:
+) -> User | None:
     """
     Get current user if authenticated, None otherwise
     """
     if credentials is None:
         return None
-    
+
     try:
         payload = jwt.decode(
             credentials.credentials,
@@ -174,7 +173,7 @@ def get_optional_current_user(
                 detail="Invalid token type",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         user_repo = UserRepository(db)
         return user_repo.get_by_id(UUID(user_id))
     except JWTError:

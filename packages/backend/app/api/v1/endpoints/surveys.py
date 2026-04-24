@@ -4,13 +4,13 @@ Ganitel V2 Backend - Survey Endpoints
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.dependencies import get_current_active_user, get_current_admin
-from app.domain.entities.user import User
-from app.infrastructure.repositories.survey_repository import SurveyRepository
-from app.application.use_cases.surveys.create_survey import CreateSurveyUseCase
 from app.api.v1.schemas.survey_schemas import SurveyCreateRequest, SurveyResponse
+from app.application.use_cases.surveys.create_survey import CreateSurveyUseCase
+from app.database import get_db
+from app.dependencies import get_current_admin
+from app.domain.entities.user import User
 from app.exceptions import ValidationError
+from app.infrastructure.repositories.survey_repository import SurveyRepository
 
 router = APIRouter(prefix="/surveys", tags=["surveys"])
 
@@ -25,7 +25,7 @@ async def create_survey(
     try:
         repository = SurveyRepository(db)
         use_case = CreateSurveyUseCase(repository)
-        
+
         survey = use_case.execute(
             title=request.title,
             description=request.description,
@@ -35,7 +35,7 @@ async def create_survey(
             is_anonymous=request.is_anonymous,
             allow_multiple_responses=request.allow_multiple_responses
         )
-        
+
         return SurveyResponse(
             id=str(survey.id),
             title=survey.title,
@@ -55,7 +55,7 @@ async def create_survey(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create survey"
@@ -72,7 +72,7 @@ async def get_active_surveys(
     try:
         repository = SurveyRepository(db)
         surveys = repository.get_active_surveys(skip, limit)
-        
+
         return [
             SurveyResponse(
                 id=str(s.id),
@@ -90,7 +90,7 @@ async def get_active_surveys(
             )
             for s in surveys
         ]
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get active surveys"

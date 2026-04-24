@@ -1,36 +1,37 @@
 """
 Ganitel V2 Backend - Payment Endpoints
 """
+import hmac
 import logging
 from uuid import UUID
-import hmac
-from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.dependencies import get_current_active_user, get_current_admin
-from app.domain.entities.user import User, UserType
-from app.infrastructure.repositories.payment_repository import PaymentRepository
-from app.infrastructure.repositories.booking_repository import BookingRepository
-from app.infrastructure.repositories.user_repository import UserRepository
-from app.infrastructure.external_apis.tranzak_client import get_tranzak_client
-from app.application.use_cases.payments import (
-    InitiatePaymentUseCase,
-    ProcessWebhookUseCase,
-    ProcessRefundUseCase,
-    GetPaymentUseCase
-)
 from app.api.v1.schemas.payment_schemas import (
     PaymentInitiateRequest,
     PaymentInitiateResponse,
-    PaymentResponse,
-    PaymentWebhookRequest,
+    PaymentListResponse,
     PaymentRefundRequest,
     PaymentRefundResponse,
-    PaymentListResponse
+    PaymentResponse,
+    PaymentWebhookRequest,
+)
+from app.application.use_cases.payments import (
+    GetPaymentUseCase,
+    InitiatePaymentUseCase,
+    ProcessRefundUseCase,
+    ProcessWebhookUseCase,
 )
 from app.config import get_settings
+from app.database import get_db
+from app.dependencies import get_current_active_user, get_current_admin
+from app.domain.entities.user import User, UserType
 from app.exceptions import GanitelException
+from app.infrastructure.external_apis.tranzak_client import get_tranzak_client
+from app.infrastructure.repositories.booking_repository import BookingRepository
+from app.infrastructure.repositories.payment_repository import PaymentRepository
+from app.infrastructure.repositories.user_repository import UserRepository
 
 router = APIRouter()
 settings = get_settings()
@@ -45,7 +46,7 @@ async def initiate_payment(
 ):
     """
     Initiate payment for a booking
-    
+
     Creates a payment record and returns payment URL for customer
     """
     try:
@@ -53,14 +54,14 @@ async def initiate_payment(
         booking_repo = BookingRepository(db)
         user_repo = UserRepository(db)
         tranzak_client = get_tranzak_client()
-        
+
         use_case = InitiatePaymentUseCase(
             payment_repo,
             booking_repo,
             user_repo,
             tranzak_client
         )
-        
+
         result = await use_case.execute(
             booking_id=UUID(payload.booking_id),
             user_id=current_user.id,
@@ -68,7 +69,7 @@ async def initiate_payment(
             callback_url=settings.PAYMENT_CALLBACK_URL,
             return_url=settings.PAYMENT_RETURN_URL
         )
-        
+
         return PaymentInitiateResponse(
             payment_id=result["payment_id"],
             transaction_id=result.get("transaction_id"),
@@ -78,7 +79,7 @@ async def initiate_payment(
             status=result["status"],
             message="Payment initiated successfully. Please complete payment at the provided URL."
         )
-        
+
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -102,7 +103,7 @@ async def tranzak_webhook(
 ):
     """
     Webhook endpoint for Tranzak payment notifications
-    
+
     This endpoint is called by Tranzak when payment status changes
     """
     try:
@@ -161,7 +162,7 @@ async def tranzak_webhook(
             "success": True,
             "message": result.get("message", "Webhook processed")
         }
-        
+
     except GanitelException as exc:
         # Return 200 even on error to prevent Tranzak from retrying
         return {
@@ -186,15 +187,15 @@ async def get_payment(
     try:
         payment_repo = PaymentRepository(db)
         use_case = GetPaymentUseCase(payment_repo)
-        
+
         payment = use_case.execute(
             payment_id=UUID(payment_id),
             requester_id=current_user.id,
             is_admin=current_user.user_type == UserType.ADMIN.value
         )
-        
+
         return PaymentResponse.from_orm(payment)
-        
+
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -220,15 +221,15 @@ async def list_user_payments(
     """Get current user's payment history"""
     try:
         payment_repo = PaymentRepository(db)
-        
+
         payments = payment_repo.get_user_payments(
             user_id=current_user.id,
             skip=skip,
             limit=limit
         )
-        
+
         total = payment_repo.count({"user_id": current_user.id})
-        
+
         return PaymentListResponse(
             payments=[PaymentResponse.from_orm(p) for p in payments],
             total=total,
@@ -236,7 +237,7 @@ async def list_user_payments(
             per_page=limit,
             pages=(total + limit - 1) // limit
         )
-        
+
     except Exception:
         logger.exception("Unhandled payment listing error")
         raise HTTPException(
@@ -258,22 +259,22 @@ async def refund_payment(
     try:
         payment_repo = PaymentRepository(db)
         tranzak_client = get_tranzak_client()
-        
+
         use_case = ProcessRefundUseCase(payment_repo, tranzak_client)
-        
+
         result = await use_case.execute(
             payment_id=UUID(payment_id),
             refund_amount=payload.amount,
             reason=payload.reason
         )
-        
+
         return PaymentRefundResponse(
             payment_id=result["payment_id"],
             refund_amount=result["refund_amount"],
             status=result["status"],
             message=result["message"]
         )
-        
+
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

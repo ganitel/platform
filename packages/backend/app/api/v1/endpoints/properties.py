@@ -2,41 +2,46 @@
 Ganitel V2 Backend - Properties Endpoints
 """
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
-from typing import Optional, List
 
-from app.database import get_db
-from app.dependencies import get_current_active_user, get_current_provider, get_optional_current_user
-from app.infrastructure.repositories.property_repository import PropertyRepository
-from app.infrastructure.repositories.location_repository import LocationRepository
-from app.infrastructure.repositories.property_type_repository import PropertyTypeRepository
-from app.infrastructure.repositories.amenity_repository import AmenityRepository
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+
+from app.api.v1.schemas.property_schemas import (
+    MessageResponse,
+    PropertyCreateRequest,
+    PropertyDetailResponse,
+    PropertyListResponse,
+    PropertyResponse,
+    PropertyUpdateRequest,
+)
 from app.application.use_cases.properties import (
     CreatePropertyUseCase,
-    GetPropertyUseCase,
-    UpdatePropertyUseCase,
     DeletePropertyUseCase,
+    GetPropertyUseCase,
     ListPropertiesUseCase,
+    UpdatePropertyUseCase,
+)
+from app.database import get_db
+from app.dependencies import (
+    get_current_provider,
+    get_optional_current_user,
 )
 from app.domain.entities.user import User
-from app.api.v1.schemas.property_schemas import (
-    PropertyCreateRequest,
-    PropertyUpdateRequest,
-    PropertyResponse,
-    PropertyListResponse,
-    PropertyDetailResponse,
-    MessageResponse,
-)
 from app.exceptions import GanitelException
+from app.infrastructure.repositories.amenity_repository import AmenityRepository
+from app.infrastructure.repositories.location_repository import LocationRepository
+from app.infrastructure.repositories.property_repository import PropertyRepository
+from app.infrastructure.repositories.property_type_repository import (
+    PropertyTypeRepository,
+)
 
 router = APIRouter()
 
 
 @router.get("/", response_model=PropertyListResponse)
 async def list_properties(
-    location_id: Optional[UUID] = Query(None, description="Filter by location"),
-    property_type_id: Optional[UUID] = Query(None, description="Filter by property type"),
+    location_id: UUID | None = Query(None, description="Filter by location"),
+    property_type_id: UUID | None = Query(None, description="Filter by property type"),
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -63,7 +68,7 @@ async def list_properties(
             total_pages=(result["total"] + limit - 1) // limit,
         )
 
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve properties",
@@ -74,7 +79,7 @@ async def list_properties(
 async def get_property(
     property_id: UUID,
     db: Session = Depends(get_db),
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User | None = Depends(get_optional_current_user),
 ):
     """
     Get property by ID
@@ -149,7 +154,7 @@ async def create_property(
 
     except GanitelException as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Property creation failed. Please try again.",
@@ -242,7 +247,7 @@ async def get_my_properties(
             total_pages=(result["total"] + limit - 1) // limit,
         )
 
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve your properties",

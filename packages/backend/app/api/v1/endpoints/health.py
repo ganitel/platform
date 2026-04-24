@@ -1,14 +1,15 @@
 """
 Ganitel V2 Backend - Health Check Endpoints
 """
+import time
+
+import redis
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-import time
-import redis
 
-from app.database import get_db, check_db_connection
-from app.dependencies import get_redis
 from app.config import get_settings
+from app.database import check_db_connection, get_db
+from app.dependencies import get_redis
 
 router = APIRouter()
 settings = get_settings()
@@ -29,10 +30,10 @@ async def detailed_health_check(
     redis_client: redis.Redis = Depends(get_redis)
 ):
     """Detailed health check including dependencies"""
-    
+
     # Check database connection
     db_healthy = check_db_connection()
-    
+
     # Check Redis connection
     redis_healthy = False
     try:
@@ -40,10 +41,10 @@ async def detailed_health_check(
         redis_healthy = True
     except Exception:
         redis_healthy = False
-    
+
     # Overall health status
     overall_healthy = db_healthy and redis_healthy
-    
+
     return {
         "status": "healthy" if overall_healthy else "unhealthy",
         "timestamp": time.time(),

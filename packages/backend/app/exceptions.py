@@ -3,6 +3,7 @@ Ganitel V2 Backend - Custom Exceptions
 """
 from fastapi import status
 
+
 class GanitelException(Exception):
     """Base exception for Ganitel application"""
     def __init__(self, message: str, status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR):

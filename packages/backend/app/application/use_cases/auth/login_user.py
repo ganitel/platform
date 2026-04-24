@@ -1,17 +1,17 @@
 """
 Ganitel V2 Backend - Login User Use Case
 """
-from datetime import datetime, timedelta
 import time
-from typing import Optional
+from datetime import datetime, timedelta
 from uuid import uuid4
-from jose import jwt
-import redis
 
-from app.domain.entities.user import User, UserStatus
-from app.domain.repositories.user_repository import IUserRepository
+import redis
+from jose import jwt
+
 from app.config import get_settings
-from app.exceptions import ValidationError, UserNotFoundError, AuthorizationError
+from app.domain.entities.user import UserStatus
+from app.domain.repositories.user_repository import IUserRepository
+from app.exceptions import AuthorizationError, UserNotFoundError, ValidationError
 
 settings = get_settings()
 pwd_context = None
@@ -48,27 +48,27 @@ class LoginUserUseCase:
     Use case for user login
     Handles authentication and JWT token generation
     """
-    
+
     def __init__(self, user_repository: IUserRepository):
         self.user_repository = user_repository
-    
+
     def execute(
         self,
         identifier: str,
         password: str,
-        redis_client: Optional[redis.Redis] = None
+        redis_client: redis.Redis | None = None
     ) -> TokenData:
         """
         Authenticate user and generate JWT tokens
-        
+
         Args:
             identifier: Email or phone number
             password: User password
             redis_client: Redis client for storing refresh tokens
-            
+
         Returns:
             TokenData: Access token and refresh token
-            
+
         Raises:
             ValidationError: If validation fails
             UserNotFoundError: If user not found
@@ -76,20 +76,20 @@ class LoginUserUseCase:
         """
         if not identifier or not identifier.strip():
             raise ValidationError("Identifier (email or phone) is required")
-        
+
         if not password:
             raise ValidationError("Password is required")
-        
+
         identifier = identifier.strip()
         auth_start_time = time.perf_counter()
-        
+
         # Find user by email or phone
         user = None
         if "@" in identifier:
             user = self.user_repository.get_by_email(identifier.lower())
         else:
             user = self.user_repository.get_by_phone(identifier)
-        
+
         if not user:
             # Run a dummy hash verification to reduce timing differences
             # between existing and non-existing identifiers.
@@ -97,46 +97,46 @@ class LoginUserUseCase:
             pwd_ctx.verify(password, DUMMY_PASSWORD_HASH)
             _enforce_min_auth_failure_duration(auth_start_time)
             raise UserNotFoundError("Invalid credentials")
-        
+
         # Check if user is deleted
         if user.deleted_at is not None:
             _enforce_min_auth_failure_duration(auth_start_time)
             raise AuthorizationError("Account has been deleted")
-        
+
         # Check user status
         if user.status == UserStatus.SUSPENDED.value:
             _enforce_min_auth_failure_duration(auth_start_time)
             raise AuthorizationError("Account is suspended. Please contact support")
-        
+
         if user.status == UserStatus.INACTIVE.value:
             _enforce_min_auth_failure_duration(auth_start_time)
             raise AuthorizationError("Account is inactive. Please contact support")
-        
+
         # Allow PENDING_VERIFICATION users to login (they can verify later)
         # Only block SUSPENDED and INACTIVE users
-        
+
         if not user.is_active:
             _enforce_min_auth_failure_duration(auth_start_time)
             raise AuthorizationError("Account is not active")
-        
+
         # Verify password
         if not user.hashed_password:
             _enforce_min_auth_failure_duration(auth_start_time)
             raise AuthorizationError("Password not set for this account")
-        
+
         pwd_ctx = get_pwd_context()
         if not pwd_ctx.verify(password, user.hashed_password):
             _enforce_min_auth_failure_duration(auth_start_time)
             raise AuthorizationError("Invalid credentials")
-        
+
         # Update last login
         user.last_login_at = datetime.utcnow()
         self.user_repository.update(user)
-        
+
         # Generate tokens
         access_token = self._create_access_token(user.id)
         refresh_token = self._create_refresh_token(user.id)
-        
+
         # Store refresh token in Redis if available
         if redis_client:
             refresh_key = f"refresh_token:{user.id}"
@@ -146,28 +146,28 @@ class LoginUserUseCase:
                 settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
                 refresh_token
             )
-        
+
         return TokenData(
             access_token=access_token,
             refresh_token=refresh_token,
             token_type="bearer"
         )
-    
+
     def refresh_access_token(
         self,
         refresh_token: str,
-        redis_client: Optional[redis.Redis] = None
+        redis_client: redis.Redis | None = None
     ) -> TokenData:
         """
         Refresh access token using refresh token
-        
+
         Args:
             refresh_token: Refresh token
             redis_client: Redis client for validating refresh tokens
-            
+
         Returns:
             TokenData: New access token and refresh token
-            
+
         Raises:
             AuthorizationError: If refresh token is invalid
         """
@@ -180,13 +180,13 @@ class LoginUserUseCase:
                 issuer=settings.JWT_ISSUER,
                 audience=settings.JWT_AUDIENCE,
             )
-            
+
             user_id = payload.get("sub")
             token_type = payload.get("type")
-            
+
             if token_type != "refresh" or not user_id:
                 raise AuthorizationError("Invalid refresh token")
-            
+
             # Verify token in Redis if available
             if redis_client:
                 stored_token = redis_client.get(f"refresh_token:{user_id}")
@@ -194,17 +194,17 @@ class LoginUserUseCase:
                     stored_token = stored_token.decode()
                 if stored_token != refresh_token:
                     raise AuthorizationError("Refresh token has been revoked")
-            
+
             # Get user
             from uuid import UUID
             user = self.user_repository.get_by_id(UUID(user_id))
             if not user or not user.is_active:
                 raise AuthorizationError("User not found or inactive")
-            
+
             # Generate new tokens
             new_access_token = self._create_access_token(user.id)
             new_refresh_token = self._create_refresh_token(user.id)
-            
+
             # Update refresh token in Redis
             if redis_client:
                 refresh_key = f"refresh_token:{user.id}"
@@ -213,18 +213,18 @@ class LoginUserUseCase:
                     settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
                     new_refresh_token
                 )
-            
+
             return TokenData(
                 access_token=new_access_token,
                 refresh_token=new_refresh_token,
                 token_type="bearer"
             )
-            
+
         except jwt.ExpiredSignatureError:
             raise AuthorizationError("Refresh token has expired")
         except jwt.JWTError:
             raise AuthorizationError("Invalid refresh token")
-    
+
     def _create_access_token(self, user_id) -> str:
         """Create JWT access token"""
         now = datetime.utcnow()
@@ -239,7 +239,7 @@ class LoginUserUseCase:
             "jti": str(uuid4())
         }
         return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    
+
     def _create_refresh_token(self, user_id) -> str:
         """Create JWT refresh token"""
         now = datetime.utcnow()

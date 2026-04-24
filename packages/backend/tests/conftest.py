@@ -2,8 +2,8 @@
 Ganitel V2 Backend - Pytest Configuration and Fixtures
 T12: Sécurité des tests + Factory App uniforme
 """
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add root directory to Python path FIRST
@@ -26,39 +26,41 @@ class NoOpLimiter:
     """A limiter that does nothing - used for testing"""
     def __init__(self):
         self.enabled = False
-    
+
     def limit(self, limit_string: str):
         """Return a decorator that doesn't actually limit"""
         def decorator(func):
             return func
         return decorator
-    
+
     def __call__(self, *args, **kwargs):
         pass
-    
+
     def reset(self):
         pass
-    
+
     def __iter__(self):
         """Support iteration"""
         return iter([])
-    
+
     def __getattr__(self, name):
         """Return self for any other attribute to allow chaining"""
         return self
 
 # Replace the limiter in app.core.ratelimit BEFORE it gets used
 import app.core.ratelimit
+
 app.core.ratelimit.limiter = NoOpLimiter()
 
 # Import pytest and other modules after disabling rate limiting
+from collections.abc import Callable, Generator
+from unittest.mock import Mock
+
 import pytest
-from typing import Generator, Callable
-from sqlalchemy import create_engine, MetaData, inspect
-from sqlalchemy.orm import sessionmaker, Session
-from fastapi.testclient import TestClient
-from unittest.mock import Mock, MagicMock
 import redis
+from fastapi.testclient import TestClient
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 # T12: Check that tests are running in TESTING mode
 # This prevents accidental test execution against production
@@ -100,27 +102,27 @@ def pytest_collection_modifyitems(config, items):
 root_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(root_dir))
 
-from app.main import app
+from datetime import date, timedelta
+from uuid import uuid4
+
+from passlib.context import CryptContext
+
 from app.database import Base, get_db
-from app.config import get_settings
+from app.domain.entities.booking import Booking, BookingStatus
+from app.domain.entities.service import (
+    AccommodationType,
+    Service,
+    ServiceStatus,
+    ServiceType,
+)
 
 # Import entities - will use Base from app.domain.entities.base
 # For SQLite compatibility, we'll use the actual Base which should work with PostgreSQL
-from app.domain.entities.user import User, UserType, UserStatus
-from app.domain.entities.service import Service, ServiceType, ServiceStatus, AccommodationType
-from app.domain.entities.booking import Booking, BookingStatus
-from app.domain.entities.location import Location
-from app.domain.entities.property_type import PropertyType
-from app.domain.entities.property import Property
-from app.domain.entities.amenity_category import AmenityCategory
-from app.domain.entities.amenity import Amenity
-from app.domain.entities.property_amenity import PropertyAmenity
-from app.infrastructure.repositories.user_repository import UserRepository
-from app.infrastructure.repositories.service_repository import ServiceRepository
+from app.domain.entities.user import User, UserStatus, UserType
 from app.infrastructure.repositories.booking_repository import BookingRepository
-from passlib.context import CryptContext
-from uuid import uuid4
-from datetime import date, datetime, timedelta
+from app.infrastructure.repositories.service_repository import ServiceRepository
+from app.infrastructure.repositories.user_repository import UserRepository
+from app.main import app
 
 
 def pytest_configure(config):
@@ -199,14 +201,14 @@ class TestAppFactory:
     """
     _app_instance = None
     _original_overrides = {}
-    
+
     @classmethod
     def create_app(cls) -> Callable:
         """Crée une nouvelle instance d'app pour tests"""
         if cls._app_instance is None:
             cls._app_instance = app
         return cls._app_instance
-    
+
     @classmethod
     def reset(cls):
         """Reset la factory et restaure les overrides"""
@@ -224,20 +226,20 @@ def cleanup_database_metadata(engine):
     try:
         metadata = MetaData()
         metadata.reflect(bind=engine)
-        
+
         if engine.dialect.name == 'postgresql':
             with engine.connect() as conn:
                 from sqlalchemy import text
                 # Désactive temporairement les vérifications de clés étrangères
                 conn.execute(text("SET session_replication_role = 'replica';"))
-                
+
                 # Truncate toutes les tables reflétées
                 for table_name in reversed(metadata.sorted_tables):
                     try:
                         conn.execute(text(f"TRUNCATE TABLE {table_name.name} CASCADE;"))
                     except Exception:
                         pass
-                
+
                 # Réactive les vérifications de clés étrangères
                 conn.execute(text("SET session_replication_role = 'origin';"))
                 conn.commit()
@@ -251,7 +253,7 @@ def cleanup_database_metadata(engine):
                     except Exception:
                         pass
                 conn.commit()
-    except Exception as e:
+    except Exception:
         # Connexion peut échouer, c'est OK pour certains tests
         pass
 
@@ -307,9 +309,9 @@ def setup_test_database():
     # Crée toutes les tables
     Base.metadata.create_all(bind=test_engine)
     ensure_booking_exclusion_constraint(test_engine)
-    
+
     yield
-    
+
     # Nettoyage en fin de suite de tests
     cleanup_database_metadata(test_engine)
     try:
@@ -336,7 +338,7 @@ def db_session() -> Generator[Session, None, None]:
     """
     # Create session
     session = TestSessionLocal()
-    
+
     try:
         yield session
         # Only commit if no exception occurred
@@ -357,7 +359,7 @@ def client(db_session: Session) -> TestClient:
     """
     T12: Fixture client utilisant la factory app uniforme
     Crée un TestClient avec la même instance d'app pour toutes les suites de tests
-    
+
     Utilisé par:
     - tests/security/test_security.py
     - tests/performance/test_api_performance.py
@@ -365,21 +367,21 @@ def client(db_session: Session) -> TestClient:
     """
     # Crée l'app via la factory
     test_app = TestAppFactory.create_app()
-    
+
     # Override la dépendance du DB
     def override_get_db():
         try:
             yield db_session
         finally:
             pass
-    
+
     test_app.dependency_overrides[get_db] = override_get_db
-    
+
     # Crée le client avec l'app
     test_client = TestClient(test_app)
-    
+
     yield test_client
-    
+
     # Nettoyage après le test
     test_app.dependency_overrides.clear()
     TestAppFactory.reset()
@@ -580,7 +582,7 @@ def sample_booking(db_session: Session, sample_user: User, sample_service: Servi
     end_date = start_date + timedelta(days=3)
     nights = (end_date - start_date).days
     total_amount = float(sample_service.base_price) * nights
-    
+
     booking = Booking(
         id=uuid4(),
         user_id=sample_user.id,
@@ -727,17 +729,17 @@ def client_no_rate_limit(db_session: Session) -> TestClient:
     This is useful for testing endpoints that have rate limiting decorators
     """
     from unittest.mock import patch
-    
+
     def override_get_db():
         try:
             yield db_session
         finally:
             pass
-    
+
     app.dependency_overrides[get_db] = override_get_db
-    
+
     # Mock the limiter.limit decorator to pass through the function unchanged
     with patch("app.core.ratelimit.limiter.limit", lambda limit_string: lambda func: func):
         yield TestClient(app)
-    
+
     app.dependency_overrides.clear()

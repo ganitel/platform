@@ -2,7 +2,7 @@
 Ganitel V2 Backend - Proximity Repository Implementation
 """
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -23,7 +23,7 @@ class ProximityRepository(IProximityRepository):
         self.db.refresh(proximity)
         return proximity
 
-    def get_by_id(self, proximity_id: UUID) -> Optional[Proximity]:
+    def get_by_id(self, proximity_id: UUID) -> Proximity | None:
         return (
             self.db.query(Proximity)
             .filter(
@@ -33,7 +33,7 @@ class ProximityRepository(IProximityRepository):
             .first()
         )
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[Proximity]:
+    def get_all(self, skip: int = 0, limit: int = 100) -> list[Proximity]:
         return (
             self.db.query(Proximity)
             .filter(Proximity.deleted_at.is_(None))
@@ -64,7 +64,7 @@ class ProximityRepository(IProximityRepository):
             return True
         return False
 
-    def count(self, filters: Optional[Dict[str, Any]] = None) -> int:
+    def count(self, filters: dict[str, Any] | None = None) -> int:
         query = self.db.query(Proximity).filter(Proximity.deleted_at.is_(None))
         if filters:
             for key, value in filters.items():
@@ -83,7 +83,7 @@ class ProximityRepository(IProximityRepository):
             is not None
         )
 
-    def get_by_property(self, property_id: UUID, skip: int = 0, limit: int = 100) -> List[Proximity]:
+    def get_by_property(self, property_id: UUID, skip: int = 0, limit: int = 100) -> list[Proximity]:
         """Get all proximities for a property"""
         return (
             self.db.query(Proximity)
@@ -96,7 +96,7 @@ class ProximityRepository(IProximityRepository):
             .all()
         )
 
-    def get_by_property_destination(self, property_id: UUID, destination_name: str) -> Optional[Proximity]:
+    def get_by_property_destination(self, property_id: UUID, destination_name: str) -> Proximity | None:
         """Get a specific proximity by property and destination"""
         return (
             self.db.query(Proximity)

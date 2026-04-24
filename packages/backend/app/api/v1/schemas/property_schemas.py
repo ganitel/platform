@@ -1,17 +1,17 @@
 """
 Ganitel V2 Backend - Property API Schemas
 """
-from typing import Optional, List, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel, validator
 from uuid import UUID
+
+from pydantic import BaseModel, validator
 
 
 class LocationResponse(BaseModel):
     """Location response schema"""
     id: UUID
     name: str
-    region: Optional[str] = None
+    region: str | None = None
 
     class Config:
         from_attributes = True
@@ -31,7 +31,7 @@ class AmenityResponse(BaseModel):
     id: UUID
     name_en: str
     name_fr: str
-    icon_path: Optional[str] = None
+    icon_path: str | None = None
 
     class Config:
         from_attributes = True
@@ -60,26 +60,26 @@ class PropertyCreateRequest(BaseModel):
     """Create property request schema"""
     title: str
     description: str
-    short_description: Optional[str] = None
+    short_description: str | None = None
     location_id: UUID
     property_type_id: UUID
     address: str
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
+    latitude: float | None = None
+    longitude: float | None = None
     base_price: float
     currency: str = "XAF"
     price_per: str = "night"
-    max_guests: Optional[int] = None
-    bedrooms: Optional[int] = None
-    bathrooms: Optional[int] = None
-    beds: Optional[int] = None
-    living_rooms: Optional[int] = None
-    balconies: Optional[int] = None
-    amenity_ids: Optional[List[UUID]] = []
-    images: Optional[List[str]] = []
+    max_guests: int | None = None
+    bedrooms: int | None = None
+    bathrooms: int | None = None
+    beds: int | None = None
+    living_rooms: int | None = None
+    balconies: int | None = None
+    amenity_ids: list[UUID] | None = []
+    images: list[str] | None = []
     instant_book: bool = False
     min_stay: int = 1
-    max_stay: Optional[int] = None
+    max_stay: int | None = None
     check_in_time: str = "15:00"
     check_out_time: str = "11:00"
 
@@ -132,30 +132,30 @@ class PropertyCreateRequest(BaseModel):
 
 class PropertyUpdateRequest(BaseModel):
     """Update property request schema"""
-    title: Optional[str] = None
-    description: Optional[str] = None
-    short_description: Optional[str] = None
-    location_id: Optional[UUID] = None
-    property_type_id: Optional[UUID] = None
-    address: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    base_price: Optional[float] = None
-    currency: Optional[str] = None
-    price_per: Optional[str] = None
-    max_guests: Optional[int] = None
-    bedrooms: Optional[int] = None
-    bathrooms: Optional[int] = None
-    beds: Optional[int] = None
-    living_rooms: Optional[int] = None
-    balconies: Optional[int] = None
-    amenity_ids: Optional[List[UUID]] = None
-    images: Optional[List[str]] = None
-    instant_book: Optional[bool] = None
-    min_stay: Optional[int] = None
-    max_stay: Optional[int] = None
-    check_in_time: Optional[str] = None
-    check_out_time: Optional[str] = None
+    title: str | None = None
+    description: str | None = None
+    short_description: str | None = None
+    location_id: UUID | None = None
+    property_type_id: UUID | None = None
+    address: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    base_price: float | None = None
+    currency: str | None = None
+    price_per: str | None = None
+    max_guests: int | None = None
+    bedrooms: int | None = None
+    bathrooms: int | None = None
+    beds: int | None = None
+    living_rooms: int | None = None
+    balconies: int | None = None
+    amenity_ids: list[UUID] | None = None
+    images: list[str] | None = None
+    instant_book: bool | None = None
+    min_stay: int | None = None
+    max_stay: int | None = None
+    check_in_time: str | None = None
+    check_out_time: str | None = None
 
 
 # Response Schemas
@@ -164,23 +164,23 @@ class PropertyBaseResponse(BaseModel):
     id: UUID
     title: str
     description: str
-    short_description: Optional[str]
+    short_description: str | None
     address: str
-    latitude: Optional[float]
-    longitude: Optional[float]
+    latitude: float | None
+    longitude: float | None
     base_price: float
     currency: str
     price_per: str
-    max_guests: Optional[int]
-    bedrooms: Optional[int]
-    bathrooms: Optional[int]
-    beds: Optional[int]
-    living_rooms: Optional[int]
-    balconies: Optional[int]
-    images: Optional[List[str]]
+    max_guests: int | None
+    bedrooms: int | None
+    bathrooms: int | None
+    beds: int | None
+    living_rooms: int | None
+    balconies: int | None
+    images: list[str] | None
     instant_book: bool
     min_stay: int
-    max_stay: Optional[int]
+    max_stay: int | None
     check_in_time: str
     check_out_time: str
     created_at: datetime
@@ -194,7 +194,7 @@ class PropertyResponse(PropertyBaseResponse):
     """Full property response schema with relationships"""
     location: LocationResponse
     property_type: PropertyTypeResponse
-    property_amenities: List[PropertyAmenityResponse] = []
+    property_amenities: list[PropertyAmenityResponse] = []
 
     class Config:
         from_attributes = True
@@ -202,7 +202,7 @@ class PropertyResponse(PropertyBaseResponse):
 
 class PropertyListResponse(BaseModel):
     """Property list response schema"""
-    items: List[PropertyResponse]
+    items: list[PropertyResponse]
     total: int
     page: int
     per_page: int
@@ -240,12 +240,12 @@ class PropertySimpleResponse(BaseModel):
     """Simple property response for listings"""
     id: UUID
     title: str
-    short_description: Optional[str]
+    short_description: str | None
     base_price: float
     currency: str
     location: LocationResponse
     property_type: PropertyTypeResponse
-    images: Optional[List[str]]
+    images: list[str] | None
     instant_book: bool
 
     class Config:

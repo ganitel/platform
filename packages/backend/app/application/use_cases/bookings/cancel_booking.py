@@ -5,7 +5,11 @@ from uuid import UUID
 
 from app.domain.entities.booking import BookingStatus
 from app.domain.repositories.booking_repository import IBookingRepository
-from app.exceptions import AuthorizationError, BookingNotFoundError, InvalidBookingStatusError
+from app.exceptions import (
+    AuthorizationError,
+    BookingNotFoundError,
+    InvalidBookingStatusError,
+)
 
 
 class CancelBookingUseCase:

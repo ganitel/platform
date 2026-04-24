@@ -2,21 +2,22 @@
 Ganitel V2 Backend - Main FastAPI Application
 """
 import logging
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from app.config import get_settings
-from app.api.v1.router import api_router
-from app.middleware.i18n_middleware import I18nMiddleware
-from app.core.ratelimit import limiter
-from app.core.logging_config import configure_logging
-from app.core.exception_handlers import register_exception_handlers
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+
+from app.api.v1.router import api_router
+from app.config import get_settings
+from app.core.exception_handlers import register_exception_handlers
+from app.core.logging_config import configure_logging
+from app.core.ratelimit import limiter
+from app.middleware.i18n_middleware import I18nMiddleware
 
 settings = get_settings()
 configure_logging(debug=settings.DEBUG)
@@ -26,13 +27,14 @@ logger = logging.getLogger(__name__)
 async def create_default_admin():
     """Create default admin account on startup if it doesn't exist"""
     try:
-        from app.database import SessionLocal
-        from app.domain.entities.user import User, UserType, UserStatus
         from passlib.context import CryptContext
         from sqlalchemy import inspect
-        
+
+        from app.database import SessionLocal
+        from app.domain.entities.user import User, UserStatus, UserType
+
         pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-        
+
         db = SessionLocal()
         try:
             # Never auto-create admin outside local development
@@ -48,20 +50,20 @@ async def create_default_admin():
             if 'users' not in inspector.get_table_names():
                 logger.warning("Users table not found, skipping admin creation")
                 return
-            
+
             # Check if admin already exists
             existing_admin = db.query(User).filter(
                 User.email == settings.ADMIN_EMAIL,
                 User.deleted_at.is_(None)
             ).first()
-            
+
             if existing_admin:
                 logger.info(
                     "Admin account already exists",
                     extra={"admin_email": settings.ADMIN_EMAIL},
                 )
                 return
-            
+
             # Create new admin account
             admin_user = User(
                 email=settings.ADMIN_EMAIL,
@@ -74,7 +76,7 @@ async def create_default_admin():
                 is_verified=True,
                 is_active=True
             )
-            
+
             db.add(admin_user)
             db.commit()
             logger.info(
@@ -82,13 +84,13 @@ async def create_default_admin():
                 extra={"admin_email": settings.ADMIN_EMAIL},
             )
             logger.warning("Please change the admin password after first login")
-            
+
         except Exception:
             db.rollback()
             logger.exception("Admin account creation failed")
         finally:
             db.close()
-            
+
     except Exception:
         logger.exception("Admin account bootstrap failed")
 
@@ -101,12 +103,12 @@ async def lifespan(app: FastAPI):
         "Starting Ganitel API",
         extra={"environment": settings.ENVIRONMENT, "debug": settings.DEBUG},
     )
-    
+
     # Create default admin account
     await create_default_admin()
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Ganitel API")
 

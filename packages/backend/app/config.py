@@ -3,9 +3,10 @@ Ganitel V2 Backend - Configuration Settings
 """
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import List, Union, Optional, Literal
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Literal
+
 from pydantic import field_validator, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import URL
 
 
@@ -17,7 +18,7 @@ class EnvironmentPolicy:
     default_access_token_expire_minutes: int
     default_refresh_token_expire_days: int
     default_env_workers: int
-    default_cors_origins: List[str]
+    default_cors_origins: list[str]
     enforce_strict_secrets: bool
 
 
@@ -62,13 +63,13 @@ ENVIRONMENT_POLICIES = {
 
 class Settings(BaseSettings):
     """Application settings with environment variable support"""
-    
+
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=True,
         env_parse_none_str='null'
     )
-    
+
     # Application
     APP_NAME: str = "ganitel API"
     APP_VERSION: str = "2.0.0"
@@ -86,30 +87,30 @@ class Settings(BaseSettings):
     TEST_POSTGRES_HOST_PORT: int = 5433
     REDIS_HOST_PORT: int = 6379
     PGADMIN_HOST_PORT: int = 5050
-    
+
     # Database
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "ganitel_db"
     POSTGRES_USER: str = "ganitel_user"
     POSTGRES_PASSWORD: str = "ganitel_password"
-    DATABASE_URL: Optional[str] = None
+    DATABASE_URL: str | None = None
     DATABASE_POOL_SIZE: int = 20
     DATABASE_MAX_OVERFLOW: int = 30
-    
+
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
-    
+
     # Security
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
-    
+
     # CORS - Accept both string and list
-    CORS_ORIGINS: Union[str, List[str]] = ["http://localhost:3000", "http://localhost:8000"]
+    CORS_ORIGINS: str | list[str] = ["http://localhost:3000", "http://localhost:8000"]
     CORS_ALLOW_CREDENTIALS: bool = True
-    CORS_ALLOW_METHODS: Union[str, List[str]] = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-    CORS_ALLOW_HEADERS: Union[str, List[str]] = ["*"]
-    
+    CORS_ALLOW_METHODS: str | list[str] = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    CORS_ALLOW_HEADERS: str | list[str] = ["*"]
+
     # Tranzak Payment Gateway
     TRANZAK_API_KEY: str = "your-tranzak-api-key"
     TRANZAK_APP_ID: str = "your-tranzak-app-id"
@@ -119,17 +120,17 @@ class Settings(BaseSettings):
     TRANZAK_WEBHOOK_SECRET: str = "your-webhook-secret"
     TRANZAK_WEBHOOK_AUTH_KEY: str = "your-tranzak-webhook-auth-key"
     TRANZAK_WEBHOOK_ID: str = ""
-    
+
     # Payment Configuration
     PAYMENT_CALLBACK_URL: str = "http://localhost:8000/api/v1/payments/webhook/tranzak"
     PAYMENT_RETURN_URL: str = "http://localhost:3000/payment/success"
-    
+
     # Default Admin Account
     ADMIN_EMAIL: str = "admin@ganitel.com"
     ADMIN_PASSWORD: str = "Change_This_Password_123!"
     ADMIN_FIRST_NAME: str = "Admin"
     ADMIN_LAST_NAME: str = "Ganitel"
-    
+
     # OAuth Configuration
     GOOGLE_CLIENT_ID: str = "your-google-client-id"
     GOOGLE_CLIENT_SECRET: str = "your-google-client-secret"
@@ -138,7 +139,7 @@ class Settings(BaseSettings):
     FACEBOOK_APP_SECRET: str = "your-facebook-app-secret"
     FACEBOOK_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/oauth/facebook/callback"
     FRONTEND_URL: str = "http://localhost:3000"
-    
+
     # Orange Money Configuration
     ORANGE_MONEY_CLIENT_ID: str = "your-orange-money-client-id"
     ORANGE_MONEY_CLIENT_SECRET: str = "your-orange-money-client-secret"
@@ -146,18 +147,18 @@ class Settings(BaseSettings):
     ORANGE_MONEY_TOKEN_URL: str = "https://api.orange.com/oauth/v2/token"
     ORANGE_MONEY_PAYMENT_URL: str = "https://api.orange.com/orange-money-webpay/cm/v1/webpayment"
     ORANGE_MONEY_WEBHOOK_URL: str = "http://localhost:8000/api/v1/payments/webhook/orange"
-    
+
     # Mobile Money Configuration
     MOBILE_MONEY_BASIC_AUTH: str = "your-mobile-money-basic-auth"
     MOBILE_MONEY_TOKEN_URL: str = "https://sandbox.momodeveloper.mtn.com/collection/token/"
     MOBILE_MONEY_PAYMENT_URL: str = "https://sandbox.momodeveloper.mtn.com/collection/v1_0/requesttopay"
     MOBILE_MONEY_ENVIRONMENT: str = "sandbox"
     MOBILE_MONEY_WEBHOOK_URL: str = "http://localhost:8000/api/v1/payments/webhook/mobile-money"
-    
+
     # File Upload Configuration
     UPLOAD_DIR: str = "uploads"
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB
-    
+
     # Cloudflare R2 Configuration
     STORAGE_TYPE: str = "local"  # 'local' or 'r2'
     R2_BUCKET_NAME: str = "ganitel-uploads"
@@ -183,34 +184,34 @@ class Settings(BaseSettings):
     def environment_policy(self) -> EnvironmentPolicy:
         return ENVIRONMENT_POLICIES[self.effective_environment]
 
-    
+
     @field_validator("CORS_ORIGINS", mode='before')
     @classmethod
-    def assemble_cors_origins(cls, v) -> List[str]:
+    def assemble_cors_origins(cls, v) -> list[str]:
         if isinstance(v, str):
             return [origin.strip() for origin in v.split(",")]
         if isinstance(v, list):
             return v
         return ["http://localhost:3000", "http://localhost:8000"]
-    
+
     @field_validator("CORS_ALLOW_METHODS", mode='before')
     @classmethod
-    def assemble_cors_methods(cls, v) -> List[str]:
+    def assemble_cors_methods(cls, v) -> list[str]:
         if isinstance(v, str):
             return [method.strip() for method in v.split(",")]
         if isinstance(v, list):
             return v
         return ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-    
+
     @field_validator("CORS_ALLOW_HEADERS", mode='before')
     @classmethod
-    def assemble_cors_headers(cls, v) -> List[str]:
+    def assemble_cors_headers(cls, v) -> list[str]:
         if isinstance(v, str):
             return [header.strip() for header in v.split(",")]
         if isinstance(v, list):
             return v
         return ["*"]
-    
+
     @field_validator("DATABASE_URL", mode='before')
     @classmethod
     def assemble_db_connection(cls, v) -> str:
@@ -354,7 +355,7 @@ class Settings(BaseSettings):
 
         return self
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     """Get cached application settings"""
     return Settings()

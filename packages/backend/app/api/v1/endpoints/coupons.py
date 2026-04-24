@@ -1,21 +1,21 @@
 """
 Ganitel V2 Backend - Coupon Endpoints
 """
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from uuid import UUID
 
+from app.api.v1.schemas.coupon_schemas import (
+    ApplyCouponRequest,
+    ApplyCouponResponse,
+    CouponResponse,
+)
+from app.application.use_cases.coupons.apply_coupon import ApplyCouponUseCase
 from app.database import get_db
 from app.dependencies import get_current_active_user
 from app.domain.entities.user import User
+from app.exceptions import NotFoundError, ValidationError
 from app.infrastructure.repositories.coupon_repository import CouponRepository
-from app.application.use_cases.coupons.apply_coupon import ApplyCouponUseCase
-from app.api.v1.schemas.coupon_schemas import (
-    CouponResponse,
-    ApplyCouponRequest,
-    ApplyCouponResponse
-)
-from app.exceptions import ValidationError, NotFoundError
 
 router = APIRouter(prefix="/coupons", tags=["coupons"])
 
@@ -30,13 +30,13 @@ async def apply_coupon(
     try:
         coupon_repository = CouponRepository(db)
         use_case = ApplyCouponUseCase(coupon_repository)
-        
+
         result = use_case.execute(
             coupon_code=request.coupon_code,
             amount=request.amount,
             user_id=current_user.id
         )
-        
+
         coupon = result["coupon"]
         return ApplyCouponResponse(
             coupon=CouponResponse(
@@ -73,7 +73,7 @@ async def apply_coupon(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to apply coupon"
@@ -90,7 +90,7 @@ async def get_active_coupons(
     try:
         repository = CouponRepository(db)
         coupons = repository.get_active_coupons(skip, limit)
-        
+
         return [
             CouponResponse(
                 id=str(c.id),
@@ -113,7 +113,7 @@ async def get_active_coupons(
             )
             for c in coupons
         ]
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get active coupons"

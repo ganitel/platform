@@ -1,7 +1,6 @@
 """
 Ganitel V2 Backend - Get User Bookings Use Case
 """
-from typing import List
 from uuid import UUID
 
 from app.domain.entities.booking import Booking
@@ -14,6 +13,6 @@ class GetUserBookingsUseCase:
     def __init__(self, booking_repository: IBookingRepository):
         self.booking_repository = booking_repository
 
-    def execute(self, user_id: UUID, skip: int = 0, limit: int = 50) -> List[Booking]:
+    def execute(self, user_id: UUID, skip: int = 0, limit: int = 50) -> list[Booking]:
         return self.booking_repository.get_by_user(user_id, skip=skip, limit=limit)
 

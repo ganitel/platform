@@ -1,18 +1,18 @@
 """
 Ganitel V2 Backend - Policy Endpoints
 """
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from uuid import UUID
 
+from app.api.v1.schemas.policy_schemas import PolicyCreateRequest, PolicyResponse
+from app.application.use_cases.policies.create_policy import CreatePolicyUseCase
 from app.database import get_db
 from app.dependencies import get_current_admin
-from app.domain.entities.user import User
-from app.infrastructure.repositories.policy_repository import PolicyRepository
-from app.application.use_cases.policies.create_policy import CreatePolicyUseCase
-from app.api.v1.schemas.policy_schemas import PolicyCreateRequest, PolicyResponse
 from app.domain.entities.policy import PolicyType
-from app.exceptions import ValidationError, ConflictError
+from app.domain.entities.user import User
+from app.exceptions import ConflictError, ValidationError
+from app.infrastructure.repositories.policy_repository import PolicyRepository
 
 router = APIRouter(prefix="/policies", tags=["policies"])
 
@@ -27,7 +27,7 @@ async def create_policy(
     try:
         repository = PolicyRepository(db)
         use_case = CreatePolicyUseCase(repository)
-        
+
         policy = use_case.execute(
             title=request.title,
             content=request.content,
@@ -35,7 +35,7 @@ async def create_policy(
             slug=request.slug,
             display_order=request.display_order
         )
-        
+
         return PolicyResponse(
             id=str(policy.id),
             title=policy.title,
@@ -58,7 +58,7 @@ async def create_policy(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(e)
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create policy"
@@ -75,7 +75,7 @@ async def get_policies(
     """Get policies"""
     try:
         repository = PolicyRepository(db)
-        
+
         if policy_type:
             try:
                 policy_type_enum = PolicyType(policy_type)
@@ -84,7 +84,7 @@ async def get_policies(
                 policies = repository.get_active_policies(skip, limit)
         else:
             policies = repository.get_active_policies(skip, limit)
-        
+
         return [
             PolicyResponse(
                 id=str(p.id),
@@ -100,7 +100,7 @@ async def get_policies(
             )
             for p in policies
         ]
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get policies"
@@ -116,13 +116,13 @@ async def get_policy_by_slug(
     try:
         repository = PolicyRepository(db)
         policy = repository.get_by_slug(slug)
-        
+
         if not policy:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Policy not found"
             )
-        
+
         return PolicyResponse(
             id=str(policy.id),
             title=policy.title,
@@ -137,7 +137,7 @@ async def get_policy_by_slug(
         )
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get policy"

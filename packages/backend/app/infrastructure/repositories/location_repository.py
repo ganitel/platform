@@ -1,8 +1,9 @@
 """
 Ganitel V2 Backend - Location Repository Implementation
 """
-from typing import Optional, List, Dict, Any
+from typing import Any
 from uuid import UUID
+
 from sqlalchemy.orm import Session
 
 from app.domain.entities.location import Location
@@ -23,27 +24,27 @@ class LocationRepository:
         self.db.refresh(location)
         return location
 
-    def get_by_id(self, location_id: UUID) -> Optional[Location]:
+    def get_by_id(self, location_id: UUID) -> Location | None:
         """Get location by ID"""
         return self.db.query(Location).filter(
             Location.id == location_id,
             Location.deleted_at.is_(None)
         ).first()
 
-    def get_by_name(self, name: str) -> Optional[Location]:
+    def get_by_name(self, name: str) -> Location | None:
         """Get location by name"""
         return self.db.query(Location).filter(
             Location.name == name,
             Location.deleted_at.is_(None)
         ).first()
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[Location]:
+    def get_all(self, skip: int = 0, limit: int = 100) -> list[Location]:
         """Get all locations with pagination"""
         return self.db.query(Location).filter(
             Location.deleted_at.is_(None)
         ).offset(skip).limit(limit).all()
 
-    def count(self, filters: Optional[Dict[str, Any]] = None) -> int:
+    def count(self, filters: dict[str, Any] | None = None) -> int:
         """Count locations with optional filters"""
         query = self.db.query(Location).filter(Location.deleted_at.is_(None))
         return query.count()

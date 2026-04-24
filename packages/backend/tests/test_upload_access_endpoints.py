@@ -1,6 +1,5 @@
 """Controlled upload access endpoint tests (TX03)."""
 
-from pathlib import Path
 
 from fastapi import status
 

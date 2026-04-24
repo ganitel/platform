@@ -1,10 +1,11 @@
 """
 Ganitel V2 Backend - Wallet API Schemas
 """
-from typing import Optional
 from datetime import datetime
 from decimal import Decimal
+
 from pydantic import BaseModel, Field
+
 
 class WalletResponse(BaseModel):
     """Wallet response schema"""
@@ -18,7 +19,7 @@ class WalletResponse(BaseModel):
     bonuses: Decimal
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -26,21 +27,21 @@ class AddBalanceRequest(BaseModel):
     """Add balance request schema"""
     amount: Decimal = Field(..., gt=0, description="Amount to add")
     is_bonus: bool = Field(False, description="Whether this is a bonus")
-    description: Optional[str] = Field(None, description="Transaction description")
+    description: str | None = Field(None, description="Transaction description")
 
 class TransactionResponse(BaseModel):
     """Transaction response schema"""
     id: str
     user_id: str
-    wallet_id: Optional[str]
+    wallet_id: str | None
     transaction_type: str
     amount: Decimal
     currency: str
-    description: Optional[str]
+    description: str | None
     status: str
-    reference: Optional[str]
+    reference: str | None
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 

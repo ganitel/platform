@@ -9,7 +9,6 @@ Seeder idempotent des données de référence:
 """
 import sys
 from pathlib import Path
-from typing import Dict
 from uuid import uuid4
 
 from sqlalchemy import or_
@@ -21,13 +20,10 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.database import SessionLocal
+from app.domain.entities.amenity import Amenity
+from app.domain.entities.amenity_category import AmenityCategory
 from app.domain.entities.location import Location
 from app.domain.entities.property_type import PropertyType
-from app.domain.entities.amenity_category import AmenityCategory
-from app.domain.entities.amenity import Amenity
-from app.domain.entities.property import Property
-from app.domain.entities.property_amenity import PropertyAmenity
-
 
 # Reference data to seed
 LOCATIONS_DATA = [
@@ -105,7 +101,7 @@ def _restore_soft_deleted(entity) -> bool:
     return True
 
 
-def seed_locations(db: Session) -> Dict[str, int]:
+def seed_locations(db: Session) -> dict[str, int]:
     """Seed locations idempotently and safely with soft-delete aware logic."""
     stats = {"created": 0, "restored": 0, "updated": 0}
 
@@ -139,7 +135,7 @@ def seed_locations(db: Session) -> Dict[str, int]:
     return stats
 
 
-def seed_property_types(db: Session) -> Dict[str, int]:
+def seed_property_types(db: Session) -> dict[str, int]:
     """Seed property types idempotently and safely with soft-delete aware logic."""
     stats = {"created": 0, "restored": 0, "updated": 0}
 
@@ -161,7 +157,7 @@ def seed_property_types(db: Session) -> Dict[str, int]:
     return stats
 
 
-def seed_amenities(db: Session) -> Dict[str, int]:
+def seed_amenities(db: Session) -> dict[str, int]:
     """Seed amenity categories and amenities with idempotent upsert behavior."""
     stats = {
         "categories_created": 0,

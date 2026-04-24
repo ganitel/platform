@@ -1,8 +1,9 @@
 """
 Ganitel V2 Backend - Update Property Use Case
 """
+from typing import Any
 from uuid import UUID
-from typing import Optional, Dict, Any
+
 from app.domain.entities.property import Property
 from app.exceptions import GanitelException
 
@@ -19,19 +20,19 @@ class UpdatePropertyUseCase:
         self,
         property_id: UUID,
         provider_id: UUID,
-        updates: Dict[str, Any]
+        updates: dict[str, Any]
     ) -> Property:
         """
         Update a property
         """
         property = self.property_repository.get_by_id(property_id)
-        
+
         if not property or property.deleted_at is not None:
             raise GanitelException(
                 message="Property not found",
                 status_code=404
             )
-        
+
         # Check authorization
         if property.provider_id != provider_id:
             raise GanitelException(

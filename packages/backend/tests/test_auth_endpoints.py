@@ -1,21 +1,21 @@
 """
 Ganitel V2 Backend - Authentication Endpoints Integration Tests
 """
-import pytest
-from fastapi import status
 from unittest.mock import MagicMock
+
+from fastapi import status
 from jose import jwt
 
-from app.main import app
-from app.dependencies import get_redis
 from app.config import get_settings
 from app.core.oauth_exchange import create_oauth_exchange_code
+from app.dependencies import get_redis
+from app.main import app
 from tests.helpers import unique_email, unique_phone
 
 
 class TestRegisterEndpoint:
     """Tests for POST /api/v1/auth/register"""
-    
+
     def test_register_traveler_success(self, client):
         """Test successful traveler registration"""
         email = unique_email()
@@ -30,14 +30,14 @@ class TestRegisterEndpoint:
                 "user_type": "traveler"
             }
         )
-        
+
         assert response.status_code == status.HTTP_201_CREATED
         data = response.json()
         assert data["email"] == email
         assert data["user_type"] == "traveler"
         assert data["status"] == "pending_verification"
         assert "id" in data
-    
+
     def test_register_provider_success(self, client):
         """Test successful provider registration"""
         response = client.post(
@@ -51,7 +51,7 @@ class TestRegisterEndpoint:
                 "user_type": "provider"
             }
         )
-        
+
         assert response.status_code == status.HTTP_201_CREATED
         data = response.json()
         assert data["user_type"] == "provider"
@@ -71,7 +71,7 @@ class TestRegisterEndpoint:
         )
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    
+
     def test_register_duplicate_email(self, client, sample_user):
         """Test registration fails with duplicate email"""
         response = client.post(
@@ -84,9 +84,9 @@ class TestRegisterEndpoint:
                 "user_type": "traveler"
             }
         )
-        
+
         assert response.status_code == status.HTTP_409_CONFLICT
-    
+
     def test_register_invalid_email(self, client):
         """Test registration fails with invalid email"""
         response = client.post(
@@ -99,10 +99,10 @@ class TestRegisterEndpoint:
                 "user_type": "traveler"
             }
         )
-        
+
         # FastAPI/Pydantic returns 422 for validation errors
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    
+
     def test_register_weak_password(self, client):
         """Test registration fails with weak password"""
         response = client.post(
@@ -115,14 +115,14 @@ class TestRegisterEndpoint:
                 "user_type": "traveler"
             }
         )
-        
+
         # FastAPI/Pydantic returns 422 for validation errors
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 class TestLoginEndpoint:
     """Tests for POST /api/v1/auth/login"""
-    
+
     def test_login_success(self, client, sample_user):
         """Test successful login"""
         response = client.post(
@@ -132,14 +132,14 @@ class TestLoginEndpoint:
                 "password": "password123"
             }
         )
-        
+
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert "access_token" in data
         assert "refresh_token" in data
         assert data["token_type"] == "bearer"
         assert len(data["access_token"]) > 0
-    
+
     def test_login_with_phone(self, client, sample_user):
         """Test login with phone number"""
         response = client.post(
@@ -149,10 +149,10 @@ class TestLoginEndpoint:
                 "password": "password123"
             }
         )
-        
+
         assert response.status_code == status.HTTP_200_OK
         assert "access_token" in response.json()
-    
+
     def test_login_wrong_password(self, client, sample_user):
         """Test login fails with wrong password"""
         response = client.post(
@@ -162,9 +162,9 @@ class TestLoginEndpoint:
                 "password": "wrongpassword"
             }
         )
-        
+
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    
+
     def test_login_user_not_found(self, client):
         """Test login fails for non-existent user"""
         response = client.post(
@@ -174,17 +174,19 @@ class TestLoginEndpoint:
                 "password": "password123"
             }
         )
-        
+
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    
+
     def test_login_suspended_user(self, client, db_session):
         """Test login fails for suspended user"""
-        from app.domain.entities.user import User, UserType, UserStatus
-        from passlib.context import CryptContext
         from uuid import uuid4
-        
+
+        from passlib.context import CryptContext
+
+        from app.domain.entities.user import User, UserStatus, UserType
+
         pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-        
+
         user = User(
             id=uuid4(),
             email="suspended@example.com",
@@ -199,7 +201,7 @@ class TestLoginEndpoint:
         )
         db_session.add(user)
         db_session.commit()
-        
+
         response = client.post(
             "/api/v1/auth/login",
             json={
@@ -207,13 +209,13 @@ class TestLoginEndpoint:
                 "password": "password123"
             }
         )
-        
+
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 class TestRefreshTokenEndpoint:
     """Tests for POST /api/v1/auth/refresh-token"""
-    
+
     def test_refresh_token_success(self, client, sample_user, mock_redis):
         """Test successful token refresh"""
         # First login
@@ -224,28 +226,28 @@ class TestRefreshTokenEndpoint:
                 "password": "password123"
             }
         )
-        
+
         refresh_token = login_response.json()["refresh_token"]
-        
+
         # Refresh token
         response = client.post(
             "/api/v1/auth/refresh-token",
             json={"refresh_token": refresh_token}
         )
-        
+
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert "access_token" in data
         assert "refresh_token" in data
         assert data["access_token"] != login_response.json()["access_token"]
-    
+
     def test_refresh_token_invalid(self, client):
         """Test refresh fails with invalid token"""
         response = client.post(
             "/api/v1/auth/refresh-token",
             json={"refresh_token": "invalid_token"}
         )
-        
+
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
@@ -511,21 +513,21 @@ class TestAuthEndpointErrorHandling:
 
 class TestLogoutEndpoint:
     """Tests for POST /api/v1/auth/logout"""
-    
+
     def test_logout_success(self, client, auth_token):
         """Test successful logout"""
         response = client.post(
             "/api/v1/auth/logout",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
-        
+
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert data["message"] == "Successfully logged out"
-    
+
     def test_logout_unauthorized(self, client):
         """Test logout fails without authentication"""
         response = client.post("/api/v1/auth/logout")
-        
+
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 

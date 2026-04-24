@@ -2,10 +2,11 @@
 Ganitel V2 Backend - Tranzak Payment Gateway Client
 """
 import asyncio
-import httpx
 import logging
-from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
+from typing import Any
+
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -15,14 +16,14 @@ class TranzakClient:
     Client for Tranzak payment gateway integration
     Documentation: https://developers.tranzak.me
     """
-    
+
     def __init__(
         self,
         api_key: str,
         app_id: str,
-        app_key: Optional[str] = None,
+        app_key: str | None = None,
         base_url: str = "https://dsapi.tranzak.me/xp021/v1",
-        auth_base_url: Optional[str] = None
+        auth_base_url: str | None = None
     ):
         self.api_key = api_key
         self.app_id = app_id
@@ -30,10 +31,10 @@ class TranzakClient:
         self.api_base_url = self._normalize_api_base_url(base_url)
         self.auth_base_url = auth_base_url or self._derive_auth_base_url(self.api_base_url)
         self.timeout = 30.0
-        self._token: Optional[str] = None
-        self._token_expires_at: Optional[datetime] = None
+        self._token: str | None = None
+        self._token_expires_at: datetime | None = None
         self._token_lock = asyncio.Lock()
-    
+
     @staticmethod
     def _normalize_api_base_url(base_url: str) -> str:
         base_url = base_url.rstrip("/")
@@ -95,7 +96,7 @@ class TranzakClient:
             self._token_expires_at = now + timedelta(seconds=expiry_buffer)
             return token
 
-    async def _get_headers(self) -> Dict[str, str]:
+    async def _get_headers(self) -> dict[str, str]:
         """Get request headers with authentication"""
         token = await self._get_token()
         return {
@@ -104,7 +105,7 @@ class TranzakClient:
             "Content-Type": "application/json",
             "Accept": "application/json"
         }
-    
+
     async def initiate_payment(
         self,
         amount: float,
@@ -116,10 +117,10 @@ class TranzakClient:
         reference: str,
         callback_url: str,
         return_url: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Initiate a payment transaction
-        
+
         Args:
             amount: Payment amount
             currency: Currency code (XAF, USD, EUR)
@@ -130,7 +131,7 @@ class TranzakClient:
             reference: Unique payment reference (booking_id)
             callback_url: Webhook URL for payment status updates
             return_url: URL to redirect customer after payment
-            
+
         Returns:
             Dict containing payment initiation response
         """
@@ -143,14 +144,14 @@ class TranzakClient:
                 "callbackUrl": callback_url,
                 "returnUrl": return_url
             }
-            
+
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
                     f"{self.api_base_url}/request/create",
                     json=payload,
                     headers=await self._get_headers()
                 )
-                
+
                 response.raise_for_status()
                 data = response.json()
 
@@ -170,7 +171,7 @@ class TranzakClient:
                     or payload_data.get("links", {}).get("payment_url"),
                     "data": payload_data
                 }
-                
+
         except httpx.HTTPStatusError as e:
             logger.error(f"Tranzak API error: {e.response.status_code} - {e.response.text}")
             return {
@@ -183,14 +184,14 @@ class TranzakClient:
                 "success": False,
                 "error": f"Payment initiation failed: {str(e)}"
             }
-    
-    async def verify_payment(self, transaction_id: str) -> Dict[str, Any]:
+
+    async def verify_payment(self, transaction_id: str) -> dict[str, Any]:
         """
         Verify payment status
-        
+
         Args:
             transaction_id: Tranzak transaction ID
-            
+
         Returns:
             Dict containing payment status
         """
@@ -201,7 +202,7 @@ class TranzakClient:
                     params={"requestId": transaction_id},
                     headers=await self._get_headers()
                 )
-                
+
                 response.raise_for_status()
                 data = response.json()
 
@@ -218,7 +219,7 @@ class TranzakClient:
                     "status": payload_data.get("status"),
                     "data": payload_data
                 }
-                
+
         except httpx.HTTPStatusError as e:
             logger.error(f"Tranzak verify error: {e.response.status_code} - {e.response.text}")
             return {
@@ -231,8 +232,8 @@ class TranzakClient:
                 "success": False,
                 "error": f"Payment verification failed: {str(e)}"
             }
-    
-    async def cancel_request(self, transaction_id: str) -> Dict[str, Any]:
+
+    async def cancel_request(self, transaction_id: str) -> dict[str, Any]:
         """Cancel a pending payment request"""
         try:
             payload = {"requestId": transaction_id}
@@ -260,7 +261,7 @@ class TranzakClient:
             logger.error(f"Tranzak cancel error: {str(e)}")
             return {"success": False, "error": f"Cancel failed: {str(e)}"}
 
-    async def void_request(self, transaction_id: str) -> Dict[str, Any]:
+    async def void_request(self, transaction_id: str) -> dict[str, Any]:
         """Void a payment request (refund if already paid)"""
         try:
             payload = {"requestId": transaction_id}
@@ -293,7 +294,7 @@ class TranzakClient:
         transaction_id: str,
         amount: float,
         reason: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Process a refund - use void for completed payments, cancel for pending"""
         # First verify payment status to determine correct action
         verification = await self.verify_payment(transaction_id)
@@ -320,7 +321,7 @@ def get_tranzak_client() -> TranzakClient:
     """Get Tranzak client instance"""
     from app.config import get_settings
     settings = get_settings()
-    
+
     return TranzakClient(
         api_key=settings.TRANZAK_API_KEY,
         app_id=settings.TRANZAK_APP_ID,

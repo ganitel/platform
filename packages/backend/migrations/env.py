@@ -1,14 +1,14 @@
 """
 Ganitel V2 Backend - Alembic Environment Configuration
 """
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from alembic import context
 import os
 import sys
+from logging.config import fileConfig
 from urllib.parse import quote_plus
+
+from alembic import context
 from dotenv import load_dotenv
+from sqlalchemy import engine_from_config, pool
 
 # Load env file so alembic can connect when run locally via uv
 for env_file in (".env.local", ".env"):
@@ -21,15 +21,6 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 # Import your models here
 from app.domain.entities.base import Base
-from app.domain.entities.user import User
-from app.domain.entities.service import Service
-from app.domain.entities.booking import Booking
-from app.domain.entities.location import Location
-from app.domain.entities.property_type import PropertyType
-from app.domain.entities.property import Property
-from app.domain.entities.amenity_category import AmenityCategory
-from app.domain.entities.amenity import Amenity
-from app.domain.entities.property_amenity import PropertyAmenity
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -107,7 +98,7 @@ def run_migrations_online() -> None:
         'sqlalchemy.url': get_database_url(),
         'sqlalchemy.poolclass': 'pool.NullPool'
     }
-    
+
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",

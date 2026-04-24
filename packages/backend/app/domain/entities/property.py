@@ -1,8 +1,8 @@
 """
 Ganitel V2 Backend - Property Entity
 """
-from sqlalchemy import Column, String, Text, Integer, Numeric, Boolean, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import relationship
 
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity

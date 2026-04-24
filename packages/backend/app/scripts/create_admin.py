@@ -17,19 +17,18 @@ Optional environment overrides used by Make targets:
 import argparse
 import os
 import sys
-from typing import Optional
 
 from passlib.context import CryptContext
 from sqlalchemy import inspect
 
 from app.config import get_settings
 from app.database import SessionLocal
-from app.domain.entities.user import User, UserType, UserStatus
+from app.domain.entities.user import User, UserStatus, UserType
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def _resolve_value(cli_value: Optional[str], env_name: str, default: Optional[str] = None) -> Optional[str]:
+def _resolve_value(cli_value: str | None, env_name: str, default: str | None = None) -> str | None:
     if cli_value is not None and cli_value != "":
         return cli_value
     env_value = os.getenv(env_name)

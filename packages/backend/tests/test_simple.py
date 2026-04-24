@@ -1,8 +1,8 @@
 """
 Ganitel V2 Backend - Tests Simplifiés
 """
-import pytest
 from fastapi.testclient import TestClient
+
 from app.main import app
 
 # Tests sans base de données
@@ -69,7 +69,7 @@ def test_unauthorized_create_service():
         "address": "Test Address",
         "base_price": 50000
     }
-    
+
     response = client.post("/api/v1/services/", json=service_data)
     # Peut être 401 (Unauthorized) ou 403 (Forbidden)
     assert response.status_code in [401, 403]
@@ -97,7 +97,7 @@ def test_invalid_registration_data():
         "first_name": "",   # Vide
         "last_name": ""     # Vide
     }
-    
+
     response = client.post("/api/v1/auth/register", json=invalid_data)
     assert response.status_code == 422  # Validation error
 
@@ -107,7 +107,7 @@ def test_invalid_login_data():
         "identifier": "",
         "password": ""
     }
-    
+
     response = client.post("/api/v1/auth/login", json=invalid_data)
     assert response.status_code in [401, 422, 500]
 

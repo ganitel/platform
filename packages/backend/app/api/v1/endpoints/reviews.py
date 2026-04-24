@@ -1,18 +1,23 @@
 """
 Ganitel V2 Backend - Review Endpoints
 """
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from uuid import UUID
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.api.v1.schemas.review_schemas import ReviewCreateRequest, ReviewResponse
+from app.application.use_cases.reviews.create_review import CreateReviewUseCase
 from app.database import get_db
 from app.dependencies import get_current_active_user
 from app.domain.entities.user import User
+from app.exceptions import (
+    ConflictError,
+    NotFoundError,
+    ValidationError,
+)
 from app.infrastructure.repositories.review_repository import ReviewRepository
 from app.infrastructure.repositories.service_repository import ServiceRepository
-from app.application.use_cases.reviews.create_review import CreateReviewUseCase
-from app.api.v1.schemas.review_schemas import ReviewCreateRequest, ReviewResponse
-from app.exceptions import GanitelException, ValidationError, ConflictError, NotFoundError
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
@@ -28,7 +33,7 @@ async def create_review(
         review_repository = ReviewRepository(db)
         service_repository = ServiceRepository(db)
         use_case = CreateReviewUseCase(review_repository, service_repository)
-        
+
         review = use_case.execute(
             service_id=UUID(request.service_id),
             user_id=current_user.id,
@@ -42,7 +47,7 @@ async def create_review(
             location_rating=request.location_rating,
             value_rating=request.value_rating
         )
-        
+
         return ReviewResponse(
             id=str(review.id),
             service_id=str(review.service_id),
@@ -76,7 +81,7 @@ async def create_review(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create review"
@@ -94,7 +99,7 @@ async def get_service_reviews(
     try:
         review_repository = ReviewRepository(db)
         reviews = review_repository.get_by_service_id(service_id, skip, limit)
-        
+
         return [
             ReviewResponse(
                 id=str(review.id),
@@ -116,7 +121,7 @@ async def get_service_reviews(
             )
             for review in reviews
         ]
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get reviews"

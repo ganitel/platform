@@ -1,8 +1,9 @@
 """
 Ganitel V2 Backend - Property Type Repository Implementation
 """
-from typing import Optional, List, Dict, Any
+from typing import Any
 from uuid import UUID
+
 from sqlalchemy.orm import Session
 
 from app.domain.entities.property_type import PropertyType
@@ -23,27 +24,27 @@ class PropertyTypeRepository:
         self.db.refresh(property_type)
         return property_type
 
-    def get_by_id(self, property_type_id: UUID) -> Optional[PropertyType]:
+    def get_by_id(self, property_type_id: UUID) -> PropertyType | None:
         """Get property type by ID"""
         return self.db.query(PropertyType).filter(
             PropertyType.id == property_type_id,
             PropertyType.deleted_at.is_(None)
         ).first()
 
-    def get_by_name(self, name: str) -> Optional[PropertyType]:
+    def get_by_name(self, name: str) -> PropertyType | None:
         """Get property type by name"""
         return self.db.query(PropertyType).filter(
             PropertyType.name == name,
             PropertyType.deleted_at.is_(None)
         ).first()
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[PropertyType]:
+    def get_all(self, skip: int = 0, limit: int = 100) -> list[PropertyType]:
         """Get all property types with pagination"""
         return self.db.query(PropertyType).filter(
             PropertyType.deleted_at.is_(None)
         ).offset(skip).limit(limit).all()
 
-    def count(self, filters: Optional[Dict[str, Any]] = None) -> int:
+    def count(self, filters: dict[str, Any] | None = None) -> int:
         """Count property types with optional filters"""
         query = self.db.query(PropertyType).filter(PropertyType.deleted_at.is_(None))
         return query.count()
