@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Review Repository Implementation
 """
 
+from datetime import UTC
 from typing import Any
 from uuid import UUID
 
@@ -92,7 +93,7 @@ class ReviewRepository(IReviewRepository):
         """Update review"""
         from datetime import datetime
 
-        review.updated_at = datetime.utcnow()
+        review.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(review)
         return review

@@ -4,7 +4,7 @@ Ganitel V2 Backend - Tranzak Payment Gateway Client
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
@@ -53,12 +53,12 @@ class TranzakClient:
         return api_base_url
 
     async def _get_token(self) -> str:
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         if self._token and self._token_expires_at and now < self._token_expires_at:
             return self._token
 
         async with self._token_lock:
-            now = datetime.utcnow()
+            now = datetime.now(UTC)
             if self._token and self._token_expires_at and now < self._token_expires_at:
                 return self._token
 

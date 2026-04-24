@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Payment Repository Implementation
 """
 
+from datetime import UTC
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -45,7 +46,7 @@ class PaymentRepository(IPaymentRepository):
         """Update an existing payment"""
         from datetime import datetime
 
-        payment.updated_at = datetime.utcnow()
+        payment.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(payment)
         return payment

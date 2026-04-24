@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Wallet Repository Implementation
 """
 
+from datetime import UTC
 from typing import Any
 from uuid import UUID
 
@@ -41,7 +42,7 @@ class WalletRepository(IWalletRepository):
         """Update wallet"""
         from datetime import datetime
 
-        wallet.updated_at = datetime.utcnow()
+        wallet.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(wallet)
         return wallet

@@ -2,7 +2,7 @@
 Ganitel V2 Backend - Service Repository Implementation
 """
 
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
@@ -49,7 +49,7 @@ class ServiceRepository(IServiceRepository):
 
     def update(self, service: Service) -> Service:
         """Update an existing service"""
-        service.updated_at = datetime.utcnow()
+        service.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(service)
         return service
@@ -324,7 +324,7 @@ class ServiceRepository(IServiceRepository):
         self, days: int = 30, skip: int = 0, limit: int = 100
     ) -> list[Service]:
         """Get recently added services"""
-        since_date = datetime.utcnow() - timedelta(days=days)
+        since_date = datetime.now(UTC) - timedelta(days=days)
 
         return (
             self.db.query(Service)

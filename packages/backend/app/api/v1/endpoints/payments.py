@@ -174,7 +174,7 @@ async def get_payment(
             is_admin=current_user.user_type == UserType.ADMIN.value,
         )
 
-        return PaymentResponse.from_orm(payment)
+        return PaymentResponse.model_validate(payment)
 
     except ValueError:
         raise HTTPException(
@@ -208,7 +208,7 @@ async def list_user_payments(
         total = payment_repo.count({"user_id": current_user.id})
 
         return PaymentListResponse(
-            payments=[PaymentResponse.from_orm(p) for p in payments],
+            payments=[PaymentResponse.model_validate(p) for p in payments],
             total=total,
             page=skip // limit + 1,
             per_page=limit,

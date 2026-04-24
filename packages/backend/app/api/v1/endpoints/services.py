@@ -140,7 +140,7 @@ async def list_services(
             total = service_repository.count({"status": "active"})
 
         return ServiceListResponse(
-            services=[ServiceResponse.from_orm(service) for service in services],
+            services=[ServiceResponse.model_validate(service) for service in services],
             total=total,
             page=skip // limit + 1,
             per_page=limit,
@@ -168,7 +168,7 @@ async def get_service(
         get_use_case = GetServiceUseCase(service_repository)
         service = get_use_case.execute(UUID(service_id))
         service_repository.update_view_count(service.id)
-        return ServiceResponse.from_orm(service)
+        return ServiceResponse.model_validate(service)
 
     except ValueError:
         raise HTTPException(
@@ -226,7 +226,7 @@ async def create_service(
             check_out_time=service_data.check_out_time,
         )
 
-        return ServiceResponse.from_orm(service)
+        return ServiceResponse.model_validate(service)
 
     except GanitelError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message) from e
@@ -250,9 +250,9 @@ async def update_service(
     try:
         service_repository = ServiceRepository(db)
         update_use_case = UpdateServiceUseCase(service_repository)
-        updates = service_data.dict(exclude_unset=True)
+        updates = service_data.model_dump(exclude_unset=True)
         service = update_use_case.execute(UUID(service_id), current_user.id, updates)
-        return ServiceResponse.from_orm(service)
+        return ServiceResponse.model_validate(service)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid service ID format"
@@ -314,7 +314,7 @@ async def get_my_services(
         total = service_repository.count({"provider_id": current_user.id})
 
         return ServiceListResponse(
-            services=[ServiceResponse.from_orm(service) for service in services],
+            services=[ServiceResponse.model_validate(service) for service in services],
             total=total,
             page=skip // limit + 1,
             per_page=limit,
@@ -339,7 +339,7 @@ async def get_featured_services(
         service_repository = ServiceRepository(db)
         services = service_repository.get_featured_services(limit=limit)
 
-        return [ServiceResponse.from_orm(service) for service in services]
+        return [ServiceResponse.model_validate(service) for service in services]
 
     except Exception:
         raise HTTPException(

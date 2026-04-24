@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 
 class ServiceType(StrEnum):
@@ -65,7 +65,8 @@ class ServiceCreateRequest(BaseModel):
     check_in_time: str = "15:00"
     check_out_time: str = "11:00"
 
-    @validator("title")
+    @field_validator("title")
+    @classmethod
     def validate_title(cls, v):
         if len(v.strip()) < 10:
             raise ValueError("Title must be at least 10 characters long")
@@ -73,13 +74,15 @@ class ServiceCreateRequest(BaseModel):
             raise ValueError("Title must be less than 200 characters")
         return v.strip()
 
-    @validator("description")
+    @field_validator("description")
+    @classmethod
     def validate_description(cls, v):
         if len(v.strip()) < 50:
             raise ValueError("Description must be at least 50 characters long")
         return v.strip()
 
-    @validator("base_price")
+    @field_validator("base_price")
+    @classmethod
     def validate_price(cls, v):
         if v <= 0:
             raise ValueError("Base price must be greater than 0")
@@ -87,25 +90,29 @@ class ServiceCreateRequest(BaseModel):
             raise ValueError("Base price is too high")
         return v
 
-    @validator("latitude")
+    @field_validator("latitude")
+    @classmethod
     def validate_latitude(cls, v):
         if v is not None and (v < -90 or v > 90):
             raise ValueError("Latitude must be between -90 and 90")
         return v
 
-    @validator("longitude")
+    @field_validator("longitude")
+    @classmethod
     def validate_longitude(cls, v):
         if v is not None and (v < -180 or v > 180):
             raise ValueError("Longitude must be between -180 and 180")
         return v
 
-    @validator("max_guests", "bedrooms", "bathrooms", "beds")
+    @field_validator("max_guests", "bedrooms", "bathrooms", "beds")
+    @classmethod
     def validate_positive_integers(cls, v):
         if v is not None and v < 0:
             raise ValueError("Value cannot be negative")
         return v
 
-    @validator("min_stay")
+    @field_validator("min_stay")
+    @classmethod
     def validate_min_stay(cls, v):
         if v < 1:
             raise ValueError("Minimum stay must be at least 1")

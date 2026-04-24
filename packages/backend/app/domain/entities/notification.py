@@ -2,7 +2,7 @@
 Ganitel V2 Backend - Notification Entity
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from uuid import UUID
 
@@ -78,7 +78,7 @@ class Notification(AuditableEntity):
     def mark_as_read(self):
         """Mark notification as read"""
         self.is_read = True
-        self.read_at = datetime.utcnow()
+        self.read_at = datetime.now(UTC)
 
     def __repr__(self):
         return f"<Notification(id={self.id}, user_id={self.user_id}, type={self.notification_type})>"

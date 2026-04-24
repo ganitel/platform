@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Loyalty Account Repository Implementation
 """
 
+from datetime import UTC
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -48,7 +49,7 @@ class LoyaltyAccountRepository(ILoyaltyAccountRepository):
         """Update loyalty account"""
         from datetime import datetime
 
-        loyalty_account.updated_at = datetime.utcnow()
+        loyalty_account.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(loyalty_account)
         return loyalty_account

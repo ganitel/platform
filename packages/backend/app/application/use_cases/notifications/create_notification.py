@@ -2,7 +2,7 @@
 Ganitel V2 Backend - Create Notification Use Case
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -65,7 +65,7 @@ class CreateNotificationUseCase:
             action_label=action_label,
             related_entity_type=related_entity_type,
             related_entity_id=related_entity_id,
-            sent_at=datetime.utcnow(),
+            sent_at=datetime.now(UTC),
         )
 
         return self.notification_repository.create(notification)

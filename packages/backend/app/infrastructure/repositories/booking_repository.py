@@ -2,7 +2,7 @@
 Ganitel V2 Backend - Booking Repository Implementation
 """
 
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from typing import Any
 from uuid import UUID
 
@@ -45,7 +45,7 @@ class BookingRepository(IBookingRepository):
         )
 
     def update(self, booking: Booking) -> Booking:
-        booking.updated_at = datetime.utcnow()
+        booking.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(booking)
         return booking
@@ -162,7 +162,7 @@ class BookingRepository(IBookingRepository):
         if not booking:
             return False
         booking.status = status.value
-        booking.updated_at = datetime.utcnow()
+        booking.updated_at = datetime.now(UTC)
         self.db.commit()
         return True
 

@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Policy Repository Implementation
 """
 
+from datetime import UTC
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -69,7 +70,7 @@ class PolicyRepository(IPolicyRepository):
         """Update policy"""
         from datetime import datetime
 
-        policy.updated_at = datetime.utcnow()
+        policy.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(policy)
         return policy

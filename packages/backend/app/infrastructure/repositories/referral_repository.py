@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Referral Repository Implementation
 """
 
+from datetime import UTC
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -43,7 +44,7 @@ class ReferralRepository(IReferralRepository):
         """Update referral"""
         from datetime import datetime
 
-        referral.updated_at = datetime.utcnow()
+        referral.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(referral)
         return referral

@@ -3,7 +3,7 @@ Ganitel V2 Backend - Test Base Classes (SQLite compatible)
 """
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, Column, DateTime, String
 from sqlalchemy.ext.declarative import declarative_base
@@ -21,9 +21,12 @@ class BaseEntityForTesting(TestingBase):
     __abstract__ = True
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
     updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+        DateTime,
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
     )
     is_active = Column(Boolean, default=True, nullable=False)
 
@@ -60,7 +63,7 @@ class SoftDeleteEntityForTesting(BaseEntityForTesting):
 
     def soft_delete(self, deleted_by_id=None):
         """Mark entity as deleted"""
-        self.deleted_at = datetime.utcnow()  # ty: ignore[invalid-assignment]
+        self.deleted_at = datetime.now(UTC)  # ty: ignore[invalid-assignment]
         self.deleted_by = deleted_by_id  # ty: ignore[invalid-assignment]
         self.is_active = False  # ty: ignore[invalid-assignment]
 

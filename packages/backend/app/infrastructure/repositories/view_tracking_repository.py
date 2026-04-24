@@ -2,6 +2,7 @@
 Ganitel V2 Backend - View Tracking Repository Implementation
 """
 
+from datetime import UTC
 from uuid import UUID
 
 from sqlalchemy import func
@@ -73,7 +74,7 @@ class ViewTrackingRepository(IViewTrackingRepository):
         """Update view tracking"""
         from datetime import datetime
 
-        view_tracking.updated_at = datetime.utcnow()
+        view_tracking.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(view_tracking)
         return view_tracking

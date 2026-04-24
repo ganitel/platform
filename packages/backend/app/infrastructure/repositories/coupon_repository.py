@@ -2,7 +2,7 @@
 Ganitel V2 Backend - Coupon Repository Implementation
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -42,7 +42,7 @@ class CouponRepository(ICouponRepository):
 
     def get_active_coupons(self, skip: int = 0, limit: int = 100) -> list[Coupon]:
         """Get active coupons"""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         return (
             self.db.query(Coupon)
             .filter(
@@ -69,7 +69,7 @@ class CouponRepository(ICouponRepository):
         """Update coupon"""
         from datetime import datetime
 
-        coupon.updated_at = datetime.utcnow()
+        coupon.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(coupon)
         return coupon

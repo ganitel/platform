@@ -3,7 +3,7 @@ Ganitel V2 Backend - Base Entity Classes
 """
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import Boolean, DateTime
@@ -25,10 +25,13 @@ class BaseEntity(Base):
         PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
+        DateTime, default=lambda: datetime.now(UTC), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+        DateTime,
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
@@ -69,7 +72,7 @@ class SoftDeleteEntity:
 
     def soft_delete(self, deleted_by_id=None):
         """Mark entity as deleted"""
-        self.deleted_at = datetime.utcnow()
+        self.deleted_at = datetime.now(UTC)
         self.deleted_by = deleted_by_id
         self.is_active = False
 

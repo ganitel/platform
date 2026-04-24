@@ -3,7 +3,7 @@ Ganitel V2 Backend - Login User Use Case
 """
 
 import time
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import redis
@@ -133,7 +133,7 @@ class LoginUserUseCase:
             raise AuthorizationError("Invalid credentials")
 
         # Update last login
-        user.last_login_at = datetime.utcnow()
+        user.last_login_at = datetime.now(UTC)
         self.user_repository.update(user)
 
         # Generate tokens
@@ -227,7 +227,7 @@ class LoginUserUseCase:
 
     def _create_access_token(self, user_id) -> str:
         """Create JWT access token"""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         payload = {
             "sub": str(user_id),
@@ -242,7 +242,7 @@ class LoginUserUseCase:
 
     def _create_refresh_token(self, user_id) -> str:
         """Create JWT refresh token"""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         expire = now + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
         payload = {
             "sub": str(user_id),

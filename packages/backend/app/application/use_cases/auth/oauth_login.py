@@ -3,7 +3,7 @@ Ganitel V2 Backend - OAuth Login Use Case
 """
 
 import secrets
-from datetime import datetime
+from datetime import UTC, datetime
 
 from passlib.context import CryptContext
 
@@ -146,7 +146,7 @@ class OAuthLoginUseCase:
         jwt_token = create_access_token(str(user.id))
 
         # Update last login
-        user.last_login_at = datetime.utcnow()
+        user.last_login_at = datetime.now(UTC)
         self.user_repository.update(user)
 
         return {

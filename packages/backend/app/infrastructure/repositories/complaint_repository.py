@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Complaint Repository Implementation
 """
 
+from datetime import UTC
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -70,7 +71,7 @@ class ComplaintRepository(IComplaintRepository):
         """Update complaint"""
         from datetime import datetime
 
-        complaint.updated_at = datetime.utcnow()
+        complaint.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(complaint)
         return complaint

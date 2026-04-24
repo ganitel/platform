@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Support Request Repository Implementation
 """
 
+from datetime import UTC
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -74,7 +75,7 @@ class SupportRequestRepository(ISupportRequestRepository):
         """Update support request"""
         from datetime import datetime
 
-        support_request.updated_at = datetime.utcnow()
+        support_request.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(support_request)
         return support_request

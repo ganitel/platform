@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Transaction Repository Implementation
 """
 
+from datetime import UTC
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -67,7 +68,7 @@ class TransactionRepository(ITransactionRepository):
         """Update transaction"""
         from datetime import datetime
 
-        transaction.updated_at = datetime.utcnow()
+        transaction.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(transaction)
         return transaction

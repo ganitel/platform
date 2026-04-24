@@ -4,7 +4,7 @@ Ganitel V2 Backend - Booking Entity
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from enum import StrEnum
 from uuid import UUID
@@ -84,26 +84,26 @@ class Booking(AuditableEntity, SoftDeleteEntity):
         if not self.can_be_cancelled():
             raise ValueError(f"Booking cannot be cancelled from status {self.status}")
         self.status = BookingStatus.CANCELLED.value
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(UTC)
 
     def confirm(self):
         """Confirm booking"""
         if self.status != BookingStatus.PENDING.value:
             raise ValueError("Only pending bookings can be confirmed")
         self.status = BookingStatus.CONFIRMED.value
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(UTC)
 
     def mark_failed(self):
         """Mark booking as failed"""
         self.status = BookingStatus.FAILED.value
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(UTC)
 
     def mark_completed(self):
         """Mark booking as completed"""
         if self.status != BookingStatus.CONFIRMED.value:
             raise ValueError("Only confirmed bookings can be completed")
         self.status = BookingStatus.COMPLETED.value
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(UTC)
 
     @staticmethod
     def overlaps(start_a: date, end_a: date, start_b: date, end_b: date) -> bool:

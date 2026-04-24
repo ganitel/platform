@@ -3,7 +3,7 @@ Ganitel V2 Backend - Forgot Password Use Case
 """
 
 import secrets
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from app.domain.repositories.user_repository import IUserRepository
 from app.exceptions import ValidationError
@@ -56,7 +56,7 @@ class ForgotPasswordUseCase:
 
         # Generate reset token
         reset_token = secrets.token_urlsafe(32)
-        expires_at = datetime.utcnow() + timedelta(hours=1)  # 1 hour expiry
+        expires_at = datetime.now(UTC) + timedelta(hours=1)  # 1 hour expiry
 
         # Update user with reset token
         self.user_repository.update_reset_token(

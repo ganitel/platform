@@ -3,7 +3,7 @@ Auth flow tests with real rate-limiting middleware enabled.
 """
 
 import importlib
-from datetime import datetime
+from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import pytest
@@ -47,7 +47,7 @@ class DummyRegisterUserUseCase:
         pass
 
     def execute(self, **kwargs):
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         first_name = kwargs["first_name"]
         last_name = kwargs["last_name"]
         return SimpleNamespace(

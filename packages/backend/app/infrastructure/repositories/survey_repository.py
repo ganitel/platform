@@ -2,7 +2,7 @@
 Ganitel V2 Backend - Survey Repository Implementation
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -34,7 +34,7 @@ class SurveyRepository(ISurveyRepository):
 
     def get_active_surveys(self, skip: int = 0, limit: int = 100) -> list[Survey]:
         """Get active surveys"""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         return (
             self.db.query(Survey)
             .filter(
@@ -64,7 +64,7 @@ class SurveyRepository(ISurveyRepository):
         """Update survey"""
         from datetime import datetime
 
-        survey.updated_at = datetime.utcnow()
+        survey.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(survey)
         return survey

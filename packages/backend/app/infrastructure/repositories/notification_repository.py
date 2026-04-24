@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Notification Repository Implementation
 """
 
+from datetime import UTC
 from uuid import UUID
 
 from sqlalchemy import func
@@ -65,7 +66,7 @@ class NotificationRepository(INotificationRepository):
             self.db.query(Notification)
             .filter(Notification.user_id == user_id, Notification.is_read.is_(False))
             .update(
-                {Notification.is_read: True, Notification.read_at: datetime.utcnow()}
+                {Notification.is_read: True, Notification.read_at: datetime.now(UTC)}
             )
         )
         self.db.commit()
@@ -84,7 +85,7 @@ class NotificationRepository(INotificationRepository):
         """Update notification"""
         from datetime import datetime
 
-        notification.updated_at = datetime.utcnow()
+        notification.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(notification)
         return notification

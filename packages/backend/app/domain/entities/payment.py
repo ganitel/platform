@@ -2,7 +2,7 @@
 Ganitel V2 Backend - Payment Entity
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from enum import StrEnum
 from uuid import UUID
@@ -84,13 +84,13 @@ class Payment(AuditableEntity, SoftDeleteEntity):
         self.status = PaymentStatus.COMPLETED.value
         self.transaction_id = transaction_id
         self.provider_response = provider_response
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(UTC)
 
     def mark_failed(self, error_message: str):
         """Mark payment as failed"""
         self.status = PaymentStatus.FAILED.value
         self.error_message = error_message
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(UTC)
 
     def process_refund(self, refund_amount: float, reason: str):
         """Process a refund"""
@@ -103,8 +103,8 @@ class Payment(AuditableEntity, SoftDeleteEntity):
         self.status = PaymentStatus.REFUNDED.value
         self.refund_amount = refund_amount  # ty: ignore[invalid-assignment]
         self.refund_reason = reason
-        self.refunded_at = datetime.utcnow().isoformat()
-        self.updated_at = datetime.utcnow()
+        self.refunded_at = datetime.now(UTC).isoformat()
+        self.updated_at = datetime.now(UTC)
 
     def __repr__(self):
         return f"<Payment(id={self.id}, booking_id={self.booking_id}, status={self.status}, amount={self.amount})>"

@@ -2,7 +2,7 @@
 Ganitel V2 Backend - Property Repository Implementation
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -52,7 +52,7 @@ class PropertyRepository:
             for key, value in updates.items():
                 if hasattr(property, key):
                     setattr(property, key, value)
-            property.updated_at = datetime.utcnow()
+            property.updated_at = datetime.now(UTC)
             self.db.commit()
             self.db.refresh(property)
         return property

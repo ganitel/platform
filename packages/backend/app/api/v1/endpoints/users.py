@@ -65,7 +65,7 @@ async def update_current_user_profile(
         user_repository = UserRepository(db)
 
         # Update user fields
-        update_data = user_update.dict(exclude_unset=True)
+        update_data = user_update.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             if hasattr(current_user, field):
                 setattr(current_user, field, value)
@@ -116,7 +116,7 @@ async def get_my_bookings(
         bookings = use_case.execute(current_user.id, skip=skip, limit=limit)
         total = booking_repository.count({"user_id": current_user.id})
         return BookingListResponse(
-            bookings=[BookingResponse.from_orm(booking) for booking in bookings],
+            bookings=[BookingResponse.model_validate(booking) for booking in bookings],
             total=total,
             page=skip // limit + 1,
             per_page=limit,

@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Wishlist Repository Implementation
 """
 
+from datetime import UTC
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -63,7 +64,7 @@ class WishlistRepository(IWishlistRepository):
         """Update wishlist"""
         from datetime import datetime
 
-        wishlist.updated_at = datetime.utcnow()
+        wishlist.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(wishlist)
         return wishlist

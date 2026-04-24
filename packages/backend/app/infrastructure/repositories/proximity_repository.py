@@ -2,7 +2,7 @@
 Ganitel V2 Backend - Proximity Repository Implementation
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -44,7 +44,7 @@ class ProximityRepository(IProximityRepository):
         )
 
     def update(self, proximity: Proximity) -> Proximity:
-        proximity.updated_at = datetime.utcnow()
+        proximity.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(proximity)
         return proximity

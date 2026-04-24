@@ -52,7 +52,7 @@ async def create_booking(
             guests=payload.guests,
             notes=payload.notes,
         )
-        return BookingResponse.from_orm(booking)
+        return BookingResponse.model_validate(booking)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid identifier format"
@@ -80,7 +80,7 @@ async def get_booking_details(
             requester_id=current_user.id,
             is_admin=current_user.user_type == UserType.ADMIN.value,
         )
-        return BookingResponse.from_orm(booking)
+        return BookingResponse.model_validate(booking)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid booking id"
@@ -106,7 +106,7 @@ async def get_my_bookings(
     bookings = use_case.execute(current_user.id, skip=skip, limit=limit)
     total = booking_repository.count({"user_id": current_user.id})
     return BookingListResponse(
-        bookings=[BookingResponse.from_orm(b) for b in bookings],
+        bookings=[BookingResponse.model_validate(b) for b in bookings],
         total=total,
         page=skip // limit + 1,
         per_page=limit,
@@ -130,7 +130,7 @@ async def cancel_booking(
         )
         return BookingCancelResponse(
             message="Booking cancelled successfully",
-            booking=BookingResponse.from_orm(booking),
+            booking=BookingResponse.model_validate(booking),
         )
     except ValueError:
         raise HTTPException(

@@ -5,7 +5,7 @@ Ganitel V2 Backend - Cron Jobs Service
 import asyncio
 import logging
 from collections.abc import Callable
-from datetime import datetime
+from datetime import UTC, datetime
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ class CronService:
         """Run a single cron job"""
         try:
             logger.info(f"Running cron job: {job.name}")
-            job.last_run = datetime.utcnow()
+            job.last_run = datetime.now(UTC)
             if asyncio.iscoroutinefunction(job.func):
                 await job.func()
             else:

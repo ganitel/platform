@@ -2,7 +2,7 @@
 Ganitel V2 Backend - Coupon Entity
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from enum import StrEnum
 
@@ -84,7 +84,7 @@ class Coupon(AuditableEntity, SoftDeleteEntity):
 
     def is_valid(self):
         """Check if coupon is valid"""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         return (
             self.status == CouponStatus.ACTIVE.value
             and self.valid_from <= now <= self.valid_until

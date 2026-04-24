@@ -4,7 +4,7 @@ Ganitel V2 Backend - User API Schemas
 
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field, model_validator, validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 from app.domain.entities.user import UserType
 
@@ -100,7 +100,8 @@ class UserCreateRequest(BaseModel):
     country: str | None = Field(None, max_length=100, description="User country")
     city: str | None = Field(None, max_length=100, description="User city")
 
-    @validator("user_type")
+    @field_validator("user_type")
+    @classmethod
     def validate_user_type(cls, v):
         valid_types = [UserType.TRAVELER.value, UserType.PROVIDER.value]
         if v.lower() not in valid_types:
@@ -148,7 +149,8 @@ class OAuthCodeExchangeRequest(BaseModel):
     code: str = Field(..., min_length=16, description="Temporary OAuth exchange code")
     provider: str = Field(..., description="OAuth provider")
 
-    @validator("provider")
+    @field_validator("provider")
+    @classmethod
     def validate_provider(cls, v):
         allowed_providers = {"google", "facebook"}
         provider = v.lower()

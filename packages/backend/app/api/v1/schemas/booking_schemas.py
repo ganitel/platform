@@ -4,7 +4,7 @@ Ganitel V2 Backend - Booking Schemas
 
 from datetime import date, datetime
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class BookingCreateRequest(BaseModel):
@@ -14,9 +14,10 @@ class BookingCreateRequest(BaseModel):
     guests: int = Field(..., gt=0)
     notes: str | None = Field(None, max_length=500)
 
-    @validator("end_date")
-    def validate_dates(cls, end_date, values):
-        start_date = values.get("start_date")
+    @field_validator("end_date")
+    @classmethod
+    def validate_dates(cls, end_date, info):
+        start_date = info.data.get("start_date")
         if start_date and end_date <= start_date:
             raise ValueError("End date must be after start date")
         return end_date

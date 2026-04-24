@@ -2,7 +2,7 @@
 Ganitel V2 Backend - User Repository Implementation
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -50,7 +50,7 @@ class UserRepository(IUserRepository):
         """Update an existing user"""
         from datetime import datetime
 
-        user.updated_at = datetime.utcnow()
+        user.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(user)
         return user
@@ -162,7 +162,7 @@ class UserRepository(IUserRepository):
             self.db.query(User)
             .filter(
                 User.reset_password_token == token,
-                User.reset_password_expires_at > datetime.utcnow(),
+                User.reset_password_expires_at > datetime.now(UTC),
                 User.deleted_at.is_(None),
             )
             .first()

@@ -3,7 +3,7 @@ Ganitel V2 Backend - Backup Service
 """
 
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ class BackupService:
         """
         try:
             backup_dir = cls.ensure_backup_dir()
-            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
             backup_file = backup_dir / f"database_backup_{timestamp}.sql"
 
             # In production, use pg_dump for PostgreSQL
@@ -54,7 +54,7 @@ class BackupService:
         """
         try:
             backup_dir = cls.ensure_backup_dir()
-            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
             backup_file = backup_dir / f"uploads_backup_{timestamp}.tar.gz"
 
             # Create tar.gz archive of uploads
@@ -76,7 +76,7 @@ class BackupService:
         """Clean up backups older than specified days"""
         try:
             backup_dir = cls.ensure_backup_dir()
-            cutoff_date = datetime.utcnow().timestamp() - (days * 24 * 60 * 60)
+            cutoff_date = datetime.now(UTC).timestamp() - (days * 24 * 60 * 60)
 
             for backup_file in backup_dir.iterdir():
                 if backup_file.stat().st_mtime < cutoff_date:

@@ -2,7 +2,7 @@
 Ganitel V2 Backend - Security Utilities
 """
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from jose import jwt
 
@@ -25,7 +25,7 @@ def create_access_token(user_id: str, expires_delta: timedelta | None = None) ->
     if expires_delta is None:
         expires_delta = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     expire = now + expires_delta
 
     to_encode = {

@@ -62,7 +62,9 @@ async def list_properties(
         )
 
         return PropertyListResponse(
-            items=[PropertyResponse.from_orm(prop) for prop in result["properties"]],
+            items=[
+                PropertyResponse.model_validate(prop) for prop in result["properties"]
+            ],
             total=result["total"],
             page=skip // limit + 1,
             per_page=limit,
@@ -89,7 +91,7 @@ async def get_property(
         property_repository = PropertyRepository(db)
         get_use_case = GetPropertyUseCase(property_repository)
         property = get_use_case.execute(property_id)
-        return PropertyDetailResponse.from_orm(property)
+        return PropertyDetailResponse.model_validate(property)
 
     except GanitelError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
@@ -151,7 +153,7 @@ async def create_property(
             check_out_time=property_data.check_out_time,
         )
 
-        return PropertyResponse.from_orm(property)
+        return PropertyResponse.model_validate(property)
 
     except GanitelError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message) from e
@@ -183,9 +185,9 @@ async def update_property(
             property_type_repository,
         )
 
-        updates = property_data.dict(exclude_unset=True)
+        updates = property_data.model_dump(exclude_unset=True)
         property = update_use_case.execute(property_id, current_user.id, updates)
-        return PropertyResponse.from_orm(property)
+        return PropertyResponse.model_validate(property)
 
     except GanitelError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
@@ -241,7 +243,9 @@ async def get_my_properties(
         )
 
         return PropertyListResponse(
-            items=[PropertyResponse.from_orm(prop) for prop in result["properties"]],
+            items=[
+                PropertyResponse.model_validate(prop) for prop in result["properties"]
+            ],
             total=result["total"],
             page=skip // limit + 1,
             per_page=limit,

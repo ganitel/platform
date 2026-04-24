@@ -23,7 +23,7 @@ import json
 import re
 import sys
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -1275,7 +1275,7 @@ class LegacyMigrationETL:
 
         report = {
             "source_file": str(self.source_path),
-            "generated_at": datetime.utcnow().isoformat() + "Z",
+            "generated_at": datetime.now(UTC).isoformat() + "Z",
             "dry_run": dry_run,
             "source_counts": {
                 "users": len(data.users),
