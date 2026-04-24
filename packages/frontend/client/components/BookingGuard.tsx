@@ -10,7 +10,7 @@ interface BookingGuardProps {
 export const BookingGuard = ({ children }: BookingGuardProps) => {
   const { booking } = useBookingContext();
   const { toast } = useToast();
-  const location = useLocation();
+  useLocation(); // keep for future redirect state
 
   useEffect(() => {
     if (!booking?.propertyId) {

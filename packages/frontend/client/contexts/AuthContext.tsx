@@ -65,8 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const authData = await authAdapter.verifyOtp(email, token);
       setUser(authData.user);
-    } catch (err: any) {
-      const message = err?.message || 'Erreur de vérification';
+    } catch (err: unknown) {
+      const message = (err as { message?: string })?.message || 'Erreur de vérification';
       setError(message);
       throw err;
     }
@@ -83,8 +83,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const authData = await authAdapter.handleGoogleCallback(code);
       setUser(authData.user);
-    } catch (err: any) {
-      const message = err?.message || 'Erreur Google OAuth';
+    } catch (err: unknown) {
+      const message = (err as { message?: string })?.message || 'Erreur Google OAuth';
       setError(message);
       throw err;
     } finally {
@@ -107,8 +107,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const authData = await authAdapter.register(data);
       setUser(authData.user);
-    } catch (err: any) {
-      const message = err?.message || "Erreur d'inscription";
+    } catch (err: unknown) {
+      const message = (err as { message?: string })?.message || "Erreur d'inscription";
       setError(message);
       throw err;
     }

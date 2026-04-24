@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { MinusSquare } from "lucide-react";
 
 export function AmenitiesList() {
   const [activeTab, setActiveTab] = useState("General");

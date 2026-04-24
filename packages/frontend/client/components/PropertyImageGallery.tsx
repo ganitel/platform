@@ -4,10 +4,8 @@ import { toast } from "sonner";
 import {
   ChevronLeft,
   Share2,
-  Heart,
   Image as ImageIcon,
   X,
-  ChevronRight,
 } from "lucide-react";
 import {
   Dialog,
