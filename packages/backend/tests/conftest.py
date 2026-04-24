@@ -176,10 +176,7 @@ if not TEST_DATABASE_URL:
     TEST_DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
 if not TEST_DATABASE_URL.startswith("postgresql://"):
-    pytest.exit(
-        "❌ Invalid TEST_DATABASE_URL: tests must run on PostgreSQL (postgresql://...).",
-        1,
-    )  # ty: ignore[invalid-argument-type,too-many-positional-arguments]
+    pytest.exit("❌ Invalid TEST_DATABASE_URL: tests must run on PostgreSQL (postgresql://...).", 1)  # ty: ignore[invalid-argument-type,too-many-positional-arguments]
 
 try:
     test_engine = create_engine(TEST_DATABASE_URL)
@@ -188,10 +185,7 @@ try:
 
         conn.execute(text("SELECT 1"))
 except Exception as e:
-    pytest.exit(
-        f"❌ PostgreSQL test database is required and unreachable. Connection target: {TEST_DATABASE_URL}. Error: {e}",
-        1,
-    )  # ty: ignore[invalid-argument-type,too-many-positional-arguments]
+    pytest.exit(f"❌ PostgreSQL test database is required and unreachable. Connection target: {TEST_DATABASE_URL}. Error: {e}", 1)  # ty: ignore[invalid-argument-type,too-many-positional-arguments]
 
 print(
     f"[i] Running tests in {ENVIRONMENT} using PostgreSQL: "
