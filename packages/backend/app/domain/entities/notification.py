@@ -2,10 +2,13 @@
 Ganitel V2 Backend - Notification Entity
 """
 
+from datetime import datetime
 from enum import StrEnum
+from uuid import UUID
 
-from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, String, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, String, Text
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.domain.entities.base import AuditableEntity
 
@@ -40,34 +43,40 @@ class Notification(AuditableEntity):
     __tablename__ = "notifications"
 
     # Relationships
-    user_id = Column(
-        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
     )
-    related_entity_type = Column(String(50), nullable=True)  # booking, payment, etc.
-    related_entity_id = Column(UUID(as_uuid=True), nullable=True)
+    related_entity_type: Mapped[str | None] = mapped_column(
+        String(50), nullable=True
+    )  # booking, payment, etc.
+    related_entity_id: Mapped[UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), nullable=True
+    )
 
     # Notification Information
-    notification_type = Column(String(50), nullable=False, index=True)
-    channel = Column(
+    notification_type: Mapped[str] = mapped_column(
+        String(50), nullable=False, index=True
+    )
+    channel: Mapped[str] = mapped_column(
         String(20), default=NotificationChannel.IN_APP.value, nullable=False
     )
-    title = Column(String(200), nullable=False)
-    message = Column(Text, nullable=False)
-    data = Column(JSON, nullable=True)  # Additional data
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    data: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # Additional data
 
     # Status
-    is_read = Column(Boolean, default=False, nullable=False, index=True)
-    read_at = Column(DateTime, nullable=True)
-    sent_at = Column(DateTime, nullable=True)
+    is_read: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False, index=True
+    )
+    read_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     # Action
-    action_url = Column(String(500), nullable=True)
-    action_label = Column(String(100), nullable=True)
+    action_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    action_label: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     def mark_as_read(self):
         """Mark notification as read"""
-        from datetime import datetime
-
         self.is_read = True
         self.read_at = datetime.utcnow()
 

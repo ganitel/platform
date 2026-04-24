@@ -143,7 +143,7 @@ async def tranzak_webhook(
         result = use_case.execute(
             transaction_id=transaction_id,
             status=status,
-            merchant_transaction_id=merchant_transaction_id,
+            merchant_transaction_id=merchant_transaction_id or "",
             payment_method=resource.payment_method,
         )
 

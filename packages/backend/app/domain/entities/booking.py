@@ -5,10 +5,13 @@ Ganitel V2 Backend - Booking Entity
 from __future__ import annotations
 
 from datetime import date, datetime
+from decimal import Decimal
 from enum import StrEnum
+from uuid import UUID
 
-from sqlalchemy import Column, Date, ForeignKey, Numeric, String, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Date, ForeignKey, Numeric, String, UniqueConstraint
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity
 
@@ -45,22 +48,24 @@ class Booking(AuditableEntity, SoftDeleteEntity):
         ),
     )
 
-    user_id = Column(
-        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
     )
-    service_id = Column(
-        UUID(as_uuid=True), ForeignKey("services.id"), nullable=False, index=True
+    service_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("services.id"), nullable=False, index=True
     )
-    start_date = Column(Date, nullable=False)
-    end_date = Column(Date, nullable=False)
-    guests = Column(Numeric(5, 0), nullable=False)
-    status = Column(
+    start_date: Mapped[date] = mapped_column(Date, nullable=False)
+    end_date: Mapped[date] = mapped_column(Date, nullable=False)
+    guests: Mapped[Decimal] = mapped_column(Numeric(5, 0), nullable=False)
+    status: Mapped[str] = mapped_column(
         String(32), default=BookingStatus.PENDING.value, nullable=False, index=True
     )
-    total_amount = Column(Numeric(10, 2), nullable=False)
-    negotiated_price = Column(Numeric(10, 2), nullable=True)
-    currency = Column(String(10), default="XAF", nullable=False)
-    notes = Column(String(500), nullable=True)
+    total_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    negotiated_price: Mapped[Decimal | None] = mapped_column(
+        Numeric(10, 2), nullable=True
+    )
+    currency: Mapped[str] = mapped_column(String(10), default="XAF", nullable=False)
+    notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     def duration_nights(self) -> int:
         """Return number of nights for the booking"""

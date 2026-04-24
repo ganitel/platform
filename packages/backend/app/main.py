@@ -48,7 +48,7 @@ async def create_default_admin():
 
             # Check if users table exists (migrations have been run)
             inspector = inspect(db.bind)
-            if "users" not in inspector.get_table_names():
+            if "users" not in inspector.get_table_names():  # ty: ignore[unresolved-attribute]
                 logger.warning("Users table not found, skipping admin creation")
                 return
 
@@ -131,7 +131,7 @@ register_exception_handlers(app)
 
 # Rate Limiter
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty: ignore[invalid-argument-type]
 app.add_middleware(SlowAPIMiddleware)
 
 # CORS middleware

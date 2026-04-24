@@ -119,8 +119,8 @@ class InitiatePaymentUseCase:
                 customer_phone=user.phone or "+237600000000",
                 customer_name=user.full_name,
                 reference=str(booking_id),
-                callback_url=callback_url,
-                return_url=return_url,
+                callback_url=callback_url or "",
+                return_url=return_url or "",
             )
 
             if not tranzak_response.get("success"):

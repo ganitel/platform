@@ -54,7 +54,7 @@ class AddBalanceUseCase:
             raise NotFoundError("Wallet not found")
 
         # Add balance
-        wallet.add_balance(float(amount), is_bonus=is_bonus)
+        wallet.add_balance(amount, is_bonus=is_bonus)
         wallet = self.wallet_repository.update(wallet)
 
         # Create transaction

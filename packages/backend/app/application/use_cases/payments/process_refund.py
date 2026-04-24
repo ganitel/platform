@@ -57,7 +57,7 @@ class ProcessRefundUseCase:
         # Process refund with Tranzak
         try:
             tranzak_response = await self.tranzak_client.process_refund(
-                transaction_id=payment.transaction_id,
+                transaction_id=payment.transaction_id or "",
                 amount=refund_amount,
                 reason=reason,
             )

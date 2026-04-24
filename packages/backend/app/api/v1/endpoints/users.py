@@ -222,7 +222,7 @@ async def list_users(
     limit: int = Query(100, ge=1, le=1000),
     search: str | None = Query(None),
     user_type: str | None = Query(None),
-    status: str | None = Query(None),
+    user_status: str | None = Query(None),
     current_user: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
@@ -239,8 +239,8 @@ async def list_users(
             filters = {}
             if user_type:
                 filters["user_type"] = user_type
-            if status:
-                filters["status"] = status
+            if user_status:
+                filters["status"] = user_status
 
             users = user_repository.find_by_criteria(filters, skip=skip, limit=limit)
             total = user_repository.count(filters)

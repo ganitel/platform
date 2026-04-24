@@ -95,8 +95,8 @@ class TestServiceCreateRequestValidation:
         request = ServiceCreateRequest(
             title="Beautiful Apartment in Douala",
             description="This is a beautiful apartment with all modern amenities. Perfect for families and business travelers.",
-            service_type="accommodation",
-            accommodation_type="apartment",
+            service_type="accommodation",  # ty: ignore[invalid-argument-type]
+            accommodation_type="apartment",  # ty: ignore[invalid-argument-type]
             country="Cameroun",
             city="Douala",
             address="123 Main Street",
@@ -111,7 +111,7 @@ class TestServiceCreateRequestValidation:
             ServiceCreateRequest(
                 title="Short",
                 description="This is a description with enough characters to pass validation",
-                service_type="accommodation",
+                service_type="accommodation",  # ty: ignore[invalid-argument-type]
                 country="Cameroun",
                 city="Douala",
                 address="123 Main Street",
@@ -124,7 +124,7 @@ class TestServiceCreateRequestValidation:
             ServiceCreateRequest(
                 title="Beautiful Apartment in Douala",
                 description="Short",
-                service_type="accommodation",
+                service_type="accommodation",  # ty: ignore[invalid-argument-type]
                 country="Cameroun",
                 city="Douala",
                 address="123 Main Street",
@@ -137,7 +137,7 @@ class TestServiceCreateRequestValidation:
             ServiceCreateRequest(
                 title="Beautiful Apartment in Douala",
                 description="This is a description with enough characters to pass validation",
-                service_type="accommodation",
+                service_type="accommodation",  # ty: ignore[invalid-argument-type]
                 country="Cameroun",
                 city="Douala",
                 address="123 Main Street",
@@ -150,7 +150,7 @@ class TestServiceCreateRequestValidation:
             ServiceCreateRequest(
                 title="Beautiful Apartment in Douala",
                 description="This is a description with enough characters to pass validation",
-                service_type="accommodation",
+                service_type="accommodation",  # ty: ignore[invalid-argument-type]
                 country="Cameroun",
                 city="Douala",
                 address="123 Main Street",

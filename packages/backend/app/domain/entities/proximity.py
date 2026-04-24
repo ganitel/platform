@@ -2,8 +2,11 @@
 Ganitel V2 Backend - Proximity Entity
 """
 
-from sqlalchemy import Column, ForeignKey, Index, Integer, String
-from sqlalchemy.dialects.postgresql import UUID
+from uuid import UUID
+
+from sqlalchemy import ForeignKey, Index, Integer, String
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.domain.entities.base import AuditableEntity
 
@@ -17,14 +20,14 @@ class Proximity(AuditableEntity):
     __tablename__ = "proximities"
 
     # Relationships
-    property_id = Column(
-        UUID(as_uuid=True), ForeignKey("properties.id"), nullable=False, index=True
+    property_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("properties.id"), nullable=False, index=True
     )
 
     # Proximity Information
-    destination_name = Column(String(100), nullable=False)
-    minutes_away = Column(Integer, nullable=False)
-    travel_mode = Column(String(50), nullable=False)
+    destination_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    minutes_away: Mapped[int] = mapped_column(Integer, nullable=False)
+    travel_mode: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # Create composite index for queries by property_id
     __table_args__ = (Index("ix_proximity_property_id", "property_id"),)

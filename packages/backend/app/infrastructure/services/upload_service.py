@@ -62,7 +62,7 @@ class UploadService:
         contents = await cls.validate_file(file, cls.ALLOWED_IMAGE_TYPES)
 
         # Generate unique filename
-        file_extension = Path(file.filename).suffix.lower()
+        file_extension = Path(file.filename or "").suffix.lower()
         if not file_extension:
             # Fallback based on content type
             ext_map = {
@@ -71,7 +71,7 @@ class UploadService:
                 "image/webp": ".webp",
                 "image/jpg": ".jpg",
             }
-            file_extension = ext_map.get(file.content_type, ".bin")
+            file_extension = ext_map.get(file.content_type or "", ".bin")
 
         unique_filename = f"{prefix}{uuid.uuid4()}{file_extension}"
 

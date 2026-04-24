@@ -60,12 +60,12 @@ class SoftDeleteEntityForTesting(BaseEntityForTesting):
 
     def soft_delete(self, deleted_by_id=None):
         """Mark entity as deleted"""
-        self.deleted_at = datetime.utcnow()
-        self.deleted_by = deleted_by_id
-        self.is_active = False
+        self.deleted_at = datetime.utcnow()  # ty: ignore[invalid-assignment]
+        self.deleted_by = deleted_by_id  # ty: ignore[invalid-assignment]
+        self.is_active = False  # ty: ignore[invalid-assignment]
 
     def restore(self):
         """Restore soft deleted entity"""
-        self.deleted_at = None
-        self.deleted_by = None
-        self.is_active = True
+        self.deleted_at = None  # ty: ignore[invalid-assignment]
+        self.deleted_by = None  # ty: ignore[invalid-assignment]
+        self.is_active = True  # ty: ignore[invalid-assignment]

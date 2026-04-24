@@ -3,6 +3,7 @@ Ganitel V2 Backend - Database Connection and Session Management
 """
 
 import logging
+from collections.abc import Generator
 
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -15,7 +16,7 @@ settings = get_settings()
 
 # Create database engine with connection pooling
 engine = create_engine(
-    settings.DATABASE_URL,
+    settings.DATABASE_URL or "",
     poolclass=QueuePool,
     pool_size=settings.DATABASE_POOL_SIZE,
     max_overflow=settings.DATABASE_MAX_OVERFLOW,
@@ -33,7 +34,7 @@ from app.domain.entities.base import Base
 metadata = MetaData()
 
 
-def get_db() -> Session:
+def get_db() -> Generator[Session, None, None]:
     """
     Dependency to get database session
     """

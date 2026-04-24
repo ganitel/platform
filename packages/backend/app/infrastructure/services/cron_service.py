@@ -24,8 +24,8 @@ class CronJob:
         self.schedule = schedule
         self.func = func
         self.enabled = enabled
-        self.last_run: datetime = None
-        self.next_run: datetime = None
+        self.last_run: datetime | None = None
+        self.next_run: datetime | None = None
 
 
 class CronService:

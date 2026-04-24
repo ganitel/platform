@@ -286,4 +286,4 @@ class TestVerifyUserUseCase:
         use_case = VerifyUserUseCase(user_repository)
 
         with pytest.raises(ValidationError, match="Invalid verification type"):
-            use_case.execute(user_id=sample_user.id, verification_type="invalid")
+            use_case.execute(user_id=sample_user.id, verification_type="invalid")  # ty: ignore[invalid-argument-type]

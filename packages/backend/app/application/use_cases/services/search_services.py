@@ -51,7 +51,7 @@ class SearchServicesUseCase:
             )
             total = self.service_repository.count({"status": "active"})
         elif latitude and longitude and radius_km:
-            services = self.service_repository.get_nearby_services(
+            services = self.service_repository.get_nearby_services(  # ty: ignore[unresolved-attribute]
                 latitude=latitude,
                 longitude=longitude,
                 radius_km=radius_km,

@@ -2,8 +2,11 @@
 Ganitel V2 Backend - Wishlist Entity
 """
 
-from sqlalchemy import Column, ForeignKey, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from uuid import UUID
+
+from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.domain.entities.base import AuditableEntity
 
@@ -19,11 +22,11 @@ class Wishlist(AuditableEntity):
     )
 
     # Relationships
-    user_id = Column(
-        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
     )
-    service_id = Column(
-        UUID(as_uuid=True), ForeignKey("services.id"), nullable=False, index=True
+    service_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("services.id"), nullable=False, index=True
     )
 
     def __repr__(self):

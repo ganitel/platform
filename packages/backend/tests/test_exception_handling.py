@@ -10,7 +10,7 @@ from app.main import app
 
 
 def _ensure_test_route(path: str, handler):
-    if any(route.path == path for route in app.router.routes):
+    if any(getattr(route, "path", None) == path for route in app.router.routes):
         return
     app.add_api_route(path, handler, methods=["GET"])
 

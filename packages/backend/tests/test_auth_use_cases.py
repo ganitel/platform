@@ -274,7 +274,9 @@ class TestLoginUserUseCase:
 
         with pytest.raises(AuthorizationError, match="Account is suspended"):
             use_case.execute(
-                identifier=user.email, password="password123", redis_client=mock_redis
+                identifier=user.email or "",
+                password="password123",
+                redis_client=mock_redis,
             )
 
     def test_login_inactive_user(self, user_repository, db_session, mock_redis):
@@ -298,7 +300,9 @@ class TestLoginUserUseCase:
 
         with pytest.raises(AuthorizationError, match="Account is inactive"):
             use_case.execute(
-                identifier=user.email, password="password123", redis_client=mock_redis
+                identifier=user.email or "",
+                password="password123",
+                redis_client=mock_redis,
             )
 
     def test_login_missing_identifier(self, user_repository, mock_redis):

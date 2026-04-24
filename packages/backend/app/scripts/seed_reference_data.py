@@ -299,13 +299,13 @@ def seed_amenities(db: Session) -> dict[str, int]:
 
             category_changed = False
             if category.name_en != category_data["name_en"]:
-                category.name_en = category_data["name_en"]
+                category.name_en = category_data["name_en"]  # ty: ignore[invalid-assignment]
                 category_changed = True
             if category.name_fr != category_data["name_fr"]:
-                category.name_fr = category_data["name_fr"]
+                category.name_fr = category_data["name_fr"]  # ty: ignore[invalid-assignment]
                 category_changed = True
             if category.display_order != category_data["display_order"]:
-                category.display_order = category_data["display_order"]
+                category.display_order = category_data["display_order"]  # ty: ignore[invalid-assignment]
                 category_changed = True
 
             if category_changed:
@@ -320,7 +320,7 @@ def seed_amenities(db: Session) -> dict[str, int]:
                     f"✓ Amenity category already up-to-date: {category_data['name_en']}"
                 )
 
-        for amenity_data in AMENITIES_DATA.get(category_data["name_en"], []):
+        for amenity_data in AMENITIES_DATA.get(category_data["name_en"], []):  # ty: ignore[no-matching-overload]
             amenity = (
                 db.query(Amenity)
                 .filter(

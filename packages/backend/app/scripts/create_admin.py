@@ -84,7 +84,7 @@ def main() -> int:
     db = SessionLocal()
     try:
         inspector = inspect(db.bind)
-        if "users" not in inspector.get_table_names():
+        if "users" not in inspector.get_table_names():  # ty: ignore[unresolved-attribute]
             print(
                 "❌ Missing table 'users'. Run migrations first: make local-migrate / make staging-migrate"
             )

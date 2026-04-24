@@ -202,13 +202,13 @@ async def create_service(
             provider_id=str(current_user.id),
             title=service_data.title,
             description=service_data.description,
-            service_type=service_data.service_type,
+            service_type=service_data.service_type,  # ty: ignore[invalid-argument-type]
             country=service_data.country,
             city=service_data.city,
             address=service_data.address,
             base_price=service_data.base_price,
             currency=service_data.currency,
-            accommodation_type=service_data.accommodation_type,
+            accommodation_type=service_data.accommodation_type,  # ty: ignore[invalid-argument-type]
             short_description=service_data.short_description,
             max_guests=service_data.max_guests,
             bedrooms=service_data.bedrooms,

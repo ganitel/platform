@@ -59,7 +59,7 @@ class NoOpLimiter:
 # Replace the limiter in app.core.ratelimit BEFORE it gets used
 import app.core.ratelimit
 
-app.core.ratelimit.limiter = NoOpLimiter()
+app.core.ratelimit.limiter = NoOpLimiter()  # ty: ignore[invalid-assignment]
 
 # Import pytest and other modules after disabling rate limiting
 from collections.abc import Callable, Generator
@@ -80,12 +80,8 @@ if _ENVIRONMENT == "development":
     _ENVIRONMENT = "local"
 
 if _ENVIRONMENT in ["production", "staging"] and not _TESTING_ENV:
-    pytest.exit(
-        "❌ SECURITY ERROR: Tests cannot run without TESTING=true environment variable\n"
-        "   This prevents accidentally running tests against production databases.\n"
-        "   Please set: export TESTING=true",
-        1,
-    )
+    _msg = "❌ SECURITY ERROR: Tests cannot run without TESTING=true environment variable\n   This prevents accidentally running tests against production databases.\n   Please set: export TESTING=true"
+    pytest.exit(_msg, 1)  # ty: ignore[invalid-argument-type,too-many-positional-arguments]
 
 
 def pytest_collection_modifyitems(config, items):
@@ -183,7 +179,7 @@ if not TEST_DATABASE_URL.startswith("postgresql://"):
     pytest.exit(
         "❌ Invalid TEST_DATABASE_URL: tests must run on PostgreSQL (postgresql://...).",
         1,
-    )
+    )  # ty: ignore[invalid-argument-type,too-many-positional-arguments]
 
 try:
     test_engine = create_engine(TEST_DATABASE_URL)
@@ -193,10 +189,9 @@ try:
         conn.execute(text("SELECT 1"))
 except Exception as e:
     pytest.exit(
-        "❌ PostgreSQL test database is required and unreachable. "
-        f"Connection target: {TEST_DATABASE_URL}. Error: {e}",
+        f"❌ PostgreSQL test database is required and unreachable. Connection target: {TEST_DATABASE_URL}. Error: {e}",
         1,
-    )
+    )  # ty: ignore[invalid-argument-type,too-many-positional-arguments]
 
 print(
     f"[i] Running tests in {ENVIRONMENT} using PostgreSQL: "
@@ -225,13 +220,13 @@ class TestAppFactory:
         """Crée une nouvelle instance d'app pour tests"""
         if cls._app_instance is None:
             cls._app_instance = app
-        return cls._app_instance
+        return cls._app_instance  # ty: ignore[invalid-return-type]
 
     @classmethod
     def reset(cls):
         """Reset la factory et restaure les overrides"""
         cls._app_instance = None
-        app.dependency_overrides.clear()
+        app.dependency_overrides.clear()  # ty: ignore[unresolved-attribute]
 
 
 # T12: Database Cleanup via Metadata
@@ -375,7 +370,7 @@ def db_session() -> Generator[Session, None, None]:
 
 
 @pytest.fixture
-def client(db_session: Session) -> TestClient:
+def client(db_session: Session) -> TestClient:  # ty: ignore[invalid-return-type]
     """
     T12: Fixture client utilisant la factory app uniforme
     Crée un TestClient avec la même instance d'app pour toutes les suites de tests
@@ -395,7 +390,7 @@ def client(db_session: Session) -> TestClient:
         finally:
             pass
 
-    test_app.dependency_overrides[get_db] = override_get_db
+    test_app.dependency_overrides[get_db] = override_get_db  # ty: ignore[unresolved-attribute]
 
     # Crée le client avec l'app
     test_client = TestClient(test_app)
@@ -403,7 +398,7 @@ def client(db_session: Session) -> TestClient:
     yield test_client
 
     # Nettoyage après le test
-    test_app.dependency_overrides.clear()
+    test_app.dependency_overrides.clear()  # ty: ignore[unresolved-attribute]
     TestAppFactory.reset()
 
 
@@ -741,7 +736,7 @@ def test_data(
 
 
 @pytest.fixture
-def client_no_rate_limit(db_session: Session) -> TestClient:
+def client_no_rate_limit(db_session: Session) -> TestClient:  # ty: ignore[invalid-return-type]
     """
     Create a test client with database override and rate limiting disabled
     This is useful for testing endpoints that have rate limiting decorators
@@ -754,12 +749,12 @@ def client_no_rate_limit(db_session: Session) -> TestClient:
         finally:
             pass
 
-    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_db] = override_get_db  # ty: ignore[unresolved-attribute]
 
     # Mock the limiter.limit decorator to pass through the function unchanged
     with patch(
         "app.core.ratelimit.limiter.limit", lambda limit_string: lambda func: func
     ):
-        yield TestClient(app)
+        yield TestClient(app)  # ty: ignore[invalid-argument-type]
 
-    app.dependency_overrides.clear()
+    app.dependency_overrides.clear()  # ty: ignore[unresolved-attribute]

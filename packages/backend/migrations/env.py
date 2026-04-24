@@ -52,7 +52,7 @@ def get_database_url():
 
     if all([db_host, db_name, db_user, db_password]):
         return (
-            f"postgresql://{quote_plus(db_user)}:{quote_plus(db_password)}"
+            f"postgresql://{quote_plus(db_user or '')}:{quote_plus(db_password or '')}"
             f"@{db_host}:{db_port}/{db_name}"
         )
 

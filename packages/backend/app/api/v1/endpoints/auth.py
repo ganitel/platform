@@ -185,7 +185,7 @@ async def login_for_access_token(
     lockout_key = f"lockout:{user_credentials.identifier}"
     lockout_count = redis_client.get(lockout_key)
 
-    if lockout_count and int(lockout_count) >= 5:
+    if lockout_count and int(lockout_count) >= 5:  # ty: ignore[invalid-argument-type]
         # Lockout for 15 minutes after 5 failures
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,

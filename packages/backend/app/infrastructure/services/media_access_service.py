@@ -63,7 +63,7 @@ class MediaAccessService:
 
         service = (
             self.db.query(Service)
-            .filter(Service.deleted_at.is_(None), Service.images.any(file_ref))
+            .filter(Service.deleted_at.is_(None), Service.images.any(file_ref))  # ty: ignore[invalid-argument-type]
             .first()
         )
         if service is not None:
@@ -73,7 +73,7 @@ class MediaAccessService:
 
         prop = (
             self.db.query(Property)
-            .filter(Property.deleted_at.is_(None), Property.images.any(file_ref))
+            .filter(Property.deleted_at.is_(None), Property.images.any(file_ref))  # ty: ignore[invalid-argument-type]
             .first()
         )
         if prop is not None:

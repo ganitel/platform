@@ -3,10 +3,13 @@ Ganitel V2 Backend - Payment Entity
 """
 
 from datetime import datetime
+from decimal import Decimal
 from enum import StrEnum
+from uuid import UUID
 
-from sqlalchemy import Column, ForeignKey, Numeric, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import ForeignKey, Numeric, String
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity
 
@@ -35,36 +38,40 @@ class Payment(AuditableEntity, SoftDeleteEntity):
 
     __tablename__ = "payments"
 
-    booking_id = Column(
-        UUID(as_uuid=True),
+    booking_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
         ForeignKey("bookings.id"),
         nullable=False,
         unique=True,
         index=True,
     )
-    amount = Column(Numeric(10, 2), nullable=False)
-    provider = Column(String(50), nullable=False)  # tranzak, mobile_money, card
-    transaction_id = Column(
+    amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    provider: Mapped[str] = mapped_column(
+        String(50), nullable=False
+    )  # tranzak, mobile_money, card
+    transaction_id: Mapped[str | None] = mapped_column(
         String(255), unique=True, nullable=True, index=True
     )  # Provider transaction ID
-    status = Column(
+    status: Mapped[str] = mapped_column(
         String(50), default=PaymentStatus.PENDING.value, nullable=False, index=True
     )
 
     # Additional payment details
-    payment_method = Column(String(50), nullable=True)  # mtn, orange, visa, etc.
-    currency = Column(String(10), default="XAF", nullable=False)
+    payment_method: Mapped[str | None] = mapped_column(
+        String(50), nullable=True
+    )  # mtn, orange, visa, etc.
+    currency: Mapped[str] = mapped_column(String(10), default="XAF", nullable=False)
 
     # Provider response data
-    provider_response = Column(
+    provider_response: Mapped[str | None] = mapped_column(
         String(2000), nullable=True
     )  # JSON string of provider response
-    error_message = Column(String(500), nullable=True)
+    error_message: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     # Refund information
-    refund_amount = Column(Numeric(10, 2), nullable=True)
-    refund_reason = Column(String(500), nullable=True)
-    refunded_at = Column(String(50), nullable=True)
+    refund_amount: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+    refund_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    refunded_at: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
     def can_be_refunded(self) -> bool:
         """Check if payment can be refunded"""
@@ -94,7 +101,7 @@ class Payment(AuditableEntity, SoftDeleteEntity):
             raise ValueError("Refund amount cannot exceed payment amount")
 
         self.status = PaymentStatus.REFUNDED.value
-        self.refund_amount = refund_amount
+        self.refund_amount = refund_amount  # ty: ignore[invalid-assignment]
         self.refund_reason = reason
         self.refunded_at = datetime.utcnow().isoformat()
         self.updated_at = datetime.utcnow()

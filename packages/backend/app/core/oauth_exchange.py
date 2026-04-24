@@ -46,7 +46,7 @@ def consume_oauth_exchange_code(redis_client: redis.Redis, code: str) -> dict[st
         raise ValueError("Invalid or expired OAuth exchange code")
 
     try:
-        payload = json.loads(raw_payload)
+        payload = json.loads(raw_payload)  # ty: ignore[invalid-argument-type]
     except (TypeError, json.JSONDecodeError) as exc:
         raise ValueError("Invalid OAuth exchange payload") from exc
 

@@ -36,7 +36,7 @@ class UpdateServiceUseCase:
 
         if updates.get("title"):
             service.generate_slug()
-            if self.service_repository.slug_exists(
+            if service.slug and self.service_repository.slug_exists(
                 service.slug, exclude_service_id=service.id
             ):
                 service.slug = f"{service.slug}-{str(service.id)[:8]}"

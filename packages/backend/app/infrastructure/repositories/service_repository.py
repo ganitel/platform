@@ -272,7 +272,7 @@ class ServiceRepository(IServiceRepository):
             .subquery()
         )
 
-        query = query.filter(~Service.id.in_(conflicting_booking_service_ids))
+        query = query.filter(~Service.id.in_(conflicting_booking_service_ids))  # ty: ignore[invalid-argument-type]
 
         return query.offset(skip).limit(limit).all()
 
@@ -437,7 +437,7 @@ class ServiceRepository(IServiceRepository):
         """Update service rating"""
         service = self.get_by_id(service_id)
         if service:
-            service.average_rating = average_rating
+            service.average_rating = average_rating  # ty: ignore[invalid-assignment]
             service.review_count = review_count
             self.db.commit()
             return True

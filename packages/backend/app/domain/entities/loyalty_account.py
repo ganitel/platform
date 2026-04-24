@@ -2,8 +2,11 @@
 Ganitel V2 Backend - Loyalty Account Entity
 """
 
-from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.dialects.postgresql import UUID
+from uuid import UUID
+
+from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.domain.entities.base import AuditableEntity
 
@@ -16,8 +19,8 @@ class LoyaltyAccount(AuditableEntity):
     __tablename__ = "loyalty_accounts"
 
     # Relationships
-    user_id = Column(
-        UUID(as_uuid=True),
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
         ForeignKey("users.id"),
         nullable=False,
         unique=True,
@@ -25,15 +28,17 @@ class LoyaltyAccount(AuditableEntity):
     )
 
     # Points Information
-    current_points = Column(Integer, default=0, nullable=False)
-    total_points_earned = Column(Integer, default=0, nullable=False)
-    total_points_redeemed = Column(Integer, default=0, nullable=False)
+    current_points: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    total_points_earned: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    total_points_redeemed: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False
+    )
 
     # Tier Information
-    tier_level = Column(
+    tier_level: Mapped[str] = mapped_column(
         String(20), default="bronze", nullable=False
     )  # bronze, silver, gold, platinum
-    tier_points = Column(Integer, default=0, nullable=False)
+    tier_points: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     def add_points(self, points: int):
         """Add points to account"""

@@ -99,7 +99,7 @@ def rate_limited_auth_client(monkeypatch):
         strategy="fixed-window",
     )
 
-    auth_module = importlib.reload(auth_module)
+    auth_module = importlib.reload(auth_module)  # ty: ignore[invalid-assignment]
 
     monkeypatch.setattr(auth_module, "RegisterUserUseCase", DummyRegisterUserUseCase)
     monkeypatch.setattr(auth_module, "LoginUserUseCase", DummyLoginUserUseCase)
@@ -111,7 +111,7 @@ def rate_limited_auth_client(monkeypatch):
 
     app = FastAPI()
     app.state.limiter = ratelimit_module.limiter
-    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty: ignore[invalid-argument-type]
     app.add_middleware(SlowAPIMiddleware)
     app.include_router(auth_module.router, prefix="/api/v1/auth")
 

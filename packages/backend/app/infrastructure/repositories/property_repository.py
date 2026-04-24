@@ -45,7 +45,7 @@ class PropertyRepository:
             .all()
         )
 
-    def update(self, property_id: UUID, updates: dict[str, Any]) -> Property:
+    def update(self, property_id: UUID, updates: dict[str, Any]) -> Property | None:
         """Update an existing property"""
         property = self.get_by_id(property_id)
         if property:

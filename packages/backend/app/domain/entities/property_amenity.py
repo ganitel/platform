@@ -2,12 +2,20 @@
 Ganitel V2 Backend - Property Amenity Entity
 """
 
-from sqlalchemy import Column, ForeignKey, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+from uuid import UUID
+
+from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity
 from app.domain.entities.property import Property
+
+if TYPE_CHECKING:
+    from app.domain.entities.amenity import Amenity
 
 
 class PropertyAmenity(AuditableEntity, SoftDeleteEntity):
@@ -20,15 +28,19 @@ class PropertyAmenity(AuditableEntity, SoftDeleteEntity):
         UniqueConstraint("property_id", "amenity_id", name="uq_property_amenity_pair"),
     )
 
-    property_id = Column(
-        UUID(as_uuid=True), ForeignKey("properties.id"), nullable=False, index=True
+    property_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("properties.id"), nullable=False, index=True
     )
-    amenity_id = Column(
-        UUID(as_uuid=True), ForeignKey("amenities.id"), nullable=False, index=True
+    amenity_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("amenities.id"), nullable=False, index=True
     )
 
-    property = relationship(Property, back_populates="property_amenities")
-    amenity = relationship("Amenity", back_populates="property_amenities")
+    property: Mapped[Property | None] = relationship(
+        Property, back_populates="property_amenities"
+    )
+    amenity: Mapped[Amenity | None] = relationship(
+        "Amenity", back_populates="property_amenities"
+    )
 
     def __repr__(self):
         return f"<PropertyAmenity(id={self.id}, property_id={self.property_id}, amenity_id={self.amenity_id})>"

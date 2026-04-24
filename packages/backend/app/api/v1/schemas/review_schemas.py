@@ -42,21 +42,21 @@ class ReviewResponse(BaseModel):
     id: str
     service_id: str
     user_id: str
-    booking_id: str | None
-    property_id: str | None
+    booking_id: str | None = None
+    property_id: str | None = None
     overall_rating: Decimal
-    cleanliness_rating: Decimal | None
-    communication_rating: Decimal | None
-    checkin_rating: Decimal | None
-    accuracy_rating: Decimal | None
-    location_rating: Decimal | None
-    value_rating: Decimal | None
-    comfort_rating: Decimal | None
-    security_rating: Decimal | None
-    accessibility_rating: Decimal | None
-    host_response_rating: Decimal | None
-    title: str | None
-    comment: str | None
+    cleanliness_rating: Decimal | None = None
+    communication_rating: Decimal | None = None
+    checkin_rating: Decimal | None = None
+    accuracy_rating: Decimal | None = None
+    location_rating: Decimal | None = None
+    value_rating: Decimal | None = None
+    comfort_rating: Decimal | None = None
+    security_rating: Decimal | None = None
+    accessibility_rating: Decimal | None = None
+    host_response_rating: Decimal | None = None
+    title: str | None = None
+    comment: str | None = None
     status: str
     created_at: datetime
     updated_at: datetime

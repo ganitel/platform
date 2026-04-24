@@ -60,7 +60,7 @@ class OAuthLoginUseCase:
 
         return await self._handle_oauth_user(
             email=email,
-            oauth_id=oauth_id,
+            oauth_id=oauth_id or "",
             provider="google",
             first_name=first_name,
             last_name=last_name,
@@ -100,7 +100,7 @@ class OAuthLoginUseCase:
 
         return await self._handle_oauth_user(
             email=email,
-            oauth_id=oauth_id,
+            oauth_id=oauth_id or "",
             provider="facebook",
             first_name=first_name,
             last_name=last_name,
