@@ -16,9 +16,6 @@ out/
 .env.prod
 *.env
 
-# Bun
-bun.lock
-
 # Python
 __pycache__/
 *.py[cod]

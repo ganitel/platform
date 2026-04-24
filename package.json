@@ -1,9 +1,0 @@
-{
-  "name": "ganitel",
-  "private": true,
-  "workspaces": ["packages/*"],
-  "scripts": {
-    "dev:frontend": "bun run --cwd packages/frontend dev",
-    "dev:backend": "bun run --cwd packages/backend dev"
-  }
-}

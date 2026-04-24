@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { isDevAdminBypassEmail } from "@/services/auth.adapter";
+import { isDevAdminBypassEmail } from "@/services/adminBypass";
 
 type AuthStep = "email" | "otp";
 

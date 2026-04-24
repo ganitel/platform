@@ -58,7 +58,6 @@ class Property(AuditableEntity, SoftDeleteEntity):
     location = relationship("Location")
     property_type = relationship("PropertyType")
     property_amenities = relationship("PropertyAmenity", back_populates="property")
-    # provider = relationship("User")
 
     def __repr__(self):
         return f"<Property(id={self.id}, title={self.title})>"

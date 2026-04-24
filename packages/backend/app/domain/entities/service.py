@@ -112,11 +112,6 @@ class Service(AuditableEntity, SoftDeleteEntity):
     availability_calendar = Column(JSON, nullable=True)  # Flexible availability data
     blocked_dates = Column(ARRAY(String), nullable=True)  # ISO date strings
     
-    # Relationships
-    # provider = relationship("User", back_populates="services")
-    # bookings = relationship("Booking", back_populates="service")
-    # reviews = relationship("Review", back_populates="service")
-    
     @property
     def is_available_for_booking(self) -> bool:
         """Check if service is available for booking"""
