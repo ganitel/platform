@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Review API Schemas
 """
+
 from datetime import datetime
 from decimal import Decimal
 
@@ -9,6 +10,7 @@ from pydantic import BaseModel, Field
 
 class ReviewCreateRequest(BaseModel):
     """Create review request schema"""
+
     service_id: str = Field(..., description="Service ID")
     overall_rating: Decimal = Field(..., ge=1, le=5, description="Overall rating (1-5)")
     title: str | None = Field(None, max_length=200, description="Review title")
@@ -20,13 +22,23 @@ class ReviewCreateRequest(BaseModel):
     location_rating: Decimal | None = Field(None, ge=1, le=5)
     value_rating: Decimal | None = Field(None, ge=1, le=5)
     property_id: str | None = Field(None, description="Property ID (optional)")
-    comfort_rating: Decimal | None = Field(None, ge=1, le=5, description="Comfort rating")
-    security_rating: Decimal | None = Field(None, ge=1, le=5, description="Security rating")
-    accessibility_rating: Decimal | None = Field(None, ge=1, le=5, description="Accessibility rating")
-    host_response_rating: Decimal | None = Field(None, ge=1, le=5, description="Host response rating")
+    comfort_rating: Decimal | None = Field(
+        None, ge=1, le=5, description="Comfort rating"
+    )
+    security_rating: Decimal | None = Field(
+        None, ge=1, le=5, description="Security rating"
+    )
+    accessibility_rating: Decimal | None = Field(
+        None, ge=1, le=5, description="Accessibility rating"
+    )
+    host_response_rating: Decimal | None = Field(
+        None, ge=1, le=5, description="Host response rating"
+    )
+
 
 class ReviewResponse(BaseModel):
     """Review response schema"""
+
     id: str
     service_id: str
     user_id: str
@@ -51,4 +63,3 @@ class ReviewResponse(BaseModel):
 
     class Config:
         from_attributes = True
-

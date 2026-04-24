@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Wallet Entity
 """
+
 from sqlalchemy import Column, ForeignKey, Numeric
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -11,10 +12,17 @@ class Wallet(AuditableEntity):
     """
     Wallet entity for user in-app wallet
     """
+
     __tablename__ = "wallets"
 
     # Relationships
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, unique=True, index=True)
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
 
     # Balance Information
     current_balance = Column(Numeric(10, 2), default=0.0, nullable=False)
@@ -43,4 +51,3 @@ class Wallet(AuditableEntity):
 
     def __repr__(self):
         return f"<Wallet(id={self.id}, user_id={self.user_id}, balance={self.current_balance})>"
-

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Main FastAPI Application
 """
+
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -47,15 +48,16 @@ async def create_default_admin():
 
             # Check if users table exists (migrations have been run)
             inspector = inspect(db.bind)
-            if 'users' not in inspector.get_table_names():
+            if "users" not in inspector.get_table_names():
                 logger.warning("Users table not found, skipping admin creation")
                 return
 
             # Check if admin already exists
-            existing_admin = db.query(User).filter(
-                User.email == settings.ADMIN_EMAIL,
-                User.deleted_at.is_(None)
-            ).first()
+            existing_admin = (
+                db.query(User)
+                .filter(User.email == settings.ADMIN_EMAIL, User.deleted_at.is_(None))
+                .first()
+            )
 
             if existing_admin:
                 logger.info(
@@ -74,7 +76,7 @@ async def create_default_admin():
                 user_type=UserType.ADMIN.value,
                 status=UserStatus.ACTIVE.value,
                 is_verified=True,
-                is_active=True
+                is_active=True,
             )
 
             db.add(admin_user)
@@ -112,6 +114,7 @@ async def lifespan(app: FastAPI):
     # Shutdown
     logger.info("Shutting down Ganitel API")
 
+
 # Create FastAPI application
 # Note: Docs enabled in staging for testing. Disable in production if needed.
 app = FastAPI(
@@ -121,7 +124,7 @@ app = FastAPI(
     docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
     redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
     openapi_url="/openapi.json" if settings.ENVIRONMENT != "production" else None,
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 register_exception_handlers(app)
@@ -151,6 +154,7 @@ if settings.effective_environment in {"development", "test"} and uploads_dir.exi
 # Include API routers
 app.include_router(api_router, prefix="/api/v1")
 
+
 # Root endpoint
 @app.get("/")
 async def root():
@@ -158,16 +162,17 @@ async def root():
         "message": "Ganitel API V2",
         "version": settings.APP_VERSION,
         "environment": settings.ENVIRONMENT,
-        "docs_url": "/docs" if settings.ENVIRONMENT != "production" else None
+        "docs_url": "/docs" if settings.ENVIRONMENT != "production" else None,
     }
+
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
         port=8000,
         reload=settings.DEBUG,
-        log_level="debug" if settings.DEBUG else "info"
+        log_level="debug" if settings.DEBUG else "info",
     )
-

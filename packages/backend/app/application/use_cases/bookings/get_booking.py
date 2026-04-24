@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Get Booking Details Use Case
 """
+
 from uuid import UUID
 
 from app.domain.repositories.booking_repository import IBookingRepository
@@ -22,4 +23,3 @@ class GetBookingUseCase:
             raise AuthorizationError("You are not allowed to view this booking")
 
         return booking
-

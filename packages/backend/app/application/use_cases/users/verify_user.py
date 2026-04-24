@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Verify User Use Case
 """
+
 from typing import Literal
 from uuid import UUID
 
@@ -18,9 +19,7 @@ class VerifyUserUseCase:
         self.user_repository = user_repository
 
     def execute(
-        self,
-        user_id: UUID,
-        verification_type: Literal["email", "phone"]
+        self, user_id: UUID, verification_type: Literal["email", "phone"]
     ) -> User:
         """
         Verify user email or phone
@@ -63,4 +62,3 @@ class VerifyUserUseCase:
         updated_user = self.user_repository.update(user)
 
         return updated_user
-

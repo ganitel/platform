@@ -9,9 +9,9 @@ from .update_service_status import UpdateServiceStatusUseCase
 
 __all__ = [
     "CreateServiceUseCase",
-    "SearchServicesUseCase",
-    "GetServiceUseCase",
-    "UpdateServiceUseCase",
     "DeleteServiceUseCase",
+    "GetServiceUseCase",
+    "SearchServicesUseCase",
     "UpdateServiceStatusUseCase",
+    "UpdateServiceUseCase",
 ]

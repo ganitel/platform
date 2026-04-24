@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Track View Use Case
 """
+
 from uuid import UUID
 
 from app.domain.entities.view_tracking import ViewTracking, ViewType
@@ -22,7 +23,7 @@ class TrackViewUseCase:
         user_id: UUID | None = None,
         ip_address: str | None = None,
         user_agent: str | None = None,
-        referrer: str | None = None
+        referrer: str | None = None,
     ) -> ViewTracking:
         """
         Track a view
@@ -46,7 +47,7 @@ class TrackViewUseCase:
         try:
             ViewType(view_type)
         except ValueError:
-            raise ValidationError(f"Invalid view type: {view_type}")
+            raise ValidationError(f"Invalid view type: {view_type}") from None
 
         view_tracking = ViewTracking(
             user_id=user_id,
@@ -55,8 +56,7 @@ class TrackViewUseCase:
             view_type=view_type,
             ip_address=ip_address,
             user_agent=user_agent,
-            referrer=referrer
+            referrer=referrer,
         )
 
         return self.view_tracking_repository.create(view_tracking)
-

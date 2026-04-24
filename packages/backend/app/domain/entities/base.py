@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Base Entity Classes
 """
+
 import uuid
 from datetime import datetime
 
@@ -10,40 +11,47 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+
 class BaseEntity(Base):
     """
     Base entity class with common fields
     """
+
     __abstract__ = True
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    updated_at = Column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
     is_active = Column(Boolean, default=True, nullable=False)
 
     def to_dict(self):
         """Convert entity to dictionary"""
         return {
-            column.name: getattr(self, column.name)
-            for column in self.__table__.columns
+            column.name: getattr(self, column.name) for column in self.__table__.columns
         }
 
     def __repr__(self):
         return f"<{self.__class__.__name__}(id={self.id})>"
 
+
 class AuditableEntity(BaseEntity):
     """
     Auditable entity with created_by and updated_by fields
     """
+
     __abstract__ = True
 
     created_by = Column(UUID(as_uuid=True), nullable=True)
     updated_by = Column(UUID(as_uuid=True), nullable=True)
 
+
 class SoftDeleteEntity:
     """
     Soft delete mixin (not inheriting from BaseEntity to avoid diamond inheritance)
     """
+
     __abstract__ = True
 
     deleted_at = Column(DateTime, nullable=True)
@@ -64,4 +72,3 @@ class SoftDeleteEntity:
         self.deleted_at = None
         self.deleted_by = None
         self.is_active = True
-

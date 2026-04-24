@@ -28,8 +28,7 @@ router = APIRouter(prefix="/wallets", tags=["wallets"])
 
 @router.post("/", response_model=WalletResponse, status_code=status.HTTP_201_CREATED)
 async def create_wallet(
-    current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)
 ):
     """Create wallet for current user"""
     try:
@@ -48,24 +47,20 @@ async def create_wallet(
             deposits=wallet.deposits,
             bonuses=wallet.bonuses,
             created_at=wallet.created_at,
-            updated_at=wallet.updated_at
+            updated_at=wallet.updated_at,
         )
     except ConflictError as e:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create wallet"
-        )
+            detail="Failed to create wallet",
+        ) from None
 
 
 @router.get("/me", response_model=WalletResponse)
 async def get_my_wallet(
-    current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)
 ):
     """Get current user's wallet"""
     try:
@@ -85,25 +80,22 @@ async def get_my_wallet(
             deposits=wallet.deposits,
             bonuses=wallet.bonuses,
             created_at=wallet.created_at,
-            updated_at=wallet.updated_at
+            updated_at=wallet.updated_at,
         )
     except NotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get wallet"
-        )
+            detail="Failed to get wallet",
+        ) from None
 
 
 @router.post("/me/add-balance", response_model=TransactionResponse)
 async def add_balance(
     request: AddBalanceRequest,
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Add balance to wallet"""
     try:
@@ -115,7 +107,7 @@ async def add_balance(
             user_id=current_user.id,
             amount=request.amount,
             is_bonus=request.is_bonus,
-            description=request.description
+            description=request.description,
         )
 
         transaction = result["transaction"]
@@ -129,21 +121,16 @@ async def add_balance(
             description=transaction.description,
             status=transaction.status,
             reference=transaction.reference,
-            created_at=transaction.created_at
+            created_at=transaction.created_at,
         )
     except ValidationError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
     except NotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to add balance"
-        )
-
+            detail="Failed to add balance",
+        ) from None

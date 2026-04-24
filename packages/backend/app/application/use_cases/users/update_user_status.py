@@ -1,6 +1,8 @@
 """
 Ganitel V2 Backend - Update User Status Use Case
 """
+
+from typing import ClassVar
 from uuid import UUID
 
 from app.domain.entities.user import User, UserStatus
@@ -14,7 +16,7 @@ class UpdateUserStatusUseCase:
     """
 
     # Valid status transitions
-    VALID_TRANSITIONS = {
+    VALID_TRANSITIONS: ClassVar[dict] = {
         UserStatus.PENDING_VERIFICATION: [UserStatus.ACTIVE, UserStatus.INACTIVE],
         UserStatus.INACTIVE: [UserStatus.ACTIVE, UserStatus.SUSPENDED],
         UserStatus.ACTIVE: [UserStatus.INACTIVE, UserStatus.SUSPENDED],
@@ -25,10 +27,7 @@ class UpdateUserStatusUseCase:
         self.user_repository = user_repository
 
     def execute(
-        self,
-        user_id: UUID,
-        new_status: UserStatus,
-        updated_by: UUID | None = None
+        self, user_id: UUID, new_status: UserStatus, updated_by: UUID | None = None
     ) -> User:
         """
         Update user status with transition validation
@@ -60,7 +59,7 @@ class UpdateUserStatusUseCase:
         try:
             current_status = UserStatus(user.status)
         except ValueError:
-            raise ValidationError(f"Invalid current status: {user.status}")
+            raise ValidationError(f"Invalid current status: {user.status}") from None
 
         # Check if transition is valid
         if current_status in self.VALID_TRANSITIONS:
@@ -71,7 +70,9 @@ class UpdateUserStatusUseCase:
                 )
         elif current_status != new_status:
             # If current status not in transitions, only allow if same status
-            raise ValidationError(f"Invalid status transition from {current_status.value}")
+            raise ValidationError(
+                f"Invalid status transition from {current_status.value}"
+            )
 
         # Update status
         user.status = new_status.value
@@ -88,4 +89,3 @@ class UpdateUserStatusUseCase:
         updated_user = self.user_repository.update(user)
 
         return updated_user
-

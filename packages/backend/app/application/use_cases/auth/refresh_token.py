@@ -22,9 +22,7 @@ class RefreshTokenUseCase:
         self.user_repository = user_repository
 
     def execute(
-        self,
-        refresh_token: str,
-        redis_client: redis.Redis | None = None
+        self, refresh_token: str, redis_client: redis.Redis | None = None
     ) -> TokenData:
         """
         Refresh access token using refresh token
@@ -65,18 +63,19 @@ class RefreshTokenUseCase:
 
             # Get user
             from uuid import UUID
+
             user = self.user_repository.get_by_id(UUID(user_id))
             if not user or not user.is_active:
                 raise AuthorizationError("User not found or inactive")
 
             # Generate new tokens using LoginUserUseCase logic
             from app.application.use_cases.auth.login_user import LoginUserUseCase
+
             login_use_case = LoginUserUseCase(self.user_repository)
 
             return login_use_case.refresh_access_token(refresh_token, redis_client)
 
         except jwt.ExpiredSignatureError:
-            raise AuthorizationError("Refresh token has expired")
+            raise AuthorizationError("Refresh token has expired") from None
         except jwt.JWTError:
-            raise AuthorizationError("Invalid refresh token")
-
+            raise AuthorizationError("Invalid refresh token") from None

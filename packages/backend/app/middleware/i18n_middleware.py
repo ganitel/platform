@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - i18n Middleware
 """
+
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -28,4 +29,3 @@ class I18nMiddleware(BaseHTTPMiddleware):
 
         response = await call_next(request)
         return response
-

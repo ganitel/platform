@@ -1,16 +1,23 @@
 """
 Ganitel V2 Backend - Create Property Use Case
 """
+
 from uuid import UUID
 
 from app.domain.entities.property import Property
-from app.exceptions import GanitelException
+from app.exceptions import GanitelError
 
 
 class CreatePropertyUseCase:
     """Create property use case"""
 
-    def __init__(self, property_repository, location_repository, property_type_repository, amenity_repository):
+    def __init__(
+        self,
+        property_repository,
+        location_repository,
+        property_type_repository,
+        amenity_repository,
+    ):
         self.property_repository = property_repository
         self.location_repository = location_repository
         self.property_type_repository = property_type_repository
@@ -50,18 +57,12 @@ class CreatePropertyUseCase:
         # Validate location exists and is not deleted
         location = self.location_repository.get_by_id(location_id)
         if not location or location.deleted_at is not None:
-            raise GanitelException(
-                message="Invalid location",
-                status_code=400
-            )
+            raise GanitelError(message="Invalid location", status_code=400)
 
         # Validate property type exists and is not deleted
         property_type = self.property_type_repository.get_by_id(property_type_id)
         if not property_type or property_type.deleted_at is not None:
-            raise GanitelException(
-                message="Invalid property type",
-                status_code=400
-            )
+            raise GanitelError(message="Invalid property type", status_code=400)
 
         # Create property
         property = Property(
@@ -101,9 +102,9 @@ class CreatePropertyUseCase:
                 if amenity and amenity.deleted_at is None:
                     # Create property amenity relationship
                     from app.domain.entities.property_amenity import PropertyAmenity
+
                     property_amenity = PropertyAmenity(
-                        property_id=saved_property.id,
-                        amenity_id=amenity_id
+                        property_id=saved_property.id, amenity_id=amenity_id
                     )
                     self.property_repository.session.add(property_amenity)
             self.property_repository.session.commit()

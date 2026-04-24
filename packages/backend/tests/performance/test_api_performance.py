@@ -2,6 +2,7 @@
 Tests de performance pour l'API Ganitel
 T12: Utilise la factory app uniforme
 """
+
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
@@ -33,7 +34,7 @@ class TestAPIPerformance:
         print("\n📊 Performance Health Endpoint:")
         print(f"   Temps total: {total_time:.2f}s")
         print(f"   Temps moyen: {avg_time:.4f}s")
-        print(f"   Requêtes/seconde: {100/total_time:.2f}")
+        print(f"   Requêtes/seconde: {100 / total_time:.2f}")
 
         # Assertion: chaque requête doit prendre moins de 100ms
         assert avg_time < 0.1, f"Performance dégradée: {avg_time:.4f}s > 0.1s"
@@ -41,6 +42,7 @@ class TestAPIPerformance:
     @pytest.mark.slow
     def test_concurrent_requests(self, client):
         """Test requêtes concurrentes sur endpoint public"""
+
         def make_request():
             # Use public health endpoint for concurrent testing
             response = client.get("/api/v1/health/")
@@ -60,7 +62,7 @@ class TestAPIPerformance:
         print("\n📊 Performance Requêtes Concurrentes:")
         print(f"   Temps total: {total_time:.2f}s")
         print(f"   Requêtes réussies: {success_count}/50")
-        print(f"   Débit: {50/total_time:.2f} req/s")
+        print(f"   Débit: {50 / total_time:.2f} req/s")
 
         assert success_count >= 48, "Trop d'échecs dans les requêtes concurrentes"
 
@@ -85,7 +87,7 @@ class TestAPIPerformance:
                 base_price=Decimal("50000.00"),
                 currency="XAF",
                 status="active",
-                is_active=True
+                is_active=True,
             )
             db_session.add(service)
 
@@ -106,7 +108,9 @@ class TestAPIPerformance:
         assert query_time < 1.0, f"Requête trop lente: {query_time:.4f}s"
 
     @pytest.mark.slow
-    def test_payment_initiation_performance(self, client, auth_headers, test_data, db_session):
+    def test_payment_initiation_performance(
+        self, client, auth_headers, test_data, db_session
+    ):
         """Test performance d'initiation de paiement"""
         from app.domain.entities.booking import Booking, BookingStatus
 
@@ -124,20 +128,17 @@ class TestAPIPerformance:
             status=BookingStatus.PENDING.value,
             total_amount=Decimal("200000.00"),
             currency="XAF",
-            is_active=True
+            is_active=True,
         )
         db_session.add(booking)
         db_session.commit()
 
         start_time = time.time()
 
-        response = client.post(
+        client.post(
             "/api/v1/payments/initiate",
-            json={
-                "booking_id": str(booking.id),
-                "payment_method": "mtn"
-            },
-            headers=auth_headers
+            json={"booking_id": str(booking.id), "payment_method": "mtn"},
+            headers=auth_headers,
         )
 
         end_time = time.time()
@@ -172,7 +173,7 @@ class TestAPIPerformance:
                 base_price=Decimal(f"{30000 + i * 100}.00"),
                 currency="XAF",
                 status="active",
-                is_active=True
+                is_active=True,
             )
             db_session.add(service)
 
@@ -200,12 +201,9 @@ class TestAPIPerformance:
         for _ in range(20):
             start_time = time.time()
 
-            response = client.post(
+            client.post(
                 "/api/v1/auth/login",
-                json={
-                    "identifier": "test@example.com",
-                    "password": "password123"
-                }
+                json={"identifier": "test@example.com", "password": "password123"},
             )
 
             end_time = time.time()
@@ -218,7 +216,9 @@ class TestAPIPerformance:
         print(f"   Temps moyen: {avg_login_time:.4f}s")
         print(f"   Temps max: {max_login_time:.4f}s")
 
-        assert avg_login_time < 0.5, f"Authentification trop lente: {avg_login_time:.4f}s"
+        assert avg_login_time < 0.5, (
+            f"Authentification trop lente: {avg_login_time:.4f}s"
+        )
 
 
 class TestLoadTesting:
@@ -230,6 +230,7 @@ class TestLoadTesting:
     @pytest.mark.external
     def test_load_100_concurrent_users(self, client):
         """Test avec 100 utilisateurs concurrents"""
+
         def simulate_user():
             try:
                 # Simuler un parcours utilisateur
@@ -259,7 +260,7 @@ class TestLoadTesting:
         print("\n📊 Test de Charge - 100 Utilisateurs:")
         print(f"   Temps total: {total_time:.2f}s")
         print(f"   Taux de succès: {success_rate:.1f}%")
-        print(f"   Débit: {100/total_time:.2f} utilisateurs/s")
+        print(f"   Débit: {100 / total_time:.2f} utilisateurs/s")
 
         assert success_rate >= 95, f"Taux de succès trop faible: {success_rate:.1f}%"
         assert total_time < 30, f"Temps de réponse trop long: {total_time:.2f}s"
@@ -268,6 +269,7 @@ class TestLoadTesting:
     @pytest.mark.external
     def test_sustained_load(self, client):
         """Test de charge soutenue sur 60 secondes"""
+
         def make_request():
             try:
                 response = client.get("/api/v1/health/")
@@ -303,6 +305,7 @@ class TestLoadTesting:
     @pytest.mark.slow
     def test_spike_load(self, client):
         """Test de pic de charge soudain"""
+
         def make_request():
             try:
                 response = client.get("/api/v1/services/?limit=5")
@@ -333,10 +336,16 @@ class TestLoadTesting:
         print("\n📊 Test de Pic de Charge:")
         print(f"   Phase normale: {normal_success:.1f}% succès en {normal_time:.2f}s")
         print(f"   Phase pic: {spike_success:.1f}% succès en {spike_time:.2f}s")
-        print(f"   Phase récupération: {recovery_success:.1f}% succès en {recovery_time:.2f}s")
+        print(
+            f"   Phase récupération: {recovery_success:.1f}% succès en {recovery_time:.2f}s"
+        )
 
-        assert spike_success >= 90, f"Système instable pendant le pic: {spike_success:.1f}%"
-        assert recovery_success >= 95, f"Récupération insuffisante: {recovery_success:.1f}%"
+        assert spike_success >= 90, (
+            f"Système instable pendant le pic: {spike_success:.1f}%"
+        )
+        assert recovery_success >= 95, (
+            f"Récupération insuffisante: {recovery_success:.1f}%"
+        )
 
     @pytest.mark.slow
     def test_memory_leak_detection(self, client):
@@ -364,7 +373,9 @@ class TestLoadTesting:
         print(f"   Augmentation: {memory_increase:.2f} MB")
 
         # L'augmentation ne doit pas dépasser 50 MB pour 1000 requêtes
-        assert memory_increase < 50, f"Fuite mémoire potentielle: +{memory_increase:.2f} MB"
+        assert memory_increase < 50, (
+            f"Fuite mémoire potentielle: +{memory_increase:.2f} MB"
+        )
 
 
 class TestStressTest:
@@ -376,6 +387,7 @@ class TestStressTest:
     @pytest.mark.external
     def test_maximum_concurrent_connections(self, client):
         """Test du nombre maximum de connexions concurrentes"""
+
         def make_request():
             try:
                 response = client.get("/api/v1/health/")
@@ -391,7 +403,9 @@ class TestStressTest:
             start_time = time.time()
 
             with ThreadPoolExecutor(max_workers=level) as executor:
-                level_results = list(executor.map(lambda _: make_request(), range(level)))
+                level_results = list(
+                    executor.map(lambda _: make_request(), range(level))
+                )
 
             end_time = time.time()
 
@@ -401,16 +415,20 @@ class TestStressTest:
             results[level] = {
                 "success_rate": success_rate,
                 "response_time": response_time,
-                "throughput": level / response_time
+                "throughput": level / response_time,
             }
 
         print("\n📊 Test de Connexions Concurrentes:")
         for level, data in results.items():
-            print(f"   {level} connexions: {data['success_rate']:.1f}% succès, "
-                  f"{data['response_time']:.2f}s, {data['throughput']:.2f} req/s")
+            print(
+                f"   {level} connexions: {data['success_rate']:.1f}% succès, "
+                f"{data['response_time']:.2f}s, {data['throughput']:.2f} req/s"
+            )
 
         # Au moins 100 connexions concurrentes doivent fonctionner
-        assert results[100]["success_rate"] >= 95, "Échec avec 100 connexions concurrentes"
+        assert results[100]["success_rate"] >= 95, (
+            "Échec avec 100 connexions concurrentes"
+        )
 
     @pytest.mark.slow
     def test_large_payload_handling(self, client, auth_headers):
@@ -429,9 +447,9 @@ class TestStressTest:
                 "country": "Cameroon",
                 "city": "Douala",
                 "base_price": 50000.0,
-                "currency": "XAF"
+                "currency": "XAF",
             },
-            headers=auth_headers
+            headers=auth_headers,
         )
 
         end_time = time.time()

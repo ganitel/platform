@@ -5,6 +5,7 @@ Revises: d7e8f9a0b1c2
 Create Date: 2026-02-15 12:00:00.000000
 
 """
+
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -23,8 +24,12 @@ def upgrade() -> None:
         "reviews",
         sa.Column("property_id", sa.UUID(), nullable=True),
     )
-    op.create_foreign_key("fk_reviews_property_id", "reviews", "properties", ["property_id"], ["id"])
-    op.create_index(op.f("ix_reviews_property_id"), "reviews", ["property_id"], unique=False)
+    op.create_foreign_key(
+        "fk_reviews_property_id", "reviews", "properties", ["property_id"], ["id"]
+    )
+    op.create_index(
+        op.f("ix_reviews_property_id"), "reviews", ["property_id"], unique=False
+    )
 
     # Add V1 rating fields
     op.add_column(
@@ -37,11 +42,15 @@ def upgrade() -> None:
     )
     op.add_column(
         "reviews",
-        sa.Column("accessibility_rating", sa.Numeric(precision=3, scale=2), nullable=True),
+        sa.Column(
+            "accessibility_rating", sa.Numeric(precision=3, scale=2), nullable=True
+        ),
     )
     op.add_column(
         "reviews",
-        sa.Column("host_response_rating", sa.Numeric(precision=3, scale=2), nullable=True),
+        sa.Column(
+            "host_response_rating", sa.Numeric(precision=3, scale=2), nullable=True
+        ),
     )
 
 

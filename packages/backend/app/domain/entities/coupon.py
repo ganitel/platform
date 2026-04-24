@@ -1,7 +1,8 @@
 """
 Ganitel V2 Backend - Coupon Entity
 """
-from enum import Enum
+
+from enum import StrEnum
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
@@ -9,15 +10,17 @@ from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity
 
 
-class CouponType(str, Enum):
+class CouponType(StrEnum):
     """Coupon type enumeration"""
+
     PERCENTAGE = "percentage"
     FIXED_AMOUNT = "fixed_amount"
     FREE_SHIPPING = "free_shipping"
 
 
-class CouponStatus(str, Enum):
+class CouponStatus(StrEnum):
     """Coupon status enumeration"""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     EXPIRED = "expired"
@@ -27,6 +30,7 @@ class Coupon(AuditableEntity, SoftDeleteEntity):
     """
     Coupon entity for discount coupons
     """
+
     __tablename__ = "coupons"
 
     # Basic Information
@@ -49,7 +53,9 @@ class Coupon(AuditableEntity, SoftDeleteEntity):
     # Validity
     valid_from = Column(DateTime, nullable=False)
     valid_until = Column(DateTime, nullable=False)
-    status = Column(String(20), default=CouponStatus.ACTIVE.value, nullable=False, index=True)
+    status = Column(
+        String(20), default=CouponStatus.ACTIVE.value, nullable=False, index=True
+    )
 
     # Applicability
     applicable_to_all_services = Column(Boolean, default=True, nullable=False)
@@ -59,11 +65,12 @@ class Coupon(AuditableEntity, SoftDeleteEntity):
     def is_valid(self):
         """Check if coupon is valid"""
         from datetime import datetime
+
         now = datetime.utcnow()
         return (
-            self.status == CouponStatus.ACTIVE.value and
-            self.valid_from <= now <= self.valid_until and
-            (self.usage_limit is None or self.used_count < self.usage_limit)
+            self.status == CouponStatus.ACTIVE.value
+            and self.valid_from <= now <= self.valid_until
+            and (self.usage_limit is None or self.used_count < self.usage_limit)
         )
 
     def calculate_discount(self, amount: float) -> float:
@@ -80,4 +87,3 @@ class Coupon(AuditableEntity, SoftDeleteEntity):
 
     def __repr__(self):
         return f"<Coupon(id={self.id}, code={self.code}, type={self.coupon_type})>"
-

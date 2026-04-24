@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Survey Repository Implementation
 """
+
 from datetime import datetime
 from uuid import UUID
 
@@ -25,31 +26,44 @@ class SurveyRepository(ISurveyRepository):
 
     def get_by_id(self, survey_id: UUID) -> Survey | None:
         """Get survey by ID"""
-        return self.db.query(Survey).filter(
-            Survey.id == survey_id,
-            Survey.deleted_at.is_(None)
-        ).first()
+        return (
+            self.db.query(Survey)
+            .filter(Survey.id == survey_id, Survey.deleted_at.is_(None))
+            .first()
+        )
 
     def get_active_surveys(self, skip: int = 0, limit: int = 100) -> list[Survey]:
         """Get active surveys"""
         now = datetime.utcnow()
-        return self.db.query(Survey).filter(
-            Survey.status == SurveyStatus.ACTIVE.value,
-            Survey.deleted_at.is_(None),
-            (Survey.start_date.is_(None) | (Survey.start_date <= now)),
-            (Survey.end_date.is_(None) | (Survey.end_date >= now))
-        ).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Survey)
+            .filter(
+                Survey.status == SurveyStatus.ACTIVE.value,
+                Survey.deleted_at.is_(None),
+                (Survey.start_date.is_(None) | (Survey.start_date <= now)),
+                (Survey.end_date.is_(None) | (Survey.end_date >= now)),
+            )
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
-    def get_by_status(self, status: SurveyStatus, skip: int = 0, limit: int = 100) -> list[Survey]:
+    def get_by_status(
+        self, status: SurveyStatus, skip: int = 0, limit: int = 100
+    ) -> list[Survey]:
         """Get surveys by status"""
-        return self.db.query(Survey).filter(
-            Survey.status == status.value,
-            Survey.deleted_at.is_(None)
-        ).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Survey)
+            .filter(Survey.status == status.value, Survey.deleted_at.is_(None))
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def update(self, survey: Survey) -> Survey:
         """Update survey"""
         from datetime import datetime
+
         survey.updated_at = datetime.utcnow()
         self.db.commit()
         self.db.refresh(survey)
@@ -57,9 +71,13 @@ class SurveyRepository(ISurveyRepository):
 
     def get_all(self, skip: int = 0, limit: int = 100):
         """Get all surveys"""
-        return self.db.query(Survey).filter(
-            Survey.deleted_at.is_(None)
-        ).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Survey)
+            .filter(Survey.deleted_at.is_(None))
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def delete(self, survey_id: UUID) -> bool:
         """Delete survey"""
@@ -69,4 +87,3 @@ class SurveyRepository(ISurveyRepository):
             self.db.commit()
             return True
         return False
-

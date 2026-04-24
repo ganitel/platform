@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Review Repository Implementation
 """
+
 from typing import Any
 from uuid import UUID
 
@@ -26,46 +27,71 @@ class ReviewRepository(IReviewRepository):
 
     def get_by_id(self, review_id: UUID) -> Review | None:
         """Get review by ID"""
-        return self.db.query(Review).filter(
-            Review.id == review_id,
-            Review.deleted_at.is_(None)
-        ).first()
+        return (
+            self.db.query(Review)
+            .filter(Review.id == review_id, Review.deleted_at.is_(None))
+            .first()
+        )
 
-    def get_by_service_id(self, service_id: UUID, skip: int = 0, limit: int = 100) -> list[Review]:
+    def get_by_service_id(
+        self, service_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Review]:
         """Get reviews by service ID"""
-        return self.db.query(Review).filter(
-            Review.service_id == service_id,
-            Review.deleted_at.is_(None),
-            Review.status == "published"
-        ).order_by(Review.created_at.desc()).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Review)
+            .filter(
+                Review.service_id == service_id,
+                Review.deleted_at.is_(None),
+                Review.status == "published",
+            )
+            .order_by(Review.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
-    def get_by_user_id(self, user_id: UUID, skip: int = 0, limit: int = 100) -> list[Review]:
+    def get_by_user_id(
+        self, user_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Review]:
         """Get reviews by user ID"""
-        return self.db.query(Review).filter(
-            Review.user_id == user_id,
-            Review.deleted_at.is_(None)
-        ).order_by(Review.created_at.desc()).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Review)
+            .filter(Review.user_id == user_id, Review.deleted_at.is_(None))
+            .order_by(Review.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def get_by_service_and_user(self, service_id: UUID, user_id: UUID) -> Review | None:
         """Get review by service and user"""
-        return self.db.query(Review).filter(
-            Review.service_id == service_id,
-            Review.user_id == user_id,
-            Review.deleted_at.is_(None)
-        ).first()
+        return (
+            self.db.query(Review)
+            .filter(
+                Review.service_id == service_id,
+                Review.user_id == user_id,
+                Review.deleted_at.is_(None),
+            )
+            .first()
+        )
 
     def get_average_rating(self, service_id: UUID) -> float:
         """Get average rating for service"""
-        result = self.db.query(func.avg(Review.overall_rating)).filter(
-            Review.service_id == service_id,
-            Review.deleted_at.is_(None),
-            Review.status == "published"
-        ).scalar()
+        result = (
+            self.db.query(func.avg(Review.overall_rating))
+            .filter(
+                Review.service_id == service_id,
+                Review.deleted_at.is_(None),
+                Review.status == "published",
+            )
+            .scalar()
+        )
         return float(result) if result else 0.0
 
     def update(self, review: Review) -> Review:
         """Update review"""
         from datetime import datetime
+
         review.updated_at = datetime.utcnow()
         self.db.commit()
         self.db.refresh(review)
@@ -73,9 +99,13 @@ class ReviewRepository(IReviewRepository):
 
     def get_all(self, skip: int = 0, limit: int = 100):
         """Get all reviews"""
-        return self.db.query(Review).filter(
-            Review.deleted_at.is_(None)
-        ).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Review)
+            .filter(Review.deleted_at.is_(None))
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def delete(self, review_id: UUID) -> bool:
         """Delete review"""
@@ -103,4 +133,3 @@ class ReviewRepository(IReviewRepository):
                     query = query.filter(getattr(Review, key) == value)
 
         return query.count()
-

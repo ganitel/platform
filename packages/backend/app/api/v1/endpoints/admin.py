@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Admin Endpoints
 """
+
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -20,10 +21,10 @@ from app.infrastructure.repositories.wallet_repository import WalletRepository
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+
 @router.get("/stats")
 async def get_stats(
-    current_user: User = Depends(get_current_admin),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_admin), db: Session = Depends(get_db)
 ):
     """Get admin dashboard statistics"""
     try:
@@ -40,7 +41,7 @@ async def get_stats(
             booking_repository=booking_repository,
             payment_repository=payment_repository,
             review_repository=review_repository,
-            wallet_repository=wallet_repository
+            wallet_repository=wallet_repository,
         )
 
         stats = use_case.execute()
@@ -49,6 +50,5 @@ async def get_stats(
         logger.exception("Failed to get admin dashboard statistics")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get statistics"
-        )
-
+            detail="Failed to get statistics",
+        ) from None

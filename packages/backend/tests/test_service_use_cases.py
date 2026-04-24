@@ -1,6 +1,7 @@
 """
 Unit tests for service (listing) use cases
 """
+
 from unittest.mock import MagicMock
 from uuid import uuid4
 
@@ -32,7 +33,9 @@ def test_update_service_success():
 
     use_case = UpdateServiceUseCase(repository)
 
-    result = use_case.execute(service.id, provider_id, {"title": "Super listing", "base_price": 60000})
+    result = use_case.execute(
+        service.id, provider_id, {"title": "Super listing", "base_price": 60000}
+    )
 
     repository.update.assert_called_once()
     assert result == service
@@ -77,4 +80,3 @@ def test_delete_service_not_found():
 
     with pytest.raises(ServiceNotFoundError):
         use_case.execute(uuid4(), uuid4())
-

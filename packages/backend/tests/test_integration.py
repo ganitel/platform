@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Integration Tests
 Complete user flows and scenarios
 """
+
 from datetime import date, timedelta
 
 from fastapi import status
@@ -21,28 +22,24 @@ class TestCompleteUserFlow:
                 "password": "password123",
                 "first_name": "Flow",
                 "last_name": "Test",
-                "user_type": "traveler"
-            }
+                "user_type": "traveler",
+            },
         )
         assert register_response.status_code == status.HTTP_201_CREATED
         user_data = register_response.json()
-        user_id = user_data["id"]
+        _ = user_data["id"]
 
         # 2. Login
         login_response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": "flow@example.com",
-                "password": "password123"
-            }
+            json={"identifier": "flow@example.com", "password": "password123"},
         )
         assert login_response.status_code == status.HTTP_200_OK
         token = login_response.json()["access_token"]
 
         # 3. Get profile
         profile_response = client.get(
-            "/api/v1/users/me",
-            headers={"Authorization": f"Bearer {token}"}
+            "/api/v1/users/me", headers={"Authorization": f"Bearer {token}"}
         )
         assert profile_response.status_code == status.HTTP_200_OK
         assert profile_response.json()["email"] == "flow@example.com"
@@ -51,10 +48,7 @@ class TestCompleteUserFlow:
         update_response = client.put(
             "/api/v1/users/me",
             headers={"Authorization": f"Bearer {token}"},
-            json={
-                "bio": "Updated bio",
-                "city": "Yaoundé"
-            }
+            json={"bio": "Updated bio", "city": "Yaoundé"},
         )
         assert update_response.status_code == status.HTTP_200_OK
         assert update_response.json()["bio"] == "Updated bio"
@@ -78,8 +72,8 @@ class TestCompleteServiceFlow:
                 "city": "Douala",
                 "address": "123 Test Street",
                 "base_price": 30000,
-                "currency": "XAF"
-            }
+                "currency": "XAF",
+            },
         )
         assert create_response.status_code == status.HTTP_201_CREATED
         service_data = create_response.json()
@@ -94,10 +88,7 @@ class TestCompleteServiceFlow:
         update_response = client.put(
             f"/api/v1/services/{service_id}",
             headers={"Authorization": f"Bearer {provider_token}"},
-            json={
-                "title": "Updated Integration Test Service",
-                "base_price": 35000
-            }
+            json={"title": "Updated Integration Test Service", "base_price": 35000},
         )
         assert update_response.status_code == status.HTTP_200_OK
         assert update_response.json()["title"] == "Updated Integration Test Service"
@@ -105,7 +96,7 @@ class TestCompleteServiceFlow:
         # 4. Delete service
         delete_response = client.delete(
             f"/api/v1/services/{service_id}",
-            headers={"Authorization": f"Bearer {provider_token}"}
+            headers={"Authorization": f"Bearer {provider_token}"},
         )
         assert delete_response.status_code == status.HTTP_200_OK
 
@@ -126,8 +117,8 @@ class TestCompleteBookingFlow:
                 "service_id": str(sample_service.id),
                 "start_date": start_date.isoformat(),
                 "end_date": end_date.isoformat(),
-                "guests": 2
-            }
+                "guests": 2,
+            },
         )
         assert create_response.status_code == status.HTTP_201_CREATED
         booking_data = create_response.json()
@@ -136,7 +127,7 @@ class TestCompleteBookingFlow:
         # 2. Get booking
         get_response = client.get(
             f"/api/v1/bookings/{booking_id}",
-            headers={"Authorization": f"Bearer {auth_token}"}
+            headers={"Authorization": f"Bearer {auth_token}"},
         )
         assert get_response.status_code == status.HTTP_200_OK
         assert get_response.json()["status"] == "pending"
@@ -144,8 +135,7 @@ class TestCompleteBookingFlow:
         # 3. Cancel booking
         cancel_response = client.put(
             f"/api/v1/bookings/{booking_id}/cancel",
-            headers={"Authorization": f"Bearer {auth_token}"}
+            headers={"Authorization": f"Bearer {auth_token}"},
         )
         assert cancel_response.status_code == status.HTTP_200_OK
         assert cancel_response.json()["booking"]["status"] == "cancelled"
-

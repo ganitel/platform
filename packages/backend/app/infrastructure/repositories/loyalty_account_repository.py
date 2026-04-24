@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Loyalty Account Repository Implementation
 """
+
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -24,11 +25,19 @@ class LoyaltyAccountRepository(ILoyaltyAccountRepository):
 
     def get_by_id(self, account_id: UUID) -> LoyaltyAccount | None:
         """Get loyalty account by ID"""
-        return self.db.query(LoyaltyAccount).filter(LoyaltyAccount.id == account_id).first()
+        return (
+            self.db.query(LoyaltyAccount)
+            .filter(LoyaltyAccount.id == account_id)
+            .first()
+        )
 
     def get_by_user_id(self, user_id: UUID) -> LoyaltyAccount | None:
         """Get loyalty account by user ID"""
-        return self.db.query(LoyaltyAccount).filter(LoyaltyAccount.user_id == user_id).first()
+        return (
+            self.db.query(LoyaltyAccount)
+            .filter(LoyaltyAccount.user_id == user_id)
+            .first()
+        )
 
     def create_for_user(self, user_id: UUID) -> LoyaltyAccount:
         """Create loyalty account for user"""
@@ -38,6 +47,7 @@ class LoyaltyAccountRepository(ILoyaltyAccountRepository):
     def update(self, loyalty_account: LoyaltyAccount) -> LoyaltyAccount:
         """Update loyalty account"""
         from datetime import datetime
+
         loyalty_account.updated_at = datetime.utcnow()
         self.db.commit()
         self.db.refresh(loyalty_account)
@@ -55,4 +65,3 @@ class LoyaltyAccountRepository(ILoyaltyAccountRepository):
             self.db.commit()
             return True
         return False
-

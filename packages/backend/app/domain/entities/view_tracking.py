@@ -1,7 +1,8 @@
 """
 Ganitel V2 Backend - View Tracking Entity
 """
-from enum import Enum
+
+from enum import StrEnum
 
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -9,8 +10,9 @@ from sqlalchemy.dialects.postgresql import UUID
 from app.domain.entities.base import AuditableEntity
 
 
-class ViewType(str, Enum):
+class ViewType(StrEnum):
     """View type enumeration"""
+
     SERVICE = "service"
     PROFILE = "profile"
     POST = "post"
@@ -21,10 +23,13 @@ class ViewTracking(AuditableEntity):
     """
     View Tracking entity for analytics
     """
+
     __tablename__ = "view_trackings"
 
     # Relationships
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)  # Nullable for anonymous views
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True
+    )  # Nullable for anonymous views
     entity_type = Column(String(50), nullable=False, index=True)
     entity_id = Column(UUID(as_uuid=True), nullable=False, index=True)
 
@@ -39,4 +44,3 @@ class ViewTracking(AuditableEntity):
 
     def __repr__(self):
         return f"<ViewTracking(id={self.id}, entity_type={self.entity_type}, view_type={self.view_type})>"
-

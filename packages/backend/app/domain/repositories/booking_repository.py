@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Booking Repository Interface
 """
+
 from abc import abstractmethod
 from datetime import date
 from uuid import UUID
@@ -15,12 +16,16 @@ class IBookingRepository(BaseRepository[Booking]):
     """
 
     @abstractmethod
-    def get_by_user(self, user_id: UUID, skip: int = 0, limit: int = 100) -> list[Booking]:
+    def get_by_user(
+        self, user_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Booking]:
         """Get bookings by user"""
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_service(self, service_id: UUID, skip: int = 0, limit: int = 100) -> list[Booking]:
+    def get_by_service(
+        self, service_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Booking]:
         """Get bookings by service/listing"""
         raise NotImplementedError
 
@@ -35,7 +40,9 @@ class IBookingRepository(BaseRepository[Booking]):
         raise NotImplementedError
 
     @abstractmethod
-    def find_by_status(self, status: BookingStatus, skip: int = 0, limit: int = 100) -> list[Booking]:
+    def find_by_status(
+        self, status: BookingStatus, skip: int = 0, limit: int = 100
+    ) -> list[Booking]:
         """Find bookings by status"""
         raise NotImplementedError
 
@@ -43,5 +50,3 @@ class IBookingRepository(BaseRepository[Booking]):
     def find_user_booking(self, user_id: UUID, booking_id: UUID) -> Booking | None:
         """Get booking by id ensuring ownership"""
         raise NotImplementedError
-
-

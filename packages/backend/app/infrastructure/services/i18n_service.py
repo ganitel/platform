@@ -1,8 +1,10 @@
 """
 Ganitel V2 Backend - Internationalization Service
 """
+
 import json
 from pathlib import Path
+from typing import ClassVar
 
 
 class I18nService:
@@ -10,12 +12,12 @@ class I18nService:
 
     TRANSLATIONS_DIR = Path("translations")
     DEFAULT_LANGUAGE = "fr"
-    SUPPORTED_LANGUAGES = ["fr", "en"]
+    SUPPORTED_LANGUAGES: ClassVar[list[str]] = ["fr", "en"]
 
-    _translations: dict[str, dict[str, str]] = {}
+    _translations: ClassVar[dict[str, dict[str, str]]] = {}
 
     @classmethod
-    def load_translations(cls, language: str = None) -> dict[str, str]:
+    def load_translations(cls, language: str | None = None) -> dict[str, str]:
         """Load translations for a language"""
         lang = language or cls.DEFAULT_LANGUAGE
 
@@ -34,7 +36,7 @@ class I18nService:
         return {}
 
     @classmethod
-    def translate(cls, key: str, language: str = None, **kwargs) -> str:
+    def translate(cls, key: str, language: str | None = None, **kwargs) -> str:
         """
         Translate a key
 
@@ -62,4 +64,3 @@ class I18nService:
     def get_supported_languages(cls) -> list[str]:
         """Get list of supported languages"""
         return cls.SUPPORTED_LANGUAGES
-

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Notification API Schemas
 """
+
 from datetime import datetime
 from typing import Any
 
@@ -9,6 +10,7 @@ from pydantic import BaseModel, Field
 
 class NotificationResponse(BaseModel):
     """Notification response schema"""
+
     id: str
     user_id: str
     notification_type: str
@@ -28,8 +30,10 @@ class NotificationResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class NotificationCreateRequest(BaseModel):
     """Create notification request schema"""
+
     user_id: str = Field(..., description="User ID")
     notification_type: str = Field(..., description="Notification type")
     title: str = Field(..., max_length=200, description="Notification title")
@@ -38,4 +42,3 @@ class NotificationCreateRequest(BaseModel):
     data: dict[str, Any] | None = None
     action_url: str | None = None
     action_label: str | None = None
-

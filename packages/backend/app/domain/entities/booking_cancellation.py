@@ -1,7 +1,8 @@
 """
 Ganitel V2 Backend - Booking Cancellation Entity
 """
-from enum import Enum
+
+from enum import StrEnum
 
 from sqlalchemy import Column, DateTime, ForeignKey, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import UUID
@@ -9,8 +10,9 @@ from sqlalchemy.dialects.postgresql import UUID
 from app.domain.entities.base import AuditableEntity
 
 
-class CancellationReason(str, Enum):
+class CancellationReason(StrEnum):
     """Cancellation reason enumeration"""
+
     USER_REQUEST = "user_request"
     PROVIDER_REQUEST = "provider_request"
     PAYMENT_FAILED = "payment_failed"
@@ -20,8 +22,9 @@ class CancellationReason(str, Enum):
     OTHER = "other"
 
 
-class CancellationStatus(str, Enum):
+class CancellationStatus(StrEnum):
     """Cancellation status enumeration"""
+
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -32,15 +35,26 @@ class BookingCancellation(AuditableEntity):
     """
     Booking Cancellation entity for detailed cancellation tracking
     """
+
     __tablename__ = "booking_cancellations"
 
     # Relationships
-    booking_id = Column(UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=False, unique=True, index=True)
-    cancelled_by_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    booking_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("bookings.id"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+    cancelled_by_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )
 
     # Cancellation Information
     reason = Column(String(50), nullable=False, index=True)
-    status = Column(String(20), default=CancellationStatus.PENDING.value, nullable=False, index=True)
+    status = Column(
+        String(20), default=CancellationStatus.PENDING.value, nullable=False, index=True
+    )
     cancellation_message = Column(Text, nullable=True)
 
     # Refund Information
@@ -54,4 +68,3 @@ class BookingCancellation(AuditableEntity):
 
     def __repr__(self):
         return f"<BookingCancellation(id={self.id}, booking_id={self.booking_id}, reason={self.reason})>"
-

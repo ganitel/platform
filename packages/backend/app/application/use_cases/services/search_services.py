@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Search Services Use Case
 """
+
 from datetime import date
 from typing import Any
 
@@ -80,23 +81,27 @@ class SearchServicesUseCase:
             if city:
                 criteria["city"] = city
 
-            services = self.service_repository.find_by_criteria(criteria, skip=skip, limit=limit)
+            services = self.service_repository.find_by_criteria(
+                criteria, skip=skip, limit=limit
+            )
             total = self.service_repository.count(criteria)
 
         # Convert services to dict format
         services_data = []
         for service in services:
-            services_data.append({
-                "id": str(service.id),
-                "title": service.title,
-                "description": service.description,
-                "service_type": service.service_type,
-                "base_price": float(service.base_price),
-                "currency": service.currency,
-                "country": service.country,
-                "city": service.city,
-                "images": service.images or [],
-            })
+            services_data.append(
+                {
+                    "id": str(service.id),
+                    "title": service.title,
+                    "description": service.description,
+                    "service_type": service.service_type,
+                    "base_price": float(service.base_price),
+                    "currency": service.currency,
+                    "country": service.country,
+                    "city": service.city,
+                    "images": service.images or [],
+                }
+            )
 
         pages = (total + limit - 1) // limit if limit > 0 else 1
         current_page = (skip // limit) + 1 if limit > 0 else 1
@@ -115,10 +120,13 @@ class SearchServicesUseCase:
                 "query": query,
                 "service_type": service_type.value if service_type else None,
                 "location": f"{city}, {country}" if city and country else None,
-                "price_range": f"{min_price}-{max_price}" if min_price and max_price else None,
+                "price_range": f"{min_price}-{max_price}"
+                if min_price and max_price
+                else None,
                 "amenities": amenities,
                 "guests": max_guests,
-                "dates": f"{check_in} to {check_out}" if check_in and check_out else None,
+                "dates": f"{check_in} to {check_out}"
+                if check_in and check_out
+                else None,
             },
         }
-

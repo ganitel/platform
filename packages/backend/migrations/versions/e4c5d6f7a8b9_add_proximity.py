@@ -5,6 +5,7 @@ Revises: f8a9c0e1b2d3
 Create Date: 2026-02-15 11:00:00.000000
 
 """
+
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -35,7 +36,9 @@ def upgrade() -> None:
     )
 
     # Create indices
-    op.create_index(op.f("ix_proximities_property_id"), "proximities", ["property_id"], unique=False)
+    op.create_index(
+        op.f("ix_proximities_property_id"), "proximities", ["property_id"], unique=False
+    )
 
 
 def downgrade() -> None:

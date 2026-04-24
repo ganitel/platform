@@ -1,15 +1,17 @@
 """
 Ganitel V2 Backend - Policy Entity
 """
-from enum import Enum
+
+from enum import StrEnum
 
 from sqlalchemy import Boolean, Column, Integer, String, Text
 
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity
 
 
-class PolicyType(str, Enum):
+class PolicyType(StrEnum):
     """Policy type enumeration"""
+
     TERMS = "terms"
     PRIVACY = "privacy"
     REFUND = "refund"
@@ -22,6 +24,7 @@ class Policy(AuditableEntity, SoftDeleteEntity):
     """
     Policy entity for platform policies
     """
+
     __tablename__ = "policies"
 
     # Basic Information
@@ -39,4 +42,3 @@ class Policy(AuditableEntity, SoftDeleteEntity):
 
     def __repr__(self):
         return f"<Policy(id={self.id}, title={self.title}, type={self.policy_type})>"
-

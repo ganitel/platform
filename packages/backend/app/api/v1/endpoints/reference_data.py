@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Reference Data Endpoints
 Endpoints for accessing locations, property types, amenities, etc.
 """
+
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -64,9 +65,7 @@ router = APIRouter(tags=["reference_data"])
 
 
 @router.get("/locations", response_model=list[LocationResponse])
-async def get_locations(
-    db: Session = Depends(get_db)
-):
+async def get_locations(db: Session = Depends(get_db)):
     """
     Get all available locations
     """
@@ -75,102 +74,89 @@ async def get_locations(
 
 
 @router.get("/locations/{location_id}", response_model=LocationResponse)
-async def get_location(
-    location_id: str,
-    db: Session = Depends(get_db)
-):
+async def get_location(location_id: str, db: Session = Depends(get_db)):
     """
     Get a specific location by ID
     """
-    location = db.query(Location).filter(
-        Location.id == location_id,
-        Location.deleted_at.is_(None)
-    ).first()
+    location = (
+        db.query(Location)
+        .filter(Location.id == location_id, Location.deleted_at.is_(None))
+        .first()
+    )
 
     if not location:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Location not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Location not found"
         )
 
     return location
 
 
 @router.get("/property-types", response_model=list[PropertyTypeResponse])
-async def get_property_types(
-    db: Session = Depends(get_db)
-):
+async def get_property_types(db: Session = Depends(get_db)):
     """
     Get all available property types
     """
-    property_types = db.query(PropertyType).filter(
-        PropertyType.deleted_at.is_(None)
-    ).all()
+    property_types = (
+        db.query(PropertyType).filter(PropertyType.deleted_at.is_(None)).all()
+    )
     return property_types
 
 
 @router.get("/property-types/{property_type_id}", response_model=PropertyTypeResponse)
-async def get_property_type(
-    property_type_id: str,
-    db: Session = Depends(get_db)
-):
+async def get_property_type(property_type_id: str, db: Session = Depends(get_db)):
     """
     Get a specific property type by ID
     """
-    property_type = db.query(PropertyType).filter(
-        PropertyType.id == property_type_id,
-        PropertyType.deleted_at.is_(None)
-    ).first()
+    property_type = (
+        db.query(PropertyType)
+        .filter(PropertyType.id == property_type_id, PropertyType.deleted_at.is_(None))
+        .first()
+    )
 
     if not property_type:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Property type not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Property type not found"
         )
 
     return property_type
 
 
 @router.get("/amenity-categories", response_model=list[AmenityCategoryResponse])
-async def get_amenity_categories(
-    db: Session = Depends(get_db)
-):
+async def get_amenity_categories(db: Session = Depends(get_db)):
     """
     Get all amenity categories with their amenities
     """
-    categories = db.query(AmenityCategory).filter(
-        AmenityCategory.deleted_at.is_(None)
-    ).order_by(AmenityCategory.display_order).all()
+    categories = (
+        db.query(AmenityCategory)
+        .filter(AmenityCategory.deleted_at.is_(None))
+        .order_by(AmenityCategory.display_order)
+        .all()
+    )
     return categories
 
 
 @router.get("/amenity-categories/{category_id}", response_model=AmenityCategoryResponse)
-async def get_amenity_category(
-    category_id: str,
-    db: Session = Depends(get_db)
-):
+async def get_amenity_category(category_id: str, db: Session = Depends(get_db)):
     """
     Get a specific amenity category with its amenities
     """
-    category = db.query(AmenityCategory).filter(
-        AmenityCategory.id == category_id,
-        AmenityCategory.deleted_at.is_(None)
-    ).first()
+    category = (
+        db.query(AmenityCategory)
+        .filter(AmenityCategory.id == category_id, AmenityCategory.deleted_at.is_(None))
+        .first()
+    )
 
     if not category:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Amenity category not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Amenity category not found"
         )
 
     return category
 
 
 @router.get("/amenities", response_model=list[AmenityResponse])
-async def get_amenities(
-    category_id: str | None = None,
-    db: Session = Depends(get_db)
-):
+async def get_amenities(category_id: str | None = None, db: Session = Depends(get_db)):
     """
     Get all amenities, optionally filtered by category
     """
@@ -184,22 +170,19 @@ async def get_amenities(
 
 
 @router.get("/amenities/{amenity_id}", response_model=AmenityResponse)
-async def get_amenity(
-    amenity_id: str,
-    db: Session = Depends(get_db)
-):
+async def get_amenity(amenity_id: str, db: Session = Depends(get_db)):
     """
     Get a specific amenity by ID
     """
-    amenity = db.query(Amenity).filter(
-        Amenity.id == amenity_id,
-        Amenity.deleted_at.is_(None)
-    ).first()
+    amenity = (
+        db.query(Amenity)
+        .filter(Amenity.id == amenity_id, Amenity.deleted_at.is_(None))
+        .first()
+    )
 
     if not amenity:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Amenity not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Amenity not found"
         )
 
     return amenity

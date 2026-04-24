@@ -1,9 +1,10 @@
 """
 Ganitel V2 Backend - Delete Property Use Case
 """
+
 from uuid import UUID
 
-from app.exceptions import GanitelException
+from app.exceptions import GanitelError
 
 
 class DeletePropertyUseCase:
@@ -19,17 +20,11 @@ class DeletePropertyUseCase:
         property = self.property_repository.get_by_id(property_id)
 
         if not property or property.deleted_at is not None:
-            raise GanitelException(
-                message="Property not found",
-                status_code=404
-            )
+            raise GanitelError(message="Property not found", status_code=404)
 
         # Check authorization
         if property.provider_id != provider_id:
-            raise GanitelException(
-                message="Unauthorized",
-                status_code=403
-            )
+            raise GanitelError(message="Unauthorized", status_code=403)
 
         # Delete property
         self.property_repository.delete(property_id)

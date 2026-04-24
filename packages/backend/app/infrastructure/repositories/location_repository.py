@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Location Repository Implementation
 """
+
 from typing import Any
 from uuid import UUID
 
@@ -26,23 +27,29 @@ class LocationRepository:
 
     def get_by_id(self, location_id: UUID) -> Location | None:
         """Get location by ID"""
-        return self.db.query(Location).filter(
-            Location.id == location_id,
-            Location.deleted_at.is_(None)
-        ).first()
+        return (
+            self.db.query(Location)
+            .filter(Location.id == location_id, Location.deleted_at.is_(None))
+            .first()
+        )
 
     def get_by_name(self, name: str) -> Location | None:
         """Get location by name"""
-        return self.db.query(Location).filter(
-            Location.name == name,
-            Location.deleted_at.is_(None)
-        ).first()
+        return (
+            self.db.query(Location)
+            .filter(Location.name == name, Location.deleted_at.is_(None))
+            .first()
+        )
 
     def get_all(self, skip: int = 0, limit: int = 100) -> list[Location]:
         """Get all locations with pagination"""
-        return self.db.query(Location).filter(
-            Location.deleted_at.is_(None)
-        ).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Location)
+            .filter(Location.deleted_at.is_(None))
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def count(self, filters: dict[str, Any] | None = None) -> int:
         """Count locations with optional filters"""
@@ -51,14 +58,18 @@ class LocationRepository:
 
     def exists(self, location_id: UUID) -> bool:
         """Check if location exists"""
-        return self.db.query(Location).filter(
-            Location.id == location_id,
-            Location.deleted_at.is_(None)
-        ).first() is not None
+        return (
+            self.db.query(Location)
+            .filter(Location.id == location_id, Location.deleted_at.is_(None))
+            .first()
+            is not None
+        )
 
     def exists_by_name(self, name: str) -> bool:
         """Check if location exists by name"""
-        return self.db.query(Location).filter(
-            Location.name == name,
-            Location.deleted_at.is_(None)
-        ).first() is not None
+        return (
+            self.db.query(Location)
+            .filter(Location.name == name, Location.deleted_at.is_(None))
+            .first()
+            is not None
+        )

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Wallet Repository Implementation
 """
+
 from typing import Any
 from uuid import UUID
 
@@ -39,6 +40,7 @@ class WalletRepository(IWalletRepository):
     def update(self, wallet: Wallet) -> Wallet:
         """Update wallet"""
         from datetime import datetime
+
         wallet.updated_at = datetime.utcnow()
         self.db.commit()
         self.db.refresh(wallet)
@@ -67,4 +69,3 @@ class WalletRepository(IWalletRepository):
                     query = query.filter(getattr(Wallet, key) == value)
 
         return query.count()
-

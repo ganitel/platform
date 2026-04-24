@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Initiate Payment Use Case
 """
+
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -25,7 +26,7 @@ class InitiatePaymentUseCase:
         payment_repository: IPaymentRepository,
         booking_repository: IBookingRepository,
         user_repository: IUserRepository,
-        tranzak_client: TranzakClient
+        tranzak_client: TranzakClient,
     ):
         self.payment_repository = payment_repository
         self.booking_repository = booking_repository
@@ -36,9 +37,9 @@ class InitiatePaymentUseCase:
         self,
         booking_id: UUID,
         user_id: UUID,
-        payment_method: str = None,
-        callback_url: str = None,
-        return_url: str = None
+        payment_method: str | None = None,
+        callback_url: str | None = None,
+        return_url: str | None = None,
     ) -> dict[str, Any]:
         """
         Initiate payment for a booking
@@ -64,11 +65,16 @@ class InitiatePaymentUseCase:
 
         # Check if booking is in pending status
         if booking.status != "pending":
-            raise ValidationError(f"Cannot pay for booking with status: {booking.status}")
+            raise ValidationError(
+                f"Cannot pay for booking with status: {booking.status}"
+            )
 
         # Check if payment already exists
         existing_payment = self.payment_repository.get_by_booking_id(booking_id)
-        if existing_payment and existing_payment.status == PaymentStatus.COMPLETED.value:
+        if (
+            existing_payment
+            and existing_payment.status == PaymentStatus.COMPLETED.value
+        ):
             raise ConflictError("Payment already completed for this booking")
 
         # Get user details
@@ -99,7 +105,7 @@ class InitiatePaymentUseCase:
                 provider=PaymentProvider.TRANZAK.value,
                 payment_method=payment_method,
                 status=PaymentStatus.PENDING.value,
-                is_active=True
+                is_active=True,
             )
             payment = self.payment_repository.create(payment)
 
@@ -114,13 +120,17 @@ class InitiatePaymentUseCase:
                 customer_name=user.full_name,
                 reference=str(booking_id),
                 callback_url=callback_url,
-                return_url=return_url
+                return_url=return_url,
             )
 
             if not tranzak_response.get("success"):
-                payment.mark_failed(tranzak_response.get("error", "Payment initiation failed"))
+                payment.mark_failed(
+                    tranzak_response.get("error", "Payment initiation failed")
+                )
                 self.payment_repository.update(payment)
-                raise PaymentError(tranzak_response.get("error", "Payment initiation failed"))
+                raise PaymentError(
+                    tranzak_response.get("error", "Payment initiation failed")
+                )
 
             # Update payment with transaction ID
             payment.transaction_id = tranzak_response.get("transaction_id")
@@ -133,10 +143,10 @@ class InitiatePaymentUseCase:
                 "payment_url": tranzak_response.get("payment_url"),
                 "amount": float(payment.amount),
                 "currency": payment.currency,
-                "status": payment.status
+                "status": payment.status,
             }
 
         except Exception as e:
             payment.mark_failed(str(e))
             self.payment_repository.update(payment)
-            raise PaymentError(f"Payment initiation failed: {str(e)}")
+            raise PaymentError(f"Payment initiation failed: {e!s}") from e

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Add Balance Use Case
 """
+
 from decimal import Decimal
 from uuid import UUID
 
@@ -20,7 +21,7 @@ class AddBalanceUseCase:
     def __init__(
         self,
         wallet_repository: IWalletRepository,
-        transaction_repository: ITransactionRepository
+        transaction_repository: ITransactionRepository,
     ):
         self.wallet_repository = wallet_repository
         self.transaction_repository = transaction_repository
@@ -30,7 +31,7 @@ class AddBalanceUseCase:
         user_id: UUID,
         amount: Decimal,
         is_bonus: bool = False,
-        description: str = None
+        description: str | None = None,
     ) -> dict:
         """
         Add balance to wallet
@@ -60,16 +61,14 @@ class AddBalanceUseCase:
         transaction = Transaction(
             user_id=user_id,
             wallet_id=wallet.id,
-            transaction_type=TransactionType.DEPOSIT.value if not is_bonus else TransactionType.BONUS.value,
+            transaction_type=TransactionType.DEPOSIT.value
+            if not is_bonus
+            else TransactionType.BONUS.value,
             amount=amount,
             currency="XAF",
             description=description or f"Balance added: {amount} XAF",
-            status=TransactionStatus.COMPLETED.value
+            status=TransactionStatus.COMPLETED.value,
         )
         transaction = self.transaction_repository.create(transaction)
 
-        return {
-            "wallet": wallet,
-            "transaction": transaction
-        }
-
+        return {"wallet": wallet, "transaction": transaction}

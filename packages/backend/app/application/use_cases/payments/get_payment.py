@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Get Payment Use Case
 """
+
 from uuid import UUID
 
 from app.domain.entities.payment import Payment
@@ -15,10 +16,7 @@ class GetPaymentUseCase:
         self.payment_repository = payment_repository
 
     def execute(
-        self,
-        payment_id: UUID,
-        requester_id: UUID,
-        is_admin: bool = False
+        self, payment_id: UUID, requester_id: UUID, is_admin: bool = False
     ) -> Payment:
         """
         Get payment details

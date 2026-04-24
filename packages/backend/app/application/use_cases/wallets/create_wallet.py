@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Create Wallet Use Case
 """
+
 from uuid import UUID
 
 from app.domain.entities.wallet import Wallet
@@ -35,4 +36,3 @@ class CreateWalletUseCase:
         # Create wallet
         wallet = self.wallet_repository.create_for_user(user_id)
         return wallet
-

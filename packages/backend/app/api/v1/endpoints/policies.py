@@ -21,7 +21,7 @@ router = APIRouter(prefix="/policies", tags=["policies"])
 async def create_policy(
     request: PolicyCreateRequest,
     current_user: User = Depends(get_current_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Create a policy (admin only)"""
     try:
@@ -33,7 +33,7 @@ async def create_policy(
             content=request.content,
             policy_type=request.policy_type,
             slug=request.slug,
-            display_order=request.display_order
+            display_order=request.display_order,
         )
 
         return PolicyResponse(
@@ -46,31 +46,27 @@ async def create_policy(
             display_order=policy.display_order,
             version=policy.version,
             created_at=policy.created_at,
-            updated_at=policy.updated_at
+            updated_at=policy.updated_at,
         )
     except ValidationError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
     except ConflictError as e:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create policy"
-        )
+            detail="Failed to create policy",
+        ) from None
 
 
 @router.get("/", response_model=list[PolicyResponse])
 async def get_policies(
-    policy_type: str = None,
+    policy_type: str | None = None,
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get policies"""
     try:
@@ -96,22 +92,19 @@ async def get_policies(
                 display_order=p.display_order,
                 version=p.version,
                 created_at=p.created_at,
-                updated_at=p.updated_at
+                updated_at=p.updated_at,
             )
             for p in policies
         ]
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get policies"
-        )
+            detail="Failed to get policies",
+        ) from None
 
 
 @router.get("/{slug}", response_model=PolicyResponse)
-async def get_policy_by_slug(
-    slug: str,
-    db: Session = Depends(get_db)
-):
+async def get_policy_by_slug(slug: str, db: Session = Depends(get_db)):
     """Get policy by slug"""
     try:
         repository = PolicyRepository(db)
@@ -119,8 +112,7 @@ async def get_policy_by_slug(
 
         if not policy:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Policy not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Policy not found"
             )
 
         return PolicyResponse(
@@ -133,13 +125,12 @@ async def get_policy_by_slug(
             display_order=policy.display_order,
             version=policy.version,
             created_at=policy.created_at,
-            updated_at=policy.updated_at
+            updated_at=policy.updated_at,
         )
     except HTTPException:
         raise
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get policy"
-        )
-
+            detail="Failed to get policy",
+        ) from None

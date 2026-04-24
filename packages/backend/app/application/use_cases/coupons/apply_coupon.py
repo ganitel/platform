@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Apply Coupon Use Case
 """
+
 from decimal import Decimal
 from uuid import UUID
 
@@ -14,7 +15,9 @@ class ApplyCouponUseCase:
     def __init__(self, coupon_repository: ICouponRepository):
         self.coupon_repository = coupon_repository
 
-    def execute(self, coupon_code: str, amount: Decimal, user_id: UUID = None) -> dict:
+    def execute(
+        self, coupon_code: str, amount: Decimal, user_id: UUID | None = None
+    ) -> dict:
         """
         Apply coupon to amount
 
@@ -52,6 +55,5 @@ class ApplyCouponUseCase:
             "original_amount": float(amount),
             "discount": discount,
             "final_amount": final_amount,
-            "currency": coupon.currency
+            "currency": coupon.currency,
         }
-

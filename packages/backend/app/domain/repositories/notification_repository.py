@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Notification Repository Interface
 """
+
 from abc import abstractmethod
 from uuid import UUID
 
@@ -12,7 +13,9 @@ class INotificationRepository(BaseRepository[Notification]):
     """Notification repository interface"""
 
     @abstractmethod
-    def get_by_user_id(self, user_id: UUID, skip: int = 0, limit: int = 100, unread_only: bool = False) -> list[Notification]:
+    def get_by_user_id(
+        self, user_id: UUID, skip: int = 0, limit: int = 100, unread_only: bool = False
+    ) -> list[Notification]:
         """Get notifications by user ID"""
         raise NotImplementedError
 
@@ -30,4 +33,3 @@ class INotificationRepository(BaseRepository[Notification]):
     def get_unread_count(self, user_id: UUID) -> int:
         """Get unread notification count"""
         raise NotImplementedError
-

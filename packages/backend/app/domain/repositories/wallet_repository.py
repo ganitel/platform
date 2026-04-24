@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Wallet Repository Interface
 """
+
 from abc import abstractmethod
 from uuid import UUID
 
@@ -20,4 +21,3 @@ class IWalletRepository(BaseRepository[Wallet]):
     def create_for_user(self, user_id: UUID) -> Wallet:
         """Create wallet for user"""
         raise NotImplementedError
-

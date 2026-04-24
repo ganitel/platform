@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Property Type Repository Implementation
 """
+
 from typing import Any
 from uuid import UUID
 
@@ -26,23 +27,31 @@ class PropertyTypeRepository:
 
     def get_by_id(self, property_type_id: UUID) -> PropertyType | None:
         """Get property type by ID"""
-        return self.db.query(PropertyType).filter(
-            PropertyType.id == property_type_id,
-            PropertyType.deleted_at.is_(None)
-        ).first()
+        return (
+            self.db.query(PropertyType)
+            .filter(
+                PropertyType.id == property_type_id, PropertyType.deleted_at.is_(None)
+            )
+            .first()
+        )
 
     def get_by_name(self, name: str) -> PropertyType | None:
         """Get property type by name"""
-        return self.db.query(PropertyType).filter(
-            PropertyType.name == name,
-            PropertyType.deleted_at.is_(None)
-        ).first()
+        return (
+            self.db.query(PropertyType)
+            .filter(PropertyType.name == name, PropertyType.deleted_at.is_(None))
+            .first()
+        )
 
     def get_all(self, skip: int = 0, limit: int = 100) -> list[PropertyType]:
         """Get all property types with pagination"""
-        return self.db.query(PropertyType).filter(
-            PropertyType.deleted_at.is_(None)
-        ).offset(skip).limit(limit).all()
+        return (
+            self.db.query(PropertyType)
+            .filter(PropertyType.deleted_at.is_(None))
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def count(self, filters: dict[str, Any] | None = None) -> int:
         """Count property types with optional filters"""
@@ -51,14 +60,20 @@ class PropertyTypeRepository:
 
     def exists(self, property_type_id: UUID) -> bool:
         """Check if property type exists"""
-        return self.db.query(PropertyType).filter(
-            PropertyType.id == property_type_id,
-            PropertyType.deleted_at.is_(None)
-        ).first() is not None
+        return (
+            self.db.query(PropertyType)
+            .filter(
+                PropertyType.id == property_type_id, PropertyType.deleted_at.is_(None)
+            )
+            .first()
+            is not None
+        )
 
     def exists_by_name(self, name: str) -> bool:
         """Check if property type exists by name"""
-        return self.db.query(PropertyType).filter(
-            PropertyType.name == name,
-            PropertyType.deleted_at.is_(None)
-        ).first() is not None
+        return (
+            self.db.query(PropertyType)
+            .filter(PropertyType.name == name, PropertyType.deleted_at.is_(None))
+            .first()
+            is not None
+        )

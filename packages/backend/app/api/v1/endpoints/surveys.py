@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Survey Endpoints
 """
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -19,7 +20,7 @@ router = APIRouter(prefix="/surveys", tags=["surveys"])
 async def create_survey(
     request: SurveyCreateRequest,
     current_user: User = Depends(get_current_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Create a survey (admin only)"""
     try:
@@ -33,7 +34,7 @@ async def create_survey(
             start_date=request.start_date,
             end_date=request.end_date,
             is_anonymous=request.is_anonymous,
-            allow_multiple_responses=request.allow_multiple_responses
+            allow_multiple_responses=request.allow_multiple_responses,
         )
 
         return SurveyResponse(
@@ -48,25 +49,22 @@ async def create_survey(
             allow_multiple_responses=survey.allow_multiple_responses,
             response_count=survey.response_count,
             created_at=survey.created_at,
-            updated_at=survey.updated_at
+            updated_at=survey.updated_at,
         )
     except ValidationError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create survey"
-        )
+            detail="Failed to create survey",
+        ) from None
 
 
 @router.get("/active", response_model=list[SurveyResponse])
 async def get_active_surveys(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db)
+    skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 ):
     """Get active surveys"""
     try:
@@ -86,13 +84,12 @@ async def get_active_surveys(
                 allow_multiple_responses=s.allow_multiple_responses,
                 response_count=s.response_count,
                 created_at=s.created_at,
-                updated_at=s.updated_at
+                updated_at=s.updated_at,
             )
             for s in surveys
         ]
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get active surveys"
-        )
-
+            detail="Failed to get active surveys",
+        ) from None

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Validation Tests
 """
+
 from datetime import date, timedelta
 
 import pytest
@@ -21,7 +22,7 @@ class TestUserCreateRequestValidation:
             password="password123",
             first_name="Test",
             last_name="User",
-            user_type="traveler"
+            user_type="traveler",
         )
         assert request.email == "test@example.com"
         assert request.user_type == "traveler"
@@ -29,11 +30,7 @@ class TestUserCreateRequestValidation:
     def test_user_create_request_missing_email_and_phone(self):
         """Test user creation fails without email or phone"""
         with pytest.raises(PydanticValidationError):
-            UserCreateRequest(
-                first_name="Test",
-                last_name="User",
-                user_type="traveler"
-            )
+            UserCreateRequest(first_name="Test", last_name="User", user_type="traveler")
 
     def test_user_create_request_invalid_email(self):
         """Test user creation fails with invalid email"""
@@ -43,7 +40,7 @@ class TestUserCreateRequestValidation:
                 password="password123",
                 first_name="Test",
                 last_name="User",
-                user_type="traveler"
+                user_type="traveler",
             )
 
     def test_user_create_request_invalid_phone(self):
@@ -53,7 +50,7 @@ class TestUserCreateRequestValidation:
                 phone="123456",
                 first_name="Test",
                 last_name="User",
-                user_type="traveler"
+                user_type="traveler",
             )
 
     def test_user_create_request_weak_password(self):
@@ -64,7 +61,7 @@ class TestUserCreateRequestValidation:
                 password="short",
                 first_name="Test",
                 last_name="User",
-                user_type="traveler"
+                user_type="traveler",
             )
 
     def test_user_create_request_invalid_user_type(self):
@@ -75,7 +72,7 @@ class TestUserCreateRequestValidation:
                 password="password123",
                 first_name="Test",
                 last_name="User",
-                user_type="invalid_type"
+                user_type="invalid_type",
             )
 
     def test_user_create_request_admin_user_type_forbidden(self):
@@ -86,7 +83,7 @@ class TestUserCreateRequestValidation:
                 password="password123",
                 first_name="Test",
                 last_name="User",
-                user_type="admin"
+                user_type="admin",
             )
 
 
@@ -103,7 +100,7 @@ class TestServiceCreateRequestValidation:
             country="Cameroun",
             city="Douala",
             address="123 Main Street",
-            base_price=25000.0
+            base_price=25000.0,
         )
         assert request.title == "Beautiful Apartment in Douala"
         assert request.service_type.value == "accommodation"
@@ -118,7 +115,7 @@ class TestServiceCreateRequestValidation:
                 country="Cameroun",
                 city="Douala",
                 address="123 Main Street",
-                base_price=25000.0
+                base_price=25000.0,
             )
 
     def test_service_create_request_short_description(self):
@@ -131,7 +128,7 @@ class TestServiceCreateRequestValidation:
                 country="Cameroun",
                 city="Douala",
                 address="123 Main Street",
-                base_price=25000.0
+                base_price=25000.0,
             )
 
     def test_service_create_request_negative_price(self):
@@ -144,7 +141,7 @@ class TestServiceCreateRequestValidation:
                 country="Cameroun",
                 city="Douala",
                 address="123 Main Street",
-                base_price=-1000.0
+                base_price=-1000.0,
             )
 
     def test_service_create_request_invalid_latitude(self):
@@ -158,7 +155,7 @@ class TestServiceCreateRequestValidation:
                 city="Douala",
                 address="123 Main Street",
                 base_price=25000.0,
-                latitude=100.0  # Invalid (> 90)
+                latitude=100.0,  # Invalid (> 90)
             )
 
 
@@ -174,7 +171,7 @@ class TestBookingCreateRequestValidation:
             service_id="123e4567-e89b-12d3-a456-426614174000",
             start_date=start_date,
             end_date=end_date,
-            guests=2
+            guests=2,
         )
         assert request.guests == 2
         assert request.start_date == start_date
@@ -189,7 +186,7 @@ class TestBookingCreateRequestValidation:
                 service_id="123e4567-e89b-12d3-a456-426614174000",
                 start_date=start_date,
                 end_date=end_date,
-                guests=0
+                guests=0,
             )
 
     def test_booking_create_request_invalid_dates(self):
@@ -202,6 +199,5 @@ class TestBookingCreateRequestValidation:
                 service_id="123e4567-e89b-12d3-a456-426614174000",
                 start_date=start_date,
                 end_date=end_date,
-                guests=2
+                guests=2,
             )
-

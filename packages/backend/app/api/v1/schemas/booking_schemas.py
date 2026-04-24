@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Booking Schemas
 """
+
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field, validator
@@ -48,11 +49,13 @@ class BookingResponse(BaseModel):
             guests=int(booking.guests),
             status=booking.status,
             total_amount=float(booking.total_amount),
-            negotiated_price=float(booking.negotiated_price) if booking.negotiated_price else None,
+            negotiated_price=float(booking.negotiated_price)
+            if booking.negotiated_price
+            else None,
             currency=booking.currency,
             notes=booking.notes,
             created_at=booking.created_at,
-            updated_at=booking.updated_at
+            updated_at=booking.updated_at,
         )
 
     class Config:
@@ -70,4 +73,3 @@ class BookingListResponse(BaseModel):
 class BookingCancelResponse(BaseModel):
     message: str
     booking: BookingResponse
-

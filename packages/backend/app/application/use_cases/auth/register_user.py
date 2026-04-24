@@ -1,6 +1,8 @@
 """
 Ganitel V2 Backend - Register User Use Case
 """
+
+from typing import ClassVar
 from uuid import uuid4
 
 from passlib.context import CryptContext
@@ -21,21 +23,21 @@ class RegisterUserUseCase:
     def __init__(self, user_repository: IUserRepository):
         self.user_repository = user_repository
 
-    ALLOWED_PUBLIC_USER_TYPES = {
+    ALLOWED_PUBLIC_USER_TYPES: ClassVar[set] = {
         UserType.TRAVELER,
         UserType.PROVIDER,
     }
 
     def execute(
         self,
-        email: str = None,
-        phone: str = None,
-        password: str = None,
-        first_name: str = None,
-        last_name: str = None,
+        email: str | None = None,
+        phone: str | None = None,
+        password: str | None = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
         user_type: str = "traveler",
-        country: str = None,
-        city: str = None,
+        country: str | None = None,
+        city: str | None = None,
         allow_admin_registration: bool = False,
     ) -> User:
         """
@@ -73,9 +75,14 @@ class RegisterUserUseCase:
         try:
             user_type_enum = UserType(user_type.lower())
         except ValueError:
-            raise ValidationError(f"Invalid user type: {user_type}. Must be one of: traveler, provider, admin")
+            raise ValidationError(
+                f"Invalid user type: {user_type}. Must be one of: traveler, provider, admin"
+            ) from None
 
-        if not allow_admin_registration and user_type_enum not in self.ALLOWED_PUBLIC_USER_TYPES:
+        if (
+            not allow_admin_registration
+            and user_type_enum not in self.ALLOWED_PUBLIC_USER_TYPES
+        ):
             raise AuthorizationError(
                 "Public registration is only allowed for traveler and provider accounts"
             )
@@ -95,7 +102,9 @@ class RegisterUserUseCase:
         if phone:
             phone = phone.strip()
             if not self._is_valid_phone(phone):
-                raise ValidationError("Invalid phone format. Must be in international format (e.g., +237690000000)")
+                raise ValidationError(
+                    "Invalid phone format. Must be in international format (e.g., +237690000000)"
+                )
 
             # Check if phone already exists
             existing_user = self.user_repository.get_by_phone(phone)
@@ -110,7 +119,9 @@ class RegisterUserUseCase:
             if len(password) < 8:
                 raise ValidationError("Password must be at least 8 characters long")
             if not self._is_strong_password(password):
-                raise ValidationError("Password must contain at least one letter and one number")
+                raise ValidationError(
+                    "Password must contain at least one letter and one number"
+                )
 
         # Hash password if provided
         hashed_password = None
@@ -147,14 +158,16 @@ class RegisterUserUseCase:
     def _is_valid_email(self, email: str) -> bool:
         """Validate email format"""
         import re
-        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+
+        pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         return bool(re.match(pattern, email))
 
     def _is_valid_phone(self, phone: str) -> bool:
         """Validate phone format (international format)"""
         import re
+
         # International format: + followed by 1-15 digits
-        pattern = r'^\+\d{1,15}$'
+        pattern = r"^\+\d{1,15}$"
         return bool(re.match(pattern, phone))
 
     def _is_strong_password(self, password: str) -> bool:
@@ -162,4 +175,3 @@ class RegisterUserUseCase:
         has_letter = any(c.isalpha() for c in password)
         has_digit = any(c.isdigit() for c in password)
         return has_letter and has_digit
-

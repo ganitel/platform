@@ -1,7 +1,8 @@
 """
 Ganitel V2 Backend - Notification Entity
 """
-from enum import Enum
+
+from enum import StrEnum
 
 from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
@@ -9,8 +10,9 @@ from sqlalchemy.dialects.postgresql import UUID
 from app.domain.entities.base import AuditableEntity
 
 
-class NotificationType(str, Enum):
+class NotificationType(StrEnum):
     """Notification type enumeration"""
+
     BOOKING = "booking"
     PAYMENT = "payment"
     REVIEW = "review"
@@ -20,8 +22,9 @@ class NotificationType(str, Enum):
     REMINDER = "reminder"
 
 
-class NotificationChannel(str, Enum):
+class NotificationChannel(StrEnum):
     """Notification channel enumeration"""
+
     PUSH = "push"
     EMAIL = "email"
     SMS = "sms"
@@ -33,16 +36,21 @@ class Notification(AuditableEntity):
     """
     Notification entity for user notifications
     """
+
     __tablename__ = "notifications"
 
     # Relationships
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )
     related_entity_type = Column(String(50), nullable=True)  # booking, payment, etc.
     related_entity_id = Column(UUID(as_uuid=True), nullable=True)
 
     # Notification Information
     notification_type = Column(String(50), nullable=False, index=True)
-    channel = Column(String(20), default=NotificationChannel.IN_APP.value, nullable=False)
+    channel = Column(
+        String(20), default=NotificationChannel.IN_APP.value, nullable=False
+    )
     title = Column(String(200), nullable=False)
     message = Column(Text, nullable=False)
     data = Column(JSON, nullable=True)  # Additional data
@@ -59,9 +67,9 @@ class Notification(AuditableEntity):
     def mark_as_read(self):
         """Mark notification as read"""
         from datetime import datetime
+
         self.is_read = True
         self.read_at = datetime.utcnow()
 
     def __repr__(self):
         return f"<Notification(id={self.id}, user_id={self.user_id}, type={self.notification_type})>"
-

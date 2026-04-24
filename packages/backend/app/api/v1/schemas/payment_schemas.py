@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Payment Schemas
 """
+
 from datetime import datetime
 
 from pydantic import BaseModel, Field
@@ -8,12 +9,16 @@ from pydantic import BaseModel, Field
 
 class PaymentInitiateRequest(BaseModel):
     """Request to initiate a payment"""
+
     booking_id: str = Field(..., description="Booking ID to pay for")
-    payment_method: str | None = Field(None, description="Payment method (mtn, orange, visa, etc.)")
+    payment_method: str | None = Field(
+        None, description="Payment method (mtn, orange, visa, etc.)"
+    )
 
 
 class PaymentInitiateResponse(BaseModel):
     """Response after initiating a payment"""
+
     payment_id: str
     transaction_id: str | None
     payment_url: str | None
@@ -25,6 +30,7 @@ class PaymentInitiateResponse(BaseModel):
 
 class PaymentResponse(BaseModel):
     """Payment details response"""
+
     id: str
     booking_id: str
     amount: float
@@ -51,7 +57,7 @@ class PaymentResponse(BaseModel):
             payment_method=payment.payment_method,
             error_message=payment.error_message,
             created_at=payment.created_at,
-            updated_at=payment.updated_at
+            updated_at=payment.updated_at,
         )
 
     class Config:
@@ -60,6 +66,7 @@ class PaymentResponse(BaseModel):
 
 class TranzakWebhookResource(BaseModel):
     """TPN resource payload with transaction details"""
+
     request_id: str | None = Field(None, alias="requestId")
     status: str | None = None
     mch_transaction_ref: str | None = Field(None, alias="mchTransactionRef")
@@ -74,6 +81,7 @@ class TranzakWebhookResource(BaseModel):
 
 class PaymentWebhookRequest(BaseModel):
     """Tranzak TPN webhook payload"""
+
     name: str | None = None
     version: str | None = None
     event_type: str = Field(..., alias="eventType")
@@ -91,12 +99,16 @@ class PaymentWebhookRequest(BaseModel):
 
 class PaymentRefundRequest(BaseModel):
     """Request to refund a payment"""
-    amount: float | None = Field(None, description="Refund amount (full refund if not specified)")
+
+    amount: float | None = Field(
+        None, description="Refund amount (full refund if not specified)"
+    )
     reason: str = Field(..., min_length=10, max_length=500, description="Refund reason")
 
 
 class PaymentRefundResponse(BaseModel):
     """Response after processing a refund"""
+
     payment_id: str
     refund_amount: float
     status: str
@@ -105,6 +117,7 @@ class PaymentRefundResponse(BaseModel):
 
 class PaymentListResponse(BaseModel):
     """List of payments with pagination"""
+
     payments: list[PaymentResponse]
     total: int
     page: int

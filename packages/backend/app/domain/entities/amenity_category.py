@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Amenity Category Entity
 """
+
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
@@ -11,6 +12,7 @@ class AmenityCategory(AuditableEntity, SoftDeleteEntity):
     """
     Amenity category entity (General, Kitchen, Security, etc.)
     """
+
     __tablename__ = "amenity_categories"
 
     name_en = Column(String(100), nullable=False, unique=True, index=True)

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Analytics Endpoints
 """
+
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -26,7 +27,7 @@ async def track_view(
     view_type: str,
     request: Request,
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Track a view"""
     try:
@@ -45,30 +46,24 @@ async def track_view(
             user_id=current_user.id,
             ip_address=ip_address,
             user_agent=user_agent,
-            referrer=referrer
+            referrer=referrer,
         )
 
-        return MessageResponse(
-            message="View tracked successfully",
-            success=True
-        )
+        return MessageResponse(message="View tracked successfully", success=True)
     except ValidationError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to track view"
-        )
+            detail="Failed to track view",
+        ) from None
 
 
 @router.get("/views/{entity_type}/{entity_id}/count", response_model=dict)
 async def get_view_count(
-    entity_type: str,
-    entity_id: UUID,
-    db: Session = Depends(get_db)
+    entity_type: str, entity_id: UUID, db: Session = Depends(get_db)
 ):
     """Get view count for an entity"""
     try:
@@ -77,11 +72,10 @@ async def get_view_count(
         return {
             "entity_type": entity_type,
             "entity_id": str(entity_id),
-            "view_count": count
+            "view_count": count,
         }
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get view count"
-        )
-
+            detail="Failed to get view count",
+        ) from None

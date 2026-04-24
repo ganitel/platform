@@ -21,8 +21,8 @@ class MobileMoneyClient:
                     settings.MOBILE_MONEY_TOKEN_URL,
                     headers={
                         "Authorization": f"Basic {settings.MOBILE_MONEY_BASIC_AUTH}",
-                        "Content-Type": "application/json"
-                    }
+                        "Content-Type": "application/json",
+                    },
                 )
                 response.raise_for_status()
                 data = response.json()
@@ -32,10 +32,7 @@ class MobileMoneyClient:
 
     @staticmethod
     async def initiate_payment(
-        amount: float,
-        phone_number: str,
-        external_id: str,
-        callback_url: str
+        amount: float, phone_number: str, external_id: str, callback_url: str
     ) -> dict:
         """Initiate Mobile Money payment"""
         token = await MobileMoneyClient.get_token()
@@ -49,20 +46,16 @@ class MobileMoneyClient:
                     "amount": str(amount),
                     "currency": "XAF",
                     "externalId": external_id,
-                    "payer": {
-                        "partyIdType": "MSISDN",
-                        "partyId": phone_number
-                    },
+                    "payer": {"partyIdType": "MSISDN", "partyId": phone_number},
                     "payerMessage": "Payment for Ganitel booking",
-                    "payeeNote": "Ganitel"
+                    "payeeNote": "Ganitel",
                 },
                 headers={
                     "Authorization": f"Bearer {token}",
                     "X-Target-Environment": settings.MOBILE_MONEY_ENVIRONMENT,
                     "X-Callback-Url": callback_url,
-                    "Content-Type": "application/json"
-                }
+                    "Content-Type": "application/json",
+                },
             )
             response.raise_for_status()
             return response.json()
-

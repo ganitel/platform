@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Service Endpoints Integration Tests
 """
+
 from datetime import timedelta
 
 from fastapi import status
@@ -27,8 +28,8 @@ class TestSearchServicesEndpoint:
                 "city": "Douala",
                 "service_type": "accommodation",
                 "min_price": 10000,
-                "max_price": 50000
-            }
+                "max_price": 50000,
+            },
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -89,8 +90,8 @@ class TestCreateServiceEndpoint:
                 "beds": 5,
                 "amenities": ["wifi", "pool", "parking", "kitchen"],
                 "instant_book": True,
-                "min_stay": 2
-            }
+                "min_stay": 2,
+            },
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -109,8 +110,8 @@ class TestCreateServiceEndpoint:
                 "country": "Cameroun",
                 "city": "Douala",
                 "address": "123 Test Street",
-                "base_price": 25000
-            }
+                "base_price": 25000,
+            },
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -127,8 +128,8 @@ class TestCreateServiceEndpoint:
                 "country": "Cameroun",
                 "city": "Douala",
                 "address": "123 Test Street",
-                "base_price": 25000
-            }
+                "base_price": 25000,
+            },
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -149,6 +150,7 @@ class TestGetServiceEndpoint:
     def test_get_service_not_found(self, client):
         """Test service retrieval fails for non-existent service"""
         from uuid import uuid4
+
         response = client.get(f"/api/v1/services/{uuid4()}")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -162,10 +164,7 @@ class TestUpdateServiceEndpoint:
         response = client.put(
             f"/api/v1/services/{sample_service.id}",
             headers={"Authorization": f"Bearer {provider_token}"},
-            json={
-                "title": "Updated Service Title",
-                "base_price": 30000
-            }
+            json={"title": "Updated Service Title", "base_price": 30000},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -175,8 +174,7 @@ class TestUpdateServiceEndpoint:
     def test_update_service_unauthorized(self, client, sample_service):
         """Test service update fails without authentication"""
         response = client.put(
-            f"/api/v1/services/{sample_service.id}",
-            json={"title": "Updated"}
+            f"/api/v1/services/{sample_service.id}", json={"title": "Updated"}
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -189,7 +187,7 @@ class TestDeleteServiceEndpoint:
         """Test successful service deletion"""
         response = client.delete(
             f"/api/v1/services/{sample_service.id}",
-            headers={"Authorization": f"Bearer {provider_token}"}
+            headers={"Authorization": f"Bearer {provider_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -201,4 +199,3 @@ class TestDeleteServiceEndpoint:
         response = client.delete(f"/api/v1/services/{sample_service.id}")
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-

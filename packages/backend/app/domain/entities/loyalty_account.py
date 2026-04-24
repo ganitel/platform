@@ -1,7 +1,8 @@
 """
 Ganitel V2 Backend - Loyalty Account Entity
 """
-from sqlalchemy import Column, ForeignKey, Integer
+
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 
 from app.domain.entities.base import AuditableEntity
@@ -11,10 +12,17 @@ class LoyaltyAccount(AuditableEntity):
     """
     Loyalty Account entity for loyalty program
     """
+
     __tablename__ = "loyalty_accounts"
 
     # Relationships
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, unique=True, index=True)
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
 
     # Points Information
     current_points = Column(Integer, default=0, nullable=False)
@@ -22,7 +30,9 @@ class LoyaltyAccount(AuditableEntity):
     total_points_redeemed = Column(Integer, default=0, nullable=False)
 
     # Tier Information
-    tier_level = Column(String(20), default="bronze", nullable=False)  # bronze, silver, gold, platinum
+    tier_level = Column(
+        String(20), default="bronze", nullable=False
+    )  # bronze, silver, gold, platinum
     tier_points = Column(Integer, default=0, nullable=False)
 
     def add_points(self, points: int):
@@ -51,4 +61,3 @@ class LoyaltyAccount(AuditableEntity):
 
     def __repr__(self):
         return f"<LoyaltyAccount(id={self.id}, user_id={self.user_id}, points={self.current_points})>"
-

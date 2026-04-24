@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Wishlist Repository Interface
 """
+
 from abc import abstractmethod
 from uuid import UUID
 
@@ -12,12 +13,16 @@ class IWishlistRepository(BaseRepository[Wishlist]):
     """Wishlist repository interface"""
 
     @abstractmethod
-    def get_by_user_id(self, user_id: UUID, skip: int = 0, limit: int = 100) -> list[Wishlist]:
+    def get_by_user_id(
+        self, user_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Wishlist]:
         """Get wishlist by user ID"""
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_user_and_service(self, user_id: UUID, service_id: UUID) -> Wishlist | None:
+    def get_by_user_and_service(
+        self, user_id: UUID, service_id: UUID
+    ) -> Wishlist | None:
         """Get wishlist item by user and service"""
         raise NotImplementedError
 
@@ -25,4 +30,3 @@ class IWishlistRepository(BaseRepository[Wishlist]):
     def remove_by_user_and_service(self, user_id: UUID, service_id: UUID) -> bool:
         """Remove wishlist item"""
         raise NotImplementedError
-

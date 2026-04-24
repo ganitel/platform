@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Comment Entity
 """
+
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, Text
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -11,12 +12,19 @@ class Comment(AuditableEntity, SoftDeleteEntity):
     """
     Comment entity for post comments
     """
+
     __tablename__ = "comments"
 
     # Relationships
-    post_id = Column(UUID(as_uuid=True), ForeignKey("posts.id"), nullable=False, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
-    parent_id = Column(UUID(as_uuid=True), ForeignKey("comments.id"), nullable=True, index=True)  # For replies
+    post_id = Column(
+        UUID(as_uuid=True), ForeignKey("posts.id"), nullable=False, index=True
+    )
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )
+    parent_id = Column(
+        UUID(as_uuid=True), ForeignKey("comments.id"), nullable=True, index=True
+    )  # For replies
 
     # Comment Information
     content = Column(Text, nullable=False)
@@ -38,5 +46,6 @@ class Comment(AuditableEntity, SoftDeleteEntity):
         self.replies_count += 1
 
     def __repr__(self):
-        return f"<Comment(id={self.id}, post_id={self.post_id}, user_id={self.user_id})>"
-
+        return (
+            f"<Comment(id={self.id}, post_id={self.post_id}, user_id={self.user_id})>"
+        )

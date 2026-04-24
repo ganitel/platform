@@ -2,6 +2,7 @@
 Tests de sécurité pour l'API Ganitel
 T12 — Tests: safety + app factory — Uses unified client fixture from conftest.py
 """
+
 from uuid import uuid4
 
 import pytest
@@ -50,8 +51,7 @@ class TestSecurityHeaders:
     def test_cors_headers(self, client):
         """Test configuration CORS"""
         response = client.options(
-            "/api/v1/health/",
-            headers={"Origin": "https://example.com"}
+            "/api/v1/health/", headers={"Origin": "https://example.com"}
         )
 
         print("\n🔒 Configuration CORS:")
@@ -80,19 +80,19 @@ class TestRateLimiting:
                 "/api/v1/auth/login",
                 json={
                     "identifier": f"test{i}@example.com",
-                    "password": "wrongpassword"
-                }
+                    "password": "wrongpassword",
+                },
             )
             responses.append(response)
 
             if response.status_code == 429:
                 rate_limited_count += 1
-                print(f"   Request {i+1}: 429 Too Many Requests")
+                print(f"   Request {i + 1}: 429 Too Many Requests")
             elif response.status_code == 401:
                 auth_failed_count += 1
             else:
                 success_count += 1
-                print(f"   Request {i+1}: {response.status_code}")
+                print(f"   Request {i + 1}: {response.status_code}")
 
         print(f"   Rate Limited: {rate_limited_count}")
         print(f"   Auth Failed: {auth_failed_count}")
@@ -101,8 +101,9 @@ class TestRateLimiting:
         # Should see at least one 429 response when hitting the rate limit
         # Note: In test environment, the rate limiter might be disabled or behave differently
         # We're verifying the implementation is in place
-        assert any(r.status_code == 429 for r in responses) or auth_failed_count >= 10, \
-            "Rate limiting should kick in after multiple requests"
+        assert (
+            any(r.status_code == 429 for r in responses) or auth_failed_count >= 10
+        ), "Rate limiting should kick in after multiple requests"
 
     def test_register_rate_limit(self, client):
         """Test rate limiting on register endpoint (5/minute)"""
@@ -117,26 +118,27 @@ class TestRateLimiting:
             response = client.post(
                 "/api/v1/auth/register",
                 json={
-                    "email": f"ratelist{i}{chr(97+i)}@example.com",
+                    "email": f"ratelist{i}{chr(97 + i)}@example.com",
                     "phone": f"+237690000{i:03d}",
                     "password": "password123",
                     "first_name": f"Test{i}",
                     "last_name": "User",
-                    "user_type": "traveler"
-                }
+                    "user_type": "traveler",
+                },
             )
             responses.append(response)
 
             if response.status_code == 429:
                 rate_limited_count += 1
-                print(f"   Request {i+1}: 429 Too Many Requests")
+                print(f"   Request {i + 1}: 429 Too Many Requests")
 
         print(f"   Rate Limited: {rate_limited_count}")
         print(f"   Total Responses: {len(responses)}")
 
         # Should see rate limiting for register endpoint
-        assert any(r.status_code == 429 for r in responses) or len(responses) >= 5, \
+        assert any(r.status_code == 429 for r in responses) or len(responses) >= 5, (
             "Register endpoint should have rate limiting"
+        )
 
     def test_rate_limit_message(self, client):
         """Test that rate limit error message is clear"""
@@ -149,8 +151,8 @@ class TestRateLimiting:
                 "/api/v1/auth/login",
                 json={
                     "identifier": f"test{i}@example.com",
-                    "password": "wrongpassword"
-                }
+                    "password": "wrongpassword",
+                },
             )
             if response.status_code == 429:
                 break
@@ -160,8 +162,11 @@ class TestRateLimiting:
             print(f"   Error Message: {detail}")
 
             # Verify clear error message about rate limiting
-            assert "rate" in detail.lower() or "many requests" in detail.lower() or \
-                   response.status_code == 429, "Should have clear rate limit message"
+            assert (
+                "rate" in detail.lower()
+                or "many requests" in detail.lower()
+                or response.status_code == 429
+            ), "Should have clear rate limit message"
 
 
 class TestAuthenticationSecurity:
@@ -172,13 +177,13 @@ class TestAuthenticationSecurity:
         # Faire plusieurs tentatives de connexion échouées
         failed_or_blocked_attempts = 0
 
-        for i in range(10):
+        for _i in range(10):
             response = client.post(
                 "/api/v1/auth/login",
                 json={
                     "identifier": "nonexistent@example.com",
-                    "password": "wrongpassword"
-                }
+                    "password": "wrongpassword",
+                },
             )
 
             # Accepter 401, 404, 429 ou 500 (échec auth ou lockout)
@@ -196,10 +201,7 @@ class TestAuthenticationSecurity:
         # Login
         response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": test_user.email,
-                "password": "password123"
-            }
+            json={"identifier": test_user.email, "password": "password123"},
         )
 
         response_text = response.text.lower()
@@ -225,11 +227,11 @@ class TestAccountLockout:
                 "/api/v1/auth/login",
                 json={
                     "identifier": sample_user.email,
-                    "password": "wrongpassword123"  # Wrong password
-                }
+                    "password": "wrongpassword123",  # Wrong password
+                },
             )
 
-            print(f"   Attempt {i+1}: Status {response.status_code}")
+            print(f"   Attempt {i + 1}: Status {response.status_code}")
 
             if response.status_code == 401:
                 failed_count += 1
@@ -243,63 +245,56 @@ class TestAccountLockout:
         print(f"   Lockout Responses: {locked_count}")
 
         # After ~5 failed attempts, should get lockout response
-        assert locked_count > 0 or failed_count >= 5, \
+        assert locked_count > 0 or failed_count >= 5, (
             "Account should be locked after 5 failed attempts"
+        )
 
-    def test_locked_account_cannot_login_with_correct_password(self, client, sample_user):
+    def test_locked_account_cannot_login_with_correct_password(
+        self, client, sample_user
+    ):
         """Test that locked account cannot login even with correct password"""
         print("\n🔒 Test Locked Account - Correct Credentials Blocked")
 
         # First, lock the account by making multiple failed attempts
-        for i in range(6):  # More than threshold of 5
+        for _i in range(6):  # More than threshold of 5
             client.post(
                 "/api/v1/auth/login",
-                json={
-                    "identifier": sample_user.email,
-                    "password": "wrongpassword"
-                }
+                json={"identifier": sample_user.email, "password": "wrongpassword"},
             )
 
         # Now try with correct password
         correct_response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": sample_user.email,
-                "password": "password123"
-            }
+            json={"identifier": sample_user.email, "password": "password123"},
         )
 
         print(f"   Login with Correct Password Status: {correct_response.status_code}")
 
         # Should still be blocked (429) due to lockout
-        assert correct_response.status_code == 429, \
+        assert correct_response.status_code == 429, (
             "Locked account should not allow login even with correct password"
+        )
 
         detail = correct_response.json().get("detail", "")
-        assert "locked" in detail.lower(), \
+        assert "locked" in detail.lower(), (
             "Error message should indicate account is locked"
+        )
 
     def test_lockout_error_message(self, client, sample_user):
         """Test that lockout error message is clear"""
         print("\n🔒 Test Lockout Error Message")
 
         # Lock the account
-        for i in range(6):
+        for _i in range(6):
             client.post(
                 "/api/v1/auth/login",
-                json={
-                    "identifier": sample_user.email,
-                    "password": "wrongpassword"
-                }
+                json={"identifier": sample_user.email, "password": "wrongpassword"},
             )
 
         # Try to login on locked account
         response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": sample_user.email,
-                "password": "wrongpassword"
-            }
+            json={"identifier": sample_user.email, "password": "wrongpassword"},
         )
 
         if response.status_code == 429:
@@ -309,33 +304,29 @@ class TestAccountLockout:
             # Message should mention:
             # - "Account locked" or "locked"
             # - Avoid revealing specific number of attempts
-            assert "locked" in detail.lower(), \
+            assert "locked" in detail.lower(), (
                 "Error message should indicate account is locked"
+            )
 
             # Message should include retry guidance
-            assert ("try again" in detail.lower() or "minutes" in detail.lower()), \
+            assert "try again" in detail.lower() or "minutes" in detail.lower(), (
                 "Error message should guide user when to retry"
+            )
 
     def test_lockout_duration_mentioned(self, client, sample_user):
         """Test that lockout duration is communicated to user"""
         print("\n🔒 Test Lockout Duration Communication")
 
         # Lock the account
-        for i in range(6):
+        for _i in range(6):
             client.post(
                 "/api/v1/auth/login",
-                json={
-                    "identifier": sample_user.email,
-                    "password": "wrongpassword"
-                }
+                json={"identifier": sample_user.email, "password": "wrongpassword"},
             )
 
         response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": sample_user.email,
-                "password": "wrongpassword"
-            }
+            json={"identifier": sample_user.email, "password": "wrongpassword"},
         )
 
         detail = response.json().get("detail", "")
@@ -343,8 +334,9 @@ class TestAccountLockout:
 
         # Should mention duration or guide user
         assert response.status_code == 429, "Account should be locked"
-        assert "15" in detail or "minutes" in detail or "locked" in detail.lower(), \
+        assert "15" in detail or "minutes" in detail or "locked" in detail.lower(), (
             "Should mention lockout duration or reason"
+        )
 
     def test_different_identifiers_separate_lockout(self, client):
         """Test that failed attempts with different identifiers don't cross-pollinate"""
@@ -357,8 +349,8 @@ class TestAccountLockout:
                 "/api/v1/auth/login",
                 json={
                     "identifier": f"unique{i}@example.com",
-                    "password": "wrongpassword"
-                }
+                    "password": "wrongpassword",
+                },
             )
             responses.append(response)
 
@@ -376,8 +368,9 @@ class TestAccountLockout:
         # Most should be 401 (auth failed) not 429 (rate limit)
         # because each identifier is different
         # Allow some 500 errors due to test environment issues
-        assert auth_failed >= 3 or (auth_failed + rate_limited) >= 5, \
+        assert auth_failed >= 3 or (auth_failed + rate_limited) >= 5, (
             "Different identifiers should have separate lockout counters"
+        )
 
     def test_lockout_implementation_present_in_code(self):
         """Verify that lockout implementation exists in auth endpoint"""
@@ -394,10 +387,12 @@ class TestAccountLockout:
 
         # Verify lockout-related code exists
         assert "lockout" in source.lower(), "Lockout mechanism should be implemented"
-        assert "429" in source or "TOO_MANY_REQUESTS" in source, \
+        assert "429" in source or "TOO_MANY_REQUESTS" in source, (
             "Should return 429 for locked accounts"
-        assert "5" in source or "lockout_count" in source, \
+        )
+        assert "5" in source or "lockout_count" in source, (
             "Should implement lockout threshold"
+        )
 
         print("   ✓ Lockout implementation verified in auth endpoint")
 
@@ -408,21 +403,19 @@ class TestAccountLockout:
             "' OR '1'='1",
             "admin'--",
             "' OR 1=1--",
-            "'; DROP TABLE users--"
+            "'; DROP TABLE users--",
         ]
 
         for injection in sql_injections:
             response = client.post(
                 "/api/v1/auth/login",
-                json={
-                    "identifier": injection,
-                    "password": "password"
-                }
+                json={"identifier": injection, "password": "password"},
             )
 
             # Doit retourner 401, 404, 422 ou 500 (pas d'injection réussie)
-            assert response.status_code in [401, 404, 422, 500], \
+            assert response.status_code in [401, 404, 422, 500], (
                 f"Injection SQL potentielle: {injection}"
+            )
 
     def test_jwt_token_validation(self, client):
         """Test validation des tokens JWT"""
@@ -430,13 +423,14 @@ class TestAccountLockout:
         invalid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid.token"
 
         response = client.get(
-            "/api/v1/users/me",
-            headers={"Authorization": f"Bearer {invalid_token}"}
+            "/api/v1/users/me", headers={"Authorization": f"Bearer {invalid_token}"}
         )
 
         assert response.status_code == 401
-        assert "invalid" in response.json()["detail"].lower() or \
-               "unauthorized" in response.json()["detail"].lower()
+        assert (
+            "invalid" in response.json()["detail"].lower()
+            or "unauthorized" in response.json()["detail"].lower()
+        )
 
     def test_expired_token_rejection(self, client):
         """Test rejet des tokens expirés"""
@@ -444,8 +438,7 @@ class TestAccountLockout:
         expired_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZXhwIjoxNTE2MjM5MDIyfQ.invalid"
 
         response = client.get(
-            "/api/v1/users/me",
-            headers={"Authorization": f"Bearer {expired_token}"}
+            "/api/v1/users/me", headers={"Authorization": f"Bearer {expired_token}"}
         )
 
         assert response.status_code == 401
@@ -459,7 +452,7 @@ class TestInputValidation:
         xss_payloads = [
             "<script>alert('XSS')</script>",
             "<img src=x onerror=alert('XSS')>",
-            "javascript:alert('XSS')"
+            "javascript:alert('XSS')",
         ]
 
         for payload in xss_payloads:
@@ -472,9 +465,9 @@ class TestInputValidation:
                     "country": "Cameroon",
                     "city": "Douala",
                     "base_price": 50000.0,
-                    "currency": "XAF"
+                    "currency": "XAF",
                 },
-                headers=auth_headers
+                headers=auth_headers,
             )
 
             # Doit être rejeté ou échappé
@@ -489,7 +482,7 @@ class TestInputValidation:
             "notanemail",
             "@example.com",
             "user@",
-            "user space@example.com"
+            "user space@example.com",
         ]
 
         for email in invalid_emails:
@@ -500,20 +493,15 @@ class TestInputValidation:
                     "password": "password123",
                     "first_name": "Test",
                     "last_name": "User",
-                    "user_type": "traveler"
-                }
+                    "user_type": "traveler",
+                },
             )
 
             assert response.status_code == 422, f"Email invalide accepté: {email}"
 
     def test_phone_validation(self, client):
         """Test validation des numéros de téléphone"""
-        invalid_phones = [
-            "123",
-            "abcdefghij",
-            "+237abc",
-            "00000000000"
-        ]
+        invalid_phones = ["123", "abcdefghij", "+237abc", "00000000000"]
 
         for phone in invalid_phones:
             response = client.post(
@@ -522,8 +510,8 @@ class TestInputValidation:
                     "phone": phone,
                     "first_name": "Test",
                     "last_name": "User",
-                    "user_type": "traveler"
-                }
+                    "user_type": "traveler",
+                },
             )
 
             # Doit être rejeté
@@ -549,7 +537,7 @@ class TestInputValidation:
             status=BookingStatus.PENDING.value,
             total_amount=Decimal("100000.00"),
             currency="XAF",
-            is_active=True
+            is_active=True,
         )
         db_session.add(booking)
         db_session.commit()
@@ -564,18 +552,16 @@ class TestInputValidation:
 
             response = client.post(
                 "/api/v1/payments/initiate",
-                json={
-                    "booking_id": str(booking.id),
-                    "payment_method": "mtn"
-                },
-                headers=auth_headers
+                json={"booking_id": str(booking.id), "payment_method": "mtn"},
+                headers=auth_headers,
             )
 
             # Les montants négatifs ou nuls doivent être rejetés
             if amount <= 0:
                 # Can be 400 (bad request), 402 (payment required), or 422 (validation error)
-                assert response.status_code in [400, 402, 422], \
+                assert response.status_code in [400, 402, 422], (
                     f"Montant invalide accepté: {amount}"
+                )
 
 
 class TestAuthorizationSecurity:
@@ -586,7 +572,7 @@ class TestAuthorizationSecurity:
         protected_endpoints = [
             ("/api/v1/users/me", "GET"),
             ("/api/v1/bookings/", "POST"),  # POST au lieu de GET
-            ("/api/v1/payments/initiate", "POST")  # POST au lieu de GET
+            ("/api/v1/payments/initiate", "POST"),  # POST au lieu de GET
         ]
 
         for endpoint, method in protected_endpoints:
@@ -596,8 +582,9 @@ class TestAuthorizationSecurity:
                 response = client.post(endpoint, json={})
 
             # Doit retourner 401 Unauthorized, 403 Forbidden ou 422 (validation)
-            assert response.status_code in [401, 403, 422], \
+            assert response.status_code in [401, 403, 422], (
                 f"Endpoint non protégé: {endpoint} ({method})"
+            )
 
     def test_access_other_user_data(self, client, test_user, test_provider, db_session):
         """Test accès aux données d'un autre utilisateur"""
@@ -608,10 +595,7 @@ class TestAuthorizationSecurity:
         headers = {"Authorization": f"Bearer {token}"}
 
         # Essayer d'accéder aux données du provider
-        response = client.get(
-            f"/api/v1/users/{test_provider.id}",
-            headers=headers
-        )
+        response = client.get(f"/api/v1/users/{test_provider.id}", headers=headers)
 
         # Endpoint public: ne doit jamais exposer des données sensibles
         assert response.status_code == 200
@@ -629,10 +613,7 @@ class TestAuthorizationSecurity:
         user_headers = {"Authorization": f"Bearer {user_token}"}
 
         # Essayer d'accéder à un endpoint admin
-        response = client.get(
-            "/api/v1/admin/users",
-            headers=user_headers
-        )
+        response = client.get("/api/v1/admin/users", headers=user_headers)
 
         # Doit être refusé
         assert response.status_code in [403, 404]
@@ -655,12 +636,13 @@ class TestDataLeakage:
             "token",
             "database",
             "connection string",
-            "api_key"
+            "api_key",
         ]
 
         for keyword in sensitive_keywords:
-            assert keyword not in error_text, \
+            assert keyword not in error_text, (
                 f"Information sensible dans l'erreur: {keyword}"
+            )
 
     def test_user_enumeration_protection_basic(self, client):
         """Test protection contre l'énumération d'utilisateurs - sames status codes"""
@@ -669,10 +651,7 @@ class TestDataLeakage:
         # Attempt 1: Login with existing user but wrong password
         existing_response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": "test@example.com",
-                "password": "wrongpassword"
-            }
+            json={"identifier": "test@example.com", "password": "wrongpassword"},
         )
 
         # Attempt 2: Login with non-existent user
@@ -680,16 +659,17 @@ class TestDataLeakage:
             "/api/v1/auth/login",
             json={
                 "identifier": "definitely.nonexistent.user.12345@example.com",
-                "password": "wrongpassword"
-            }
+                "password": "wrongpassword",
+            },
         )
 
         print(f"   Existing User Response: {existing_response.status_code}")
         print(f"   Non-existent User Response: {nonexistent_response.status_code}")
 
         # Status codes must be identical to prevent enumeration
-        assert existing_response.status_code == nonexistent_response.status_code, \
+        assert existing_response.status_code == nonexistent_response.status_code, (
             "Status codes must be identical to prevent user enumeration"
+        )
 
     def test_user_enumeration_protection_error_messages(self, client):
         """Test protection contre l'énumération - error messages identical"""
@@ -698,10 +678,7 @@ class TestDataLeakage:
         # Attempt with existing user
         existing_response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": "test@example.com",
-                "password": "wrong123"
-            }
+            json={"identifier": "test@example.com", "password": "wrong123"},
         )
 
         # Attempt with non-existent user
@@ -709,19 +686,22 @@ class TestDataLeakage:
             "/api/v1/auth/login",
             json={
                 "identifier": "nonexistent.enum.test.xyz@example.com",
-                "password": "wrong123"
-            }
+                "password": "wrong123",
+            },
         )
 
         existing_msg = existing_response.json().get("detail", "").lower()
         nonexistent_msg = nonexistent_response.json().get("detail", "").lower()
 
         print(f"   Existing User Message: {existing_response.json().get('detail', '')}")
-        print(f"   Non-existent User Message: {nonexistent_response.json().get('detail', '')}")
+        print(
+            f"   Non-existent User Message: {nonexistent_response.json().get('detail', '')}"
+        )
 
         # Messages should be identical or very similar
-        assert existing_msg == nonexistent_msg, \
+        assert existing_msg == nonexistent_msg, (
             "Error messages must be identical to prevent enumeration"
+        )
 
         # Should use generic message, NOT revealing if user exists
         revealing_phrases = [
@@ -729,12 +709,13 @@ class TestDataLeakage:
             "does not exist",
             "invalid email",
             "invalid phone",
-            "this email"
+            "this email",
         ]
 
         for phrase in revealing_phrases:
-            assert phrase not in nonexistent_msg, \
+            assert phrase not in nonexistent_msg, (
                 f"Error message reveals user doesn't exist: '{phrase}'"
+            )
 
     def test_user_enumeration_protection_phone_login(self, client, sample_user):
         """Test enumeration protection with phone login"""
@@ -743,25 +724,21 @@ class TestDataLeakage:
         # Attempt with existing user (wrong password)
         existing_response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": sample_user.phone,
-                "password": "wrongpassword"
-            }
+            json={"identifier": sample_user.phone, "password": "wrongpassword"},
         )
 
         # Attempt with non-existent phone
         nonexistent_response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": "+237612345999",
-                "password": "wrongpassword"
-            }
+            json={"identifier": "+237612345999", "password": "wrongpassword"},
         )
 
         existing_msg = existing_response.json().get("detail", "").lower()
         nonexistent_msg = nonexistent_response.json().get("detail", "").lower()
 
-        print(f"   Status Codes Match: {existing_response.status_code == nonexistent_response.status_code}")
+        print(
+            f"   Status Codes Match: {existing_response.status_code == nonexistent_response.status_code}"
+        )
         print(f"   Messages Match: {existing_msg == nonexistent_msg}")
 
         # Should be indistinguishable
@@ -776,23 +753,20 @@ class TestDataLeakage:
 
         # Time existing user attempt
         start1 = time.time()
-        response1 = client.post(
+        client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": sample_user.email,
-                "password": "wrongpassword"
-            }
+            json={"identifier": sample_user.email, "password": "wrongpassword"},
         )
         time1 = time.time() - start1
 
         # Time non-existent user attempt
         start2 = time.time()
-        response2 = client.post(
+        client.post(
             "/api/v1/auth/login",
             json={
                 "identifier": "timing.nonexistent.12345@example.com",
-                "password": "wrongpassword"
-            }
+                "password": "wrongpassword",
+            },
         )
         time2 = time.time() - start2
 
@@ -802,8 +776,9 @@ class TestDataLeakage:
         # Timing should be similar (within 60ms)
         # This prevents timing attacks
         time_diff = abs(time1 - time2)
-        assert time_diff < 0.06, \
-            f"Response times differ by {time_diff*1000:.2f}ms - could enable timing attack"
+        assert time_diff < 0.06, (
+            f"Response times differ by {time_diff * 1000:.2f}ms - could enable timing attack"
+        )
 
     def test_register_user_enumeration_protection(self, client, db_session):
         """Test enumeration protection on registration"""
@@ -842,15 +817,16 @@ class TestDataLeakage:
                 "password": "password123",
                 "first_name": "Test",
                 "last_name": "User",
-                "user_type": "traveler"
-            }
+                "user_type": "traveler",
+            },
         )
 
         print(f"   Register with Existing Email: {existing_response.status_code}")
 
         # Should give clear error about conflict
-        assert existing_response.status_code in [409, 400, 422], \
+        assert existing_response.status_code in [409, 400, 422], (
             f"Duplicate email should return error, got {existing_response.status_code}"
+        )
 
         detail = existing_response.json().get("detail", "").lower()
 
@@ -875,14 +851,16 @@ class TestPaymentSecurity:
                 "currency_code": "XAF",
                 "customer_email": "test@example.com",
                 "customer_phone_number": "+237612345678",
-                "payment_method": "mtn"
-            }
+                "payment_method": "mtn",
+            },
         )
 
         # Doit être accepté ou rejeté proprement
         assert response.status_code in [200, 400, 401, 404, 422]
 
-    def test_amount_tampering_protection(self, client, auth_headers, test_data, db_session):
+    def test_amount_tampering_protection(
+        self, client, auth_headers, test_data, db_session
+    ):
         """Test protection contre la modification des montants"""
         from datetime import date
         from decimal import Decimal
@@ -902,7 +880,7 @@ class TestPaymentSecurity:
             status=BookingStatus.PENDING.value,
             total_amount=Decimal("200000.00"),
             currency="XAF",
-            is_active=True
+            is_active=True,
         )
         db_session.add(booking)
         db_session.commit()
@@ -913,9 +891,9 @@ class TestPaymentSecurity:
             json={
                 "booking_id": str(booking.id),
                 "payment_method": "mtn",
-                "amount": 1000.0  # Montant falsifié
+                "amount": 1000.0,  # Montant falsifié
             },
-            headers=auth_headers
+            headers=auth_headers,
         )
 
         # Le système doit utiliser le montant de la réservation, pas celui fourni
@@ -936,20 +914,14 @@ class TestPaymentSecurity:
             "currency_code": "XAF",
             "customer_email": "test@example.com",
             "customer_phone_number": "+237612345678",
-            "payment_method": "mtn"
+            "payment_method": "mtn",
         }
 
         # Premier appel
-        response1 = client.post(
-            "/api/v1/payments/webhook/tranzak",
-            json=webhook_data
-        )
+        response1 = client.post("/api/v1/payments/webhook/tranzak", json=webhook_data)
 
         # Deuxième appel (rejeu)
-        response2 = client.post(
-            "/api/v1/payments/webhook/tranzak",
-            json=webhook_data
-        )
+        response2 = client.post("/api/v1/payments/webhook/tranzak", json=webhook_data)
 
         # Le deuxième appel doit être détecté comme un doublon
         # (Comportement dépend de l'implémentation)

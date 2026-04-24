@@ -1,9 +1,10 @@
 """
 Ganitel V2 Backend - File Upload Service
 """
+
 import uuid
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from fastapi import UploadFile
 
@@ -16,8 +17,17 @@ settings = get_settings()
 class UploadService:
     """Service for handling file uploads using storage providers"""
 
-    ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/jpg", "image/webp"}
-    ALLOWED_VIDEO_TYPES = {"video/mp4", "video/mpeg", "video/quicktime"}
+    ALLOWED_IMAGE_TYPES: ClassVar[set[str]] = {
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "image/webp",
+    }
+    ALLOWED_VIDEO_TYPES: ClassVar[set[str]] = {
+        "video/mp4",
+        "video/mpeg",
+        "video/quicktime",
+    }
     MAX_FILE_SIZE = settings.MAX_UPLOAD_SIZE
 
     @classmethod
@@ -33,19 +43,18 @@ class UploadService:
 
         contents = await file.read()
         if len(contents) > cls.MAX_FILE_SIZE:
-             # Reset file pointer for potential future reads if needed,
-             # though we return contents here.
+            # Reset file pointer for potential future reads if needed,
+            # though we return contents here.
             await file.seek(0)
-            raise ValueError(f"File size exceeds {cls.MAX_FILE_SIZE / (1024 * 1024):.1f}MB")
+            raise ValueError(
+                f"File size exceeds {cls.MAX_FILE_SIZE / (1024 * 1024):.1f}MB"
+            )
 
         return contents
 
     @classmethod
     async def upload_image(
-        cls,
-        file: UploadFile,
-        subdirectory: str = "images",
-        prefix: str = ""
+        cls, file: UploadFile, subdirectory: str = "images", prefix: str = ""
     ) -> dict:
         """
         Upload an image file using the configured storage provider
@@ -60,7 +69,7 @@ class UploadService:
                 "image/jpeg": ".jpg",
                 "image/png": ".png",
                 "image/webp": ".webp",
-                "image/jpg": ".jpg"
+                "image/jpg": ".jpg",
             }
             file_extension = ext_map.get(file.content_type, ".bin")
 
@@ -74,33 +83,24 @@ class UploadService:
             "url": url_or_path,
             "filename": unique_filename,
             "size": len(contents),
-            "content_type": file.content_type
+            "content_type": file.content_type,
         }
 
     @classmethod
     async def upload_multiple_images(
-        cls,
-        files: list[UploadFile],
-        subdirectory: str = "images",
-        prefix: str = ""
+        cls, files: list[UploadFile], subdirectory: str = "images", prefix: str = ""
     ) -> list[dict[str, Any]]:
         """Upload multiple image files, handling exceptions per file"""
         results = []
         for file in files:
             try:
                 result = await cls.upload_image(file, subdirectory, prefix)
-                results.append({
-                    "file": file.filename,
-                    "result": result,
-                    "error": None
-                })
+                results.append({"file": file.filename, "result": result, "error": None})
             except Exception as exc:
                 # Log the error, keep going with other files
-                results.append({
-                    "file": file.filename,
-                    "result": None,
-                    "error": str(exc)
-                })
+                results.append(
+                    {"file": file.filename, "result": None, "error": str(exc)}
+                )
                 # Optional: logger.exception("Failed to upload %s", file.filename)
         return results
 

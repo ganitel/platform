@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Create Service Use Case
 """
+
 from uuid import UUID, uuid4
 
 from app.domain.entities.service import (
@@ -95,4 +96,3 @@ class CreateServiceUseCase:
         service.generate_slug()
         created = self.service_repository.create(service)
         return created
-

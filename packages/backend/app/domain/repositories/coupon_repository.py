@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Coupon Repository Interface
 """
+
 from abc import abstractmethod
 from uuid import UUID
 
@@ -25,4 +26,3 @@ class ICouponRepository(BaseRepository[Coupon]):
     def increment_usage(self, coupon_id: UUID) -> bool:
         """Increment coupon usage count"""
         raise NotImplementedError
-

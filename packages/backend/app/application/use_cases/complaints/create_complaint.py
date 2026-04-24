@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Create Complaint Use Case
 """
+
 from uuid import UUID
 
 from app.domain.entities.complaint import Complaint, ComplaintPriority, ComplaintStatus
@@ -15,7 +16,7 @@ class CreateComplaintUseCase:
     def __init__(
         self,
         complaint_repository: IComplaintRepository,
-        user_repository: IUserRepository
+        user_repository: IUserRepository,
     ):
         self.complaint_repository = complaint_repository
         self.user_repository = user_repository
@@ -28,7 +29,7 @@ class CreateComplaintUseCase:
         category: str | None = None,
         booking_id: UUID | None = None,
         service_id: UUID | None = None,
-        priority: str = ComplaintPriority.MEDIUM.value
+        priority: str = ComplaintPriority.MEDIUM.value,
     ) -> Complaint:
         """
         Create a complaint
@@ -62,8 +63,7 @@ class CreateComplaintUseCase:
             booking_id=booking_id,
             service_id=service_id,
             priority=priority,
-            status=ComplaintStatus.PENDING.value
+            status=ComplaintStatus.PENDING.value,
         )
 
         return self.complaint_repository.create(complaint)
-

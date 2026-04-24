@@ -22,8 +22,8 @@ class OrangeMoneyClient:
                     data={
                         "grant_type": "client_credentials",
                         "client_id": settings.ORANGE_MONEY_CLIENT_ID,
-                        "client_secret": settings.ORANGE_MONEY_CLIENT_SECRET
-                    }
+                        "client_secret": settings.ORANGE_MONEY_CLIENT_SECRET,
+                    },
                 )
                 response.raise_for_status()
                 data = response.json()
@@ -33,10 +33,7 @@ class OrangeMoneyClient:
 
     @staticmethod
     async def initiate_payment(
-        amount: float,
-        phone_number: str,
-        order_id: str,
-        callback_url: str
+        amount: float, phone_number: str, order_id: str, callback_url: str
     ) -> dict:
         """Initiate Orange Money payment"""
         token = await OrangeMoneyClient.get_token()
@@ -55,13 +52,12 @@ class OrangeMoneyClient:
                     "cancel_url": callback_url,
                     "notif_url": settings.ORANGE_MONEY_WEBHOOK_URL,
                     "lang": "fr",
-                    "reference": "Ganitel Payment"
+                    "reference": "Ganitel Payment",
                 },
                 headers={
                     "Authorization": f"Bearer {token}",
-                    "Content-Type": "application/json"
-                }
+                    "Content-Type": "application/json",
+                },
             )
             response.raise_for_status()
             return response.json()
-

@@ -1,6 +1,8 @@
 """
 Ganitel V2 Backend - Update Service Status Use Case
 """
+
+from typing import ClassVar
 from uuid import UUID
 
 from app.domain.entities.service import Service, ServiceStatus
@@ -14,7 +16,7 @@ class UpdateServiceStatusUseCase:
     """
 
     # Valid status transitions according to architecture
-    VALID_TRANSITIONS = {
+    VALID_TRANSITIONS: ClassVar[dict] = {
         ServiceStatus.DRAFT: [ServiceStatus.PENDING_REVIEW, ServiceStatus.ARCHIVED],
         ServiceStatus.PENDING_REVIEW: [ServiceStatus.ACTIVE, ServiceStatus.REJECTED],
         ServiceStatus.ACTIVE: [ServiceStatus.INACTIVE, ServiceStatus.ARCHIVED],
@@ -31,7 +33,7 @@ class UpdateServiceStatusUseCase:
         new_status: ServiceStatus,
         updated_by: UUID | None = None,
         provider_id: UUID | None = None,
-        is_admin: bool = False
+        is_admin: bool = False,
     ) -> Service:
         """
         Update service status with transition validation
@@ -68,7 +70,9 @@ class UpdateServiceStatusUseCase:
         # Authorization check
         if not is_admin:
             if not provider_id or service.provider_id != provider_id:
-                raise AuthorizationError("Only the service provider or admin can update service status")
+                raise AuthorizationError(
+                    "Only the service provider or admin can update service status"
+                )
 
         # Admin-only transitions
         admin_only_transitions = [
@@ -79,11 +83,13 @@ class UpdateServiceStatusUseCase:
         try:
             current_status = ServiceStatus(service.status)
         except ValueError:
-            raise ValidationError(f"Invalid current status: {service.status}")
+            raise ValidationError(f"Invalid current status: {service.status}") from None
 
         transition = (current_status, new_status)
         if transition in admin_only_transitions and not is_admin:
-            raise AuthorizationError("Only administrators can approve or reject services")
+            raise AuthorizationError(
+                "Only administrators can approve or reject services"
+            )
 
         # Check if transition is valid
         if current_status in self.VALID_TRANSITIONS:
@@ -93,7 +99,9 @@ class UpdateServiceStatusUseCase:
                     f"Valid transitions: {[s.value for s in self.VALID_TRANSITIONS[current_status]]}"
                 )
         elif current_status != new_status:
-            raise ValidationError(f"Invalid status transition from {current_status.value}")
+            raise ValidationError(
+                f"Invalid status transition from {current_status.value}"
+            )
 
         # Update status
         service.status = new_status.value
@@ -106,4 +114,3 @@ class UpdateServiceStatusUseCase:
         updated_service = self.service_repository.update(service)
 
         return updated_service
-

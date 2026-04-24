@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Status Transitions Tests
 """
+
 from uuid import uuid4
 
 import pytest
@@ -94,7 +95,9 @@ class TestUserStatusTransitions:
 class TestServiceStatusTransitions:
     """Tests for service status transitions"""
 
-    def test_transition_draft_to_pending_review(self, service_repository, sample_service, sample_provider):
+    def test_transition_draft_to_pending_review(
+        self, service_repository, sample_service, sample_provider
+    ):
         """Test transition: draft → pending_review"""
         sample_service.status = ServiceStatus.DRAFT.value
         service_repository.update(sample_service)
@@ -104,12 +107,14 @@ class TestServiceStatusTransitions:
             sample_service.id,
             ServiceStatus.PENDING_REVIEW,
             provider_id=sample_provider.id,
-            is_admin=False
+            is_admin=False,
         )
 
         assert updated_service.status == ServiceStatus.PENDING_REVIEW.value
 
-    def test_transition_pending_to_active_admin(self, service_repository, sample_service, sample_admin):
+    def test_transition_pending_to_active_admin(
+        self, service_repository, sample_service, sample_admin
+    ):
         """Test transition: pending_review → active (admin only)"""
         sample_service.status = ServiceStatus.PENDING_REVIEW.value
         service_repository.update(sample_service)
@@ -119,12 +124,14 @@ class TestServiceStatusTransitions:
             sample_service.id,
             ServiceStatus.ACTIVE,
             updated_by=sample_admin.id,
-            is_admin=True
+            is_admin=True,
         )
 
         assert updated_service.status == ServiceStatus.ACTIVE.value
 
-    def test_transition_pending_to_rejected_admin(self, service_repository, sample_service, sample_admin):
+    def test_transition_pending_to_rejected_admin(
+        self, service_repository, sample_service, sample_admin
+    ):
         """Test transition: pending_review → rejected (admin only)"""
         sample_service.status = ServiceStatus.PENDING_REVIEW.value
         service_repository.update(sample_service)
@@ -134,24 +141,28 @@ class TestServiceStatusTransitions:
             sample_service.id,
             ServiceStatus.REJECTED,
             updated_by=sample_admin.id,
-            is_admin=True
+            is_admin=True,
         )
 
         assert updated_service.status == ServiceStatus.REJECTED.value
 
-    def test_transition_active_to_inactive(self, service_repository, sample_service, sample_provider):
+    def test_transition_active_to_inactive(
+        self, service_repository, sample_service, sample_provider
+    ):
         """Test transition: active → inactive"""
         use_case = UpdateServiceStatusUseCase(service_repository)
         updated_service = use_case.execute(
             sample_service.id,
             ServiceStatus.INACTIVE,
             provider_id=sample_provider.id,
-            is_admin=False
+            is_admin=False,
         )
 
         assert updated_service.status == ServiceStatus.INACTIVE.value
 
-    def test_transition_invalid_active_to_draft(self, service_repository, sample_service, sample_provider):
+    def test_transition_invalid_active_to_draft(
+        self, service_repository, sample_service, sample_provider
+    ):
         """Test invalid transition: active → draft"""
         use_case = UpdateServiceStatusUseCase(service_repository)
 
@@ -160,7 +171,7 @@ class TestServiceStatusTransitions:
                 sample_service.id,
                 ServiceStatus.DRAFT,
                 provider_id=sample_provider.id,
-                is_admin=False
+                is_admin=False,
             )
 
 
@@ -174,7 +185,9 @@ class TestBookingStatusTransitions:
 
         assert updated_booking.status == BookingStatus.CONFIRMED.value
 
-    def test_transition_confirmed_to_completed(self, booking_repository, sample_booking):
+    def test_transition_confirmed_to_completed(
+        self, booking_repository, sample_booking
+    ):
         """Test transition: confirmed → completed"""
         # First confirm
         confirm_use_case = ConfirmBookingUseCase(booking_repository)
@@ -192,14 +205,14 @@ class TestBookingStatusTransitions:
 
         use_case = CancelBookingUseCase(booking_repository)
         cancelled_booking = use_case.execute(
-            sample_booking.id,
-            requester_id=sample_booking.user_id,
-            is_admin=False
+            sample_booking.id, requester_id=sample_booking.user_id, is_admin=False
         )
 
         assert cancelled_booking.status == BookingStatus.CANCELLED.value
 
-    def test_transition_invalid_confirmed_to_pending(self, booking_repository, sample_booking):
+    def test_transition_invalid_confirmed_to_pending(
+        self, booking_repository, sample_booking
+    ):
         """Test invalid transition: confirmed → pending"""
         # First confirm
         confirm_use_case = ConfirmBookingUseCase(booking_repository)
@@ -207,6 +220,7 @@ class TestBookingStatusTransitions:
 
         # Try to go back to pending (should fail)
         use_case = ConfirmBookingUseCase(booking_repository)
-        with pytest.raises(ValidationError, match="Only pending bookings can be confirmed"):
+        with pytest.raises(
+            ValidationError, match="Only pending bookings can be confirmed"
+        ):
             use_case.execute(confirmed_booking.id)
-

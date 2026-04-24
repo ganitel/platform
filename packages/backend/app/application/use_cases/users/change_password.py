@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Change Password Use Case
 """
+
 from uuid import UUID
 
 from passlib.context import CryptContext
@@ -19,12 +20,7 @@ class ChangePasswordUseCase:
     def __init__(self, user_repository: IUserRepository):
         self.user_repository = user_repository
 
-    def execute(
-        self,
-        user_id: UUID,
-        current_password: str,
-        new_password: str
-    ) -> bool:
+    def execute(self, user_id: UUID, current_password: str, new_password: str) -> bool:
         """
         Change user password
 
@@ -53,7 +49,9 @@ class ChangePasswordUseCase:
         has_letter = any(c.isalpha() for c in new_password)
         has_digit = any(c.isdigit() for c in new_password)
         if not (has_letter and has_digit):
-            raise ValidationError("New password must contain at least one letter and one number")
+            raise ValidationError(
+                "New password must contain at least one letter and one number"
+            )
 
         # Verify current password
         if not user.hashed_password:
@@ -69,4 +67,3 @@ class ChangePasswordUseCase:
         success = self.user_repository.change_password(user_id, new_hashed_password)
 
         return success
-

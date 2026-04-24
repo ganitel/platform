@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Coupon API Schemas
 """
+
 from datetime import datetime
 from decimal import Decimal
 
@@ -9,6 +10,7 @@ from pydantic import BaseModel, Field
 
 class CouponResponse(BaseModel):
     """Coupon response schema"""
+
     id: str
     code: str
     name: str
@@ -30,16 +32,19 @@ class CouponResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class ApplyCouponRequest(BaseModel):
     """Apply coupon request schema"""
+
     coupon_code: str = Field(..., description="Coupon code")
     amount: Decimal = Field(..., gt=0, description="Amount to apply coupon to")
 
+
 class ApplyCouponResponse(BaseModel):
     """Apply coupon response schema"""
+
     coupon: CouponResponse
     original_amount: float
     discount: float
     final_amount: float
     currency: str
-

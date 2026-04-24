@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Policy Repository Interface
 """
+
 from abc import abstractmethod
 
 from app.domain.entities.policy import Policy, PolicyType
@@ -16,7 +17,9 @@ class IPolicyRepository(BaseRepository[Policy]):
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_type(self, policy_type: PolicyType, skip: int = 0, limit: int = 100) -> list[Policy]:
+    def get_by_type(
+        self, policy_type: PolicyType, skip: int = 0, limit: int = 100
+    ) -> list[Policy]:
         """Get policies by type"""
         raise NotImplementedError
 
@@ -24,4 +27,3 @@ class IPolicyRepository(BaseRepository[Policy]):
     def get_active_policies(self, skip: int = 0, limit: int = 100) -> list[Policy]:
         """Get active policies"""
         raise NotImplementedError
-

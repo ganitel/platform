@@ -1,6 +1,7 @@
 """
 Tests d'intégration pour l'API Payments
 """
+
 from decimal import Decimal
 from uuid import uuid4
 
@@ -27,7 +28,7 @@ def mock_tranzak_calls(monkeypatch):
         customer_name,
         reference,
         callback_url,
-        return_url
+        return_url,
     ):
         return {
             "success": True,
@@ -35,8 +36,8 @@ def mock_tranzak_calls(monkeypatch):
             "payment_url": "https://pay.tranzak.me/flow/REQ_TEST_123",
             "data": {
                 "requestId": "REQ_TEST_123",
-                "links": {"paymentAuthUrl": "https://pay.tranzak.me/flow/REQ_TEST_123"}
-            }
+                "links": {"paymentAuthUrl": "https://pay.tranzak.me/flow/REQ_TEST_123"},
+            },
         }
 
     async def mock_void_request(self, transaction_id):
@@ -68,7 +69,7 @@ def test_service(db_session, sample_provider):
         base_price=Decimal("25000.00"),
         currency="XAF",
         status="active",
-        is_active=True
+        is_active=True,
     )
     db_session.add(service)
     db_session.commit()
@@ -91,7 +92,7 @@ def test_booking(db_session, sample_user, test_service):
         status=BookingStatus.PENDING.value,
         total_amount=Decimal("125000.00"),
         currency="XAF",
-        is_active=True
+        is_active=True,
     )
     db_session.add(booking)
     db_session.commit()
@@ -105,11 +106,8 @@ class TestPaymentAPI:
         """Test initiation de paiement réussie"""
         response = client.post(
             "/api/v1/payments/initiate",
-            json={
-                "booking_id": str(test_booking.id),
-                "payment_method": "mtn"
-            },
-            headers=auth_headers
+            json={"booking_id": str(test_booking.id), "payment_method": "mtn"},
+            headers=auth_headers,
         )
 
         assert response.status_code == 201
@@ -119,7 +117,9 @@ class TestPaymentAPI:
         assert data["currency"] == "XAF"
         assert data["status"] == "pending"
 
-    def test_initiate_payment_duplicate(self, client, test_booking, auth_headers, db_session):
+    def test_initiate_payment_duplicate(
+        self, client, test_booking, auth_headers, db_session
+    ):
         """Test initiation de paiement en double"""
         # Créer un premier paiement
         payment = Payment(
@@ -129,7 +129,7 @@ class TestPaymentAPI:
             currency=test_booking.currency,
             provider="tranzak",
             status=PaymentStatus.COMPLETED.value,
-            is_active=True
+            is_active=True,
         )
         db_session.add(payment)
         db_session.commit()
@@ -137,10 +137,8 @@ class TestPaymentAPI:
         # Essayer de créer un second paiement
         response = client.post(
             "/api/v1/payments/initiate",
-            json={
-                "booking_id": str(test_booking.id)
-            },
-            headers=auth_headers
+            json={"booking_id": str(test_booking.id)},
+            headers=auth_headers,
         )
 
         assert response.status_code == 409
@@ -156,17 +154,14 @@ class TestPaymentAPI:
             provider="tranzak",
             status=PaymentStatus.COMPLETED.value,
             transaction_id="tranzak-123",
-            is_active=True
+            is_active=True,
         )
         db_session.add(payment)
         db_session.commit()
 
         admin_headers = {"Authorization": f"Bearer {admin_token}"}
 
-        response = client.get(
-            f"/api/v1/payments/{payment.id}",
-            headers=admin_headers
-        )
+        response = client.get(f"/api/v1/payments/{payment.id}", headers=admin_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -183,7 +178,7 @@ class TestPaymentAPI:
             currency=test_booking.currency,
             provider="tranzak",
             status=PaymentStatus.COMPLETED.value,
-            is_active=True
+            is_active=True,
         )
         db_session.add(payment)
         db_session.commit()
@@ -208,7 +203,7 @@ class TestPaymentAPI:
                 status=BookingStatus.CONFIRMED.value,
                 total_amount=Decimal("100000.00") + Decimal(i * 10000),
                 currency="XAF",
-                is_active=True
+                is_active=True,
             )
             db_session.add(booking)
             db_session.flush()  # Flush to get booking ID
@@ -220,16 +215,13 @@ class TestPaymentAPI:
                 currency=booking.currency,
                 provider="tranzak",
                 status=PaymentStatus.COMPLETED.value,
-                is_active=True
+                is_active=True,
             )
             db_session.add(payment)
 
         db_session.commit()
 
-        response = client.get(
-            "/api/v1/payments/",
-            headers=auth_headers
-        )
+        response = client.get("/api/v1/payments/", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -247,7 +239,7 @@ class TestPaymentAPI:
             provider="tranzak",
             status=PaymentStatus.PENDING.value,
             transaction_id="tranzak-webhook-123",
-            is_active=True
+            is_active=True,
         )
         db_session.add(payment)
         db_session.commit()
@@ -279,12 +271,12 @@ class TestPaymentAPI:
                     "mchTransactionRef": str(test_booking.id),
                     "amount": float(test_booking.total_amount),
                     "currencyCode": "XAF",
-                    "paymentMethod": "mtn"
+                    "paymentMethod": "mtn",
                 },
                 "webhookId": webhook_id,
                 "creationDateTime": "2026-02-09T10:00:00+00:00",
-                "authKey": auth_key
-            }
+                "authKey": auth_key,
+            },
         )
 
         assert response.status_code == 200

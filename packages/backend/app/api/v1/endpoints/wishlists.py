@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Wishlist Endpoints
 """
+
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -22,7 +23,7 @@ router = APIRouter(prefix="/wishlists", tags=["wishlists"])
 async def toggle_wishlist(
     service_id: UUID,
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Add or remove service from wishlist"""
     try:
@@ -32,20 +33,14 @@ async def toggle_wishlist(
 
         result = use_case.execute(current_user.id, service_id)
 
-        return MessageResponse(
-            message=result["message"],
-            success=True
-        )
+        return MessageResponse(message=result["message"], success=True)
     except NotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to toggle wishlist"
-        )
+            detail="Failed to toggle wishlist",
+        ) from None
 
 
 @router.get("/me", response_model=list[dict])
@@ -53,24 +48,25 @@ async def get_my_wishlist(
     skip: int = 0,
     limit: int = 100,
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get current user's wishlist"""
     try:
         wishlist_repository = WishlistRepository(db)
-        wishlist_items = wishlist_repository.get_by_user_id(current_user.id, skip, limit)
+        wishlist_items = wishlist_repository.get_by_user_id(
+            current_user.id, skip, limit
+        )
 
         return [
             {
                 "id": str(item.id),
                 "service_id": str(item.service_id),
-                "created_at": item.created_at.isoformat()
+                "created_at": item.created_at.isoformat(),
             }
             for item in wishlist_items
         ]
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get wishlist"
-        )
-
+            detail="Failed to get wishlist",
+        ) from None

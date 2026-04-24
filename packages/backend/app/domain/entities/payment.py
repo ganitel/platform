@@ -1,25 +1,28 @@
 """
 Ganitel V2 Backend - Payment Entity
 """
+
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from sqlalchemy import Column, ForeignKey, Numeric, String
-from sqlalchemy.dialects.postgresql import UUID as pgUUID
+from sqlalchemy.dialects.postgresql import UUID
 
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity
 
 
-class PaymentStatus(str, Enum):
+class PaymentStatus(StrEnum):
     """Payment status lifecycle"""
+
     PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
     REFUNDED = "refunded"
 
 
-class PaymentProvider(str, Enum):
+class PaymentProvider(StrEnum):
     """Payment providers"""
+
     TRANZAK = "tranzak"
     MOBILE_MONEY = "mobile_money"
     CARD = "card"
@@ -29,20 +32,33 @@ class Payment(AuditableEntity, SoftDeleteEntity):
     """
     Payment entity representing financial transactions
     """
+
     __tablename__ = "payments"
 
-    booking_id = Column(pgUUID(as_uuid=True), ForeignKey("bookings.id"), nullable=False, unique=True, index=True)
+    booking_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("bookings.id"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
     amount = Column(Numeric(10, 2), nullable=False)
     provider = Column(String(50), nullable=False)  # tranzak, mobile_money, card
-    transaction_id = Column(String(255), unique=True, nullable=True, index=True)  # Provider transaction ID
-    status = Column(String(50), default=PaymentStatus.PENDING.value, nullable=False, index=True)
+    transaction_id = Column(
+        String(255), unique=True, nullable=True, index=True
+    )  # Provider transaction ID
+    status = Column(
+        String(50), default=PaymentStatus.PENDING.value, nullable=False, index=True
+    )
 
     # Additional payment details
     payment_method = Column(String(50), nullable=True)  # mtn, orange, visa, etc.
     currency = Column(String(10), default="XAF", nullable=False)
 
     # Provider response data
-    provider_response = Column(String(2000), nullable=True)  # JSON string of provider response
+    provider_response = Column(
+        String(2000), nullable=True
+    )  # JSON string of provider response
     error_message = Column(String(500), nullable=True)
 
     # Refund information
@@ -52,9 +68,11 @@ class Payment(AuditableEntity, SoftDeleteEntity):
 
     def can_be_refunded(self) -> bool:
         """Check if payment can be refunded"""
-        return self.status == PaymentStatus.COMPLETED.value and self.refund_amount is None
+        return (
+            self.status == PaymentStatus.COMPLETED.value and self.refund_amount is None
+        )
 
-    def mark_completed(self, transaction_id: str, provider_response: str = None):
+    def mark_completed(self, transaction_id: str, provider_response: str | None = None):
         """Mark payment as completed"""
         self.status = PaymentStatus.COMPLETED.value
         self.transaction_id = transaction_id

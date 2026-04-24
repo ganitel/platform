@@ -5,6 +5,7 @@ Revises: 91e870784d19
 Create Date: 2026-02-10 12:00:00.000000
 
 """
+
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -48,7 +49,9 @@ def upgrade() -> None:
         sa.Column("deleted_by", sa.UUID(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_property_types_name"), "property_types", ["name"], unique=True)
+    op.create_index(
+        op.f("ix_property_types_name"), "property_types", ["name"], unique=True
+    )
 
     op.create_table(
         "properties",
@@ -89,9 +92,18 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["provider_id"], ["users.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_properties_location_id"), "properties", ["location_id"], unique=False)
-    op.create_index(op.f("ix_properties_property_type_id"), "properties", ["property_type_id"], unique=False)
-    op.create_index(op.f("ix_properties_provider_id"), "properties", ["provider_id"], unique=False)
+    op.create_index(
+        op.f("ix_properties_location_id"), "properties", ["location_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_properties_property_type_id"),
+        "properties",
+        ["property_type_id"],
+        unique=False,
+    )
+    op.create_index(
+        op.f("ix_properties_provider_id"), "properties", ["provider_id"], unique=False
+    )
     op.create_index(op.f("ix_properties_title"), "properties", ["title"], unique=False)
 
 

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Service Repository Interface
 """
+
 from abc import abstractmethod
 from datetime import date
 from uuid import UUID
@@ -15,7 +16,9 @@ class IServiceRepository(BaseRepository[Service]):
     """
 
     @abstractmethod
-    def get_by_provider_id(self, provider_id: UUID, skip: int = 0, limit: int = 100) -> list[Service]:
+    def get_by_provider_id(
+        self, provider_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Service]:
         """Get services by provider ID"""
         raise NotImplementedError
 
@@ -25,12 +28,16 @@ class IServiceRepository(BaseRepository[Service]):
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_service_type(self, service_type: ServiceType, skip: int = 0, limit: int = 100) -> list[Service]:
+    def get_by_service_type(
+        self, service_type: ServiceType, skip: int = 0, limit: int = 100
+    ) -> list[Service]:
         """Get services by type"""
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_status(self, status: ServiceStatus, skip: int = 0, limit: int = 100) -> list[Service]:
+    def get_by_status(
+        self, status: ServiceStatus, skip: int = 0, limit: int = 100
+    ) -> list[Service]:
         """Get services by status"""
         raise NotImplementedError
 
@@ -40,7 +47,13 @@ class IServiceRepository(BaseRepository[Service]):
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_location(self, country: str | None = None, city: str | None = None, skip: int = 0, limit: int = 100) -> list[Service]:
+    def get_by_location(
+        self,
+        country: str | None = None,
+        city: str | None = None,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> list[Service]:
         """Get services by location"""
         raise NotImplementedError
 
@@ -55,7 +68,7 @@ class IServiceRepository(BaseRepository[Service]):
         max_price: float | None = None,
         amenities: list[str] | None = None,
         skip: int = 0,
-        limit: int = 100
+        limit: int = 100,
     ) -> list[Service]:
         """Search services with filters"""
         raise NotImplementedError
@@ -70,7 +83,7 @@ class IServiceRepository(BaseRepository[Service]):
         country: str | None = None,
         city: str | None = None,
         skip: int = 0,
-        limit: int = 100
+        limit: int = 100,
     ) -> list[Service]:
         """Get available services for specific dates"""
         raise NotImplementedError
@@ -94,4 +107,3 @@ class IServiceRepository(BaseRepository[Service]):
     def slug_exists(self, slug: str, exclude_service_id: UUID | None = None) -> bool:
         """Check if slug already exists"""
         raise NotImplementedError
-

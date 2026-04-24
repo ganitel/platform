@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Health Check Endpoints
 """
+
 import time
 
 import redis
@@ -14,6 +15,7 @@ from app.dependencies import get_redis
 router = APIRouter()
 settings = get_settings()
 
+
 @router.get("/")
 async def health_check():
     """Basic health check"""
@@ -21,13 +23,13 @@ async def health_check():
         "status": "healthy",
         "timestamp": time.time(),
         "version": settings.APP_VERSION,
-        "environment": settings.ENVIRONMENT
+        "environment": settings.ENVIRONMENT,
     }
+
 
 @router.get("/detailed")
 async def detailed_health_check(
-    db: Session = Depends(get_db),
-    redis_client: redis.Redis = Depends(get_redis)
+    db: Session = Depends(get_db), redis_client: redis.Redis = Depends(get_redis)
 ):
     """Detailed health check including dependencies"""
 
@@ -53,12 +55,11 @@ async def detailed_health_check(
         "dependencies": {
             "database": {
                 "status": "healthy" if db_healthy else "unhealthy",
-                "type": "postgresql"
+                "type": "postgresql",
             },
             "redis": {
                 "status": "healthy" if redis_healthy else "unhealthy",
-                "type": "redis"
-            }
-        }
+                "type": "redis",
+            },
+        },
     }
-

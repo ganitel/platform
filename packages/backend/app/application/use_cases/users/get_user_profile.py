@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Get User Profile Use Case
 """
+
 from uuid import UUID
 
 from app.domain.entities.user import User
@@ -35,4 +36,3 @@ class GetUserProfileUseCase:
             raise UserNotFoundError(f"User with ID {user_id} not found")
 
         return user
-

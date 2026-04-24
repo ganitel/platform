@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - User Endpoints Integration Tests
 """
+
 from fastapi import status
 
 
@@ -10,8 +11,7 @@ class TestGetCurrentUserEndpoint:
     def test_get_current_user_success(self, client, auth_token, sample_user):
         """Test successful profile retrieval"""
         response = client.get(
-            "/api/v1/users/me",
-            headers={"Authorization": f"Bearer {auth_token}"}
+            "/api/v1/users/me", headers={"Authorization": f"Bearer {auth_token}"}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -35,11 +35,7 @@ class TestUpdateCurrentUserEndpoint:
         response = client.put(
             "/api/v1/users/me",
             headers={"Authorization": f"Bearer {auth_token}"},
-            json={
-                "first_name": "Updated",
-                "bio": "New bio",
-                "city": "Yaoundé"
-            }
+            json={"first_name": "Updated", "bio": "New bio", "city": "Yaoundé"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -50,10 +46,7 @@ class TestUpdateCurrentUserEndpoint:
 
     def test_update_profile_unauthorized(self, client):
         """Test profile update fails without authentication"""
-        response = client.put(
-            "/api/v1/users/me",
-            json={"first_name": "Updated"}
-        )
+        response = client.put("/api/v1/users/me", json={"first_name": "Updated"})
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -66,10 +59,7 @@ class TestChangePasswordEndpoint:
         response = client.post(
             "/api/v1/users/me/change-password",
             headers={"Authorization": f"Bearer {auth_token}"},
-            json={
-                "current_password": "password123",
-                "new_password": "newpassword456"
-            }
+            json={"current_password": "password123", "new_password": "newpassword456"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -79,10 +69,7 @@ class TestChangePasswordEndpoint:
         # Verify new password works
         login_response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": sample_user.email,
-                "password": "newpassword456"
-            }
+            json={"identifier": sample_user.email, "password": "newpassword456"},
         )
         assert login_response.status_code == status.HTTP_200_OK
 
@@ -93,8 +80,8 @@ class TestChangePasswordEndpoint:
             headers={"Authorization": f"Bearer {auth_token}"},
             json={
                 "current_password": "wrongpassword",
-                "new_password": "newpassword456"
-            }
+                "new_password": "newpassword456",
+            },
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -103,10 +90,7 @@ class TestChangePasswordEndpoint:
         """Test password change fails without authentication"""
         response = client.post(
             "/api/v1/users/me/change-password",
-            json={
-                "current_password": "password123",
-                "new_password": "newpassword456"
-            }
+            json={"current_password": "password123", "new_password": "newpassword456"},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -119,7 +103,7 @@ class TestGetUserBookingsEndpoint:
         """Test successful bookings retrieval"""
         response = client.get(
             "/api/v1/users/me/bookings",
-            headers={"Authorization": f"Bearer {auth_token}"}
+            headers={"Authorization": f"Bearer {auth_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -151,7 +135,7 @@ class TestGetUserPublicProfileEndpoint:
     def test_get_public_profile_not_found(self, client):
         """Test public profile retrieval fails for non-existent user"""
         from uuid import uuid4
+
         response = client.get(f"/api/v1/users/{uuid4()}")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
-

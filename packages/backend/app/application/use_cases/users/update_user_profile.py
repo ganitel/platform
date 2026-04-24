@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Update User Profile Use Case
 """
+
 from typing import Any
 from uuid import UUID
 
@@ -18,10 +19,7 @@ class UpdateUserProfileUseCase:
         self.user_repository = user_repository
 
     def execute(
-        self,
-        user_id: UUID,
-        update_data: dict[str, Any],
-        updated_by: UUID | None = None
+        self, user_id: UUID, update_data: dict[str, Any], updated_by: UUID | None = None
     ) -> User:
         """
         Update user profile
@@ -45,8 +43,14 @@ class UpdateUserProfileUseCase:
 
         # Validate and update fields
         allowed_fields = [
-            'first_name', 'last_name', 'bio', 'profile_picture',
-            'country', 'city', 'language', 'currency'
+            "first_name",
+            "last_name",
+            "bio",
+            "profile_picture",
+            "country",
+            "city",
+            "language",
+            "currency",
         ]
 
         for field, value in update_data.items():
@@ -55,11 +59,13 @@ class UpdateUserProfileUseCase:
 
             if value is not None:
                 # Additional validation
-                if field in ['first_name', 'last_name']:
+                if field in ["first_name", "last_name"]:
                     if not value.strip():
                         raise ValidationError(f"{field} cannot be empty")
                     if len(value.strip()) > 100:
-                        raise ValidationError(f"{field} must be less than 100 characters")
+                        raise ValidationError(
+                            f"{field} must be less than 100 characters"
+                        )
 
                 setattr(user, field, value.strip() if isinstance(value, str) else value)
 
@@ -71,4 +77,3 @@ class UpdateUserProfileUseCase:
         updated_user = self.user_repository.update(user)
 
         return updated_user
-

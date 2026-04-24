@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Configuration Settings
 """
+
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Literal
@@ -13,6 +14,7 @@ from sqlalchemy.engine import URL
 @dataclass(frozen=True)
 class EnvironmentPolicy:
     """Environment-specific defaults and safety requirements"""
+
     canonical_name: Literal["development", "test", "staging", "production"]
     default_debug: bool
     default_access_token_expire_minutes: int
@@ -61,13 +63,12 @@ ENVIRONMENT_POLICIES = {
     ),
 }
 
+
 class Settings(BaseSettings):
     """Application settings with environment variable support"""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
-        case_sensitive=True,
-        env_parse_none_str='null'
+        env_file=".env", case_sensitive=True, env_parse_none_str="null"
     )
 
     # Application
@@ -137,7 +138,9 @@ class Settings(BaseSettings):
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/oauth/google/callback"
     FACEBOOK_APP_ID: str = "your-facebook-app-id"
     FACEBOOK_APP_SECRET: str = "your-facebook-app-secret"
-    FACEBOOK_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/oauth/facebook/callback"
+    FACEBOOK_REDIRECT_URI: str = (
+        "http://localhost:8000/api/v1/auth/oauth/facebook/callback"
+    )
     FRONTEND_URL: str = "http://localhost:3000"
 
     # Orange Money Configuration
@@ -145,15 +148,25 @@ class Settings(BaseSettings):
     ORANGE_MONEY_CLIENT_SECRET: str = "your-orange-money-client-secret"
     ORANGE_MONEY_MERCHANT_KEY: str = "your-orange-money-merchant-key"
     ORANGE_MONEY_TOKEN_URL: str = "https://api.orange.com/oauth/v2/token"
-    ORANGE_MONEY_PAYMENT_URL: str = "https://api.orange.com/orange-money-webpay/cm/v1/webpayment"
-    ORANGE_MONEY_WEBHOOK_URL: str = "http://localhost:8000/api/v1/payments/webhook/orange"
+    ORANGE_MONEY_PAYMENT_URL: str = (
+        "https://api.orange.com/orange-money-webpay/cm/v1/webpayment"
+    )
+    ORANGE_MONEY_WEBHOOK_URL: str = (
+        "http://localhost:8000/api/v1/payments/webhook/orange"
+    )
 
     # Mobile Money Configuration
     MOBILE_MONEY_BASIC_AUTH: str = "your-mobile-money-basic-auth"
-    MOBILE_MONEY_TOKEN_URL: str = "https://sandbox.momodeveloper.mtn.com/collection/token/"
-    MOBILE_MONEY_PAYMENT_URL: str = "https://sandbox.momodeveloper.mtn.com/collection/v1_0/requesttopay"
+    MOBILE_MONEY_TOKEN_URL: str = (
+        "https://sandbox.momodeveloper.mtn.com/collection/token/"
+    )
+    MOBILE_MONEY_PAYMENT_URL: str = (
+        "https://sandbox.momodeveloper.mtn.com/collection/v1_0/requesttopay"
+    )
     MOBILE_MONEY_ENVIRONMENT: str = "sandbox"
-    MOBILE_MONEY_WEBHOOK_URL: str = "http://localhost:8000/api/v1/payments/webhook/mobile-money"
+    MOBILE_MONEY_WEBHOOK_URL: str = (
+        "http://localhost:8000/api/v1/payments/webhook/mobile-money"
+    )
 
     # File Upload Configuration
     UPLOAD_DIR: str = "uploads"
@@ -166,7 +179,7 @@ class Settings(BaseSettings):
     R2_ACCESS_KEY_ID: str = ""
     R2_SECRET_ACCESS_KEY: str = ""
     R2_PUBLIC_URL: str = "https://cdn.ganitel.com"
-    R2_ENDPOINT_URL: str = "" # Generated from account_id if empty
+    R2_ENDPOINT_URL: str = ""  # Generated from account_id if empty
 
     @staticmethod
     def _normalize_environment_name(environment: str) -> str:
@@ -184,8 +197,7 @@ class Settings(BaseSettings):
     def environment_policy(self) -> EnvironmentPolicy:
         return ENVIRONMENT_POLICIES[self.effective_environment]
 
-
-    @field_validator("CORS_ORIGINS", mode='before')
+    @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v) -> list[str]:
         if isinstance(v, str):
@@ -194,7 +206,7 @@ class Settings(BaseSettings):
             return v
         return ["http://localhost:3000", "http://localhost:8000"]
 
-    @field_validator("CORS_ALLOW_METHODS", mode='before')
+    @field_validator("CORS_ALLOW_METHODS", mode="before")
     @classmethod
     def assemble_cors_methods(cls, v) -> list[str]:
         if isinstance(v, str):
@@ -203,7 +215,7 @@ class Settings(BaseSettings):
             return v
         return ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 
-    @field_validator("CORS_ALLOW_HEADERS", mode='before')
+    @field_validator("CORS_ALLOW_HEADERS", mode="before")
     @classmethod
     def assemble_cors_headers(cls, v) -> list[str]:
         if isinstance(v, str):
@@ -212,7 +224,7 @@ class Settings(BaseSettings):
             return v
         return ["*"]
 
-    @field_validator("DATABASE_URL", mode='before')
+    @field_validator("DATABASE_URL", mode="before")
     @classmethod
     def assemble_db_connection(cls, v) -> str:
         if v and isinstance(v, str) and v.startswith("postgres://"):
@@ -230,7 +242,7 @@ class Settings(BaseSettings):
             )
         return normalized
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def build_database_url(self):
         if self.DATABASE_URL:
             # Continue to policy and fail-fast checks
@@ -252,7 +264,9 @@ class Settings(BaseSettings):
             self.DEBUG = policy.default_debug
 
         if "ACCESS_TOKEN_EXPIRE_MINUTES" not in provided_fields:
-            self.ACCESS_TOKEN_EXPIRE_MINUTES = policy.default_access_token_expire_minutes
+            self.ACCESS_TOKEN_EXPIRE_MINUTES = (
+                policy.default_access_token_expire_minutes
+            )
 
         if "REFRESH_TOKEN_EXPIRE_DAYS" not in provided_fields:
             self.REFRESH_TOKEN_EXPIRE_DAYS = policy.default_refresh_token_expire_days
@@ -266,16 +280,29 @@ class Settings(BaseSettings):
         if self.effective_environment == "production" and self.DEBUG:
             raise ValueError("DEBUG must be False in production environment")
 
-        if self.CORS_ALLOW_CREDENTIALS and "*" in self.CORS_ORIGINS and self.effective_environment != "development":
-            raise ValueError("CORS_ORIGINS cannot contain '*' when credentials are enabled outside development")
+        if (
+            self.CORS_ALLOW_CREDENTIALS
+            and "*" in self.CORS_ORIGINS
+            and self.effective_environment != "development"
+        ):
+            raise ValueError(
+                "CORS_ORIGINS cannot contain '*' when credentials are enabled outside development"
+            )
 
-        if self.effective_environment in {"staging", "production"} and not (15 <= self.ACCESS_TOKEN_EXPIRE_MINUTES <= 30):
-            raise ValueError("ACCESS_TOKEN_EXPIRE_MINUTES must be between 15 and 30 for staging/production")
+        if self.effective_environment in {"staging", "production"} and not (
+            15 <= self.ACCESS_TOKEN_EXPIRE_MINUTES <= 30
+        ):
+            raise ValueError(
+                "ACCESS_TOKEN_EXPIRE_MINUTES must be between 15 and 30 for staging/production"
+            )
 
         if self.ENV_WORKERS < 1:
             raise ValueError("ENV_WORKERS must be >= 1")
 
-        if self.effective_environment in {"staging", "production"} and self.ENV_WORKERS < 2:
+        if (
+            self.effective_environment in {"staging", "production"}
+            and self.ENV_WORKERS < 2
+        ):
             raise ValueError("ENV_WORKERS must be >= 2 in staging/production")
 
         host_port_bindings = {
@@ -315,8 +342,13 @@ class Settings(BaseSettings):
             raise ValueError(f"Duplicate host ports detected across bindings: {joined}")
 
         if policy.enforce_strict_secrets:
-            if self.SECRET_KEY == "dev-secret-key-change-in-production" or len(self.SECRET_KEY) < 32:
-                raise ValueError("SECRET_KEY must be set to a strong value (min 32 chars) in staging/production")
+            if (
+                self.SECRET_KEY == "dev-secret-key-change-in-production"
+                or len(self.SECRET_KEY) < 32
+            ):
+                raise ValueError(
+                    "SECRET_KEY must be set to a strong value (min 32 chars) in staging/production"
+                )
 
             if (self.ADMIN_EMAIL or "").strip().lower() == "admin@ganitel.com":
                 raise ValueError("ADMIN_EMAIL must be changed in staging/production")
@@ -341,7 +373,8 @@ class Settings(BaseSettings):
             }
 
             invalid_secret_names = [
-                key for key, value in placeholder_secrets.items()
+                key
+                for key, value in placeholder_secrets.items()
                 if not value
                 or value.startswith("your-")
                 or value.startswith("your_")
@@ -351,12 +384,14 @@ class Settings(BaseSettings):
 
             if invalid_secret_names:
                 joined = ", ".join(invalid_secret_names)
-                raise ValueError(f"Placeholder secrets detected in staging/production: {joined}")
+                raise ValueError(
+                    f"Placeholder secrets detected in staging/production: {joined}"
+                )
 
         return self
+
 
 @lru_cache
 def get_settings() -> Settings:
     """Get cached application settings"""
     return Settings()
-

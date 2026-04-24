@@ -3,6 +3,7 @@ Ganitel V2 Backend - Booking Exclusion Constraint Tests
 
 Tests specifically for the anti-overlap booking constraint at the database level.
 """
+
 from datetime import date, timedelta
 
 import pytest
@@ -15,7 +16,9 @@ from app.infrastructure.repositories.booking_repository import BookingRepository
 class TestBookingExclusionConstraint:
     """Tests for the database-level exclusion constraint preventing overlapping bookings"""
 
-    def test_overlapping_bookings_should_fail_at_db_level(self, db_session, sample_user, sample_service):
+    def test_overlapping_bookings_should_fail_at_db_level(
+        self, db_session, sample_user, sample_service
+    ):
         """
         Test that the database exclusion constraint prevents overlapping bookings
         for the same service.
@@ -66,7 +69,9 @@ class TestBookingExclusionConstraint:
         # Clean up the transaction state
         db_session.rollback()
 
-    def test_non_overlapping_bookings_should_succeed(self, db_session, sample_user, sample_service):
+    def test_non_overlapping_bookings_should_succeed(
+        self, db_session, sample_user, sample_service
+    ):
         """
         Test that non-overlapping bookings for the same service can be created.
         """
@@ -112,7 +117,9 @@ class TestBookingExclusionConstraint:
         assert repo.get_by_id(booking_1.id) is not None
         assert repo.get_by_id(booking_2.id) is not None
 
-    def test_deleted_bookings_do_not_trigger_constraint(self, db_session, sample_user, sample_service):
+    def test_deleted_bookings_do_not_trigger_constraint(
+        self, db_session, sample_user, sample_service
+    ):
         """
         Test that soft-deleted bookings do not trigger the overlap constraint.
 
@@ -165,7 +172,9 @@ class TestBookingExclusionConstraint:
         # Verify booking_2 exists
         assert repo.get_by_id(booking_2.id) is not None
 
-    def test_overlapping_bookings_different_services_allowed(self, db_session, sample_user, sample_service, sample_service_2):
+    def test_overlapping_bookings_different_services_allowed(
+        self, db_session, sample_user, sample_service, sample_service_2
+    ):
         """
         Test that overlapping bookings are allowed for different services.
 

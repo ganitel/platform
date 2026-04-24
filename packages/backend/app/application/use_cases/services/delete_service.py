@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Delete Service Use Case
 """
+
 from uuid import UUID
 
 from app.domain.repositories.service_repository import IServiceRepository
@@ -22,4 +23,3 @@ class DeleteServiceUseCase:
             raise AuthorizationError("You can only delete your own listings")
 
         self.service_repository.soft_delete(service_id)
-

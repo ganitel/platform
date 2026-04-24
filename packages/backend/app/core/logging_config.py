@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Logging Configuration
 """
+
 import logging
 
 
@@ -11,10 +12,5 @@ def configure_logging(debug: bool = False) -> None:
 
     logging.basicConfig(
         level=logging.DEBUG if debug else logging.INFO,
-        format=(
-            "%(asctime)s "
-            "level=%(levelname)s "
-            "logger=%(name)s "
-            "message=%(message)s"
-        ),
+        format=("%(asctime)s level=%(levelname)s logger=%(name)s message=%(message)s"),
     )

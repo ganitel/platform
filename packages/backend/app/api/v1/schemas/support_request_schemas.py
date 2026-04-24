@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Support Request API Schemas
 """
+
 from datetime import datetime
 
 from pydantic import BaseModel, Field
@@ -8,13 +9,16 @@ from pydantic import BaseModel, Field
 
 class SupportRequestCreateRequest(BaseModel):
     """Create support request schema"""
+
     subject: str = Field(..., max_length=200, description="Request subject")
     description: str = Field(..., description="Request description")
     category: str | None = Field(None, description="Request category")
     priority: str = Field("medium", description="Request priority")
 
+
 class SupportRequestResponse(BaseModel):
     """Support request response schema"""
+
     id: str
     user_id: str
     subject: str
@@ -30,4 +34,3 @@ class SupportRequestResponse(BaseModel):
 
     class Config:
         from_attributes = True
-

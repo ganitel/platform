@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Process Refund Use Case
 """
+
 import logging
 from uuid import UUID
 
@@ -15,9 +16,7 @@ class ProcessRefundUseCase:
     """Handles payment refunds"""
 
     def __init__(
-        self,
-        payment_repository: IPaymentRepository,
-        tranzak_client: TranzakClient
+        self, payment_repository: IPaymentRepository, tranzak_client: TranzakClient
     ):
         self.payment_repository = payment_repository
         self.tranzak_client = tranzak_client
@@ -25,8 +24,8 @@ class ProcessRefundUseCase:
     async def execute(
         self,
         payment_id: UUID,
-        refund_amount: float = None,
-        reason: str = "Customer request"
+        refund_amount: float | None = None,
+        reason: str = "Customer request",
     ) -> dict:
         """
         Process a refund for a payment
@@ -60,7 +59,7 @@ class ProcessRefundUseCase:
             tranzak_response = await self.tranzak_client.process_refund(
                 transaction_id=payment.transaction_id,
                 amount=refund_amount,
-                reason=reason
+                reason=reason,
             )
 
             if not tranzak_response.get("success"):
@@ -77,9 +76,9 @@ class ProcessRefundUseCase:
                 "payment_id": str(payment.id),
                 "refund_amount": refund_amount,
                 "status": payment.status,
-                "message": "Refund processed successfully"
+                "message": "Refund processed successfully",
             }
 
         except Exception as e:
-            logger.error(f"Refund processing error: {str(e)}")
-            raise PaymentError(f"Refund failed: {str(e)}")
+            logger.error(f"Refund processing error: {e!s}")
+            raise PaymentError(f"Refund failed: {e!s}") from e

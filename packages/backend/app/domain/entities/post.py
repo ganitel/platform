@@ -1,7 +1,8 @@
 """
 Ganitel V2 Backend - Post Entity (Social Features)
 """
-from enum import Enum
+
+from enum import StrEnum
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
@@ -9,8 +10,9 @@ from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity
 
 
-class PostStatus(str, Enum):
+class PostStatus(StrEnum):
     """Post status enumeration"""
+
     DRAFT = "draft"
     PUBLISHED = "published"
     ARCHIVED = "archived"
@@ -21,10 +23,13 @@ class Post(AuditableEntity, SoftDeleteEntity):
     """
     Post entity for social posts
     """
+
     __tablename__ = "posts"
 
     # Relationships
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )
 
     # Post Information
     title = Column(String(200), nullable=False)
@@ -37,7 +42,9 @@ class Post(AuditableEntity, SoftDeleteEntity):
     images = Column(ARRAY(String), nullable=True)
 
     # Status
-    status = Column(String(20), default=PostStatus.DRAFT.value, nullable=False, index=True)
+    status = Column(
+        String(20), default=PostStatus.DRAFT.value, nullable=False, index=True
+    )
     is_featured = Column(Boolean, default=False, nullable=False)
 
     # Engagement
@@ -64,4 +71,3 @@ class Post(AuditableEntity, SoftDeleteEntity):
 
     def __repr__(self):
         return f"<Post(id={self.id}, title={self.title}, status={self.status})>"
-

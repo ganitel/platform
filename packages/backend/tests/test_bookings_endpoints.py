@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Booking Endpoints Integration Tests
 """
+
 from datetime import date, timedelta
 
 from fastapi import status
@@ -22,8 +23,8 @@ class TestCreateBookingEndpoint:
                 "start_date": start_date.isoformat(),
                 "end_date": end_date.isoformat(),
                 "guests": 2,
-                "notes": "Test booking"
-            }
+                "notes": "Test booking",
+            },
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -43,8 +44,8 @@ class TestCreateBookingEndpoint:
                 "service_id": str(sample_service.id),
                 "start_date": start_date.isoformat(),
                 "end_date": end_date.isoformat(),
-                "guests": 2
-            }
+                "guests": 2,
+            },
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -61,8 +62,8 @@ class TestCreateBookingEndpoint:
                 "service_id": str(sample_service.id),
                 "start_date": start_date.isoformat(),
                 "end_date": end_date.isoformat(),
-                "guests": 2
-            }
+                "guests": 2,
+            },
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -79,8 +80,8 @@ class TestCreateBookingEndpoint:
                 "service_id": str(sample_service.id),
                 "start_date": start_date.isoformat(),
                 "end_date": end_date.isoformat(),
-                "guests": 2
-            }
+                "guests": 2,
+            },
         )
 
         # FastAPI/Pydantic returns 422 for validation errors
@@ -94,7 +95,7 @@ class TestGetBookingEndpoint:
         """Test successful booking retrieval"""
         response = client.get(
             f"/api/v1/bookings/{sample_booking.id}",
-            headers={"Authorization": f"Bearer {auth_token}"}
+            headers={"Authorization": f"Bearer {auth_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -116,7 +117,7 @@ class TestCancelBookingEndpoint:
         """Test successful booking cancellation"""
         response = client.put(
             f"/api/v1/bookings/{sample_booking.id}/cancel",
-            headers={"Authorization": f"Bearer {auth_token}"}
+            headers={"Authorization": f"Bearer {auth_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -129,4 +130,3 @@ class TestCancelBookingEndpoint:
         response = client.put(f"/api/v1/bookings/{sample_booking.id}/cancel")
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-

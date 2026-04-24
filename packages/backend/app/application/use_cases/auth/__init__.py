@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Authentication Use Cases
 """
+
 from .forgot_password import ForgotPasswordUseCase
 from .login_user import LoginUserUseCase
 from .oauth_login import OAuthLoginUseCase
@@ -10,12 +11,11 @@ from .reset_password import ResetPasswordUseCase
 from .verify_reset_token import VerifyResetTokenUseCase
 
 __all__ = [
-    "RegisterUserUseCase",
-    "LoginUserUseCase",
-    "RefreshTokenUseCase",
     "ForgotPasswordUseCase",
+    "LoginUserUseCase",
+    "OAuthLoginUseCase",
+    "RefreshTokenUseCase",
+    "RegisterUserUseCase",
     "ResetPasswordUseCase",
     "VerifyResetTokenUseCase",
-    "OAuthLoginUseCase",
 ]
-

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Property Entity
 """
+
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import relationship
@@ -12,6 +13,7 @@ class Property(AuditableEntity, SoftDeleteEntity):
     """
     Property entity for accommodation listings
     """
+
     __tablename__ = "properties"
 
     # Basic Information
@@ -20,9 +22,15 @@ class Property(AuditableEntity, SoftDeleteEntity):
     short_description = Column(String(500), nullable=True)
 
     # Relationships
-    provider_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
-    location_id = Column(UUID(as_uuid=True), ForeignKey("locations.id"), nullable=False, index=True)
-    property_type_id = Column(UUID(as_uuid=True), ForeignKey("property_types.id"), nullable=False, index=True)
+    provider_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )
+    location_id = Column(
+        UUID(as_uuid=True), ForeignKey("locations.id"), nullable=False, index=True
+    )
+    property_type_id = Column(
+        UUID(as_uuid=True), ForeignKey("property_types.id"), nullable=False, index=True
+    )
 
     # Location
     address = Column(Text, nullable=False)

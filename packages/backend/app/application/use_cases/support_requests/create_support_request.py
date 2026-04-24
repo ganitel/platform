@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Create Support Request Use Case
 """
+
 from uuid import UUID
 
 from app.domain.entities.support_request import (
@@ -19,7 +20,7 @@ class CreateSupportRequestUseCase:
     def __init__(
         self,
         support_request_repository: ISupportRequestRepository,
-        user_repository: IUserRepository
+        user_repository: IUserRepository,
     ):
         self.support_request_repository = support_request_repository
         self.user_repository = user_repository
@@ -30,7 +31,7 @@ class CreateSupportRequestUseCase:
         subject: str,
         description: str,
         category: str | None = None,
-        priority: str = SupportRequestPriority.MEDIUM.value
+        priority: str = SupportRequestPriority.MEDIUM.value,
     ) -> SupportRequest:
         """
         Create a support request
@@ -59,8 +60,7 @@ class CreateSupportRequestUseCase:
             description=description,
             category=category,
             priority=priority,
-            status=SupportRequestStatus.OPEN.value
+            status=SupportRequestStatus.OPEN.value,
         )
 
         return self.support_request_repository.create(support_request)
-

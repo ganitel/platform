@@ -1,6 +1,7 @@
 """
 Unit tests for booking use cases
 """
+
 from datetime import date, timedelta
 from unittest.mock import MagicMock
 from uuid import uuid4
@@ -113,4 +114,3 @@ def test_cancel_booking_protection():
     # Authorized path
     use_case.execute(uuid4(), booking.user_id)
     booking_repo.update.assert_called_once()
-

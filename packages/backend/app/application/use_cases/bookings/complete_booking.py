@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Complete Booking Use Case
 """
+
 from uuid import UUID
 
 from app.domain.entities.booking import Booking, BookingStatus
@@ -16,11 +17,7 @@ class CompleteBookingUseCase:
     def __init__(self, booking_repository: IBookingRepository):
         self.booking_repository = booking_repository
 
-    def execute(
-        self,
-        booking_id: UUID,
-        completed_by: UUID | None = None
-    ) -> Booking:
+    def execute(self, booking_id: UUID, completed_by: UUID | None = None) -> Booking:
         """
         Mark booking as completed
 
@@ -60,4 +57,3 @@ class CompleteBookingUseCase:
         updated_booking = self.booking_repository.update(booking)
 
         return updated_booking
-

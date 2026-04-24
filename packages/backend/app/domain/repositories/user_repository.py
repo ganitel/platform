@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - User Repository Interface
 """
+
 from abc import abstractmethod
 from uuid import UUID
 
@@ -24,7 +25,9 @@ class IUserRepository(BaseRepository[User]):
         raise NotImplementedError
 
     @abstractmethod
-    def search_users(self, search_term: str, skip: int = 0, limit: int = 100) -> list[User]:
+    def search_users(
+        self, search_term: str, skip: int = 0, limit: int = 100
+    ) -> list[User]:
         """Search users by name or email"""
         raise NotImplementedError
 
@@ -57,4 +60,3 @@ class IUserRepository(BaseRepository[User]):
     def get_by_oauth_id(self, oauth_id: str, provider: str) -> User | None:
         """Get user by OAuth ID and provider"""
         raise NotImplementedError
-

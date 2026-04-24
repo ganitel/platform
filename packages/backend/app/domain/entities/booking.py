@@ -1,18 +1,19 @@
 """
 Ganitel V2 Backend - Booking Entity
 """
+
 from __future__ import annotations
 
 from datetime import date, datetime
-from enum import Enum
+from enum import StrEnum
 
 from sqlalchemy import Column, Date, ForeignKey, Numeric, String, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID as pgUUID
+from sqlalchemy.dialects.postgresql import UUID
 
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity
 
 
-class BookingStatus(str, Enum):
+class BookingStatus(StrEnum):
     """Booking status lifecycle"""
 
     PENDING = "pending"
@@ -35,15 +36,27 @@ class Booking(AuditableEntity, SoftDeleteEntity):
 
     __tablename__ = "bookings"
     __table_args__ = (
-        UniqueConstraint("service_id", "user_id", "start_date", "end_date", name="uq_booking_unique_period"),
+        UniqueConstraint(
+            "service_id",
+            "user_id",
+            "start_date",
+            "end_date",
+            name="uq_booking_unique_period",
+        ),
     )
 
-    user_id = Column(pgUUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
-    service_id = Column(pgUUID(as_uuid=True), ForeignKey("services.id"), nullable=False, index=True)
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )
+    service_id = Column(
+        UUID(as_uuid=True), ForeignKey("services.id"), nullable=False, index=True
+    )
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
     guests = Column(Numeric(5, 0), nullable=False)
-    status = Column(String(32), default=BookingStatus.PENDING.value, nullable=False, index=True)
+    status = Column(
+        String(32), default=BookingStatus.PENDING.value, nullable=False, index=True
+    )
     total_amount = Column(Numeric(10, 2), nullable=False)
     negotiated_price = Column(Numeric(10, 2), nullable=True)
     currency = Column(String(10), default="XAF", nullable=False)
@@ -55,7 +68,11 @@ class Booking(AuditableEntity, SoftDeleteEntity):
 
     def can_be_cancelled(self) -> bool:
         """Check if booking can be cancelled"""
-        return self.status in {BookingStatus.PENDING.value, BookingStatus.NEGOTIATING.value, BookingStatus.CONFIRMED.value}
+        return self.status in {
+            BookingStatus.PENDING.value,
+            BookingStatus.NEGOTIATING.value,
+            BookingStatus.CONFIRMED.value,
+        }
 
     def cancel(self):
         """Cancel booking"""
@@ -90,4 +107,3 @@ class Booking(AuditableEntity, SoftDeleteEntity):
 
     def __repr__(self):
         return f"<Booking(id={self.id}, service_id={self.service_id}, status={self.status})>"
-

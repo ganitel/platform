@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - User Management Use Cases Tests
 """
+
 from uuid import uuid4
 
 import pytest
@@ -47,16 +48,9 @@ class TestUpdateUserProfileUseCase:
         """Test successful profile update"""
         use_case = UpdateUserProfileUseCase(user_repository)
 
-        update_data = {
-            "first_name": "Updated",
-            "bio": "New bio",
-            "city": "Yaoundé"
-        }
+        update_data = {"first_name": "Updated", "bio": "New bio", "city": "Yaoundé"}
 
-        updated_user = use_case.execute(
-            user_id=sample_user.id,
-            update_data=update_data
-        )
+        updated_user = use_case.execute(user_id=sample_user.id, update_data=update_data)
 
         assert updated_user.first_name == "Updated"
         assert updated_user.bio == "New bio"
@@ -67,10 +61,7 @@ class TestUpdateUserProfileUseCase:
         use_case = UpdateUserProfileUseCase(user_repository)
 
         with pytest.raises(UserNotFoundError):
-            use_case.execute(
-                user_id=uuid4(),
-                update_data={"first_name": "Test"}
-            )
+            use_case.execute(user_id=uuid4(), update_data={"first_name": "Test"})
 
     def test_update_profile_invalid_field(self, user_repository, sample_user):
         """Test update fails with invalid field"""
@@ -78,8 +69,7 @@ class TestUpdateUserProfileUseCase:
 
         with pytest.raises(ValidationError, match="cannot be updated"):
             use_case.execute(
-                user_id=sample_user.id,
-                update_data={"email": "new@example.com"}
+                user_id=sample_user.id, update_data={"email": "new@example.com"}
             )
 
     def test_update_profile_empty_name(self, user_repository, sample_user):
@@ -87,10 +77,7 @@ class TestUpdateUserProfileUseCase:
         use_case = UpdateUserProfileUseCase(user_repository)
 
         with pytest.raises(ValidationError, match="cannot be empty"):
-            use_case.execute(
-                user_id=sample_user.id,
-                update_data={"first_name": "   "}
-            )
+            use_case.execute(user_id=sample_user.id, update_data={"first_name": "   "})
 
 
 class TestChangePasswordUseCase:
@@ -103,13 +90,14 @@ class TestChangePasswordUseCase:
         result = use_case.execute(
             user_id=sample_user.id,
             current_password="password123",
-            new_password="newpassword456"
+            new_password="newpassword456",
         )
 
         assert result is True
 
         # Verify new password works
         from passlib.context import CryptContext
+
         pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         updated_user = user_repository.get_by_id(sample_user.id)
         assert pwd_context.verify("newpassword456", updated_user.hashed_password)
@@ -122,7 +110,7 @@ class TestChangePasswordUseCase:
             use_case.execute(
                 user_id=sample_user.id,
                 current_password="wrongpassword",
-                new_password="newpassword456"
+                new_password="newpassword456",
             )
 
     def test_change_password_weak_new(self, user_repository, sample_user):
@@ -133,7 +121,7 @@ class TestChangePasswordUseCase:
             use_case.execute(
                 user_id=sample_user.id,
                 current_password="password123",
-                new_password="short"
+                new_password="short",
             )
 
     def test_change_password_not_found(self, user_repository):
@@ -144,7 +132,7 @@ class TestChangePasswordUseCase:
             use_case.execute(
                 user_id=uuid4(),
                 current_password="password123",
-                new_password="newpassword456"
+                new_password="newpassword456",
             )
 
 
@@ -170,10 +158,7 @@ class TestUpdateUserStatusUseCase:
 
         use_case = UpdateUserStatusUseCase(user_repository)
 
-        updated_user = use_case.execute(
-            user_id=user.id,
-            new_status=UserStatus.ACTIVE
-        )
+        updated_user = use_case.execute(user_id=user.id, new_status=UserStatus.ACTIVE)
 
         assert updated_user.status == UserStatus.ACTIVE.value
         assert updated_user.is_verified is True
@@ -183,8 +168,7 @@ class TestUpdateUserStatusUseCase:
         use_case = UpdateUserStatusUseCase(user_repository)
 
         updated_user = use_case.execute(
-            user_id=sample_user.id,
-            new_status=UserStatus.SUSPENDED
+            user_id=sample_user.id, new_status=UserStatus.SUSPENDED
         )
 
         assert updated_user.status == UserStatus.SUSPENDED.value
@@ -208,10 +192,7 @@ class TestUpdateUserStatusUseCase:
 
         use_case = UpdateUserStatusUseCase(user_repository)
 
-        updated_user = use_case.execute(
-            user_id=user.id,
-            new_status=UserStatus.ACTIVE
-        )
+        updated_user = use_case.execute(user_id=user.id, new_status=UserStatus.ACTIVE)
 
         assert updated_user.status == UserStatus.ACTIVE.value
 
@@ -221,8 +202,7 @@ class TestUpdateUserStatusUseCase:
 
         with pytest.raises(ValidationError, match="Cannot transition"):
             use_case.execute(
-                user_id=sample_user.id,
-                new_status=UserStatus.PENDING_VERIFICATION
+                user_id=sample_user.id, new_status=UserStatus.PENDING_VERIFICATION
             )
 
     def test_update_status_not_found(self, user_repository):
@@ -230,10 +210,7 @@ class TestUpdateUserStatusUseCase:
         use_case = UpdateUserStatusUseCase(user_repository)
 
         with pytest.raises(UserNotFoundError):
-            use_case.execute(
-                user_id=uuid4(),
-                new_status=UserStatus.ACTIVE
-            )
+            use_case.execute(user_id=uuid4(), new_status=UserStatus.ACTIVE)
 
 
 class TestVerifyUserUseCase:
@@ -258,10 +235,7 @@ class TestVerifyUserUseCase:
 
         use_case = VerifyUserUseCase(user_repository)
 
-        verified_user = use_case.execute(
-            user_id=user.id,
-            verification_type="email"
-        )
+        verified_user = use_case.execute(user_id=user.id, verification_type="email")
 
         assert verified_user.is_verified is True
         assert verified_user.status == UserStatus.ACTIVE.value
@@ -283,10 +257,7 @@ class TestVerifyUserUseCase:
 
         use_case = VerifyUserUseCase(user_repository)
 
-        verified_user = use_case.execute(
-            user_id=user.id,
-            verification_type="phone"
-        )
+        verified_user = use_case.execute(user_id=user.id, verification_type="phone")
 
         assert verified_user.is_verified is True
 
@@ -308,18 +279,11 @@ class TestVerifyUserUseCase:
         use_case = VerifyUserUseCase(user_repository)
 
         with pytest.raises(ValidationError, match="does not have an email"):
-            use_case.execute(
-                user_id=user.id,
-                verification_type="email"
-            )
+            use_case.execute(user_id=user.id, verification_type="email")
 
     def test_verify_invalid_type(self, user_repository, sample_user):
         """Test verification fails with invalid type"""
         use_case = VerifyUserUseCase(user_repository)
 
         with pytest.raises(ValidationError, match="Invalid verification type"):
-            use_case.execute(
-                user_id=sample_user.id,
-                verification_type="invalid"
-            )
-
+            use_case.execute(user_id=sample_user.id, verification_type="invalid")

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Transaction Repository Implementation
 """
+
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -24,27 +25,48 @@ class TransactionRepository(ITransactionRepository):
 
     def get_by_id(self, transaction_id: UUID) -> Transaction | None:
         """Get transaction by ID"""
-        return self.db.query(Transaction).filter(Transaction.id == transaction_id).first()
+        return (
+            self.db.query(Transaction).filter(Transaction.id == transaction_id).first()
+        )
 
-    def get_by_user_id(self, user_id: UUID, skip: int = 0, limit: int = 100) -> list[Transaction]:
+    def get_by_user_id(
+        self, user_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Transaction]:
         """Get transactions by user ID"""
-        return self.db.query(Transaction).filter(
-            Transaction.user_id == user_id
-        ).order_by(Transaction.created_at.desc()).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Transaction)
+            .filter(Transaction.user_id == user_id)
+            .order_by(Transaction.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
-    def get_by_wallet_id(self, wallet_id: UUID, skip: int = 0, limit: int = 100) -> list[Transaction]:
+    def get_by_wallet_id(
+        self, wallet_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Transaction]:
         """Get transactions by wallet ID"""
-        return self.db.query(Transaction).filter(
-            Transaction.wallet_id == wallet_id
-        ).order_by(Transaction.created_at.desc()).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Transaction)
+            .filter(Transaction.wallet_id == wallet_id)
+            .order_by(Transaction.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def get_by_reference(self, reference: str) -> Transaction | None:
         """Get transaction by reference"""
-        return self.db.query(Transaction).filter(Transaction.reference == reference).first()
+        return (
+            self.db.query(Transaction)
+            .filter(Transaction.reference == reference)
+            .first()
+        )
 
     def update(self, transaction: Transaction) -> Transaction:
         """Update transaction"""
         from datetime import datetime
+
         transaction.updated_at = datetime.utcnow()
         self.db.commit()
         self.db.refresh(transaction)
@@ -62,4 +84,3 @@ class TransactionRepository(ITransactionRepository):
             self.db.commit()
             return True
         return False
-

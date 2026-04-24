@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Authentication Endpoints
 """
+
 import logging
 from uuid import UUID, uuid4
 
@@ -41,7 +42,7 @@ from app.domain.entities.user import User
 from app.exceptions import (
     AuthorizationError,
     ConflictError,
-    GanitelException,
+    GanitelError,
     UserNotFoundError,
     ValidationError,
 )
@@ -77,7 +78,7 @@ def _raise_unhandled_auth_error(
     )
     raise HTTPException(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail=f"{public_message} (ref: {request_id})"
+        detail=f"{public_message} (ref: {request_id})",
     )
 
 
@@ -89,12 +90,12 @@ def _build_oauth_error_redirect(provider: str, request_id: str) -> RedirectRespo
     return RedirectResponse(url=redirect_url)
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
+)
 @limiter.limit("5/minute")
 async def register_user(
-    request: Request,
-    user_data: UserCreateRequest,
-    db: Session = Depends(get_db)
+    request: Request, user_data: UserCreateRequest, db: Session = Depends(get_db)
 ):
     """
     Register a new user
@@ -118,7 +119,7 @@ async def register_user(
             last_name=user_data.last_name,
             user_type=user_data.user_type,
             country=user_data.country,
-            city=user_data.city
+            city=user_data.city,
         )
 
         return UserResponse(
@@ -138,24 +139,17 @@ async def register_user(
             language=user.language,
             currency=user.currency,
             created_at=user.created_at,
-            updated_at=user.updated_at
+            updated_at=user.updated_at,
         )
 
     except ValidationError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
     except ConflictError as e:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=str(e)
-        )
-    except GanitelException as e:
-        raise HTTPException(
-            status_code=e.status_code,
-            detail=e.message
-        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
+    except GanitelError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
     except Exception as e:
         _raise_unhandled_auth_error(
             request=request,
@@ -177,7 +171,7 @@ async def login_for_access_token(
     response: Response,
     user_credentials: UserLoginRequest,
     db: Session = Depends(get_db),
-    redis_client: redis.Redis = Depends(get_redis)
+    redis_client: redis.Redis = Depends(get_redis),
 ):
     """
     User login endpoint
@@ -195,7 +189,7 @@ async def login_for_access_token(
         # Lockout for 15 minutes after 5 failures
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Account locked due to multiple failed attempts. Please try again in 15 minutes."
+            detail="Account locked due to multiple failed attempts. Please try again in 15 minutes.",
         )
 
     try:
@@ -205,7 +199,7 @@ async def login_for_access_token(
         token_data = login_use_case.execute(
             identifier=user_credentials.identifier,
             password=user_credentials.password,
-            redis_client=redis_client
+            redis_client=redis_client,
         )
 
         # Reset lockout on success
@@ -218,13 +212,13 @@ async def login_for_access_token(
             httponly=True,
             secure=not settings.DEBUG,  # HTTPS only in production
             samesite="lax",
-            max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+            max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
         )
 
         return TokenResponse(
             access_token=token_data.access_token,
             token_type=token_data.token_type,
-            refresh_token=token_data.refresh_token
+            refresh_token=token_data.refresh_token,
         )
 
     except (ValidationError, UserNotFoundError, AuthorizationError):
@@ -235,13 +229,10 @@ async def login_for_access_token(
         # Uniform error message to prevent enumeration
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials or account locked"
-        )
-    except GanitelException as e:
-        raise HTTPException(
-            status_code=e.status_code,
-            detail=e.message
-        )
+            detail="Invalid credentials or account locked",
+        ) from None
+    except GanitelError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
     except Exception as e:
         _raise_unhandled_auth_error(
             request=request,
@@ -259,7 +250,7 @@ async def logout_user(
     request: Request,
     response: Response,
     current_user: User = Depends(get_current_active_user),
-    redis_client: redis.Redis = Depends(get_redis)
+    redis_client: redis.Redis = Depends(get_redis),
 ):
     """
     Logout user endpoint
@@ -295,7 +286,7 @@ async def refresh_access_token(
     refresh_request: RefreshTokenRequest | None = None,
     refresh_token_query: str | None = Query(default=None, alias="refresh_token"),
     db: Session = Depends(get_db),
-    redis_client: redis.Redis = Depends(get_redis)
+    redis_client: redis.Redis = Depends(get_redis),
 ):
     """
     Refresh access token endpoint
@@ -310,8 +301,7 @@ async def refresh_access_token(
 
     if not refresh_token:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Refresh token missing"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token missing"
         )
 
     try:
@@ -319,8 +309,7 @@ async def refresh_access_token(
         refresh_use_case = RefreshTokenUseCase(user_repository)
 
         token_data = refresh_use_case.execute(
-            refresh_token=refresh_token,
-            redis_client=redis_client
+            refresh_token=refresh_token, redis_client=redis_client
         )
 
         # Update refresh token cookie
@@ -330,20 +319,19 @@ async def refresh_access_token(
             httponly=True,
             secure=not settings.DEBUG,
             samesite="lax",
-            max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+            max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
         )
 
         return TokenResponse(
             access_token=token_data.access_token,
             token_type=token_data.token_type,
-            refresh_token=token_data.refresh_token
+            refresh_token=token_data.refresh_token,
         )
 
     except AuthorizationError as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e)
-        )
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e)
+        ) from e
     except Exception as e:
         _raise_unhandled_auth_error(
             request=request,
@@ -358,9 +346,7 @@ async def refresh_access_token(
 @router.post("/forgot-password", response_model=MessageResponse)
 @limiter.limit("3/hour")
 async def forgot_password(
-    request: Request,
-    request_data: ForgotPasswordRequest,
-    db: Session = Depends(get_db)
+    request: Request, request_data: ForgotPasswordRequest, db: Session = Depends(get_db)
 ):
     """
     Forgot password endpoint
@@ -372,20 +358,19 @@ async def forgot_password(
         forgot_password_use_case = ForgotPasswordUseCase(user_repository)
 
         result = forgot_password_use_case.execute(
-            email=request_data.email,
-            phone=request_data.phone
+            email=request_data.email, phone=request_data.phone
         )
 
         return MessageResponse(
             message=result.get("message", "Password reset link sent"),
-            success=result.get("success", True)
+            success=result.get("success", True),
         )
 
-    except (ValidationError, UserNotFoundError, GanitelException):
+    except (ValidationError, UserNotFoundError, GanitelError):
         # Always return success message to prevent user enumeration
         return MessageResponse(
             message="If an account exists with this identifier, a password reset link has been sent.",
-            success=True
+            success=True,
         )
     except Exception as e:
         _raise_unhandled_auth_error(
@@ -401,9 +386,7 @@ async def forgot_password(
 @router.get("/verify-reset-token/{token}", response_model=MessageResponse)
 @limiter.limit("10/minute")
 async def verify_reset_token(
-    request: Request,
-    token: str,
-    db: Session = Depends(get_db)
+    request: Request, token: str, db: Session = Depends(get_db)
 ):
     """
     Verify reset token endpoint
@@ -418,14 +401,13 @@ async def verify_reset_token(
 
         return MessageResponse(
             message=result.get("message", "Token is valid"),
-            success=result.get("success", True)
+            success=result.get("success", True),
         )
 
     except AuthorizationError as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e)
-        )
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e)
+        ) from e
     except Exception as e:
         _raise_unhandled_auth_error(
             request=request,
@@ -440,9 +422,7 @@ async def verify_reset_token(
 @router.post("/reset-password", response_model=MessageResponse)
 @limiter.limit("5/minute")
 async def reset_password(
-    request: Request,
-    request_data: ResetPasswordRequest,
-    db: Session = Depends(get_db)
+    request: Request, request_data: ResetPasswordRequest, db: Session = Depends(get_db)
 ):
     """
     Reset password endpoint
@@ -454,30 +434,24 @@ async def reset_password(
         reset_password_use_case = ResetPasswordUseCase(user_repository)
 
         result = reset_password_use_case.execute(
-            token=request_data.token,
-            new_password=request_data.new_password
+            token=request_data.token, new_password=request_data.new_password
         )
 
         return MessageResponse(
             message=result.get("message", "Password reset successfully"),
-            success=result.get("success", True)
+            success=result.get("success", True),
         )
 
     except ValidationError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
     except AuthorizationError as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e)
-        )
-    except GanitelException as e:
-        raise HTTPException(
-            status_code=e.status_code,
-            detail=e.message
-        )
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e)
+        ) from e
+    except GanitelError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
     except Exception as e:
         _raise_unhandled_auth_error(
             request=request,
@@ -502,8 +476,8 @@ async def get_google_oauth_url(request: Request):
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to generate OAuth URL"
-        )
+            detail="Failed to generate OAuth URL",
+        ) from None
 
 
 @router.get("/oauth/google/callback")
@@ -539,21 +513,33 @@ async def google_oauth_callback(
         request_id = request.headers.get("X-Request-ID") or str(uuid4())
         logger.warning(
             "Google OAuth callback validation failed",
-            extra={"request_id": request_id, "provider": "google", "error_type": type(e).__name__},
+            extra={
+                "request_id": request_id,
+                "provider": "google",
+                "error_type": type(e).__name__,
+            },
         )
         return _build_oauth_error_redirect(provider="google", request_id=request_id)
     except ConflictError as e:
         request_id = request.headers.get("X-Request-ID") or str(uuid4())
         logger.warning(
             "Google OAuth callback conflict",
-            extra={"request_id": request_id, "provider": "google", "error_type": type(e).__name__},
+            extra={
+                "request_id": request_id,
+                "provider": "google",
+                "error_type": type(e).__name__,
+            },
         )
         return _build_oauth_error_redirect(provider="google", request_id=request_id)
     except Exception as e:
         request_id = request.headers.get("X-Request-ID") or str(uuid4())
         logger.exception(
             "Google OAuth callback unexpected error",
-            extra={"request_id": request_id, "provider": "google", "error_type": type(e).__name__},
+            extra={
+                "request_id": request_id,
+                "provider": "google",
+                "error_type": type(e).__name__,
+            },
         )
         return _build_oauth_error_redirect(provider="google", request_id=request_id)
 
@@ -570,8 +556,8 @@ async def get_facebook_oauth_url(request: Request):
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to generate OAuth URL"
-        )
+            detail="Failed to generate OAuth URL",
+        ) from None
 
 
 @router.get("/oauth/facebook/callback")
@@ -607,21 +593,33 @@ async def facebook_oauth_callback(
         request_id = request.headers.get("X-Request-ID") or str(uuid4())
         logger.warning(
             "Facebook OAuth callback validation failed",
-            extra={"request_id": request_id, "provider": "facebook", "error_type": type(e).__name__},
+            extra={
+                "request_id": request_id,
+                "provider": "facebook",
+                "error_type": type(e).__name__,
+            },
         )
         return _build_oauth_error_redirect(provider="facebook", request_id=request_id)
     except ConflictError as e:
         request_id = request.headers.get("X-Request-ID") or str(uuid4())
         logger.warning(
             "Facebook OAuth callback conflict",
-            extra={"request_id": request_id, "provider": "facebook", "error_type": type(e).__name__},
+            extra={
+                "request_id": request_id,
+                "provider": "facebook",
+                "error_type": type(e).__name__,
+            },
         )
         return _build_oauth_error_redirect(provider="facebook", request_id=request_id)
     except Exception as e:
         request_id = request.headers.get("X-Request-ID") or str(uuid4())
         logger.exception(
             "Facebook OAuth callback unexpected error",
-            extra={"request_id": request_id, "provider": "facebook", "error_type": type(e).__name__},
+            extra={
+                "request_id": request_id,
+                "provider": "facebook",
+                "error_type": type(e).__name__,
+            },
         )
         return _build_oauth_error_redirect(provider="facebook", request_id=request_id)
 
@@ -660,7 +658,7 @@ async def exchange_oauth_code(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired OAuth code",
-        )
+        ) from None
     except Exception as e:
         _raise_unhandled_auth_error(
             request=request,

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Alembic Environment Configuration
 """
+
 import os
 import sys
 from logging.config import fileConfig
@@ -40,6 +41,7 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+
 def get_database_url():
     """Get database URL from environment variables"""
     db_host = os.getenv("POSTGRES_SERVER")
@@ -58,9 +60,8 @@ def get_database_url():
     if db_url:
         return db_url
 
-    raise ValueError(
-        "Database configuration is required (POSTGRES_* or DATABASE_URL)"
-    )
+    raise ValueError("Database configuration is required (POSTGRES_* or DATABASE_URL)")
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -95,8 +96,8 @@ def run_migrations_online() -> None:
     """
     # Create a custom configuration dict
     configuration = {
-        'sqlalchemy.url': get_database_url(),
-        'sqlalchemy.poolclass': 'pool.NullPool'
+        "sqlalchemy.url": get_database_url(),
+        "sqlalchemy.poolclass": "pool.NullPool",
     }
 
     connectable = engine_from_config(
@@ -106,9 +107,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

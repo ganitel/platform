@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Authentication Use Cases Tests
 """
+
 from uuid import uuid4
 
 import pytest
@@ -36,7 +37,7 @@ class TestRegisterUserUseCase:
             password="password123",
             first_name="New",
             last_name="User",
-            user_type="traveler"
+            user_type="traveler",
         )
 
         assert user.email == email
@@ -52,10 +53,7 @@ class TestRegisterUserUseCase:
         phone = unique_phone()
 
         user = use_case.execute(
-            phone=phone,
-            first_name="Phone",
-            last_name="User",
-            user_type="traveler"
+            phone=phone, first_name="Phone", last_name="User", user_type="traveler"
         )
 
         assert user.phone == phone
@@ -71,7 +69,7 @@ class TestRegisterUserUseCase:
             password="password123",
             first_name="Provider",
             last_name="User",
-            user_type="provider"
+            user_type="provider",
         )
 
         assert user.user_type == UserType.PROVIDER.value
@@ -80,25 +78,25 @@ class TestRegisterUserUseCase:
         """Test admin registration is forbidden in public flow"""
         use_case = RegisterUserUseCase(user_repository)
 
-        with pytest.raises(AuthorizationError, match="Public registration is only allowed"):
+        with pytest.raises(
+            AuthorizationError, match="Public registration is only allowed"
+        ):
             use_case.execute(
                 email=unique_email(),
                 password="password123",
                 first_name="Admin",
                 last_name="User",
-                user_type="admin"
+                user_type="admin",
             )
 
     def test_register_user_missing_email_and_phone(self, user_repository):
         """Test registration fails without email or phone"""
         use_case = RegisterUserUseCase(user_repository)
 
-        with pytest.raises(ValidationError, match="Either email or phone must be provided"):
-            use_case.execute(
-                first_name="Test",
-                last_name="User",
-                user_type="traveler"
-            )
+        with pytest.raises(
+            ValidationError, match="Either email or phone must be provided"
+        ):
+            use_case.execute(first_name="Test", last_name="User", user_type="traveler")
 
     def test_register_user_missing_name(self, user_repository):
         """Test registration fails without first or last name"""
@@ -106,9 +104,7 @@ class TestRegisterUserUseCase:
 
         with pytest.raises(ValidationError):
             use_case.execute(
-                email="test@example.com",
-                password="password123",
-                user_type="traveler"
+                email="test@example.com", password="password123", user_type="traveler"
             )
 
     def test_register_user_invalid_email(self, user_repository):
@@ -121,7 +117,7 @@ class TestRegisterUserUseCase:
                 password="password123",
                 first_name="Test",
                 last_name="User",
-                user_type="traveler"
+                user_type="traveler",
             )
 
     def test_register_user_invalid_phone(self, user_repository):
@@ -133,33 +129,37 @@ class TestRegisterUserUseCase:
                 phone="123456",
                 first_name="Test",
                 last_name="User",
-                user_type="traveler"
+                user_type="traveler",
             )
 
     def test_register_user_weak_password(self, user_repository):
         """Test registration fails with weak password"""
         use_case = RegisterUserUseCase(user_repository)
 
-        with pytest.raises(ValidationError, match="Password must be at least 8 characters"):
+        with pytest.raises(
+            ValidationError, match="Password must be at least 8 characters"
+        ):
             use_case.execute(
                 email=unique_email(),
                 password="short",
                 first_name="Test",
                 last_name="User",
-                user_type="traveler"
+                user_type="traveler",
             )
 
     def test_register_user_password_without_letter(self, user_repository):
         """Test registration fails with password without letter"""
         use_case = RegisterUserUseCase(user_repository)
 
-        with pytest.raises(ValidationError, match="Password must contain at least one letter"):
+        with pytest.raises(
+            ValidationError, match="Password must contain at least one letter"
+        ):
             use_case.execute(
                 email=unique_email(),
                 password="12345678",
                 first_name="Test",
                 last_name="User",
-                user_type="traveler"
+                user_type="traveler",
             )
 
     def test_register_user_duplicate_email(self, user_repository, sample_user):
@@ -172,7 +172,7 @@ class TestRegisterUserUseCase:
                 password="password123",
                 first_name="Test",
                 last_name="User",
-                user_type="traveler"
+                user_type="traveler",
             )
 
     def test_register_user_duplicate_phone(self, user_repository, sample_user):
@@ -184,7 +184,7 @@ class TestRegisterUserUseCase:
                 phone=sample_user.phone,
                 first_name="Test",
                 last_name="User",
-                user_type="traveler"
+                user_type="traveler",
             )
 
     def test_register_user_invalid_user_type(self, user_repository):
@@ -197,7 +197,7 @@ class TestRegisterUserUseCase:
                 password="password123",
                 first_name="Test",
                 last_name="User",
-                user_type="invalid_type"
+                user_type="invalid_type",
             )
 
 
@@ -211,7 +211,7 @@ class TestLoginUserUseCase:
         token_data = use_case.execute(
             identifier=sample_user.email,
             password="password123",
-            redis_client=mock_redis
+            redis_client=mock_redis,
         )
 
         assert token_data.access_token is not None
@@ -225,7 +225,7 @@ class TestLoginUserUseCase:
         token_data = use_case.execute(
             identifier=sample_user.phone,
             password="password123",
-            redis_client=mock_redis
+            redis_client=mock_redis,
         )
 
         assert token_data.access_token is not None
@@ -239,7 +239,7 @@ class TestLoginUserUseCase:
             use_case.execute(
                 identifier="nonexistent@example.com",
                 password="password123",
-                redis_client=mock_redis
+                redis_client=mock_redis,
             )
 
     def test_login_wrong_password(self, user_repository, sample_user, mock_redis):
@@ -250,7 +250,7 @@ class TestLoginUserUseCase:
             use_case.execute(
                 identifier=sample_user.email,
                 password="wrongpassword",
-                redis_client=mock_redis
+                redis_client=mock_redis,
             )
 
     def test_login_suspended_user(self, user_repository, db_session, mock_redis):
@@ -274,9 +274,7 @@ class TestLoginUserUseCase:
 
         with pytest.raises(AuthorizationError, match="Account is suspended"):
             use_case.execute(
-                identifier=user.email,
-                password="password123",
-                redis_client=mock_redis
+                identifier=user.email, password="password123", redis_client=mock_redis
             )
 
     def test_login_inactive_user(self, user_repository, db_session, mock_redis):
@@ -300,20 +298,16 @@ class TestLoginUserUseCase:
 
         with pytest.raises(AuthorizationError, match="Account is inactive"):
             use_case.execute(
-                identifier=user.email,
-                password="password123",
-                redis_client=mock_redis
+                identifier=user.email, password="password123", redis_client=mock_redis
             )
 
     def test_login_missing_identifier(self, user_repository, mock_redis):
         """Test login fails without identifier"""
         use_case = LoginUserUseCase(user_repository)
 
-        with pytest.raises(ValidationError, match="Identifier.*required"):
+        with pytest.raises(ValidationError, match=r"Identifier.*required"):
             use_case.execute(
-                identifier="",
-                password="password123",
-                redis_client=mock_redis
+                identifier="", password="password123", redis_client=mock_redis
             )
 
     def test_login_missing_password(self, user_repository, sample_user, mock_redis):
@@ -322,9 +316,7 @@ class TestLoginUserUseCase:
 
         with pytest.raises(ValidationError, match="Password is required"):
             use_case.execute(
-                identifier=sample_user.email,
-                password="",
-                redis_client=mock_redis
+                identifier=sample_user.email, password="", redis_client=mock_redis
             )
 
 
@@ -340,13 +332,12 @@ class TestRefreshTokenUseCase:
         token_data = login_use_case.execute(
             identifier=sample_user.email,
             password="password123",
-            redis_client=mock_redis
+            redis_client=mock_redis,
         )
 
         # Refresh token
         new_token_data = refresh_use_case.execute(
-            refresh_token=token_data.refresh_token,
-            redis_client=mock_redis
+            refresh_token=token_data.refresh_token, redis_client=mock_redis
         )
 
         assert new_token_data.access_token is not None
@@ -359,7 +350,5 @@ class TestRefreshTokenUseCase:
 
         with pytest.raises(AuthorizationError, match="Invalid refresh token"):
             refresh_use_case.execute(
-                refresh_token="invalid_token",
-                redis_client=mock_redis
+                refresh_token="invalid_token", redis_client=mock_redis
             )
-

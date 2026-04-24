@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - FastAPI Dependencies
 """
+
 from uuid import UUID
 
 import redis
@@ -21,12 +22,14 @@ security = HTTPBearer(auto_error=False)
 # Redis connection
 redis_client = redis.from_url(settings.REDIS_URL, decode_responses=True)
 
+
 def get_redis() -> redis.Redis:
     """Get Redis client"""
     return redis_client
 
+
 def get_current_user_id(
-    credentials: HTTPAuthorizationCredentials | None = Depends(security)
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
 ) -> str:
     """
     Extract user ID from JWT token
@@ -69,11 +72,11 @@ def get_current_user_id(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from None
+
 
 def get_current_user(
-    user_id: str = Depends(get_current_user_id),
-    db: Session = Depends(get_db)
+    user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)
 ) -> User:
     """
     Get current authenticated user
@@ -82,67 +85,61 @@ def get_current_user(
     user = user_repo.get_by_id(UUID(user_id))
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
     return user
 
-def get_current_active_user(
-    current_user: User = Depends(get_current_user)
-) -> User:
+
+def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
     """
     Get current active user
     """
     if not current_user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Inactive user"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
         )
     return current_user
 
-def get_current_provider(
-    current_user: User = Depends(get_current_active_user)
-) -> User:
+
+def get_current_provider(current_user: User = Depends(get_current_active_user)) -> User:
     """
     Get current user if they are a provider
     """
     if current_user.user_type != UserType.PROVIDER.value:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Provider access required"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Provider access required"
         )
     return current_user
 
-def get_current_traveler(
-    current_user: User = Depends(get_current_active_user)
-) -> User:
+
+def get_current_traveler(current_user: User = Depends(get_current_active_user)) -> User:
     """
     Get current user if they are a traveler
     """
     if current_user.user_type != UserType.TRAVELER.value:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Traveler access required"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Traveler access required"
         )
     return current_user
 
-def get_current_admin(
-    current_user: User = Depends(get_current_active_user)
-) -> User:
+
+def get_current_admin(current_user: User = Depends(get_current_active_user)) -> User:
     """
     Get current user if they are an admin
     """
     if current_user.user_type != UserType.ADMIN.value:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required"
         )
     return current_user
 
+
 # Optional authentication (for public endpoints that can benefit from user context)
 def get_optional_current_user(
-    credentials: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False)),
-    db: Session = Depends(get_db)
+    credentials: HTTPAuthorizationCredentials | None = Depends(
+        HTTPBearer(auto_error=False)
+    ),
+    db: Session = Depends(get_db),
 ) -> User | None:
     """
     Get current user if authenticated, None otherwise
@@ -181,4 +178,4 @@ def get_optional_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from None

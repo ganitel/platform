@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Property API Schemas
 """
+
 from datetime import datetime
 from uuid import UUID
 
@@ -9,6 +10,7 @@ from pydantic import BaseModel, validator
 
 class LocationResponse(BaseModel):
     """Location response schema"""
+
     id: UUID
     name: str
     region: str | None = None
@@ -19,6 +21,7 @@ class LocationResponse(BaseModel):
 
 class PropertyTypeResponse(BaseModel):
     """Property type response schema"""
+
     id: UUID
     name: str
 
@@ -28,6 +31,7 @@ class PropertyTypeResponse(BaseModel):
 
 class AmenityResponse(BaseModel):
     """Amenity response schema"""
+
     id: UUID
     name_en: str
     name_fr: str
@@ -39,6 +43,7 @@ class AmenityResponse(BaseModel):
 
 class PropertyAmenityResponse(BaseModel):
     """Property amenity response schema"""
+
     amenity: AmenityResponse
 
     class Config:
@@ -47,6 +52,7 @@ class PropertyAmenityResponse(BaseModel):
 
 class ProximityCategoryResponse(BaseModel):
     """Proximity item response"""
+
     destination_name: str
     minutes_away: int
     travel_mode: str
@@ -58,6 +64,7 @@ class ProximityCategoryResponse(BaseModel):
 # Create/Update Schemas
 class PropertyCreateRequest(BaseModel):
     """Create property request schema"""
+
     title: str
     description: str
     short_description: str | None = None
@@ -83,55 +90,58 @@ class PropertyCreateRequest(BaseModel):
     check_in_time: str = "15:00"
     check_out_time: str = "11:00"
 
-    @validator('title')
+    @validator("title")
     def validate_title(cls, v):
         if len(v.strip()) < 10:
-            raise ValueError('Title must be at least 10 characters long')
+            raise ValueError("Title must be at least 10 characters long")
         if len(v.strip()) > 200:
-            raise ValueError('Title must be less than 200 characters')
+            raise ValueError("Title must be less than 200 characters")
         return v.strip()
 
-    @validator('description')
+    @validator("description")
     def validate_description(cls, v):
         if len(v.strip()) < 50:
-            raise ValueError('Description must be at least 50 characters long')
+            raise ValueError("Description must be at least 50 characters long")
         return v.strip()
 
-    @validator('base_price')
+    @validator("base_price")
     def validate_price(cls, v):
         if v <= 0:
-            raise ValueError('Base price must be greater than 0')
+            raise ValueError("Base price must be greater than 0")
         if v > 10000000:
-            raise ValueError('Base price is too high')
+            raise ValueError("Base price is too high")
         return v
 
-    @validator('latitude')
+    @validator("latitude")
     def validate_latitude(cls, v):
         if v is not None and (v < -90 or v > 90):
-            raise ValueError('Latitude must be between -90 and 90')
+            raise ValueError("Latitude must be between -90 and 90")
         return v
 
-    @validator('longitude')
+    @validator("longitude")
     def validate_longitude(cls, v):
         if v is not None and (v < -180 or v > 180):
-            raise ValueError('Longitude must be between -180 and 180')
+            raise ValueError("Longitude must be between -180 and 180")
         return v
 
-    @validator('max_guests', 'bedrooms', 'bathrooms', 'beds', 'living_rooms', 'balconies')
+    @validator(
+        "max_guests", "bedrooms", "bathrooms", "beds", "living_rooms", "balconies"
+    )
     def validate_positive_integers(cls, v):
         if v is not None and v < 0:
-            raise ValueError('Value cannot be negative')
+            raise ValueError("Value cannot be negative")
         return v
 
-    @validator('min_stay')
+    @validator("min_stay")
     def validate_min_stay(cls, v):
         if v < 1:
-            raise ValueError('Minimum stay must be at least 1')
+            raise ValueError("Minimum stay must be at least 1")
         return v
 
 
 class PropertyUpdateRequest(BaseModel):
     """Update property request schema"""
+
     title: str | None = None
     description: str | None = None
     short_description: str | None = None
@@ -161,6 +171,7 @@ class PropertyUpdateRequest(BaseModel):
 # Response Schemas
 class PropertyBaseResponse(BaseModel):
     """Base property response schema"""
+
     id: UUID
     title: str
     description: str
@@ -192,6 +203,7 @@ class PropertyBaseResponse(BaseModel):
 
 class PropertyResponse(PropertyBaseResponse):
     """Full property response schema with relationships"""
+
     location: LocationResponse
     property_type: PropertyTypeResponse
     property_amenities: list[PropertyAmenityResponse] = []
@@ -202,6 +214,7 @@ class PropertyResponse(PropertyBaseResponse):
 
 class PropertyListResponse(BaseModel):
     """Property list response schema"""
+
     items: list[PropertyResponse]
     total: int
     page: int
@@ -214,6 +227,7 @@ class PropertyListResponse(BaseModel):
 
 class PropertyDetailResponse(PropertyResponse):
     """Property detail response with additional fields"""
+
     provider_id: UUID
 
     class Config:
@@ -222,6 +236,7 @@ class PropertyDetailResponse(PropertyResponse):
 
 class PropertyCreateResponse(PropertyResponse):
     """Property create response"""
+
     provider_id: UUID
 
     class Config:
@@ -230,6 +245,7 @@ class PropertyCreateResponse(PropertyResponse):
 
 class PropertyUpdateResponse(PropertyResponse):
     """Property update response"""
+
     pass
 
     class Config:
@@ -238,6 +254,7 @@ class PropertyUpdateResponse(PropertyResponse):
 
 class PropertySimpleResponse(BaseModel):
     """Simple property response for listings"""
+
     id: UUID
     title: str
     short_description: str | None
@@ -254,4 +271,5 @@ class PropertySimpleResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     """Message response schema"""
+
     message: str

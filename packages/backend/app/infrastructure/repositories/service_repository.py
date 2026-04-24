@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Service Repository Implementation
 """
+
 from datetime import date, datetime, timedelta
 from typing import Any
 from uuid import UUID
@@ -30,16 +31,21 @@ class ServiceRepository(IServiceRepository):
 
     def get_by_id(self, service_id: UUID) -> Service | None:
         """Get service by ID"""
-        return self.db.query(Service).filter(
-            Service.id == service_id,
-            Service.deleted_at.is_(None)
-        ).first()
+        return (
+            self.db.query(Service)
+            .filter(Service.id == service_id, Service.deleted_at.is_(None))
+            .first()
+        )
 
     def get_all(self, skip: int = 0, limit: int = 100) -> list[Service]:
         """Get all services with pagination"""
-        return self.db.query(Service).filter(
-            Service.deleted_at.is_(None)
-        ).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Service)
+            .filter(Service.deleted_at.is_(None))
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def update(self, service: Service) -> Service:
         """Update an existing service"""
@@ -77,12 +83,16 @@ class ServiceRepository(IServiceRepository):
 
     def exists(self, service_id: UUID) -> bool:
         """Check if service exists"""
-        return self.db.query(Service).filter(
-            Service.id == service_id,
-            Service.deleted_at.is_(None)
-        ).first() is not None
+        return (
+            self.db.query(Service)
+            .filter(Service.id == service_id, Service.deleted_at.is_(None))
+            .first()
+            is not None
+        )
 
-    def find_by_criteria(self, criteria: dict[str, Any], skip: int = 0, limit: int = 100) -> list[Service]:
+    def find_by_criteria(
+        self, criteria: dict[str, Any], skip: int = 0, limit: int = 100
+    ) -> list[Service]:
         """Find services by criteria"""
         query = self.db.query(Service).filter(Service.deleted_at.is_(None))
 
@@ -90,43 +100,73 @@ class ServiceRepository(IServiceRepository):
 
         return query.offset(skip).limit(limit).all()
 
-    def get_by_provider_id(self, provider_id: UUID, skip: int = 0, limit: int = 100) -> list[Service]:
+    def get_by_provider_id(
+        self, provider_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Service]:
         """Get services by provider ID"""
-        return self.db.query(Service).filter(
-            Service.provider_id == provider_id,
-            Service.deleted_at.is_(None)
-        ).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Service)
+            .filter(Service.provider_id == provider_id, Service.deleted_at.is_(None))
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def get_by_slug(self, slug: str) -> Service | None:
         """Get service by URL slug"""
-        return self.db.query(Service).filter(
-            Service.slug == slug,
-            Service.deleted_at.is_(None)
-        ).first()
+        return (
+            self.db.query(Service)
+            .filter(Service.slug == slug, Service.deleted_at.is_(None))
+            .first()
+        )
 
-    def get_by_service_type(self, service_type: ServiceType, skip: int = 0, limit: int = 100) -> list[Service]:
+    def get_by_service_type(
+        self, service_type: ServiceType, skip: int = 0, limit: int = 100
+    ) -> list[Service]:
         """Get services by type"""
-        return self.db.query(Service).filter(
-            Service.service_type == service_type.value,
-            Service.deleted_at.is_(None)
-        ).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Service)
+            .filter(
+                Service.service_type == service_type.value, Service.deleted_at.is_(None)
+            )
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
-    def get_by_status(self, status: ServiceStatus, skip: int = 0, limit: int = 100) -> list[Service]:
+    def get_by_status(
+        self, status: ServiceStatus, skip: int = 0, limit: int = 100
+    ) -> list[Service]:
         """Get services by status"""
-        return self.db.query(Service).filter(
-            Service.status == status.value,
-            Service.deleted_at.is_(None)
-        ).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Service)
+            .filter(Service.status == status.value, Service.deleted_at.is_(None))
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def get_active_services(self, skip: int = 0, limit: int = 100) -> list[Service]:
         """Get active services"""
-        return self.db.query(Service).filter(
-            Service.status == ServiceStatus.ACTIVE.value,
-            Service.is_active == True,
-            Service.deleted_at.is_(None)
-        ).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Service)
+            .filter(
+                Service.status == ServiceStatus.ACTIVE.value,
+                Service.is_active.is_(True),
+                Service.deleted_at.is_(None),
+            )
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
-    def get_by_location(self, country: str | None = None, city: str | None = None, skip: int = 0, limit: int = 100) -> list[Service]:
+    def get_by_location(
+        self,
+        country: str | None = None,
+        city: str | None = None,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> list[Service]:
         """Get services by location"""
         query = self.db.query(Service).filter(Service.deleted_at.is_(None))
 
@@ -148,21 +188,23 @@ class ServiceRepository(IServiceRepository):
         max_price: float | None = None,
         amenities: list[str] | None = None,
         skip: int = 0,
-        limit: int = 100
+        limit: int = 100,
     ) -> list[Service]:
         """Search services with filters"""
         search_query = self.db.query(Service).filter(
             or_(
                 Service.title.ilike(f"%{query}%"),
                 Service.description.ilike(f"%{query}%"),
-                Service.short_description.ilike(f"%{query}%")
+                Service.short_description.ilike(f"%{query}%"),
             ),
             Service.deleted_at.is_(None),
-            Service.status == ServiceStatus.ACTIVE.value
+            Service.status == ServiceStatus.ACTIVE.value,
         )
 
         if service_type:
-            search_query = search_query.filter(Service.service_type == service_type.value)
+            search_query = search_query.filter(
+                Service.service_type == service_type.value
+            )
 
         if country:
             search_query = search_query.filter(Service.country.ilike(f"%{country}%"))
@@ -178,7 +220,9 @@ class ServiceRepository(IServiceRepository):
 
         if amenities:
             for amenity in amenities:
-                search_query = search_query.filter(Service.amenities.contains([amenity]))
+                search_query = search_query.filter(
+                    Service.amenities.contains([amenity])
+                )
 
         return search_query.offset(skip).limit(limit).all()
 
@@ -191,12 +235,11 @@ class ServiceRepository(IServiceRepository):
         country: str | None = None,
         city: str | None = None,
         skip: int = 0,
-        limit: int = 100
+        limit: int = 100,
     ) -> list[Service]:
         """Get available services for specific dates"""
         query = self.db.query(Service).filter(
-            Service.deleted_at.is_(None),
-            Service.status == ServiceStatus.ACTIVE.value
+            Service.deleted_at.is_(None), Service.status == ServiceStatus.ACTIVE.value
         )
 
         if service_type:
@@ -235,16 +278,23 @@ class ServiceRepository(IServiceRepository):
 
     def get_featured_services(self, limit: int = 10) -> list[Service]:
         """Get featured services"""
-        return self.db.query(Service).filter(
-            Service.deleted_at.is_(None),
-            Service.status == ServiceStatus.ACTIVE.value
-        ).order_by(Service.average_rating.desc()).limit(limit).all()
+        return (
+            self.db.query(Service)
+            .filter(
+                Service.deleted_at.is_(None),
+                Service.status == ServiceStatus.ACTIVE.value,
+            )
+            .order_by(Service.average_rating.desc())
+            .limit(limit)
+            .all()
+        )
 
-    def get_popular_services(self, service_type: ServiceType | None = None, limit: int = 10) -> list[Service]:
+    def get_popular_services(
+        self, service_type: ServiceType | None = None, limit: int = 10
+    ) -> list[Service]:
         """Get popular services by booking count"""
         query = self.db.query(Service).filter(
-            Service.deleted_at.is_(None),
-            Service.status == ServiceStatus.ACTIVE.value
+            Service.deleted_at.is_(None), Service.status == ServiceStatus.ACTIVE.value
         )
 
         if service_type:
@@ -252,12 +302,17 @@ class ServiceRepository(IServiceRepository):
 
         return query.order_by(Service.booking_count.desc()).limit(limit).all()
 
-    def get_top_rated_services(self, service_type: ServiceType | None = None, min_reviews: int = 5, limit: int = 10) -> list[Service]:
+    def get_top_rated_services(
+        self,
+        service_type: ServiceType | None = None,
+        min_reviews: int = 5,
+        limit: int = 10,
+    ) -> list[Service]:
         """Get top rated services"""
         query = self.db.query(Service).filter(
             Service.deleted_at.is_(None),
             Service.status == ServiceStatus.ACTIVE.value,
-            Service.review_count >= min_reviews
+            Service.review_count >= min_reviews,
         )
 
         if service_type:
@@ -265,14 +320,20 @@ class ServiceRepository(IServiceRepository):
 
         return query.order_by(Service.average_rating.desc()).limit(limit).all()
 
-    def get_recent_services(self, days: int = 30, skip: int = 0, limit: int = 100) -> list[Service]:
+    def get_recent_services(
+        self, days: int = 30, skip: int = 0, limit: int = 100
+    ) -> list[Service]:
         """Get recently added services"""
         since_date = datetime.utcnow() - timedelta(days=days)
 
-        return self.db.query(Service).filter(
-            Service.created_at >= since_date,
-            Service.deleted_at.is_(None)
-        ).order_by(Service.created_at.desc()).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Service)
+            .filter(Service.created_at >= since_date, Service.deleted_at.is_(None))
+            .order_by(Service.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def get_services_by_price_range(
         self,
@@ -280,14 +341,14 @@ class ServiceRepository(IServiceRepository):
         max_price: float,
         service_type: ServiceType | None = None,
         skip: int = 0,
-        limit: int = 100
+        limit: int = 100,
     ) -> list[Service]:
         """Get services within price range"""
         query = self.db.query(Service).filter(
             Service.base_price >= min_price,
             Service.base_price <= max_price,
             Service.deleted_at.is_(None),
-            Service.status == ServiceStatus.ACTIVE.value
+            Service.status == ServiceStatus.ACTIVE.value,
         )
 
         if service_type:
@@ -300,12 +361,11 @@ class ServiceRepository(IServiceRepository):
         amenities: list[str],
         service_type: ServiceType | None = None,
         skip: int = 0,
-        limit: int = 100
+        limit: int = 100,
     ) -> list[Service]:
         """Get services with specific amenities"""
         query = self.db.query(Service).filter(
-            Service.deleted_at.is_(None),
-            Service.status == ServiceStatus.ACTIVE.value
+            Service.deleted_at.is_(None), Service.status == ServiceStatus.ACTIVE.value
         )
 
         if service_type:
@@ -323,7 +383,7 @@ class ServiceRepository(IServiceRepository):
         radius_km: float = 10.0,
         service_type: ServiceType | None = None,
         skip: int = 0,
-        limit: int = 100
+        limit: int = 100,
     ) -> list[Service]:
         """Get services within radius of coordinates"""
         # Using Haversine formula for distance calculation
@@ -331,7 +391,7 @@ class ServiceRepository(IServiceRepository):
             Service.latitude.isnot(None),
             Service.longitude.isnot(None),
             Service.deleted_at.is_(None),
-            Service.status == ServiceStatus.ACTIVE.value
+            Service.status == ServiceStatus.ACTIVE.value,
         )
 
         if service_type:
@@ -339,8 +399,13 @@ class ServiceRepository(IServiceRepository):
 
         # Add distance calculation (simplified - in production use PostGIS)
         distance_formula = func.sqrt(
-            func.pow(69.1 * (Service.latitude - latitude), 2) +
-            func.pow(69.1 * (longitude - Service.longitude) * func.cos(Service.latitude / 57.3), 2)
+            func.pow(69.1 * (Service.latitude - latitude), 2)
+            + func.pow(
+                69.1
+                * (longitude - Service.longitude)
+                * func.cos(Service.latitude / 57.3),
+                2,
+            )
         )
 
         query = query.filter(distance_formula <= radius_km)
@@ -366,7 +431,9 @@ class ServiceRepository(IServiceRepository):
             return True
         return False
 
-    def update_rating(self, service_id: UUID, average_rating: float, review_count: int) -> bool:
+    def update_rating(
+        self, service_id: UUID, average_rating: float, review_count: int
+    ) -> bool:
         """Update service rating"""
         service = self.get_by_id(service_id)
         if service:
@@ -388,8 +455,7 @@ class ServiceRepository(IServiceRepository):
     def slug_exists(self, slug: str, exclude_service_id: UUID | None = None) -> bool:
         """Check if slug already exists"""
         query = self.db.query(Service).filter(
-            Service.slug == slug,
-            Service.deleted_at.is_(None)
+            Service.slug == slug, Service.deleted_at.is_(None)
         )
 
         if exclude_service_id:
@@ -405,28 +471,41 @@ class ServiceRepository(IServiceRepository):
             query = query.filter(Service.provider_id == provider_id)
 
         total_services = query.count()
-        active_services = query.filter(Service.status == ServiceStatus.ACTIVE.value).count()
-        pending_services = query.filter(Service.status == ServiceStatus.PENDING_REVIEW.value).count()
+        active_services = query.filter(
+            Service.status == ServiceStatus.ACTIVE.value
+        ).count()
+        pending_services = query.filter(
+            Service.status == ServiceStatus.PENDING_REVIEW.value
+        ).count()
 
         return {
             "total_services": total_services,
             "active_services": active_services,
             "pending_services": pending_services,
-            "inactive_services": total_services - active_services - pending_services
+            "inactive_services": total_services - active_services - pending_services,
         }
 
-    def get_services_needing_review(self, skip: int = 0, limit: int = 100) -> list[Service]:
+    def get_services_needing_review(
+        self, skip: int = 0, limit: int = 100
+    ) -> list[Service]:
         """Get services pending review"""
-        return self.db.query(Service).filter(
-            Service.status == ServiceStatus.PENDING_REVIEW.value,
-            Service.deleted_at.is_(None)
-        ).order_by(Service.created_at.asc()).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Service)
+            .filter(
+                Service.status == ServiceStatus.PENDING_REVIEW.value,
+                Service.deleted_at.is_(None),
+            )
+            .order_by(Service.created_at.asc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def _apply_filters(self, query, filters: dict[str, Any]):
         """Apply filters to query"""
         for key, value in filters.items():
             if hasattr(Service, key) and value is not None:
-                if key in ['country', 'city', 'title', 'description']:
+                if key in ["country", "city", "title", "description"]:
                     query = query.filter(getattr(Service, key).ilike(f"%{value}%"))
                 else:
                     query = query.filter(getattr(Service, key) == value)

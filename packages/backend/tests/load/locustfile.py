@@ -46,9 +46,9 @@ class GanitelUser(HttpUser):
             "/api/v1/auth/login",
             json={
                 "identifier": f"loadtest{random.randint(1, 1000)}@example.com",
-                "password": "password123"
+                "password": "password123",
             },
-            name="Login"
+            name="Login",
         )
 
         if response.status_code == 200:
@@ -74,8 +74,7 @@ class GanitelUser(HttpUser):
         city = random.choice(cities)
 
         response = self.client.get(
-            f"/api/v1/services/?city={city}&limit=20",
-            name="Search Services"
+            f"/api/v1/services/?city={city}&limit=20", name="Search Services"
         )
 
         if response.status_code == 200:
@@ -90,17 +89,13 @@ class GanitelUser(HttpUser):
             service_id = service.get("id")
 
             self.client.get(
-                f"/api/v1/services/{service_id}",
-                name="View Service Details"
+                f"/api/v1/services/{service_id}", name="View Service Details"
             )
 
     @task(8)
     def list_services(self):
         """Lister tous les services"""
-        self.client.get(
-            "/api/v1/services/?limit=50",
-            name="List Services"
-        )
+        self.client.get("/api/v1/services/?limit=50", name="List Services")
 
     @task(5)
     def create_booking(self):
@@ -119,10 +114,10 @@ class GanitelUser(HttpUser):
                 "start_date": start_date.strftime("%Y-%m-%d"),
                 "end_date": end_date.strftime("%Y-%m-%d"),
                 "guests": random.randint(1, 4),
-                "notes": "Load test booking"
+                "notes": "Load test booking",
             },
             headers=self.get_headers(),
-            name="Create Booking"
+            name="Create Booking",
         )
 
         if response.status_code == 201:
@@ -138,7 +133,7 @@ class GanitelUser(HttpUser):
         self.client.get(
             "/api/v1/users/me/bookings",
             headers=self.get_headers(),
-            name="View My Bookings"
+            name="View My Bookings",
         )
 
     @task(3)
@@ -153,10 +148,10 @@ class GanitelUser(HttpUser):
             "/api/v1/payments/initiate",
             json={
                 "booking_id": booking.get("id"),
-                "payment_method": random.choice(["mtn", "orange"])
+                "payment_method": random.choice(["mtn", "orange"]),
             },
             headers=self.get_headers(),
-            name="Initiate Payment"
+            name="Initiate Payment",
         )
 
     @task(4)
@@ -166,9 +161,7 @@ class GanitelUser(HttpUser):
             return
 
         self.client.get(
-            "/api/v1/users/me",
-            headers=self.get_headers(),
-            name="View Profile"
+            "/api/v1/users/me", headers=self.get_headers(), name="View Profile"
         )
 
     @task(2)
@@ -179,7 +172,7 @@ class GanitelUser(HttpUser):
 
         self.client.get(
             f"/api/v1/services/?min_price={min_price}&max_price={max_price}&limit=20",
-            name="Filter by Price"
+            name="Filter by Price",
         )
 
     @task(2)
@@ -189,7 +182,7 @@ class GanitelUser(HttpUser):
 
         self.client.get(
             f"/api/v1/services/?service_type={service_type}&limit=20",
-            name="Filter by Type"
+            name="Filter by Type",
         )
 
 
@@ -212,9 +205,9 @@ class ProviderUser(HttpUser):
             "/api/v1/auth/login",
             json={
                 "identifier": f"provider{random.randint(1, 100)}@example.com",
-                "password": "password123"
+                "password": "password123",
             },
-            name="Provider Login"
+            name="Provider Login",
         )
 
         if response.status_code == 200:
@@ -237,7 +230,7 @@ class ProviderUser(HttpUser):
         response = self.client.get(
             "/api/v1/providers/me/services",
             headers=self.get_headers(),
-            name="View My Services"
+            name="View My Services",
         )
 
         if response.status_code == 200:
@@ -253,7 +246,7 @@ class ProviderUser(HttpUser):
         self.client.get(
             "/api/v1/providers/me/bookings",
             headers=self.get_headers(),
-            name="View Service Bookings"
+            name="View Service Bookings",
         )
 
     @task(3)
@@ -268,10 +261,10 @@ class ProviderUser(HttpUser):
             f"/api/v1/services/{service.get('id')}",
             json={
                 "title": f"Updated Service {random.randint(1, 1000)}",
-                "base_price": random.randint(20000, 100000)
+                "base_price": random.randint(20000, 100000),
             },
             headers=self.get_headers(),
-            name="Update Service"
+            name="Update Service",
         )
 
     @task(2)
@@ -294,10 +287,10 @@ class ProviderUser(HttpUser):
                 "address": f"{random.randint(1, 999)} Test Street",
                 "base_price": random.randint(20000, 150000),
                 "currency": "XAF",
-                "max_guests": random.randint(2, 10)
+                "max_guests": random.randint(2, 10),
             },
             headers=self.get_headers(),
-            name="Create Service"
+            name="Create Service",
         )
 
     @task(8)
@@ -309,18 +302,21 @@ class ProviderUser(HttpUser):
         self.client.get(
             "/api/v1/providers/me/dashboard",
             headers=self.get_headers(),
-            name="Provider Dashboard"
+            name="Provider Dashboard",
         )
 
 
 # Événements Locust pour statistiques personnalisées
+
 
 @events.test_start.add_listener
 def on_test_start(environment, **kwargs):
     """Exécuté au début du test"""
     print("🚀 Démarrage du test de charge Ganitel")
     print(f"   Host: {environment.host}")
-    print(f"   Utilisateurs: {environment.runner.target_user_count if hasattr(environment.runner, 'target_user_count') else 'N/A'}")
+    print(
+        f"   Utilisateurs: {environment.runner.target_user_count if hasattr(environment.runner, 'target_user_count') else 'N/A'}"
+    )
 
 
 @events.test_stop.add_listener

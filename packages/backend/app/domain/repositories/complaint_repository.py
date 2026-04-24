@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Complaint Repository Interface
 """
+
 from abc import abstractmethod
 from uuid import UUID
 
@@ -12,17 +13,22 @@ class IComplaintRepository(BaseRepository[Complaint]):
     """Complaint repository interface"""
 
     @abstractmethod
-    def get_by_user_id(self, user_id: UUID, skip: int = 0, limit: int = 100) -> list[Complaint]:
+    def get_by_user_id(
+        self, user_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Complaint]:
         """Get complaints by user ID"""
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_status(self, status: ComplaintStatus, skip: int = 0, limit: int = 100) -> list[Complaint]:
+    def get_by_status(
+        self, status: ComplaintStatus, skip: int = 0, limit: int = 100
+    ) -> list[Complaint]:
         """Get complaints by status"""
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_assigned_to(self, assigned_to_id: UUID, skip: int = 0, limit: int = 100) -> list[Complaint]:
+    def get_by_assigned_to(
+        self, assigned_to_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Complaint]:
         """Get complaints assigned to user"""
         raise NotImplementedError
-

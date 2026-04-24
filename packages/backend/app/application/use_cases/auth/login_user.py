@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Login User Use Case
 """
+
 import time
 from datetime import datetime, timedelta
 from uuid import uuid4
@@ -18,11 +19,13 @@ pwd_context = None
 DUMMY_PASSWORD_HASH = "$2b$12$zR/pJ0d6fV7GQogfW1VxE.rmy9jre7hN3Qj0x2I8wYh6w8d6l0w2K"
 MIN_AUTH_FAILURE_DURATION_SECONDS = 0.50
 
+
 def get_pwd_context():
     """Lazy import of password context"""
     global pwd_context
     if pwd_context is None:
         from passlib.context import CryptContext
+
         pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     return pwd_context
 
@@ -37,7 +40,10 @@ def _enforce_min_auth_failure_duration(start_time: float) -> None:
 
 class TokenData:
     """Token data structure"""
-    def __init__(self, access_token: str, refresh_token: str, token_type: str = "bearer"):
+
+    def __init__(
+        self, access_token: str, refresh_token: str, token_type: str = "bearer"
+    ):
         self.access_token = access_token
         self.refresh_token = refresh_token
         self.token_type = token_type
@@ -53,10 +59,7 @@ class LoginUserUseCase:
         self.user_repository = user_repository
 
     def execute(
-        self,
-        identifier: str,
-        password: str,
-        redis_client: redis.Redis | None = None
+        self, identifier: str, password: str, redis_client: redis.Redis | None = None
     ) -> TokenData:
         """
         Authenticate user and generate JWT tokens
@@ -144,19 +147,15 @@ class LoginUserUseCase:
             redis_client.setex(
                 refresh_key,
                 settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
-                refresh_token
+                refresh_token,
             )
 
         return TokenData(
-            access_token=access_token,
-            refresh_token=refresh_token,
-            token_type="bearer"
+            access_token=access_token, refresh_token=refresh_token, token_type="bearer"
         )
 
     def refresh_access_token(
-        self,
-        refresh_token: str,
-        redis_client: redis.Redis | None = None
+        self, refresh_token: str, redis_client: redis.Redis | None = None
     ) -> TokenData:
         """
         Refresh access token using refresh token
@@ -197,6 +196,7 @@ class LoginUserUseCase:
 
             # Get user
             from uuid import UUID
+
             user = self.user_repository.get_by_id(UUID(user_id))
             if not user or not user.is_active:
                 raise AuthorizationError("User not found or inactive")
@@ -211,19 +211,19 @@ class LoginUserUseCase:
                 redis_client.setex(
                     refresh_key,
                     settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
-                    new_refresh_token
+                    new_refresh_token,
                 )
 
             return TokenData(
                 access_token=new_access_token,
                 refresh_token=new_refresh_token,
-                token_type="bearer"
+                token_type="bearer",
             )
 
         except jwt.ExpiredSignatureError:
-            raise AuthorizationError("Refresh token has expired")
+            raise AuthorizationError("Refresh token has expired") from None
         except jwt.JWTError:
-            raise AuthorizationError("Invalid refresh token")
+            raise AuthorizationError("Invalid refresh token") from None
 
     def _create_access_token(self, user_id) -> str:
         """Create JWT access token"""
@@ -236,7 +236,7 @@ class LoginUserUseCase:
             "aud": settings.JWT_AUDIENCE,
             "exp": expire,
             "iat": now,
-            "jti": str(uuid4())
+            "jti": str(uuid4()),
         }
         return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
@@ -251,7 +251,6 @@ class LoginUserUseCase:
             "aud": settings.JWT_AUDIENCE,
             "exp": expire,
             "iat": now,
-            "jti": str(uuid4())
+            "jti": str(uuid4()),
         }
         return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - OAuth temporary exchange code utilities
 """
+
 import json
 import secrets
 

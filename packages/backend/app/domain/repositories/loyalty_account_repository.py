@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Loyalty Account Repository Interface
 """
+
 from abc import abstractmethod
 from uuid import UUID
 
@@ -20,4 +21,3 @@ class ILoyaltyAccountRepository(BaseRepository[LoyaltyAccount]):
     def create_for_user(self, user_id: UUID) -> LoyaltyAccount:
         """Create loyalty account for user"""
         raise NotImplementedError
-

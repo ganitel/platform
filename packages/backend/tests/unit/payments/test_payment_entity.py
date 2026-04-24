@@ -1,6 +1,7 @@
 """
 Tests unitaires pour l'entité Payment
 """
+
 from decimal import Decimal
 from uuid import uuid4
 
@@ -21,7 +22,7 @@ class TestPaymentEntity:
             currency="XAF",
             provider=PaymentProvider.TRANZAK.value,
             status=PaymentStatus.PENDING.value,
-            is_active=True
+            is_active=True,
         )
 
         assert payment.id is not None
@@ -38,7 +39,7 @@ class TestPaymentEntity:
             currency="XAF",
             provider=PaymentProvider.TRANZAK.value,
             status=PaymentStatus.COMPLETED.value,
-            is_active=True
+            is_active=True,
         )
 
         assert payment.can_be_refunded() is True
@@ -52,7 +53,7 @@ class TestPaymentEntity:
             currency="XAF",
             provider=PaymentProvider.TRANZAK.value,
             status=PaymentStatus.PENDING.value,
-            is_active=True
+            is_active=True,
         )
 
         assert payment.can_be_refunded() is False
@@ -66,7 +67,7 @@ class TestPaymentEntity:
             currency="XAF",
             provider=PaymentProvider.TRANZAK.value,
             status=PaymentStatus.PENDING.value,
-            is_active=True
+            is_active=True,
         )
 
         payment.mark_completed("tranzak-123", '{"success": true}')
@@ -84,7 +85,7 @@ class TestPaymentEntity:
             currency="XAF",
             provider=PaymentProvider.TRANZAK.value,
             status=PaymentStatus.PENDING.value,
-            is_active=True
+            is_active=True,
         )
 
         payment.mark_failed("Payment declined")
@@ -101,7 +102,7 @@ class TestPaymentEntity:
             currency="XAF",
             provider=PaymentProvider.TRANZAK.value,
             status=PaymentStatus.COMPLETED.value,
-            is_active=True
+            is_active=True,
         )
 
         payment.process_refund(50000.0, "Customer request")
@@ -120,10 +121,12 @@ class TestPaymentEntity:
             currency="XAF",
             provider=PaymentProvider.TRANZAK.value,
             status=PaymentStatus.COMPLETED.value,
-            is_active=True
+            is_active=True,
         )
 
-        with pytest.raises(ValueError, match="Refund amount cannot exceed payment amount"):
+        with pytest.raises(
+            ValueError, match="Refund amount cannot exceed payment amount"
+        ):
             payment.process_refund(150000.0, "Customer request")
 
     def test_process_refund_not_completed(self):
@@ -135,7 +138,7 @@ class TestPaymentEntity:
             currency="XAF",
             provider=PaymentProvider.TRANZAK.value,
             status=PaymentStatus.PENDING.value,
-            is_active=True
+            is_active=True,
         )
 
         with pytest.raises(ValueError, match="Payment cannot be refunded"):

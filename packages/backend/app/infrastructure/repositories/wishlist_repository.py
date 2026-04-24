@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Wishlist Repository Implementation
 """
+
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -26,18 +27,28 @@ class WishlistRepository(IWishlistRepository):
         """Get wishlist by ID"""
         return self.db.query(Wishlist).filter(Wishlist.id == wishlist_id).first()
 
-    def get_by_user_id(self, user_id: UUID, skip: int = 0, limit: int = 100) -> list[Wishlist]:
+    def get_by_user_id(
+        self, user_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Wishlist]:
         """Get wishlist by user ID"""
-        return self.db.query(Wishlist).filter(
-            Wishlist.user_id == user_id
-        ).order_by(Wishlist.created_at.desc()).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Wishlist)
+            .filter(Wishlist.user_id == user_id)
+            .order_by(Wishlist.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
-    def get_by_user_and_service(self, user_id: UUID, service_id: UUID) -> Wishlist | None:
+    def get_by_user_and_service(
+        self, user_id: UUID, service_id: UUID
+    ) -> Wishlist | None:
         """Get wishlist item by user and service"""
-        return self.db.query(Wishlist).filter(
-            Wishlist.user_id == user_id,
-            Wishlist.service_id == service_id
-        ).first()
+        return (
+            self.db.query(Wishlist)
+            .filter(Wishlist.user_id == user_id, Wishlist.service_id == service_id)
+            .first()
+        )
 
     def remove_by_user_and_service(self, user_id: UUID, service_id: UUID) -> bool:
         """Remove wishlist item"""
@@ -51,6 +62,7 @@ class WishlistRepository(IWishlistRepository):
     def update(self, wishlist: Wishlist) -> Wishlist:
         """Update wishlist"""
         from datetime import datetime
+
         wishlist.updated_at = datetime.utcnow()
         self.db.commit()
         self.db.refresh(wishlist)
@@ -68,4 +80,3 @@ class WishlistRepository(IWishlistRepository):
             self.db.commit()
             return True
         return False
-

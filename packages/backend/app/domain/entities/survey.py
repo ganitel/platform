@@ -1,15 +1,17 @@
 """
 Ganitel V2 Backend - Survey Entity
 """
-from enum import Enum
+
+from enum import StrEnum
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
 
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity
 
 
-class SurveyStatus(str, Enum):
+class SurveyStatus(StrEnum):
     """Survey status enumeration"""
+
     DRAFT = "draft"
     ACTIVE = "active"
     CLOSED = "closed"
@@ -19,6 +21,7 @@ class Survey(AuditableEntity, SoftDeleteEntity):
     """
     Survey entity for user surveys
     """
+
     __tablename__ = "surveys"
 
     # Basic Information
@@ -27,7 +30,9 @@ class Survey(AuditableEntity, SoftDeleteEntity):
     category = Column(String(50), nullable=True)
 
     # Status
-    status = Column(String(20), default=SurveyStatus.DRAFT.value, nullable=False, index=True)
+    status = Column(
+        String(20), default=SurveyStatus.DRAFT.value, nullable=False, index=True
+    )
 
     # Validity
     start_date = Column(DateTime, nullable=True)
@@ -42,4 +47,3 @@ class Survey(AuditableEntity, SoftDeleteEntity):
 
     def __repr__(self):
         return f"<Survey(id={self.id}, title={self.title}, status={self.status})>"
-

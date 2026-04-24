@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Database Connection and Session Management
 """
+
 import logging
 
 from sqlalchemy import MetaData, create_engine
@@ -31,6 +32,7 @@ from app.domain.entities.base import Base
 # Metadata for migrations
 metadata = MetaData()
 
+
 def get_db() -> Session:
     """
     Dependency to get database session
@@ -45,20 +47,22 @@ def get_db() -> Session:
     finally:
         db.close()
 
+
 def create_tables():
     """Create all tables (for development only)"""
     if settings.DEBUG:
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created")
 
+
 def check_db_connection():
     """Check database connection health"""
     try:
         from sqlalchemy import text
+
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         return True
     except Exception as e:
         logger.error(f"Database connection failed: {e}")
         return False
-

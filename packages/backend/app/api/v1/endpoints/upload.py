@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - File Upload Endpoints
 """
+
 import logging
 import mimetypes
 from uuid import uuid4
@@ -34,14 +35,12 @@ async def upload_image(
     file: UploadFile = File(...),
     subdirectory: str = "images",
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Upload a single image"""
     try:
         result = await UploadService.upload_image(
-            file=file,
-            subdirectory=subdirectory,
-            prefix=f"user_{current_user.id}_"
+            file=file, subdirectory=subdirectory, prefix=f"user_{current_user.id}_"
         )
         return {
             "message": "Image uploaded successfully",
@@ -49,13 +48,12 @@ async def upload_image(
             "file_ref": result["url"],
             "access_url": MediaAccessService.build_access_url(result["url"]),
             "filename": result["filename"],
-            "size": result["size"]
+            "size": result["size"],
         }
     except ValueError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
     except Exception:
         logger.exception(
             "Unhandled image upload error",
@@ -64,7 +62,7 @@ async def upload_image(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to upload image",
-        )
+        ) from None
 
 
 @router.post("/images", response_model=dict)
@@ -73,14 +71,12 @@ async def upload_multiple_images(
     files: list[UploadFile] = File(...),
     subdirectory: str = "images",
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Upload multiple images"""
     try:
         results = await UploadService.upload_multiple_images(
-            files=files,
-            subdirectory=subdirectory,
-            prefix=f"user_{current_user.id}_"
+            files=files, subdirectory=subdirectory, prefix=f"user_{current_user.id}_"
         )
         return {
             "message": f"{len(results)} images uploaded successfully",
@@ -90,16 +86,15 @@ async def upload_multiple_images(
                     "file_ref": r["url"],
                     "access_url": MediaAccessService.build_access_url(r["url"]),
                     "filename": r["filename"],
-                    "size": r["size"]
+                    "size": r["size"],
                 }
                 for r in results
-            ]
+            ],
         }
     except ValueError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
     except Exception:
         logger.exception(
             "Unhandled multiple-image upload error",
@@ -108,13 +103,15 @@ async def upload_multiple_images(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to upload images",
-        )
+        ) from None
 
 
 @router.get("/download")
 async def download_file(
     request: Request,
-    file_ref: str = Query(..., description="Stored file reference such as /uploads/images/file.jpg"),
+    file_ref: str = Query(
+        ..., description="Stored file reference such as /uploads/images/file.jpg"
+    ),
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -122,12 +119,14 @@ async def download_file(
     media_service = MediaAccessService(db)
 
     try:
-        resolved = media_service.resolve_download(file_ref=file_ref, requester=current_user)
+        resolved = media_service.resolve_download(
+            file_ref=file_ref, requester=current_user
+        )
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid file reference",
-        )
+        ) from None
     except PermissionError:
         request_id = request.headers.get("X-Request-ID") or str(uuid4())
         logger.warning(
@@ -143,12 +142,12 @@ async def download_file(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied",
-        )
+        ) from None
     except FileNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="File not found",
-        )
+        ) from None
     except Exception:
         logger.exception(
             "Unhandled controlled media download error",
@@ -157,8 +156,11 @@ async def download_file(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to download file",
-        )
+        ) from None
 
-    media_type = mimetypes.guess_type(resolved["filename"])[0] or "application/octet-stream"
-    return FileResponse(path=resolved["path"], media_type=media_type, filename=resolved["filename"])
-
+    media_type = (
+        mimetypes.guess_type(resolved["filename"])[0] or "application/octet-stream"
+    )
+    return FileResponse(
+        path=resolved["path"], media_type=media_type, filename=resolved["filename"]
+    )

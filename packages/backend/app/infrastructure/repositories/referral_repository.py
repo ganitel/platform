@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Referral Repository Implementation
 """
+
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -32,11 +33,16 @@ class ReferralRepository(IReferralRepository):
 
     def get_by_referred_user_id(self, referred_user_id: UUID) -> Referral | None:
         """Get referral by referred user ID"""
-        return self.db.query(Referral).filter(Referral.referred_user_id == referred_user_id).first()
+        return (
+            self.db.query(Referral)
+            .filter(Referral.referred_user_id == referred_user_id)
+            .first()
+        )
 
     def update(self, referral: Referral) -> Referral:
         """Update referral"""
         from datetime import datetime
+
         referral.updated_at = datetime.utcnow()
         self.db.commit()
         self.db.refresh(referral)
@@ -54,4 +60,3 @@ class ReferralRepository(IReferralRepository):
             self.db.commit()
             return True
         return False
-

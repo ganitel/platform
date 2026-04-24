@@ -28,7 +28,9 @@ from app.domain.entities.user import User, UserStatus, UserType
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def _resolve_value(cli_value: str | None, env_name: str, default: str | None = None) -> str | None:
+def _resolve_value(
+    cli_value: str | None, env_name: str, default: str | None = None
+) -> str | None:
     if cli_value is not None and cli_value != "":
         return cli_value
     env_value = os.getenv(env_name)
@@ -43,7 +45,10 @@ def build_args() -> argparse.Namespace:
     parser.add_argument("--first-name", help="Admin first name")
     parser.add_argument("--last-name", help="Admin last name")
     parser.add_argument("--phone", help="Admin phone number")
-    parser.add_argument("--password", help="Admin password (avoid passing in shell history when possible)")
+    parser.add_argument(
+        "--password",
+        help="Admin password (avoid passing in shell history when possible)",
+    )
     parser.add_argument(
         "--no-promote-existing",
         action="store_true",
@@ -57,10 +62,16 @@ def main() -> int:
     settings = get_settings()
 
     email = _resolve_value(args.email, "ADMIN_CREATE_EMAIL", settings.ADMIN_EMAIL)
-    first_name = _resolve_value(args.first_name, "ADMIN_CREATE_FIRST_NAME", settings.ADMIN_FIRST_NAME)
-    last_name = _resolve_value(args.last_name, "ADMIN_CREATE_LAST_NAME", settings.ADMIN_LAST_NAME)
+    first_name = _resolve_value(
+        args.first_name, "ADMIN_CREATE_FIRST_NAME", settings.ADMIN_FIRST_NAME
+    )
+    last_name = _resolve_value(
+        args.last_name, "ADMIN_CREATE_LAST_NAME", settings.ADMIN_LAST_NAME
+    )
     phone = _resolve_value(args.phone, "ADMIN_CREATE_PHONE", "+237600000000")
-    password = _resolve_value(args.password, "ADMIN_CREATE_PASSWORD", settings.ADMIN_PASSWORD)
+    password = _resolve_value(
+        args.password, "ADMIN_CREATE_PASSWORD", settings.ADMIN_PASSWORD
+    )
 
     if not email:
         print("❌ Missing email")
@@ -74,7 +85,9 @@ def main() -> int:
     try:
         inspector = inspect(db.bind)
         if "users" not in inspector.get_table_names():
-            print("❌ Missing table 'users'. Run migrations first: make local-migrate / make staging-migrate")
+            print(
+                "❌ Missing table 'users'. Run migrations first: make local-migrate / make staging-migrate"
+            )
             return 1
 
         user = db.query(User).filter(User.email == email).first()

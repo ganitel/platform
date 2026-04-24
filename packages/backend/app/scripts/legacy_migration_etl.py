@@ -155,9 +155,13 @@ class LegacyMigrationETL:
         users = [self._map_user_row(row) for row in inserts.get("user", [])]
         regions = [self._map_region_row(row) for row in inserts.get("region", [])]
         cities = [self._map_city_row(row) for row in inserts.get("city", [])]
-        house_types = [self._map_house_type_row(row) for row in inserts.get("house_type", [])]
+        house_types = [
+            self._map_house_type_row(row) for row in inserts.get("house_type", [])
+        ]
         houses = [self._map_house_row(row) for row in inserts.get("houses", [])]
-        facilities = [self._map_facility_row(row) for row in inserts.get("facilities", [])]
+        facilities = [
+            self._map_facility_row(row) for row in inserts.get("facilities", [])
+        ]
 
         return ExtractedData(
             users=users,
@@ -191,7 +195,11 @@ class LegacyMigrationETL:
 
             mapped_user: User | None = None
             if existing_map:
-                mapped_user = self.db.query(User).filter(User.id == existing_map["new_id"]).first()
+                mapped_user = (
+                    self.db.query(User)
+                    .filter(User.id == existing_map["new_id"])
+                    .first()
+                )
 
             if not mapped_user and key in dedup_cache:
                 mapped_user = dedup_cache[key]
@@ -199,7 +207,9 @@ class LegacyMigrationETL:
             if not mapped_user:
                 mapped_user = self._find_existing_user(email, phone)
 
-            first_name, last_name = self._split_name(src.get("fullname") or "Legacy User")
+            first_name, last_name = self._split_name(
+                src.get("fullname") or "Legacy User"
+            )
             normalized_role = (src.get("role") or "").strip().lower()
 
             user_type = UserType.TRAVELER.value
@@ -208,7 +218,11 @@ class LegacyMigrationETL:
             elif phone and phone in provider_phones:
                 user_type = UserType.PROVIDER.value
 
-            status = UserStatus.ACTIVE.value if (src.get("status") or "").strip().lower() == "active" else UserStatus.PENDING_VERIFICATION.value
+            status = (
+                UserStatus.ACTIVE.value
+                if (src.get("status") or "").strip().lower() == "active"
+                else UserStatus.PENDING_VERIFICATION.value
+            )
 
             if not mapped_user:
                 mapped_user = User(
@@ -238,12 +252,20 @@ class LegacyMigrationETL:
                 changed |= self._set_if_changed(mapped_user, "phone", phone)
                 changed |= self._set_if_changed(mapped_user, "first_name", first_name)
                 changed |= self._set_if_changed(mapped_user, "last_name", last_name)
-                changed |= self._set_if_changed(mapped_user, "hashed_password", src.get("password"))
+                changed |= self._set_if_changed(
+                    mapped_user, "hashed_password", src.get("password")
+                )
                 changed |= self._set_if_changed(mapped_user, "user_type", user_type)
                 changed |= self._set_if_changed(mapped_user, "status", status)
-                changed |= self._set_if_changed(mapped_user, "is_verified", status == UserStatus.ACTIVE.value)
-                changed |= self._set_if_changed(mapped_user, "profile_picture", src.get("image"))
-                changed |= self._set_if_changed(mapped_user, "bio", src.get("description"))
+                changed |= self._set_if_changed(
+                    mapped_user, "is_verified", status == UserStatus.ACTIVE.value
+                )
+                changed |= self._set_if_changed(
+                    mapped_user, "profile_picture", src.get("image")
+                )
+                changed |= self._set_if_changed(
+                    mapped_user, "bio", src.get("description")
+                )
                 changed |= self._set_if_changed(mapped_user, "city", src.get("city"))
                 if changed:
                     self.stats.users_updated += 1
@@ -273,11 +295,15 @@ class LegacyMigrationETL:
             old_id = city["id"]
             city_name = self._normalize_city(city.get("name"))
             if not city_name:
-                self._record_anomaly("location", f"Invalid city name for legacy city id={old_id}", city)
+                self._record_anomaly(
+                    "location", f"Invalid city name for legacy city id={old_id}", city
+                )
                 continue
 
             region_name = regions_by_id.get(city.get("region_id"))
-            location = self.db.query(Location).filter(Location.name == city_name).first()
+            location = (
+                self.db.query(Location).filter(Location.name == city_name).first()
+            )
             if not location:
                 location = Location(id=uuid4(), name=city_name, region=region_name)
                 self.db.add(location)
@@ -299,7 +325,9 @@ class LegacyMigrationETL:
         self.db.flush()
         self._location_by_norm = {
             self._normalize_key(loc.name): loc
-            for loc in self.db.query(Location).filter(Location.deleted_at.is_(None)).all()
+            for loc in self.db.query(Location)
+            .filter(Location.deleted_at.is_(None))
+            .all()
         }
         self.db.commit()
 
@@ -319,7 +347,11 @@ class LegacyMigrationETL:
             raw_name = (src.get("type") or "").strip()
             normalized = canonical.get(self._normalize_key(raw_name), "Room")
 
-            obj = self.db.query(PropertyType).filter(PropertyType.name == normalized).first()
+            obj = (
+                self.db.query(PropertyType)
+                .filter(PropertyType.name == normalized)
+                .first()
+            )
             if not obj:
                 obj = PropertyType(id=uuid4(), name=normalized)
                 self.db.add(obj)
@@ -337,7 +369,9 @@ class LegacyMigrationETL:
         self.db.flush()
         self._property_type_by_norm = {
             self._normalize_key(t.name): t
-            for t in self.db.query(PropertyType).filter(PropertyType.deleted_at.is_(None)).all()
+            for t in self.db.query(PropertyType)
+            .filter(PropertyType.deleted_at.is_(None))
+            .all()
         }
         self.db.commit()
 
@@ -354,28 +388,48 @@ class LegacyMigrationETL:
             map_row = self._get_map("migration_map_properties", old_id)
             prop = None
             if map_row:
-                prop = self.db.query(Property).filter(Property.id == map_row["new_id"]).first()
+                prop = (
+                    self.db.query(Property)
+                    .filter(Property.id == map_row["new_id"])
+                    .first()
+                )
 
             provider_phone = self._normalize_phone(src.get("user_phone"))
             provider = user_by_phone.get(provider_phone)
             if not provider:
-                self._record_anomaly("property", f"Provider not found for legacy house id={old_id}", src)
+                self._record_anomaly(
+                    "property", f"Provider not found for legacy house id={old_id}", src
+                )
                 continue
 
             location = self._resolve_location(src.get("city"))
             if not location:
-                self._record_anomaly("property", f"Location not found for legacy house id={old_id}", src)
+                self._record_anomaly(
+                    "property", f"Location not found for legacy house id={old_id}", src
+                )
                 continue
 
             ptype = self._resolve_property_type(src)
             if not ptype:
-                self._record_anomaly("property", f"Property type not resolved for legacy house id={old_id}", src)
+                self._record_anomaly(
+                    "property",
+                    f"Property type not resolved for legacy house id={old_id}",
+                    src,
+                )
                 continue
 
             title = (src.get("location") or "").strip() or f"Legacy Property #{old_id}"
-            description = (src.get("description") or src.get("description_fr") or "Legacy imported property").strip()
+            description = (
+                src.get("description")
+                or src.get("description_fr")
+                or "Legacy imported property"
+            ).strip()
             address = (src.get("location") or src.get("city") or "Unknown").strip()
-            base_price = self._safe_decimal(src.get("discPrice")) or self._safe_decimal(src.get("price")) or 0
+            base_price = (
+                self._safe_decimal(src.get("discPrice"))
+                or self._safe_decimal(src.get("price"))
+                or 0
+            )
             images = self._collect_images(src.get("image"), src.get("other_images"))
 
             if not prop:
@@ -383,7 +437,9 @@ class LegacyMigrationETL:
                     id=uuid4(),
                     title=title,
                     description=description,
-                    short_description=(description[:497] + "...") if len(description) > 500 else description,
+                    short_description=(description[:497] + "...")
+                    if len(description) > 500
+                    else description,
                     provider_id=provider.id,
                     location_id=location.id,
                     property_type_id=ptype.id,
@@ -414,20 +470,40 @@ class LegacyMigrationETL:
                 changed = False
                 changed |= self._set_if_changed(prop, "title", title)
                 changed |= self._set_if_changed(prop, "description", description)
-                changed |= self._set_if_changed(prop, "short_description", (description[:497] + "...") if len(description) > 500 else description)
+                changed |= self._set_if_changed(
+                    prop,
+                    "short_description",
+                    (description[:497] + "...")
+                    if len(description) > 500
+                    else description,
+                )
                 changed |= self._set_if_changed(prop, "provider_id", provider.id)
                 changed |= self._set_if_changed(prop, "location_id", location.id)
                 changed |= self._set_if_changed(prop, "property_type_id", ptype.id)
                 changed |= self._set_if_changed(prop, "address", address)
                 changed |= self._set_if_changed(prop, "base_price", base_price)
-                changed |= self._set_if_changed(prop, "max_guests", self._safe_int(src.get("guestnum")))
-                changed |= self._set_if_changed(prop, "bedrooms", self._safe_int(src.get("rooms")))
-                changed |= self._set_if_changed(prop, "bathrooms", self._safe_int(src.get("toilets")))
-                changed |= self._set_if_changed(prop, "beds", self._safe_int(src.get("rooms")))
-                changed |= self._set_if_changed(prop, "living_rooms", self._safe_int(src.get("livrooms")))
-                changed |= self._set_if_changed(prop, "balconies", self._safe_int(src.get("balconies")))
+                changed |= self._set_if_changed(
+                    prop, "max_guests", self._safe_int(src.get("guestnum"))
+                )
+                changed |= self._set_if_changed(
+                    prop, "bedrooms", self._safe_int(src.get("rooms"))
+                )
+                changed |= self._set_if_changed(
+                    prop, "bathrooms", self._safe_int(src.get("toilets"))
+                )
+                changed |= self._set_if_changed(
+                    prop, "beds", self._safe_int(src.get("rooms"))
+                )
+                changed |= self._set_if_changed(
+                    prop, "living_rooms", self._safe_int(src.get("livrooms"))
+                )
+                changed |= self._set_if_changed(
+                    prop, "balconies", self._safe_int(src.get("balconies"))
+                )
                 changed |= self._set_if_changed(prop, "images", images)
-                changed |= self._set_if_changed(prop, "is_active", self._is_active_legacy_property(src))
+                changed |= self._set_if_changed(
+                    prop, "is_active", self._is_active_legacy_property(src)
+                )
                 if changed:
                     self.stats.properties_updated += 1
 
@@ -446,17 +522,27 @@ class LegacyMigrationETL:
                 payload,
             )
 
-            self._upsert_service_for_active_property(src, prop, provider, location, ptype)
+            self._upsert_service_for_active_property(
+                src, prop, provider, location, ptype
+            )
 
         self.db.commit()
 
     def load_amenities_and_links(self, data: ExtractedData) -> None:
         categories = {
             c.name_en: c
-            for c in self.db.query(AmenityCategory).filter(AmenityCategory.deleted_at.is_(None)).all()
+            for c in self.db.query(AmenityCategory)
+            .filter(AmenityCategory.deleted_at.is_(None))
+            .all()
         }
 
-        for expected in ["General", "Living Room", "Main Bedroom", "Kitchen", "Security"]:
+        for expected in [
+            "General",
+            "Living Room",
+            "Main Bedroom",
+            "Kitchen",
+            "Security",
+        ]:
             if expected not in categories:
                 c = AmenityCategory(
                     id=uuid4(),
@@ -470,14 +556,20 @@ class LegacyMigrationETL:
 
         for facility in data.facilities:
             old_id = facility["id"]
-            name_en = (facility.get("name_en") or "").strip() or f"Legacy Amenity {old_id}"
+            name_en = (
+                facility.get("name_en") or ""
+            ).strip() or f"Legacy Amenity {old_id}"
             name_fr = (facility.get("name_fr") or name_en).strip()
             category_name = self._resolve_category_name(name_en)
             category = categories[category_name]
 
-            amenity = self.db.query(Amenity).filter(
-                and_(Amenity.category_id == category.id, Amenity.name_en == name_en)
-            ).first()
+            amenity = (
+                self.db.query(Amenity)
+                .filter(
+                    and_(Amenity.category_id == category.id, Amenity.name_en == name_en)
+                )
+                .first()
+            )
 
             if not amenity:
                 amenity = Amenity(
@@ -508,7 +600,9 @@ class LegacyMigrationETL:
         self.db.flush()
 
         amenity_rows = self.db.query(Amenity).filter(Amenity.deleted_at.is_(None)).all()
-        self._amenity_by_norm = {self._normalize_key(row.name_en): row for row in amenity_rows}
+        self._amenity_by_norm = {
+            self._normalize_key(row.name_en): row for row in amenity_rows
+        }
 
         for house in data.houses:
             prop_map = self._get_map("migration_map_properties", house["id"])
@@ -522,10 +616,14 @@ class LegacyMigrationETL:
                 if not amenity:
                     continue
 
-                exists = self.db.query(PropertyAmenity).filter(
-                    PropertyAmenity.property_id == property_id,
-                    PropertyAmenity.amenity_id == amenity.id,
-                ).first()
+                exists = (
+                    self.db.query(PropertyAmenity)
+                    .filter(
+                        PropertyAmenity.property_id == property_id,
+                        PropertyAmenity.amenity_id == amenity.id,
+                    )
+                    .first()
+                )
                 if exists:
                     continue
 
@@ -586,7 +684,9 @@ class LegacyMigrationETL:
                         "legacy_source": "residencemg_backup.sql",
                         "legacy_status": src_house.get("status"),
                         "legacy_type_label": src_house.get("type"),
-                        "legacy_media_paths": self._collect_images(src_house.get("image"), src_house.get("other_images")),
+                        "legacy_media_paths": self._collect_images(
+                            src_house.get("image"), src_house.get("other_images")
+                        ),
                     }.items()
                     if key in self.metadata_keys
                 },
@@ -607,9 +707,15 @@ class LegacyMigrationETL:
         changed = False
         changed |= self._set_if_changed(service, "title", prop.title)
         changed |= self._set_if_changed(service, "description", prop.description)
-        changed |= self._set_if_changed(service, "short_description", prop.short_description)
-        changed |= self._set_if_changed(service, "service_type", ServiceType.ACCOMMODATION.value)
-        changed |= self._set_if_changed(service, "accommodation_type", accommodation_type)
+        changed |= self._set_if_changed(
+            service, "short_description", prop.short_description
+        )
+        changed |= self._set_if_changed(
+            service, "service_type", ServiceType.ACCOMMODATION.value
+        )
+        changed |= self._set_if_changed(
+            service, "accommodation_type", accommodation_type
+        )
         changed |= self._set_if_changed(service, "status", status)
         changed |= self._set_if_changed(service, "provider_id", provider.id)
         changed |= self._set_if_changed(service, "country", "Cameroon")
@@ -622,7 +728,9 @@ class LegacyMigrationETL:
         changed |= self._set_if_changed(service, "bedrooms", prop.bedrooms)
         changed |= self._set_if_changed(service, "bathrooms", prop.bathrooms)
         changed |= self._set_if_changed(service, "beds", prop.beds)
-        changed |= self._set_if_changed(service, "house_rules", self._tokenize_rules(src_house.get("rules")))
+        changed |= self._set_if_changed(
+            service, "house_rules", self._tokenize_rules(src_house.get("rules"))
+        )
         changed |= self._set_if_changed(service, "images", prop.images)
         changed |= self._set_if_changed(service, "is_active", True)
 
@@ -869,7 +977,9 @@ class LegacyMigrationETL:
         if not self._location_by_norm:
             self._location_by_norm = {
                 self._normalize_key(loc.name): loc
-                for loc in self.db.query(Location).filter(Location.deleted_at.is_(None)).all()
+                for loc in self.db.query(Location)
+                .filter(Location.deleted_at.is_(None))
+                .all()
             }
 
         city = self._normalize_city(raw_city)
@@ -891,13 +1001,22 @@ class LegacyMigrationETL:
         if not self._property_type_by_norm:
             self._property_type_by_norm = {
                 self._normalize_key(t.name): t
-                for t in self.db.query(PropertyType).filter(PropertyType.deleted_at.is_(None)).all()
+                for t in self.db.query(PropertyType)
+                .filter(PropertyType.deleted_at.is_(None))
+                .all()
             }
 
         raw = (house.get("type") or "").strip()
         normalized = self._normalize_key(raw)
 
-        if normalized in {"apartment", "studio", "room", "singleroom", "duplex", "villa"}:
+        if normalized in {
+            "apartment",
+            "studio",
+            "room",
+            "singleroom",
+            "duplex",
+            "villa",
+        }:
             mapped = "room" if normalized == "singleroom" else normalized
         elif normalized == "duplexvilla":
             text_blob = f"{house.get('location') or ''} {house.get('description') or ''}".lower()
@@ -933,7 +1052,9 @@ class LegacyMigrationETL:
             "netflix": "cable tv",
             "decoder": "cable tv",
         }
-        alias_norm = self._normalize_key(aliases.get(token.lower(), aliases.get(normalized, "")))
+        alias_norm = self._normalize_key(
+            aliases.get(token.lower(), aliases.get(normalized, ""))
+        )
         if alias_norm and alias_norm in self._amenity_by_norm:
             return self._amenity_by_norm[alias_norm]
         return None
@@ -951,7 +1072,11 @@ class LegacyMigrationETL:
     def _is_active_legacy_property(self, house: dict[str, Any]) -> bool:
         status = str(house.get("status") or "").strip().lower()
         published = str(house.get("published") or "").strip().lower()
-        return status in SERVICE_STATUS_ACTIVE_VALUES or published in SERVICE_STATUS_ACTIVE_VALUES or bool(published)
+        return (
+            status in SERVICE_STATUS_ACTIVE_VALUES
+            or published in SERVICE_STATUS_ACTIVE_VALUES
+            or bool(published)
+        )
 
     def _collect_images(self, primary: Any, other_images: Any) -> list[str]:
         images: list[str] = []
@@ -980,11 +1105,20 @@ class LegacyMigrationETL:
         return [token for token in tokens if token]
 
     def _get_map(self, table_name: str, old_id: int) -> dict[str, Any] | None:
-        sql = text(f"SELECT old_id, new_id, source_hash FROM {table_name} WHERE old_id = :old_id")
+        sql = text(
+            f"SELECT old_id, new_id, source_hash FROM {table_name} WHERE old_id = :old_id"
+        )
         row = self.db.execute(sql, {"old_id": old_id}).mappings().first()
         return dict(row) if row else None
 
-    def _upsert_map(self, table_name: str, old_id: int, new_id: Any, source_hash: str, payload: dict[str, Any]) -> None:
+    def _upsert_map(
+        self,
+        table_name: str,
+        old_id: int,
+        new_id: Any,
+        source_hash: str,
+        payload: dict[str, Any],
+    ) -> None:
         sql = text(
             f"""
             INSERT INTO {table_name} (id, old_id, new_id, source_hash, payload, created_at, updated_at)
@@ -1008,9 +1142,13 @@ class LegacyMigrationETL:
             },
         )
 
-    def _record_anomaly(self, category: str, message: str, payload: dict[str, Any]) -> None:
+    def _record_anomaly(
+        self, category: str, message: str, payload: dict[str, Any]
+    ) -> None:
         self.stats.anomalies += 1
-        self.anomalies.append({"category": category, "message": message, "payload": payload})
+        self.anomalies.append(
+            {"category": category, "message": message, "payload": payload}
+        )
 
     @staticmethod
     def _set_if_changed(entity: Any, field_name: str, new_value: Any) -> bool:
@@ -1160,7 +1298,9 @@ class LegacyMigrationETL:
         json_path = self.report_dir / "migration_report.json"
         md_path = self.report_dir / "migration_report.md"
 
-        json_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+        json_path.write_text(
+            json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
 
         lines = [
             "# Legacy Migration Report",
@@ -1202,10 +1342,18 @@ class LegacyMigrationETL:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Legacy SQL backup migration ETL")
-    parser.add_argument("--source", type=Path, default=PROJECT_ROOT / "residencemg_backup.sql")
-    parser.add_argument("--report-dir", type=Path, default=PROJECT_ROOT / "logs" / "migration")
-    parser.add_argument("--dry-run", action="store_true", help="Parse + transform profile only")
-    parser.add_argument("--apply", action="store_true", help="Apply ETL changes to database")
+    parser.add_argument(
+        "--source", type=Path, default=PROJECT_ROOT / "residencemg_backup.sql"
+    )
+    parser.add_argument(
+        "--report-dir", type=Path, default=PROJECT_ROOT / "logs" / "migration"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Parse + transform profile only"
+    )
+    parser.add_argument(
+        "--apply", action="store_true", help="Apply ETL changes to database"
+    )
     return parser.parse_args()
 
 
@@ -1229,12 +1377,18 @@ def main() -> None:
             report_dir=args.report_dir,
         )
         report = etl.run()
-        print(json.dumps({
-            "dry_run": report["dry_run"],
-            "source_counts": report["source_counts"],
-            "migration_stats": report["migration_stats"],
-            "anomalies_count": report["anomalies_count"],
-        }, indent=2, ensure_ascii=False))
+        print(
+            json.dumps(
+                {
+                    "dry_run": report["dry_run"],
+                    "source_counts": report["source_counts"],
+                    "migration_stats": report["migration_stats"],
+                    "anomalies_count": report["anomalies_count"],
+                },
+                indent=2,
+                ensure_ascii=False,
+            )
+        )
     except Exception:
         db.rollback()
         raise

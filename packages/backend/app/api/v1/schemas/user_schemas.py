@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - User API Schemas
 """
+
 from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field, model_validator, validator
@@ -30,6 +31,7 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class UserPublicResponse(BaseModel):
     id: str
     first_name: str
@@ -43,6 +45,7 @@ class UserPublicResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class UserUpdateRequest(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
@@ -53,13 +56,16 @@ class UserUpdateRequest(BaseModel):
     language: str | None = None
     currency: str | None = None
 
+
 class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password: str
 
+
 class MessageResponse(BaseModel):
     message: str
     success: bool = True
+
 
 class UserListResponse(BaseModel):
     users: list[UserResponse]
@@ -72,23 +78,36 @@ class UserListResponse(BaseModel):
 # Authentication Schemas
 class UserCreateRequest(BaseModel):
     """Request schema for user registration"""
-    email: EmailStr | None = Field(None, description="User email (required if phone not provided)")
-    phone: str | None = Field(None, pattern=r"^\+\d{1,15}$", description="Phone number in international format (required if email not provided)")
-    password: str | None = Field(None, min_length=8, description="Password (required for email registration)")
-    first_name: str = Field(..., min_length=1, max_length=100, description="User first name")
-    last_name: str = Field(..., min_length=1, max_length=100, description="User last name")
+
+    email: EmailStr | None = Field(
+        None, description="User email (required if phone not provided)"
+    )
+    phone: str | None = Field(
+        None,
+        pattern=r"^\+\d{1,15}$",
+        description="Phone number in international format (required if email not provided)",
+    )
+    password: str | None = Field(
+        None, min_length=8, description="Password (required for email registration)"
+    )
+    first_name: str = Field(
+        ..., min_length=1, max_length=100, description="User first name"
+    )
+    last_name: str = Field(
+        ..., min_length=1, max_length=100, description="User last name"
+    )
     user_type: str = Field("traveler", description="User type: traveler or provider")
     country: str | None = Field(None, max_length=100, description="User country")
     city: str | None = Field(None, max_length=100, description="User city")
 
-    @validator('user_type')
+    @validator("user_type")
     def validate_user_type(cls, v):
         valid_types = [UserType.TRAVELER.value, UserType.PROVIDER.value]
         if v.lower() not in valid_types:
             raise ValueError(f"user_type must be one of: {', '.join(valid_types)}")
         return v.lower()
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_contact_and_password(self):
         """Ensure at least email or phone is provided, and password is required for email"""
         # At least one contact method must be provided
@@ -104,12 +123,14 @@ class UserCreateRequest(BaseModel):
 
 class UserLoginRequest(BaseModel):
     """Request schema for user login"""
+
     identifier: str = Field(..., description="Email or phone number")
     password: str = Field(..., min_length=1, description="User password")
 
 
 class TokenResponse(BaseModel):
     """Response schema for authentication tokens"""
+
     access_token: str = Field(..., description="JWT access token")
     token_type: str = Field("bearer", description="Token type")
     refresh_token: str | None = Field(None, description="JWT refresh token")
@@ -117,30 +138,39 @@ class TokenResponse(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     """Request schema for token refresh"""
+
     refresh_token: str = Field(..., description="Refresh token")
 
 
 class OAuthCodeExchangeRequest(BaseModel):
     """Request schema to exchange temporary OAuth code for API token"""
+
     code: str = Field(..., min_length=16, description="Temporary OAuth exchange code")
     provider: str = Field(..., description="OAuth provider")
 
-    @validator('provider')
+    @validator("provider")
     def validate_provider(cls, v):
         allowed_providers = {"google", "facebook"}
         provider = v.lower()
         if provider not in allowed_providers:
-            raise ValueError(f"provider must be one of: {', '.join(sorted(allowed_providers))}")
+            raise ValueError(
+                f"provider must be one of: {', '.join(sorted(allowed_providers))}"
+            )
         return provider
 
 
 # Password Reset Schemas
 class ForgotPasswordRequest(BaseModel):
     """Request schema for forgot password"""
-    email: EmailStr | None = Field(None, description="User email")
-    phone: str | None = Field(None, pattern=r"^\+\d{1,15}$", description="Phone number in international format")
 
-    @model_validator(mode='after')
+    email: EmailStr | None = Field(None, description="User email")
+    phone: str | None = Field(
+        None,
+        pattern=r"^\+\d{1,15}$",
+        description="Phone number in international format",
+    )
+
+    @model_validator(mode="after")
     def validate_contact(self):
         """Ensure at least email or phone is provided"""
         if not self.email and not self.phone:
@@ -150,11 +180,12 @@ class ForgotPasswordRequest(BaseModel):
 
 class ResetPasswordRequest(BaseModel):
     """Request schema for reset password"""
+
     token: str = Field(..., description="Password reset token")
     new_password: str = Field(..., min_length=8, description="New password")
 
 
 class VerifyResetTokenRequest(BaseModel):
     """Request schema for verifying reset token"""
-    token: str = Field(..., description="Password reset token")
 
+    token: str = Field(..., description="Password reset token")

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Backup Service
 """
+
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -58,6 +59,7 @@ class BackupService:
 
             # Create tar.gz archive of uploads
             import tarfile
+
             uploads_dir = Path("uploads")
             if uploads_dir.exists():
                 with tarfile.open(backup_file, "w:gz") as tar:
@@ -82,4 +84,3 @@ class BackupService:
                     logger.info(f"Deleted old backup: {backup_file}")
         except Exception as e:
             logger.error(f"Error cleaning up backups: {e}")
-

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Storage Provider Abstraction
 """
+
 import os
 import re
 from abc import ABC, abstractmethod
@@ -72,11 +73,14 @@ def _resolve_within_base(base_dir: Path, *parts: str) -> Path:
 
     return candidate
 
+
 class StorageProvider(ABC):
     """Abstract base class for storage providers"""
 
     @abstractmethod
-    async def upload_file(self, file_content: bytes, filename: str, subdirectory: str) -> str:
+    async def upload_file(
+        self, file_content: bytes, filename: str, subdirectory: str
+    ) -> str:
         """Upload a file and return its URL or path"""
         pass
 
@@ -93,13 +97,17 @@ class LocalStorageProvider(StorageProvider):
         self.upload_dir = Path(upload_dir)
         self.upload_dir.mkdir(parents=True, exist_ok=True)
 
-    async def upload_file(self, file_content: bytes, filename: str, subdirectory: str) -> str:
+    async def upload_file(
+        self, file_content: bytes, filename: str, subdirectory: str
+    ) -> str:
         safe_subdirectory = _sanitize_subdirectory(subdirectory)
         safe_filename = _sanitize_filename(filename)
 
         dest_dir = _resolve_within_base(self.upload_dir, safe_subdirectory)
         dest_dir.mkdir(parents=True, exist_ok=True)
-        dest_path = _resolve_within_base(self.upload_dir, safe_subdirectory, safe_filename)
+        dest_path = _resolve_within_base(
+            self.upload_dir, safe_subdirectory, safe_filename
+        )
 
         with open(dest_path, "wb") as f:
             f.write(file_content)
@@ -120,7 +128,9 @@ class LocalStorageProvider(StorageProvider):
         try:
             safe_subdirectory = _sanitize_subdirectory(subdirectory)
             safe_filename = _sanitize_filename(filename)
-            full_path = _resolve_within_base(self.upload_dir, safe_subdirectory, safe_filename)
+            full_path = _resolve_within_base(
+                self.upload_dir, safe_subdirectory, safe_filename
+            )
         except ValueError:
             return False
 
@@ -141,19 +151,23 @@ class R2StorageProvider(StorageProvider):
         # Build endpoint URL if not provided
         self.endpoint_url = settings.R2_ENDPOINT_URL
         if not self.endpoint_url and settings.R2_ACCOUNT_ID:
-            self.endpoint_url = f"https://{settings.R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+            self.endpoint_url = (
+                f"https://{settings.R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+            )
 
-    async def upload_file(self, file_content: bytes, filename: str, subdirectory: str) -> str:
+    async def upload_file(
+        self, file_content: bytes, filename: str, subdirectory: str
+    ) -> str:
         safe_subdirectory = _sanitize_subdirectory(subdirectory)
         safe_filename = _sanitize_filename(filename)
         key = f"{safe_subdirectory}/{safe_filename}"
 
         async with self.session.client(
-            's3',
+            "s3",
             endpoint_url=self.endpoint_url,
             aws_access_key_id=settings.R2_ACCESS_KEY_ID,
             aws_secret_access_key=settings.R2_SECRET_ACCESS_KEY,
-            config=Config(signature_version='s3v4')
+            config=Config(signature_version="s3v4"),
         ) as s3:
             await s3.put_object(
                 Bucket=self.bucket_name,
@@ -172,11 +186,11 @@ class R2StorageProvider(StorageProvider):
         key = file_url.replace(f"{self.public_url}/", "")
 
         async with self.session.client(
-            's3',
+            "s3",
             endpoint_url=self.endpoint_url,
             aws_access_key_id=settings.R2_ACCESS_KEY_ID,
             aws_secret_access_key=settings.R2_SECRET_ACCESS_KEY,
-            config=Config(signature_version='s3v4')
+            config=Config(signature_version="s3v4"),
         ) as s3:
             try:
                 await s3.delete_object(Bucket=self.bucket_name, Key=key)

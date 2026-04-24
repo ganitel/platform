@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Proximity Repository Interface
 """
+
 from abc import abstractmethod
 from uuid import UUID
 
@@ -14,12 +15,16 @@ class IProximityRepository(BaseRepository[Proximity]):
     """
 
     @abstractmethod
-    def get_by_property(self, property_id: UUID, skip: int = 0, limit: int = 100) -> list[Proximity]:
+    def get_by_property(
+        self, property_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Proximity]:
         """Get all proximities for a property"""
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_property_destination(self, property_id: UUID, destination_name: str) -> Proximity | None:
+    def get_by_property_destination(
+        self, property_id: UUID, destination_name: str
+    ) -> Proximity | None:
         """Get a specific proximity by property and destination"""
         raise NotImplementedError
 

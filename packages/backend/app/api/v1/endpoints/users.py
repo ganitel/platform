@@ -23,9 +23,10 @@ from app.infrastructure.repositories.user_repository import UserRepository
 
 router = APIRouter()
 
+
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_profile(
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user),
 ):
     """
     Get current user's profile
@@ -47,14 +48,15 @@ async def get_current_user_profile(
         language=current_user.language,
         currency=current_user.currency,
         created_at=current_user.created_at,
-        updated_at=current_user.updated_at
+        updated_at=current_user.updated_at,
     )
+
 
 @router.put("/me", response_model=UserResponse)
 async def update_current_user_profile(
     user_update: UserUpdateRequest,
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Update current user's profile
@@ -88,21 +90,22 @@ async def update_current_user_profile(
             language=updated_user.language,
             currency=updated_user.currency,
             created_at=updated_user.created_at,
-            updated_at=updated_user.updated_at
+            updated_at=updated_user.updated_at,
         )
 
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Profile update failed. Please try again."
-        )
+            detail="Profile update failed. Please try again.",
+        ) from None
+
 
 @router.get("/me/bookings", response_model=BookingListResponse)
 async def get_my_bookings(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Retrieve bookings for the current user
@@ -117,19 +120,20 @@ async def get_my_bookings(
             total=total,
             page=skip // limit + 1,
             per_page=limit,
-            pages=(total + limit - 1) // limit
+            pages=(total + limit - 1) // limit,
         )
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve bookings"
-        )
+            detail="Failed to retrieve bookings",
+        ) from None
+
 
 @router.post("/me/change-password", response_model=MessageResponse)
 async def change_password(
     password_data: ChangePasswordRequest,
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Change current user's password
@@ -141,10 +145,12 @@ async def change_password(
         user_repository = UserRepository(db)
 
         # Verify current password
-        if not pwd_context.verify(password_data.current_password, current_user.hashed_password):
+        if not pwd_context.verify(
+            password_data.current_password, current_user.hashed_password
+        ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Current password is incorrect"
+                detail="Current password is incorrect",
             )
 
         # Hash new password
@@ -155,7 +161,7 @@ async def change_password(
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Password change failed"
+                detail="Password change failed",
             )
 
         return MessageResponse(message="Password changed successfully")
@@ -165,14 +171,12 @@ async def change_password(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Password change failed. Please try again."
-        )
+            detail="Password change failed. Please try again.",
+        ) from None
+
 
 @router.get("/{user_id}", response_model=UserPublicResponse)
-async def get_user_public_profile(
-    user_id: str,
-    db: Session = Depends(get_db)
-):
+async def get_user_public_profile(user_id: str, db: Session = Depends(get_db)):
     """
     Get user's public profile
     """
@@ -184,8 +188,7 @@ async def get_user_public_profile(
 
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
 
         return UserPublicResponse(
@@ -196,21 +199,21 @@ async def get_user_public_profile(
             profile_picture=user.profile_picture,
             bio=user.bio,
             country=user.country,
-            city=user.city
+            city=user.city,
         )
 
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid user ID format"
-        )
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user ID format"
+        ) from None
     except HTTPException:
         raise
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve user profile"
-        )
+            detail="Failed to retrieve user profile",
+        ) from None
+
 
 # Admin endpoints
 @router.get("/", response_model=UserListResponse)
@@ -221,7 +224,7 @@ async def list_users(
     user_type: str | None = Query(None),
     status: str | None = Query(None),
     current_user: User = Depends(get_current_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     List users (Admin only)
@@ -235,9 +238,9 @@ async def list_users(
         else:
             filters = {}
             if user_type:
-                filters['user_type'] = user_type
+                filters["user_type"] = user_type
             if status:
-                filters['status'] = status
+                filters["status"] = status
 
             users = user_repository.find_by_criteria(filters, skip=skip, limit=limit)
             total = user_repository.count(filters)
@@ -261,27 +264,29 @@ async def list_users(
                     language=user.language,
                     currency=user.currency,
                     created_at=user.created_at,
-                    updated_at=user.updated_at
-                ) for user in users
+                    updated_at=user.updated_at,
+                )
+                for user in users
             ],
             total=total,
             page=skip // limit + 1,
             per_page=limit,
-            pages=(total + limit - 1) // limit
+            pages=(total + limit - 1) // limit,
         )
 
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve users"
-        )
+            detail="Failed to retrieve users",
+        ) from None
+
 
 @router.put("/{user_id}/status", response_model=MessageResponse)
 async def update_user_status(
     user_id: str,
     new_status: str,
     current_user: User = Depends(get_current_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Update user status (Admin only)
@@ -298,29 +303,26 @@ async def update_user_status(
             status_enum = UserStatus(new_status)
         except ValueError:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid status value"
-            )
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid status value"
+            ) from None
 
         # Update status
         success = user_repository.update_status(UUID(user_id), status_enum)
         if not success:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
 
         return MessageResponse(message=f"User status updated to {new_status}")
 
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid user ID format"
-        )
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user ID format"
+        ) from None
     except HTTPException:
         raise
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Status update failed"
-        )
+            detail="Status update failed",
+        ) from None

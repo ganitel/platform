@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Forgot Password Use Case
 """
+
 import secrets
 from datetime import datetime, timedelta
 
@@ -17,7 +18,7 @@ class ForgotPasswordUseCase:
     def __init__(self, user_repository: IUserRepository):
         self.user_repository = user_repository
 
-    def execute(self, email: str = None, phone: str = None) -> dict:
+    def execute(self, email: str | None = None, phone: str | None = None) -> dict:
         """
         Initiate password reset process
 
@@ -46,7 +47,7 @@ class ForgotPasswordUseCase:
             # Don't reveal if user exists for security
             return {
                 "message": "If the email/phone exists, a reset link will be sent",
-                "success": True
+                "success": True,
             }
 
         # Check if user uses email auth
@@ -59,9 +60,7 @@ class ForgotPasswordUseCase:
 
         # Update user with reset token
         self.user_repository.update_reset_token(
-            user_id=user.id,
-            token=reset_token,
-            expires_at=expires_at
+            user_id=user.id, token=reset_token, expires_at=expires_at
         )
 
         # In production, send email/SMS here
@@ -71,6 +70,5 @@ class ForgotPasswordUseCase:
             "message": "Password reset link sent to your email/phone",
             "success": True,
             "token": reset_token,  # Remove in production, only for testing
-            "expires_at": expires_at.isoformat()
+            "expires_at": expires_at.isoformat(),
         }
-

@@ -23,7 +23,7 @@ class GoogleOAuthClient:
             "response_type": "code",
             "scope": "openid email profile",
             "access_type": "offline",
-            "prompt": "consent"
+            "prompt": "consent",
         }
 
         return f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
@@ -39,8 +39,8 @@ class GoogleOAuthClient:
                     "client_id": settings.GOOGLE_CLIENT_ID,
                     "client_secret": settings.GOOGLE_CLIENT_SECRET,
                     "redirect_uri": settings.GOOGLE_REDIRECT_URI,
-                    "grant_type": "authorization_code"
-                }
+                    "grant_type": "authorization_code",
+                },
             )
             response.raise_for_status()
             return response.json()
@@ -51,7 +51,7 @@ class GoogleOAuthClient:
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 "https://www.googleapis.com/oauth2/v2/userinfo",
-                headers={"Authorization": f"Bearer {access_token}"}
+                headers={"Authorization": f"Bearer {access_token}"},
             )
             response.raise_for_status()
             return response.json()
@@ -69,7 +69,7 @@ class FacebookOAuthClient:
             "client_id": settings.FACEBOOK_APP_ID,
             "redirect_uri": settings.FACEBOOK_REDIRECT_URI,
             "response_type": "code",
-            "scope": "email,public_profile"
+            "scope": "email,public_profile",
         }
 
         return f"https://www.facebook.com/v18.0/dialog/oauth?{urlencode(params)}"
@@ -84,8 +84,8 @@ class FacebookOAuthClient:
                     "client_id": settings.FACEBOOK_APP_ID,
                     "client_secret": settings.FACEBOOK_APP_SECRET,
                     "redirect_uri": settings.FACEBOOK_REDIRECT_URI,
-                    "code": code
-                }
+                    "code": code,
+                },
             )
             response.raise_for_status()
             return response.json()
@@ -98,8 +98,8 @@ class FacebookOAuthClient:
                 "https://graph.facebook.com/v18.0/me",
                 params={
                     "fields": "id,name,email,picture",
-                    "access_token": access_token
-                }
+                    "access_token": access_token,
+                },
             )
             response.raise_for_status()
             data = response.json()
@@ -109,4 +109,3 @@ class FacebookOAuthClient:
                 data["picture_url"] = data["picture"]["data"]["url"]
 
             return data
-

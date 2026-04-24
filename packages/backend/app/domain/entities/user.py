@@ -1,28 +1,34 @@
 """
 Ganitel V2 Backend - User Entity
 """
-from enum import Enum as PyEnum
+
+from enum import StrEnum
 
 from sqlalchemy import Boolean, Column, DateTime, String, Text
 
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity
 
 
-class UserType(str, PyEnum):
+class UserType(StrEnum):
     """User type enumeration"""
+
     TRAVELER = "traveler"
     PROVIDER = "provider"
     ADMIN = "admin"
 
-class UserStatus(str, PyEnum):
+
+class UserStatus(StrEnum):
     """User status enumeration"""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     SUSPENDED = "suspended"
     PENDING_VERIFICATION = "pending_verification"
 
+
 class User(AuditableEntity, SoftDeleteEntity):
     """User entity for all platform users"""
+
     __tablename__ = "users"
 
     # Basic Information
@@ -33,8 +39,15 @@ class User(AuditableEntity, SoftDeleteEntity):
 
     # Authentication
     hashed_password = Column(String(255), nullable=True)
-    user_type = Column(String(20), default=UserType.TRAVELER.value, nullable=False, index=True)
-    status = Column(String(20), default=UserStatus.PENDING_VERIFICATION.value, nullable=False, index=True)
+    user_type = Column(
+        String(20), default=UserType.TRAVELER.value, nullable=False, index=True
+    )
+    status = Column(
+        String(20),
+        default=UserStatus.PENDING_VERIFICATION.value,
+        nullable=False,
+        index=True,
+    )
 
     # Verification Status
     is_verified = Column(Boolean, default=False, nullable=False)
@@ -59,7 +72,9 @@ class User(AuditableEntity, SoftDeleteEntity):
     reset_password_expires_at = Column(DateTime, nullable=True)
 
     # OAuth
-    auth_type = Column(String(20), default="email", nullable=False)  # email, google, facebook
+    auth_type = Column(
+        String(20), default="email", nullable=False
+    )  # email, google, facebook
     oauth_id = Column(String(255), nullable=True, index=True)  # OAuth provider user ID
     oauth_provider = Column(String(20), nullable=True)  # google, facebook
 
@@ -70,4 +85,3 @@ class User(AuditableEntity, SoftDeleteEntity):
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, type={self.user_type})>"
-

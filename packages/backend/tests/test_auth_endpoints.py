@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Authentication Endpoints Integration Tests
 """
+
 from unittest.mock import MagicMock
 
 from fastapi import status
@@ -27,8 +28,8 @@ class TestRegisterEndpoint:
                 "password": "password123",
                 "first_name": "New",
                 "last_name": "Traveler",
-                "user_type": "traveler"
-            }
+                "user_type": "traveler",
+            },
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -48,8 +49,8 @@ class TestRegisterEndpoint:
                 "password": "password123",
                 "first_name": "New",
                 "last_name": "Provider",
-                "user_type": "provider"
-            }
+                "user_type": "provider",
+            },
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -66,8 +67,8 @@ class TestRegisterEndpoint:
                 "password": "password123",
                 "first_name": "New",
                 "last_name": "Admin",
-                "user_type": "admin"
-            }
+                "user_type": "admin",
+            },
         )
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -81,8 +82,8 @@ class TestRegisterEndpoint:
                 "password": "password123",
                 "first_name": "Test",
                 "last_name": "User",
-                "user_type": "traveler"
-            }
+                "user_type": "traveler",
+            },
         )
 
         assert response.status_code == status.HTTP_409_CONFLICT
@@ -96,8 +97,8 @@ class TestRegisterEndpoint:
                 "password": "password123",
                 "first_name": "Test",
                 "last_name": "User",
-                "user_type": "traveler"
-            }
+                "user_type": "traveler",
+            },
         )
 
         # FastAPI/Pydantic returns 422 for validation errors
@@ -112,8 +113,8 @@ class TestRegisterEndpoint:
                 "password": "short",
                 "first_name": "Test",
                 "last_name": "User",
-                "user_type": "traveler"
-            }
+                "user_type": "traveler",
+            },
         )
 
         # FastAPI/Pydantic returns 422 for validation errors
@@ -127,10 +128,7 @@ class TestLoginEndpoint:
         """Test successful login"""
         response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": sample_user.email,
-                "password": "password123"
-            }
+            json={"identifier": sample_user.email, "password": "password123"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -144,10 +142,7 @@ class TestLoginEndpoint:
         """Test login with phone number"""
         response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": sample_user.phone,
-                "password": "password123"
-            }
+            json={"identifier": sample_user.phone, "password": "password123"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -157,10 +152,7 @@ class TestLoginEndpoint:
         """Test login fails with wrong password"""
         response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": sample_user.email,
-                "password": "wrongpassword"
-            }
+            json={"identifier": sample_user.email, "password": "wrongpassword"},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -169,10 +161,7 @@ class TestLoginEndpoint:
         """Test login fails for non-existent user"""
         response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": "nonexistent@example.com",
-                "password": "password123"
-            }
+            json={"identifier": "nonexistent@example.com", "password": "password123"},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -204,10 +193,7 @@ class TestLoginEndpoint:
 
         response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": user.email,
-                "password": "password123"
-            }
+            json={"identifier": user.email, "password": "password123"},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -221,18 +207,14 @@ class TestRefreshTokenEndpoint:
         # First login
         login_response = client.post(
             "/api/v1/auth/login",
-            json={
-                "identifier": sample_user.email,
-                "password": "password123"
-            }
+            json={"identifier": sample_user.email, "password": "password123"},
         )
 
         refresh_token = login_response.json()["refresh_token"]
 
         # Refresh token
         response = client.post(
-            "/api/v1/auth/refresh-token",
-            json={"refresh_token": refresh_token}
+            "/api/v1/auth/refresh-token", json={"refresh_token": refresh_token}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -244,8 +226,7 @@ class TestRefreshTokenEndpoint:
     def test_refresh_token_invalid(self, client):
         """Test refresh fails with invalid token"""
         response = client.post(
-            "/api/v1/auth/refresh-token",
-            json={"refresh_token": "invalid_token"}
+            "/api/v1/auth/refresh-token", json={"refresh_token": "invalid_token"}
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -254,7 +235,9 @@ class TestRefreshTokenEndpoint:
 class TestOAuthEndpoints:
     """Tests for OAuth callback and temporary code exchange flow."""
 
-    def test_google_callback_redirects_with_temp_code_not_token(self, client, mock_redis, monkeypatch):
+    def test_google_callback_redirects_with_temp_code_not_token(
+        self, client, mock_redis, monkeypatch
+    ):
         """Google callback must redirect with one-time code, never with JWT token in URL."""
         from app.api.v1.endpoints import auth as auth_module
 
@@ -266,7 +249,9 @@ class TestOAuthEndpoints:
             }
 
         app.dependency_overrides[get_redis] = lambda: mock_redis
-        monkeypatch.setattr(auth_module.OAuthLoginUseCase, "execute_google", fake_execute_google)
+        monkeypatch.setattr(
+            auth_module.OAuthLoginUseCase, "execute_google", fake_execute_google
+        )
 
         response = client.get(
             "/api/v1/auth/oauth/google/callback?code=provider-code",
@@ -339,7 +324,9 @@ class TestOAuthEndpoints:
             raise RuntimeError("internal stack details leaked")
 
         app.dependency_overrides[get_redis] = lambda: mock_redis
-        monkeypatch.setattr(auth_module.OAuthLoginUseCase, "execute_google", broken_execute_google)
+        monkeypatch.setattr(
+            auth_module.OAuthLoginUseCase, "execute_google", broken_execute_google
+        )
 
         response = client.get(
             "/api/v1/auth/oauth/google/callback?code=provider-code",
@@ -426,7 +413,9 @@ class TestAuthFlowCombinations:
 class TestAuthEndpointErrorHandling:
     """Tests for clear and traceable unexpected-error responses."""
 
-    def test_register_unhandled_error_includes_request_reference(self, client, monkeypatch):
+    def test_register_unhandled_error_includes_request_reference(
+        self, client, monkeypatch
+    ):
         """Unhandled register failures should include request reference in response."""
         from app.api.v1.endpoints import auth as auth_module
 
@@ -437,7 +426,9 @@ class TestAuthEndpointErrorHandling:
             def execute(self, **kwargs):
                 raise RuntimeError("forced register failure")
 
-        monkeypatch.setattr(auth_module, "RegisterUserUseCase", BrokenRegisterUserUseCase)
+        monkeypatch.setattr(
+            auth_module, "RegisterUserUseCase", BrokenRegisterUserUseCase
+        )
 
         response = client.post(
             "/api/v1/auth/register",
@@ -456,7 +447,9 @@ class TestAuthEndpointErrorHandling:
         assert "Registration failed. Please try again." in response.json()["detail"]
         assert "req-register-500" in response.json()["detail"]
 
-    def test_login_unhandled_error_includes_request_reference(self, client, monkeypatch):
+    def test_login_unhandled_error_includes_request_reference(
+        self, client, monkeypatch
+    ):
         """Unhandled login failures should include request reference in response."""
         from app.api.v1.endpoints import auth as auth_module
 
@@ -486,7 +479,9 @@ class TestAuthEndpointErrorHandling:
         assert "Login failed. Please try again." in response.json()["detail"]
         assert "req-login-500" in response.json()["detail"]
 
-    def test_refresh_unhandled_error_includes_request_reference(self, client, monkeypatch):
+    def test_refresh_unhandled_error_includes_request_reference(
+        self, client, monkeypatch
+    ):
         """Unhandled refresh failures should include request reference in response."""
         from app.api.v1.endpoints import auth as auth_module
 
@@ -499,7 +494,9 @@ class TestAuthEndpointErrorHandling:
 
         redis_mock = MagicMock()
         app.dependency_overrides[get_redis] = lambda: redis_mock
-        monkeypatch.setattr(auth_module, "RefreshTokenUseCase", BrokenRefreshTokenUseCase)
+        monkeypatch.setattr(
+            auth_module, "RefreshTokenUseCase", BrokenRefreshTokenUseCase
+        )
 
         response = client.post(
             "/api/v1/auth/refresh-token?refresh_token=dummy-refresh-token",
@@ -517,8 +514,7 @@ class TestLogoutEndpoint:
     def test_logout_success(self, client, auth_token):
         """Test successful logout"""
         response = client.post(
-            "/api/v1/auth/logout",
-            headers={"Authorization": f"Bearer {auth_token}"}
+            "/api/v1/auth/logout", headers={"Authorization": f"Bearer {auth_token}"}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -530,4 +526,3 @@ class TestLogoutEndpoint:
         response = client.post("/api/v1/auth/logout")
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Create Policy Use Case
 """
+
 import re
 
 from app.domain.entities.policy import Policy, PolicyType
@@ -20,7 +21,7 @@ class CreatePolicyUseCase:
         content: str,
         policy_type: str,
         slug: str | None = None,
-        display_order: int = 0
+        display_order: int = 0,
     ) -> Policy:
         """
         Create a policy
@@ -42,7 +43,7 @@ class CreatePolicyUseCase:
         try:
             PolicyType(policy_type)
         except ValueError:
-            raise ValidationError(f"Invalid policy type: {policy_type}")
+            raise ValidationError(f"Invalid policy type: {policy_type}") from None
 
         # Generate slug if not provided
         if not slug:
@@ -59,14 +60,13 @@ class CreatePolicyUseCase:
             policy_type=policy_type,
             slug=slug,
             display_order=display_order,
-            is_active=True
+            is_active=True,
         )
 
         return self.policy_repository.create(policy)
 
     def _generate_slug(self, title: str) -> str:
         """Generate URL slug from title"""
-        slug = re.sub(r'[^\w\s-]', '', title.lower())
-        slug = re.sub(r'[-\s]+', '-', slug)
+        slug = re.sub(r"[^\w\s-]", "", title.lower())
+        slug = re.sub(r"[-\s]+", "-", slug)
         return slug[:250]
-

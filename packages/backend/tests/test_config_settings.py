@@ -28,7 +28,10 @@ def test_database_url_is_built_when_missing(monkeypatch):
 
     settings = Settings()
 
-    assert settings.DATABASE_URL == "postgresql://ganitel_user:ganitel_password@db:5432/ganitel_db"
+    assert (
+        settings.DATABASE_URL
+        == "postgresql://ganitel_user:ganitel_password@db:5432/ganitel_db"
+    )
 
 
 def _set_staging_valid_security_env(monkeypatch):
@@ -60,7 +63,9 @@ def test_staging_rejects_default_admin_email(monkeypatch):
     _set_staging_valid_security_env(monkeypatch)
     monkeypatch.setenv("ADMIN_EMAIL", "admin@ganitel.com")
 
-    with pytest.raises(ValueError, match="ADMIN_EMAIL must be changed in staging/production"):
+    with pytest.raises(
+        ValueError, match="ADMIN_EMAIL must be changed in staging/production"
+    ):
         Settings()
 
 
@@ -68,7 +73,9 @@ def test_staging_rejects_access_token_expire_above_30(monkeypatch):
     _set_staging_valid_security_env(monkeypatch)
     monkeypatch.setenv("ACCESS_TOKEN_EXPIRE_MINUTES", "31")
 
-    with pytest.raises(ValueError, match="ACCESS_TOKEN_EXPIRE_MINUTES must be between 15 and 30"):
+    with pytest.raises(
+        ValueError, match="ACCESS_TOKEN_EXPIRE_MINUTES must be between 15 and 30"
+    ):
         Settings()
 
 
@@ -76,7 +83,9 @@ def test_staging_rejects_access_token_expire_below_15(monkeypatch):
     _set_staging_valid_security_env(monkeypatch)
     monkeypatch.setenv("ACCESS_TOKEN_EXPIRE_MINUTES", "14")
 
-    with pytest.raises(ValueError, match="ACCESS_TOKEN_EXPIRE_MINUTES must be between 15 and 30"):
+    with pytest.raises(
+        ValueError, match="ACCESS_TOKEN_EXPIRE_MINUTES must be between 15 and 30"
+    ):
         Settings()
 
 

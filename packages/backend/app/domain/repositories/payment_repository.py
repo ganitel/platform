@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Payment Repository Interface
 """
+
 from abc import abstractmethod
 from uuid import UUID
 
@@ -22,6 +23,8 @@ class IPaymentRepository(BaseRepository[Payment]):
         raise NotImplementedError
 
     @abstractmethod
-    def get_user_payments(self, user_id: UUID, skip: int = 0, limit: int = 100) -> list[Payment]:
+    def get_user_payments(
+        self, user_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Payment]:
         """Get all payments for a user"""
         raise NotImplementedError

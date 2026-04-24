@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - OAuth Login Use Case
 """
+
 import secrets
 from datetime import datetime
 
@@ -63,7 +64,7 @@ class OAuthLoginUseCase:
             provider="google",
             first_name=first_name,
             last_name=last_name,
-            profile_picture=profile_picture
+            profile_picture=profile_picture,
         )
 
     async def execute_facebook(self, code: str) -> dict:
@@ -103,7 +104,7 @@ class OAuthLoginUseCase:
             provider="facebook",
             first_name=first_name,
             last_name=last_name,
-            profile_picture=profile_picture
+            profile_picture=profile_picture,
         )
 
     async def _handle_oauth_user(
@@ -113,7 +114,7 @@ class OAuthLoginUseCase:
         provider: str,
         first_name: str,
         last_name: str,
-        profile_picture: str | None = None
+        profile_picture: str | None = None,
     ) -> dict:
         """Handle OAuth user login or registration"""
         # Check if user exists by OAuth ID
@@ -138,7 +139,7 @@ class OAuthLoginUseCase:
                     provider=provider,
                     first_name=first_name,
                     last_name=last_name,
-                    profile_picture=profile_picture
+                    profile_picture=profile_picture,
                 )
 
         # Generate JWT tokens
@@ -157,10 +158,10 @@ class OAuthLoginUseCase:
                 "full_name": user.full_name,
                 "user_type": user.user_type,
                 "profile_picture": user.profile_picture,
-                "is_verified": user.is_verified
+                "is_verified": user.is_verified,
             },
             "access_token": jwt_token,
-            "token_type": "bearer"
+            "token_type": "bearer",
         }
 
     async def _create_oauth_user(
@@ -170,7 +171,7 @@ class OAuthLoginUseCase:
         provider: str,
         first_name: str,
         last_name: str,
-        profile_picture: str | None = None
+        profile_picture: str | None = None,
     ) -> User:
         """Create a new user from OAuth"""
         from uuid import uuid4
@@ -193,8 +194,7 @@ class OAuthLoginUseCase:
             auth_type=provider,
             oauth_id=oauth_id,
             oauth_provider=provider,
-            is_active=True
+            is_active=True,
         )
 
         return self.user_repository.create(user)
-

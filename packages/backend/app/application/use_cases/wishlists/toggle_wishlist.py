@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Toggle Wishlist Use Case
 """
+
 from uuid import UUID
 
 from app.domain.entities.wishlist import Wishlist
@@ -15,7 +16,7 @@ class ToggleWishlistUseCase:
     def __init__(
         self,
         wishlist_repository: IWishlistRepository,
-        service_repository: IServiceRepository
+        service_repository: IServiceRepository,
     ):
         self.wishlist_repository = wishlist_repository
         self.service_repository = service_repository
@@ -45,7 +46,7 @@ class ToggleWishlistUseCase:
             return {
                 "action": "removed",
                 "message": "Service removed from wishlist",
-                "service_id": str(service_id)
+                "service_id": str(service_id),
             }
         else:
             # Add to wishlist
@@ -55,6 +56,5 @@ class ToggleWishlistUseCase:
                 "action": "added",
                 "message": "Service added to wishlist",
                 "wishlist_item": wishlist,
-                "service_id": str(service_id)
+                "service_id": str(service_id),
             }
-

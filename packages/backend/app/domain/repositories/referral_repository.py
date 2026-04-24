@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Referral Repository Interface
 """
+
 from abc import abstractmethod
 from uuid import UUID
 
@@ -20,4 +21,3 @@ class IReferralRepository(BaseRepository[Referral]):
     def get_by_referred_user_id(self, referred_user_id: UUID) -> Referral | None:
         """Get referral by referred user ID"""
         raise NotImplementedError
-

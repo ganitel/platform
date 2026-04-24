@@ -1,7 +1,8 @@
 """
 Ganitel V2 Backend - Complaint Entity
 """
-from enum import Enum
+
+from enum import StrEnum
 
 from sqlalchemy import Column, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
@@ -9,8 +10,9 @@ from sqlalchemy.dialects.postgresql import UUID
 from app.domain.entities.base import AuditableEntity
 
 
-class ComplaintStatus(str, Enum):
+class ComplaintStatus(StrEnum):
     """Complaint status enumeration"""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     RESOLVED = "resolved"
@@ -18,8 +20,9 @@ class ComplaintStatus(str, Enum):
     REJECTED = "rejected"
 
 
-class ComplaintPriority(str, Enum):
+class ComplaintPriority(StrEnum):
     """Complaint priority enumeration"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -30,13 +33,22 @@ class Complaint(AuditableEntity):
     """
     Complaint entity for user complaints
     """
+
     __tablename__ = "complaints"
 
     # Relationships
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
-    booking_id = Column(UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=True, index=True)
-    service_id = Column(UUID(as_uuid=True), ForeignKey("services.id"), nullable=True, index=True)
-    assigned_to_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )
+    booking_id = Column(
+        UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=True, index=True
+    )
+    service_id = Column(
+        UUID(as_uuid=True), ForeignKey("services.id"), nullable=True, index=True
+    )
+    assigned_to_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True
+    )
 
     # Complaint Information
     subject = Column(String(200), nullable=False)
@@ -44,8 +56,12 @@ class Complaint(AuditableEntity):
     category = Column(String(50), nullable=True)  # booking, payment, service, other
 
     # Status
-    status = Column(String(20), default=ComplaintStatus.PENDING.value, nullable=False, index=True)
-    priority = Column(String(20), default=ComplaintPriority.MEDIUM.value, nullable=False)
+    status = Column(
+        String(20), default=ComplaintStatus.PENDING.value, nullable=False, index=True
+    )
+    priority = Column(
+        String(20), default=ComplaintPriority.MEDIUM.value, nullable=False
+    )
 
     # Resolution
     resolution = Column(Text, nullable=True)
@@ -53,5 +69,6 @@ class Complaint(AuditableEntity):
     resolved_by_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
 
     def __repr__(self):
-        return f"<Complaint(id={self.id}, user_id={self.user_id}, status={self.status})>"
-
+        return (
+            f"<Complaint(id={self.id}, user_id={self.user_id}, status={self.status})>"
+        )

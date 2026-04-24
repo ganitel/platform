@@ -1,11 +1,13 @@
 """
 Ganitel V2 Backend - Base Repository Interface
 """
+
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
 from uuid import UUID
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class BaseRepository(ABC, Generic[T]):
     """
@@ -54,11 +56,7 @@ class BaseRepository(ABC, Generic[T]):
 
     @abstractmethod
     def find_by_criteria(
-        self,
-        criteria: dict[str, Any],
-        skip: int = 0,
-        limit: int = 100
+        self, criteria: dict[str, Any], skip: int = 0, limit: int = 100
     ) -> list[T]:
         """Find entities by criteria"""
         pass
-

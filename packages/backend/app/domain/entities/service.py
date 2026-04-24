@@ -1,7 +1,8 @@
 """
 Ganitel V2 Backend - Service Entity (Accommodation/Listing)
 """
-from enum import Enum
+
+from enum import StrEnum
 
 from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
@@ -9,8 +10,9 @@ from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity
 
 
-class ServiceType(str, Enum):
+class ServiceType(StrEnum):
     """Service type enumeration"""
+
     ACCOMMODATION = "accommodation"
     TOUR = "tour"
     ACTIVITY = "activity"
@@ -18,8 +20,10 @@ class ServiceType(str, Enum):
     DINING = "dining"
     WELLNESS = "wellness"
 
-class AccommodationType(str, Enum):
+
+class AccommodationType(StrEnum):
     """Accommodation type enumeration"""
+
     HOTEL = "hotel"
     APARTMENT = "apartment"
     HOUSE = "house"
@@ -29,8 +33,10 @@ class AccommodationType(str, Enum):
     RESORT = "resort"
     LODGE = "lodge"
 
-class ServiceStatus(str, Enum):
+
+class ServiceStatus(StrEnum):
     """Service status enumeration"""
+
     DRAFT = "draft"
     PENDING_REVIEW = "pending_review"
     ACTIVE = "active"
@@ -38,10 +44,12 @@ class ServiceStatus(str, Enum):
     REJECTED = "rejected"
     ARCHIVED = "archived"
 
+
 class Service(AuditableEntity, SoftDeleteEntity):
     """
     Service entity representing all types of services (accommodations, tours, etc.)
     """
+
     __tablename__ = "services"
 
     # Basic Information
@@ -51,11 +59,17 @@ class Service(AuditableEntity, SoftDeleteEntity):
 
     # Service Classification
     service_type = Column(String(50), nullable=False, index=True)  # ServiceType enum
-    accommodation_type = Column(String(50), nullable=True)  # AccommodationType enum (for accommodations)
-    status = Column(String(50), default=ServiceStatus.DRAFT.value, nullable=False, index=True)
+    accommodation_type = Column(
+        String(50), nullable=True
+    )  # AccommodationType enum (for accommodations)
+    status = Column(
+        String(50), default=ServiceStatus.DRAFT.value, nullable=False, index=True
+    )
 
     # Provider Information
-    provider_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    provider_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )
 
     # Location
     country = Column(String(100), nullable=False, index=True)
@@ -67,7 +81,9 @@ class Service(AuditableEntity, SoftDeleteEntity):
     # Pricing
     base_price = Column(Numeric(10, 2), nullable=False)
     currency = Column(String(10), default="XAF", nullable=False)
-    price_per = Column(String(20), default="night", nullable=False)  # night, person, hour, etc.
+    price_per = Column(
+        String(20), default="night", nullable=False
+    )  # night, person, hour, etc.
 
     # Capacity
     max_guests = Column(Integer, nullable=True)
@@ -115,10 +131,10 @@ class Service(AuditableEntity, SoftDeleteEntity):
     def is_available_for_booking(self) -> bool:
         """Check if service is available for booking"""
         return (
-            self.is_active and
-            not self.is_deleted and
-            self.status == ServiceStatus.ACTIVE.value and
-            self.provider_id is not None
+            self.is_active
+            and not self.is_deleted
+            and self.status == ServiceStatus.ACTIVE.value
+            and self.provider_id is not None
         )
 
     @property
@@ -180,8 +196,9 @@ class Service(AuditableEntity, SoftDeleteEntity):
     def generate_slug(self):
         """Generate URL slug from title"""
         import re
-        slug = re.sub(r'[^\w\s-]', '', self.title.lower())
-        slug = re.sub(r'[-\s]+', '-', slug)
+
+        slug = re.sub(r"[^\w\s-]", "", self.title.lower())
+        slug = re.sub(r"[-\s]+", "-", slug)
         self.slug = f"{slug}-{str(self.id)[:8]}"
 
     def __repr__(self):

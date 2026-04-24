@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Payment Endpoints
 """
+
 import hmac
 import logging
 from uuid import UUID
@@ -27,7 +28,7 @@ from app.config import get_settings
 from app.database import get_db
 from app.dependencies import get_current_active_user, get_current_admin
 from app.domain.entities.user import User, UserType
-from app.exceptions import GanitelException
+from app.exceptions import GanitelError
 from app.infrastructure.external_apis.tranzak_client import get_tranzak_client
 from app.infrastructure.repositories.booking_repository import BookingRepository
 from app.infrastructure.repositories.payment_repository import PaymentRepository
@@ -38,11 +39,15 @@ settings = get_settings()
 logger = logging.getLogger(__name__)
 
 
-@router.post("/initiate", response_model=PaymentInitiateResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/initiate",
+    response_model=PaymentInitiateResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def initiate_payment(
     payload: PaymentInitiateRequest,
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Initiate payment for a booking
@@ -56,10 +61,7 @@ async def initiate_payment(
         tranzak_client = get_tranzak_client()
 
         use_case = InitiatePaymentUseCase(
-            payment_repo,
-            booking_repo,
-            user_repo,
-            tranzak_client
+            payment_repo, booking_repo, user_repo, tranzak_client
         )
 
         result = await use_case.execute(
@@ -67,7 +69,7 @@ async def initiate_payment(
             user_id=current_user.id,
             payment_method=payload.payment_method,
             callback_url=settings.PAYMENT_CALLBACK_URL,
-            return_url=settings.PAYMENT_RETURN_URL
+            return_url=settings.PAYMENT_RETURN_URL,
         )
 
         return PaymentInitiateResponse(
@@ -77,29 +79,26 @@ async def initiate_payment(
             amount=result["amount"],
             currency=result["currency"],
             status=result["status"],
-            message="Payment initiated successfully. Please complete payment at the provided URL."
+            message="Payment initiated successfully. Please complete payment at the provided URL.",
         )
 
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid booking ID format"
-        )
-    except GanitelException:
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid booking ID format"
+        ) from None
+    except GanitelError:
         raise
     except Exception:
         logger.exception("Unhandled payment initiation error")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Payment initiation failed"
-        )
+            detail="Payment initiation failed",
+        ) from None
 
 
 @router.post("/webhook/tranzak", status_code=status.HTTP_200_OK)
 async def tranzak_webhook(
-    request: Request,
-    payload: PaymentWebhookRequest,
-    db: Session = Depends(get_db)
+    request: Request, payload: PaymentWebhookRequest, db: Session = Depends(get_db)
 ):
     """
     Webhook endpoint for Tranzak payment notifications
@@ -114,32 +113,22 @@ async def tranzak_webhook(
         )
 
         if not expected_auth_key or not hmac.compare_digest(
-            payload.auth_key.encode("utf-8"),
-            expected_auth_key.encode("utf-8")
+            payload.auth_key.encode("utf-8"), expected_auth_key.encode("utf-8")
         ):
-            return {
-                "success": False,
-                "message": "Invalid webhook auth key"
-            }
+            return {"success": False, "message": "Invalid webhook auth key"}
 
         if payload.event_type != "REQUEST.COMPLETED":
             return {
                 "success": False,
-                "message": f"Unsupported event type: {payload.event_type}"
+                "message": f"Unsupported event type: {payload.event_type}",
             }
 
         if payload.app_id != settings.TRANZAK_APP_ID:
-            return {
-                "success": False,
-                "message": "Webhook appId mismatch"
-            }
+            return {"success": False, "message": "Webhook appId mismatch"}
 
         if getattr(settings, "TRANZAK_WEBHOOK_ID", ""):
             if payload.webhook_id != settings.TRANZAK_WEBHOOK_ID:
-                return {
-                    "success": False,
-                    "message": "Webhook ID mismatch"
-                }
+                return {"success": False, "message": "Webhook ID mismatch"}
 
         payment_repo = PaymentRepository(db)
         booking_repo = BookingRepository(db)
@@ -155,33 +144,24 @@ async def tranzak_webhook(
             transaction_id=transaction_id,
             status=status,
             merchant_transaction_id=merchant_transaction_id,
-            payment_method=resource.payment_method
+            payment_method=resource.payment_method,
         )
 
-        return {
-            "success": True,
-            "message": result.get("message", "Webhook processed")
-        }
+        return {"success": True, "message": result.get("message", "Webhook processed")}
 
-    except GanitelException as exc:
+    except GanitelError as exc:
         # Return 200 even on error to prevent Tranzak from retrying
-        return {
-            "success": False,
-            "message": exc.message
-        }
+        return {"success": False, "message": exc.message}
     except Exception:
         logger.exception("Unhandled Tranzak webhook processing error")
-        return {
-            "success": False,
-            "message": "Webhook processing failed"
-        }
+        return {"success": False, "message": "Webhook processing failed"}
 
 
 @router.get("/{payment_id}", response_model=PaymentResponse)
 async def get_payment(
     payment_id: str,
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get payment details"""
     try:
@@ -191,24 +171,23 @@ async def get_payment(
         payment = use_case.execute(
             payment_id=UUID(payment_id),
             requester_id=current_user.id,
-            is_admin=current_user.user_type == UserType.ADMIN.value
+            is_admin=current_user.user_type == UserType.ADMIN.value,
         )
 
         return PaymentResponse.from_orm(payment)
 
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid payment ID format"
-        )
-    except GanitelException:
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid payment ID format"
+        ) from None
+    except GanitelError:
         raise
     except Exception:
         logger.exception("Unhandled payment retrieval error")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve payment"
-        )
+            detail="Failed to retrieve payment",
+        ) from None
 
 
 @router.get("/", response_model=PaymentListResponse)
@@ -216,16 +195,14 @@ async def list_user_payments(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get current user's payment history"""
     try:
         payment_repo = PaymentRepository(db)
 
         payments = payment_repo.get_user_payments(
-            user_id=current_user.id,
-            skip=skip,
-            limit=limit
+            user_id=current_user.id, skip=skip, limit=limit
         )
 
         total = payment_repo.count({"user_id": current_user.id})
@@ -235,15 +212,15 @@ async def list_user_payments(
             total=total,
             page=skip // limit + 1,
             per_page=limit,
-            pages=(total + limit - 1) // limit
+            pages=(total + limit - 1) // limit,
         )
 
     except Exception:
         logger.exception("Unhandled payment listing error")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve payments"
-        )
+            detail="Failed to retrieve payments",
+        ) from None
 
 
 @router.post("/{payment_id}/refund", response_model=PaymentRefundResponse)
@@ -251,7 +228,7 @@ async def refund_payment(
     payment_id: str,
     payload: PaymentRefundRequest,
     current_user: User = Depends(get_current_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Process a refund (Admin only)
@@ -265,26 +242,24 @@ async def refund_payment(
         result = await use_case.execute(
             payment_id=UUID(payment_id),
             refund_amount=payload.amount,
-            reason=payload.reason
+            reason=payload.reason,
         )
 
         return PaymentRefundResponse(
             payment_id=result["payment_id"],
             refund_amount=result["refund_amount"],
             status=result["status"],
-            message=result["message"]
+            message=result["message"],
         )
 
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid payment ID format"
-        )
-    except GanitelException:
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid payment ID format"
+        ) from None
+    except GanitelError:
         raise
     except Exception:
         logger.exception("Unhandled refund processing error")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Refund failed"
-        )
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Refund failed"
+        ) from None

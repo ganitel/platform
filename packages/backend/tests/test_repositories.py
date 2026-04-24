@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Repository Tests
 """
+
 from datetime import timedelta
 from uuid import uuid4
 
@@ -117,7 +118,9 @@ class TestServiceRepository:
         assert service is not None
         assert service.id == sample_service.id
 
-    def test_get_services_by_provider(self, service_repository, sample_service, sample_provider):
+    def test_get_services_by_provider(
+        self, service_repository, sample_service, sample_provider
+    ):
         """Test get services by provider"""
         services = service_repository.get_by_provider_id(sample_provider.id)
         assert len(services) >= 1
@@ -131,11 +134,7 @@ class TestServiceRepository:
 
     def test_search_services(self, service_repository, sample_service):
         """Test service search"""
-        result = service_repository.search_services(
-            query="Test",
-            skip=0,
-            limit=10
-        )
+        result = service_repository.search_services(query="Test", skip=0, limit=10)
         assert len(result) >= 1
 
     def test_get_available_services_excludes_conflicting_booking(
@@ -196,7 +195,9 @@ class TestBookingRepository:
         assert booking is not None
         assert booking.id == sample_booking.id
 
-    def test_get_bookings_by_user(self, booking_repository, sample_booking, sample_user):
+    def test_get_bookings_by_user(
+        self, booking_repository, sample_booking, sample_user
+    ):
         """Test get bookings by user"""
         bookings = booking_repository.get_by_user_id(sample_user.id)
         assert len(bookings) >= 1
@@ -207,4 +208,3 @@ class TestBookingRepository:
         sample_booking.notes = "Updated notes"
         updated_booking = booking_repository.update(sample_booking)
         assert updated_booking.notes == "Updated notes"
-

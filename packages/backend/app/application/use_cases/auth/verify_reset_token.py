@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Verify Reset Token Use Case
 """
+
 from app.domain.repositories.user_repository import IUserRepository
 from app.exceptions import AuthorizationError
 
@@ -35,8 +36,4 @@ class VerifyResetTokenUseCase:
         if not user:
             raise AuthorizationError("Invalid or expired reset token")
 
-        return {
-            "message": "Reset token is valid",
-            "success": True
-        }
-
+        return {"message": "Reset token is valid", "success": True}

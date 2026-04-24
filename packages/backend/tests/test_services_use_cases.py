@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Service Use Cases Tests
 """
+
 from uuid import uuid4
 
 import pytest
@@ -24,7 +25,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class TestCreateServiceUseCase:
     """Tests for CreateServiceUseCase"""
 
-    def test_create_service_success(self, user_repository, service_repository, sample_provider):
+    def test_create_service_success(
+        self, user_repository, service_repository, sample_provider
+    ):
         """Test successful service creation"""
         use_case = CreateServiceUseCase(service_repository, user_repository)
 
@@ -41,7 +44,7 @@ class TestCreateServiceUseCase:
             accommodation_type=AccommodationType.APARTMENT,
             max_guests=4,
             bedrooms=2,
-            bathrooms=1
+            bathrooms=1,
         )
 
         assert service.title == "Beautiful Apartment in Douala"
@@ -49,7 +52,9 @@ class TestCreateServiceUseCase:
         assert service.status == ServiceStatus.DRAFT.value
         assert service.slug is not None
 
-    def test_create_service_non_provider(self, user_repository, service_repository, sample_user):
+    def test_create_service_non_provider(
+        self, user_repository, service_repository, sample_user
+    ):
         """Test service creation fails for non-provider"""
         use_case = CreateServiceUseCase(service_repository, user_repository)
 
@@ -63,10 +68,12 @@ class TestCreateServiceUseCase:
                 city="Douala",
                 address="123 Test Street",
                 base_price=25000.0,
-                currency="XAF"
+                currency="XAF",
             )
 
-    def test_create_service_provider_not_found(self, user_repository, service_repository):
+    def test_create_service_provider_not_found(
+        self, user_repository, service_repository
+    ):
         """Test service creation fails for non-existent provider"""
         use_case = CreateServiceUseCase(service_repository, user_repository)
 
@@ -80,10 +87,12 @@ class TestCreateServiceUseCase:
                 city="Douala",
                 address="123 Test Street",
                 base_price=25000.0,
-                currency="XAF"
+                currency="XAF",
             )
 
-    def test_create_service_missing_accommodation_type(self, user_repository, service_repository, sample_provider):
+    def test_create_service_missing_accommodation_type(
+        self, user_repository, service_repository, sample_provider
+    ):
         """Test service creation succeeds even without accommodation type (optional field)"""
         use_case = CreateServiceUseCase(service_repository, user_repository)
 
@@ -97,7 +106,7 @@ class TestCreateServiceUseCase:
             city="Douala",
             address="123 Test Street",
             base_price=25000.0,
-            currency="XAF"
+            currency="XAF",
         )
 
         assert service is not None
@@ -107,7 +116,9 @@ class TestCreateServiceUseCase:
 class TestUpdateServiceStatusUseCase:
     """Tests for UpdateServiceStatusUseCase"""
 
-    def test_update_status_draft_to_pending_review(self, service_repository, sample_service, sample_provider):
+    def test_update_status_draft_to_pending_review(
+        self, service_repository, sample_service, sample_provider
+    ):
         """Test successful status transition: draft → pending_review"""
         # Set service to draft
         sample_service.status = ServiceStatus.DRAFT.value
@@ -119,12 +130,14 @@ class TestUpdateServiceStatusUseCase:
             service_id=sample_service.id,
             new_status=ServiceStatus.PENDING_REVIEW,
             provider_id=sample_provider.id,
-            is_admin=False
+            is_admin=False,
         )
 
         assert updated_service.status == ServiceStatus.PENDING_REVIEW.value
 
-    def test_update_status_pending_to_active_admin(self, service_repository, sample_service, sample_admin):
+    def test_update_status_pending_to_active_admin(
+        self, service_repository, sample_service, sample_admin
+    ):
         """Test admin can approve service: pending_review → active"""
         sample_service.status = ServiceStatus.PENDING_REVIEW.value
         service_repository.update(sample_service)
@@ -135,12 +148,14 @@ class TestUpdateServiceStatusUseCase:
             service_id=sample_service.id,
             new_status=ServiceStatus.ACTIVE,
             updated_by=sample_admin.id,
-            is_admin=True
+            is_admin=True,
         )
 
         assert updated_service.status == ServiceStatus.ACTIVE.value
 
-    def test_update_status_pending_to_rejected_admin(self, service_repository, sample_service, sample_admin):
+    def test_update_status_pending_to_rejected_admin(
+        self, service_repository, sample_service, sample_admin
+    ):
         """Test admin can reject service: pending_review → rejected"""
         sample_service.status = ServiceStatus.PENDING_REVIEW.value
         service_repository.update(sample_service)
@@ -151,12 +166,14 @@ class TestUpdateServiceStatusUseCase:
             service_id=sample_service.id,
             new_status=ServiceStatus.REJECTED,
             updated_by=sample_admin.id,
-            is_admin=True
+            is_admin=True,
         )
 
         assert updated_service.status == ServiceStatus.REJECTED.value
 
-    def test_update_status_active_to_inactive(self, service_repository, sample_service, sample_provider):
+    def test_update_status_active_to_inactive(
+        self, service_repository, sample_service, sample_provider
+    ):
         """Test successful status transition: active → inactive"""
         use_case = UpdateServiceStatusUseCase(service_repository)
 
@@ -164,12 +181,14 @@ class TestUpdateServiceStatusUseCase:
             service_id=sample_service.id,
             new_status=ServiceStatus.INACTIVE,
             provider_id=sample_provider.id,
-            is_admin=False
+            is_admin=False,
         )
 
         assert updated_service.status == ServiceStatus.INACTIVE.value
 
-    def test_update_status_inactive_to_active(self, service_repository, sample_service, sample_provider):
+    def test_update_status_inactive_to_active(
+        self, service_repository, sample_service, sample_provider
+    ):
         """Test successful status transition: inactive → active"""
         sample_service.status = ServiceStatus.INACTIVE.value
         service_repository.update(sample_service)
@@ -180,24 +199,30 @@ class TestUpdateServiceStatusUseCase:
             service_id=sample_service.id,
             new_status=ServiceStatus.ACTIVE,
             provider_id=sample_provider.id,
-            is_admin=False
+            is_admin=False,
         )
 
         assert updated_service.status == ServiceStatus.ACTIVE.value
 
-    def test_update_status_unauthorized(self, service_repository, sample_service, sample_user):
+    def test_update_status_unauthorized(
+        self, service_repository, sample_service, sample_user
+    ):
         """Test status update fails for non-owner and non-admin"""
         use_case = UpdateServiceStatusUseCase(service_repository)
 
-        with pytest.raises(AuthorizationError, match="Only the service provider or admin"):
+        with pytest.raises(
+            AuthorizationError, match="Only the service provider or admin"
+        ):
             use_case.execute(
                 service_id=sample_service.id,
                 new_status=ServiceStatus.INACTIVE,
                 provider_id=sample_user.id,
-                is_admin=False
+                is_admin=False,
             )
 
-    def test_update_status_admin_only_transition(self, service_repository, sample_service, sample_provider):
+    def test_update_status_admin_only_transition(
+        self, service_repository, sample_service, sample_provider
+    ):
         """Test admin-only transitions require admin"""
         sample_service.status = ServiceStatus.PENDING_REVIEW.value
         service_repository.update(sample_service)
@@ -209,10 +234,12 @@ class TestUpdateServiceStatusUseCase:
                 service_id=sample_service.id,
                 new_status=ServiceStatus.ACTIVE,
                 provider_id=sample_provider.id,
-                is_admin=False
+                is_admin=False,
             )
 
-    def test_update_status_invalid_transition(self, service_repository, sample_service, sample_provider):
+    def test_update_status_invalid_transition(
+        self, service_repository, sample_service, sample_provider
+    ):
         """Test status update fails with invalid transition"""
         use_case = UpdateServiceStatusUseCase(service_repository)
 
@@ -221,7 +248,7 @@ class TestUpdateServiceStatusUseCase:
                 service_id=sample_service.id,
                 new_status=ServiceStatus.REJECTED,
                 provider_id=sample_provider.id,
-                is_admin=False
+                is_admin=False,
             )
 
     def test_update_status_not_found(self, service_repository, sample_provider):
@@ -233,6 +260,5 @@ class TestUpdateServiceStatusUseCase:
                 service_id=uuid4(),
                 new_status=ServiceStatus.ACTIVE,
                 provider_id=sample_provider.id,
-                is_admin=False
+                is_admin=False,
             )
-

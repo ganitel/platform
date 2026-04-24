@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Cron Jobs Service
 """
+
 import asyncio
 import logging
 from collections.abc import Callable
@@ -17,7 +18,7 @@ class CronJob:
         name: str,
         schedule: str,  # Cron expression
         func: Callable,
-        enabled: bool = True
+        enabled: bool = True,
     ):
         self.name = name
         self.schedule = schedule
@@ -63,4 +64,3 @@ class CronService:
         """Stop the cron service"""
         self.running = False
         logger.info("Cron service stopped")
-

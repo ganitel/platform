@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Get Admin Dashboard Stats Use Case
 """
+
 from app.domain.repositories.booking_repository import IBookingRepository
 from app.domain.repositories.payment_repository import IPaymentRepository
 from app.domain.repositories.review_repository import IReviewRepository
@@ -19,7 +20,7 @@ class GetDashboardStatsUseCase:
         booking_repository: IBookingRepository,
         payment_repository: IPaymentRepository,
         review_repository: IReviewRepository,
-        wallet_repository: IWalletRepository
+        wallet_repository: IWalletRepository,
     ):
         self.user_repository = user_repository
         self.service_repository = service_repository
@@ -66,27 +67,19 @@ class GetDashboardStatsUseCase:
                 "total": total_users,
                 "active": active_users,
                 "travelers": travelers,
-                "providers": providers
+                "providers": providers,
             },
             "services": {
                 "total": total_services,
                 "active": active_services,
-                "pending_review": pending_services
+                "pending_review": pending_services,
             },
             "bookings": {
                 "total": total_bookings,
                 "confirmed": confirmed_bookings,
-                "completed": completed_bookings
+                "completed": completed_bookings,
             },
-            "payments": {
-                "total": total_payments,
-                "completed": completed_payments
-            },
-            "reviews": {
-                "total": total_reviews
-            },
-            "wallets": {
-                "total": total_wallets
-            }
+            "payments": {"total": total_payments, "completed": completed_payments},
+            "reviews": {"total": total_reviews},
+            "wallets": {"total": total_wallets},
         }
-

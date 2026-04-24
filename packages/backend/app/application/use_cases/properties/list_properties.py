@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - List Properties Use Case
 """
+
 from typing import Any
 from uuid import UUID
 
@@ -32,7 +33,9 @@ class ListPropertiesUseCase:
             criteria["property_type_id"] = property_type_id
 
         # Get properties
-        properties = self.property_repository.find_by_criteria(criteria, skip=skip, limit=limit)
+        properties = self.property_repository.find_by_criteria(
+            criteria, skip=skip, limit=limit
+        )
 
         # Count total
         total = self.property_repository.count(criteria)

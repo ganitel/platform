@@ -2,6 +2,7 @@
 Ganitel V2 Backend - Pytest Configuration and Fixtures
 T12: Sécurité des tests + Factory App uniforme
 """
+
 import os
 import sys
 from pathlib import Path
@@ -18,19 +19,26 @@ sys.path.insert(0, str(root_dir))
 _bootstrap_environment = os.getenv("ENVIRONMENT", "local").strip().lower()
 if _bootstrap_environment == "development":
     _bootstrap_environment = "local"
-if _bootstrap_environment not in {"staging", "production"} and os.getenv("TESTING") is None:
+if (
+    _bootstrap_environment not in {"staging", "production"}
+    and os.getenv("TESTING") is None
+):
     os.environ["TESTING"] = "true"
+
 
 # Create a no-op limiter that disables rate limiting
 class NoOpLimiter:
     """A limiter that does nothing - used for testing"""
+
     def __init__(self):
         self.enabled = False
 
     def limit(self, limit_string: str):
         """Return a decorator that doesn't actually limit"""
+
         def decorator(func):
             return func
+
         return decorator
 
     def __call__(self, *args, **kwargs):
@@ -47,6 +55,7 @@ class NoOpLimiter:
         """Return self for any other attribute to allow chaining"""
         return self
 
+
 # Replace the limiter in app.core.ratelimit BEFORE it gets used
 import app.core.ratelimit
 
@@ -54,6 +63,7 @@ app.core.ratelimit.limiter = NoOpLimiter()
 
 # Import pytest and other modules after disabling rate limiting
 from collections.abc import Callable, Generator
+from typing import ClassVar
 from unittest.mock import Mock
 
 import pytest
@@ -74,7 +84,7 @@ if _ENVIRONMENT in ["production", "staging"] and not _TESTING_ENV:
         "❌ SECURITY ERROR: Tests cannot run without TESTING=true environment variable\n"
         "   This prevents accidentally running tests against production databases.\n"
         "   Please set: export TESTING=true",
-        1
+        1,
     )
 
 
@@ -97,6 +107,7 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.e2e)
         else:
             item.add_marker(pytest.mark.integration)
+
 
 # Add root directory to Python path
 root_dir = Path(__file__).parent.parent
@@ -131,11 +142,14 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "integration: marks tests as integration tests")
     config.addinivalue_line("markers", "unit: marks tests as unit tests")
     config.addinivalue_line("markers", "e2e: marks tests as end-to-end tests")
-    config.addinivalue_line("markers", "external: marks tests that require external services")
+    config.addinivalue_line(
+        "markers", "external: marks tests that require external services"
+    )
     config.addinivalue_line("markers", "payment: marks tests related to payments")
     config.addinivalue_line("markers", "auth: marks tests related to authentication")
     config.addinivalue_line("markers", "booking: marks tests related to bookings")
     config.addinivalue_line("markers", "service: marks tests related to services")
+
 
 # Test database URL - PostgreSQL only (no SQLite fallback)
 
@@ -149,7 +163,9 @@ ENVIRONMENT = os.getenv("ENVIRONMENT", "local").lower()
 if ENVIRONMENT == "development":
     ENVIRONMENT = "local"
 
-DEFAULT_TEST_DB_HOST = "db-test" if IN_DOCKER else os.getenv("TEST_DB_HOST", "localhost")
+DEFAULT_TEST_DB_HOST = (
+    "db-test" if IN_DOCKER else os.getenv("TEST_DB_HOST", "localhost")
+)
 DEFAULT_TEST_DB_PORT = "5432" if IN_DOCKER else os.getenv("TEST_POSTGRES_PORT", "5433")
 
 TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")
@@ -158,21 +174,22 @@ if not TEST_DATABASE_URL:
     POSTGRES_PORT = os.getenv("POSTGRES_PORT", DEFAULT_TEST_DB_PORT)
     POSTGRES_USER = os.getenv("POSTGRES_USER", "ganitel_user")
     POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "ganitel_local_password_2024")
-    POSTGRES_DB = os.getenv("TEST_POSTGRES_DB", os.getenv("POSTGRES_DB", "ganitel_test_db"))
-    TEST_DATABASE_URL = (
-        f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    POSTGRES_DB = os.getenv(
+        "TEST_POSTGRES_DB", os.getenv("POSTGRES_DB", "ganitel_test_db")
     )
+    TEST_DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
 if not TEST_DATABASE_URL.startswith("postgresql://"):
     pytest.exit(
         "❌ Invalid TEST_DATABASE_URL: tests must run on PostgreSQL (postgresql://...).",
-        1
+        1,
     )
 
 try:
     test_engine = create_engine(TEST_DATABASE_URL)
     with test_engine.connect() as conn:
         from sqlalchemy import text
+
         conn.execute(text("SELECT 1"))
 except Exception as e:
     pytest.exit(
@@ -182,7 +199,7 @@ except Exception as e:
     )
 
 print(
-    f"ℹ️  Running tests in {ENVIRONMENT} using PostgreSQL: "
+    f"[i] Running tests in {ENVIRONMENT} using PostgreSQL: "
     f"{TEST_DATABASE_URL.split('@')[1] if '@' in TEST_DATABASE_URL else TEST_DATABASE_URL}"
 )
 
@@ -199,8 +216,9 @@ class TestAppFactory:
     Factory pour créer une instance d'app pour les tests
     Uniformise l'utilisation de l'app à travers performance, security, et autres suites
     """
-    _app_instance = None
-    _original_overrides = {}
+
+    _app_instance: ClassVar = None
+    _original_overrides: ClassVar[dict] = {}
 
     @classmethod
     def create_app(cls) -> Callable:
@@ -227,9 +245,10 @@ def cleanup_database_metadata(engine):
         metadata = MetaData()
         metadata.reflect(bind=engine)
 
-        if engine.dialect.name == 'postgresql':
+        if engine.dialect.name == "postgresql":
             with engine.connect() as conn:
                 from sqlalchemy import text
+
                 # Désactive temporairement les vérifications de clés étrangères
                 conn.execute(text("SET session_replication_role = 'replica';"))
 
@@ -247,6 +266,7 @@ def cleanup_database_metadata(engine):
             # Pour SQLite, utilise DELETE
             with engine.connect() as conn:
                 from sqlalchemy import text
+
                 for table_name in reversed(metadata.sorted_tables):
                     try:
                         conn.execute(text(f"DELETE FROM {table_name.name};"))
@@ -413,8 +433,7 @@ def mock_redis() -> Mock:
 
     def mock_getdel(key):
         value = storage.get(key)
-        if key in storage:
-            del storage[key]
+        storage.pop(key, None)
         return value
 
     mock.get.side_effect = mock_get
@@ -574,7 +593,9 @@ def sample_service_2(db_session: Session, sample_provider: User) -> Service:
 
 
 @pytest.fixture
-def sample_booking(db_session: Session, sample_user: User, sample_service: Service) -> Booking:
+def sample_booking(
+    db_session: Session, sample_user: User, sample_service: Service
+) -> Booking:
     """
     Create a sample booking for testing
     """
@@ -632,10 +653,7 @@ def auth_token(client: TestClient, sample_user: User) -> str:
     """
     response = client.post(
         "/api/v1/auth/login",
-        json={
-            "identifier": sample_user.email,
-            "password": "password123"
-        }
+        json={"identifier": sample_user.email, "password": "password123"},
     )
     if response.status_code == 200:
         return response.json()["access_token"]
@@ -649,10 +667,7 @@ def provider_token(client: TestClient, sample_provider: User) -> str:
     """
     response = client.post(
         "/api/v1/auth/login",
-        json={
-            "identifier": sample_provider.email,
-            "password": "password123"
-        }
+        json={"identifier": sample_provider.email, "password": "password123"},
     )
     if response.status_code == 200:
         return response.json()["access_token"]
@@ -666,10 +681,7 @@ def admin_token(client: TestClient, sample_admin: User) -> str:
     """
     response = client.post(
         "/api/v1/auth/login",
-        json={
-            "identifier": sample_admin.email,
-            "password": "password123"
-        }
+        json={"identifier": sample_admin.email, "password": "password123"},
     )
     if response.status_code == 200:
         return response.json()["access_token"]
@@ -709,7 +721,13 @@ def test_admin(sample_admin: User) -> User:
 
 
 @pytest.fixture
-def test_data(db_session: Session, sample_user: User, sample_provider: User, sample_service: Service, sample_booking: Booking):
+def test_data(
+    db_session: Session,
+    sample_user: User,
+    sample_provider: User,
+    sample_service: Service,
+    sample_booking: Booking,
+):
     """
     Create test data for performance and security tests
     """
@@ -718,7 +736,7 @@ def test_data(db_session: Session, sample_user: User, sample_provider: User, sam
         "traveler": sample_user,  # Alias for compatibility
         "provider": sample_provider,
         "service": sample_service,
-        "booking": sample_booking
+        "booking": sample_booking,
     }
 
 
@@ -739,7 +757,9 @@ def client_no_rate_limit(db_session: Session) -> TestClient:
     app.dependency_overrides[get_db] = override_get_db
 
     # Mock the limiter.limit decorator to pass through the function unchanged
-    with patch("app.core.ratelimit.limiter.limit", lambda limit_string: lambda func: func):
+    with patch(
+        "app.core.ratelimit.limiter.limit", lambda limit_string: lambda func: func
+    ):
         yield TestClient(app)
 
     app.dependency_overrides.clear()

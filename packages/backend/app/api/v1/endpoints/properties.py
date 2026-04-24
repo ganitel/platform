@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Properties Endpoints
 """
+
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -27,7 +28,7 @@ from app.dependencies import (
     get_optional_current_user,
 )
 from app.domain.entities.user import User
-from app.exceptions import GanitelException
+from app.exceptions import GanitelError
 from app.infrastructure.repositories.amenity_repository import AmenityRepository
 from app.infrastructure.repositories.location_repository import LocationRepository
 from app.infrastructure.repositories.property_repository import PropertyRepository
@@ -72,7 +73,7 @@ async def list_properties(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve properties",
-        )
+        ) from None
 
 
 @router.get("/{property_id}", response_model=PropertyDetailResponse)
@@ -90,13 +91,13 @@ async def get_property(
         property = get_use_case.execute(property_id)
         return PropertyDetailResponse.from_orm(property)
 
-    except GanitelException as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+    except GanitelError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve property",
-        )
+        ) from None
 
 
 @router.post("/", response_model=PropertyResponse, status_code=status.HTTP_201_CREATED)
@@ -152,13 +153,13 @@ async def create_property(
 
         return PropertyResponse.from_orm(property)
 
-    except GanitelException as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
+    except GanitelError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message) from e
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Property creation failed. Please try again.",
-        )
+        ) from None
 
 
 @router.put("/{property_id}", response_model=PropertyResponse)
@@ -186,13 +187,13 @@ async def update_property(
         property = update_use_case.execute(property_id, current_user.id, updates)
         return PropertyResponse.from_orm(property)
 
-    except GanitelException as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+    except GanitelError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update property",
-        )
+        ) from None
 
 
 @router.delete("/{property_id}", response_model=MessageResponse)
@@ -210,13 +211,13 @@ async def delete_property(
         delete_use_case.execute(property_id, current_user.id)
         return MessageResponse(message="Property deleted successfully")
 
-    except GanitelException as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+    except GanitelError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to delete property",
-        )
+        ) from None
 
 
 @router.get("/provider/my-properties", response_model=PropertyListResponse)
@@ -251,4 +252,4 @@ async def get_my_properties(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve your properties",
-        )
+        ) from None

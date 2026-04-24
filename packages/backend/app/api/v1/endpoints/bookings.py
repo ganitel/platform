@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Bookings Endpoints
 """
+
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -21,7 +22,7 @@ from app.application.use_cases.bookings import (
 from app.database import get_db
 from app.dependencies import get_current_active_user, get_current_traveler
 from app.domain.entities.user import User, UserType
-from app.exceptions import GanitelException
+from app.exceptions import GanitelError
 from app.infrastructure.repositories.booking_repository import BookingRepository
 from app.infrastructure.repositories.service_repository import ServiceRepository
 from app.infrastructure.repositories.user_repository import UserRepository
@@ -39,7 +40,9 @@ async def create_booking(
     booking_repository = BookingRepository(db)
     service_repository = ServiceRepository(db)
     user_repository = UserRepository(db)
-    use_case = CreateBookingUseCase(booking_repository, service_repository, user_repository)
+    use_case = CreateBookingUseCase(
+        booking_repository, service_repository, user_repository
+    )
     try:
         booking = use_case.execute(
             traveler_id=current_user.id,
@@ -51,11 +54,16 @@ async def create_booking(
         )
         return BookingResponse.from_orm(booking)
     except ValueError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid identifier format")
-    except GanitelException as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid identifier format"
+        ) from None
+    except GanitelError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Booking creation failed")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Booking creation failed",
+        ) from None
 
 
 @router.get("/{booking_id}", response_model=BookingResponse)
@@ -74,11 +82,16 @@ async def get_booking_details(
         )
         return BookingResponse.from_orm(booking)
     except ValueError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid booking id")
-    except GanitelException as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid booking id"
+        ) from None
+    except GanitelError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unable to fetch booking")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to fetch booking",
+        ) from None
 
 
 @router.get("/users/me/", response_model=BookingListResponse)
@@ -115,11 +128,18 @@ async def cancel_booking(
             requester_id=current_user.id,
             is_admin=current_user.user_type == UserType.ADMIN.value,
         )
-        return BookingCancelResponse(message="Booking cancelled successfully", booking=BookingResponse.from_orm(booking))
+        return BookingCancelResponse(
+            message="Booking cancelled successfully",
+            booking=BookingResponse.from_orm(booking),
+        )
     except ValueError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid booking id")
-    except GanitelException as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid booking id"
+        ) from None
+    except GanitelError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unable to cancel booking")
-
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to cancel booking",
+        ) from None

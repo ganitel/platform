@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Security Utilities
 """
+
 from datetime import datetime, timedelta
 
 from jose import jwt
@@ -10,7 +11,7 @@ from app.config import get_settings
 settings = get_settings()
 
 
-def create_access_token(user_id: str, expires_delta: timedelta = None) -> str:
+def create_access_token(user_id: str, expires_delta: timedelta | None = None) -> str:
     """
     Create a JWT access token for a user
 
@@ -33,13 +34,11 @@ def create_access_token(user_id: str, expires_delta: timedelta = None) -> str:
         "iss": settings.JWT_ISSUER,
         "aud": settings.JWT_AUDIENCE,
         "iat": now,
-        "exp": expire
+        "exp": expire,
     }
 
     encoded_jwt = jwt.encode(
-        to_encode,
-        settings.SECRET_KEY,
-        algorithm=settings.ALGORITHM
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
     )
 
     return encoded_jwt

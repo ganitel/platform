@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Process Payment Webhook Use Case
 """
+
 import logging
 from uuid import UUID
 
@@ -18,7 +19,7 @@ class ProcessWebhookUseCase:
     def __init__(
         self,
         payment_repository: IPaymentRepository,
-        booking_repository: IBookingRepository
+        booking_repository: IBookingRepository,
     ):
         self.payment_repository = payment_repository
         self.booking_repository = booking_repository
@@ -28,7 +29,7 @@ class ProcessWebhookUseCase:
         transaction_id: str,
         status: str,
         merchant_transaction_id: str,
-        payment_method: str = None
+        payment_method: str | None = None,
     ) -> dict:
         """
         Process webhook notification from Tranzak
@@ -52,22 +53,26 @@ class ProcessWebhookUseCase:
                     booking_id = UUID(merchant_transaction_id)
                     payment = self.payment_repository.get_by_booking_id(booking_id)
                 except ValueError:
-                    raise PaymentError(f"Invalid booking ID: {merchant_transaction_id}")
+                    raise PaymentError(
+                        f"Invalid booking ID: {merchant_transaction_id}"
+                    ) from None
 
             if not payment:
-                raise PaymentError(f"Payment not found for transaction: {transaction_id}")
+                raise PaymentError(
+                    f"Payment not found for transaction: {transaction_id}"
+                )
 
             # Idempotency: ignore duplicate notifications for finalized payments
             if payment.status in [
                 PaymentStatus.COMPLETED.value,
                 PaymentStatus.FAILED.value,
-                PaymentStatus.REFUNDED.value
+                PaymentStatus.REFUNDED.value,
             ]:
                 return {
                     "success": True,
                     "message": "Duplicate webhook ignored",
                     "payment_id": str(payment.id),
-                    "status": payment.status
+                    "status": payment.status,
                 }
 
             # Get associated booking
@@ -94,17 +99,24 @@ class ProcessWebhookUseCase:
                 booking.confirm()
                 self.booking_repository.update(booking)
 
-                logger.info(f"Payment completed: {payment.id}, Booking confirmed: {booking.id}")
+                logger.info(
+                    f"Payment completed: {payment.id}, Booking confirmed: {booking.id}"
+                )
 
                 return {
                     "success": True,
                     "message": "Payment processed successfully",
                     "payment_id": str(payment.id),
                     "booking_id": str(booking.id),
-                    "status": "completed"
+                    "status": "completed",
                 }
 
-            elif normalized_status in ["FAILED", "CANCELLED", "CANCELLED_BY_PAYER", "REJECTED"]:
+            elif normalized_status in [
+                "FAILED",
+                "CANCELLED",
+                "CANCELLED_BY_PAYER",
+                "REJECTED",
+            ]:
                 # Mark payment as failed
                 payment.mark_failed(f"Payment {normalized_status.lower()}")
                 self.payment_repository.update(payment)
@@ -113,26 +125,30 @@ class ProcessWebhookUseCase:
                 booking.mark_failed()
                 self.booking_repository.update(booking)
 
-                logger.warning(f"Payment failed: {payment.id}, Booking failed: {booking.id}")
+                logger.warning(
+                    f"Payment failed: {payment.id}, Booking failed: {booking.id}"
+                )
 
                 return {
                     "success": True,
                     "message": f"Payment {status.lower()}",
                     "payment_id": str(payment.id),
                     "booking_id": str(booking.id),
-                    "status": "failed"
+                    "status": "failed",
                 }
 
             else:
                 # Unknown status, log and keep as pending
-                logger.warning(f"Unknown payment status: {status} for payment {payment.id}")
+                logger.warning(
+                    f"Unknown payment status: {status} for payment {payment.id}"
+                )
                 return {
                     "success": True,
                     "message": f"Payment status: {status}",
                     "payment_id": str(payment.id),
-                    "status": "pending"
+                    "status": "pending",
                 }
 
         except Exception as e:
-            logger.error(f"Webhook processing error: {str(e)}")
-            raise PaymentError(f"Webhook processing failed: {str(e)}")
+            logger.error(f"Webhook processing error: {e!s}")
+            raise PaymentError(f"Webhook processing failed: {e!s}") from e

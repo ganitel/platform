@@ -5,6 +5,7 @@ Revises: c2f1b6d9a4e7
 Create Date: 2026-02-12 14:00:00.000000
 
 """
+
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -34,8 +35,18 @@ def upgrade() -> None:
         sa.Column("deleted_by", sa.UUID(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_amenity_categories_name_en"), "amenity_categories", ["name_en"], unique=True)
-    op.create_index(op.f("ix_amenity_categories_name_fr"), "amenity_categories", ["name_fr"], unique=True)
+    op.create_index(
+        op.f("ix_amenity_categories_name_en"),
+        "amenity_categories",
+        ["name_en"],
+        unique=True,
+    )
+    op.create_index(
+        op.f("ix_amenity_categories_name_fr"),
+        "amenity_categories",
+        ["name_fr"],
+        unique=True,
+    )
 
     op.create_table(
         "amenities",
@@ -54,9 +65,15 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["category_id"], ["amenity_categories.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_amenities_category_id"), "amenities", ["category_id"], unique=False)
-    op.create_index(op.f("ix_amenities_name_en"), "amenities", ["name_en"], unique=False)
-    op.create_index(op.f("ix_amenities_name_fr"), "amenities", ["name_fr"], unique=False)
+    op.create_index(
+        op.f("ix_amenities_category_id"), "amenities", ["category_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_amenities_name_en"), "amenities", ["name_en"], unique=False
+    )
+    op.create_index(
+        op.f("ix_amenities_name_fr"), "amenities", ["name_fr"], unique=False
+    )
 
     op.create_table(
         "property_amenities",
@@ -73,15 +90,31 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["amenity_id"], ["amenities.id"]),
         sa.ForeignKeyConstraint(["property_id"], ["properties.id"]),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("property_id", "amenity_id", name="uq_property_amenity_pair"),
+        sa.UniqueConstraint(
+            "property_id", "amenity_id", name="uq_property_amenity_pair"
+        ),
     )
-    op.create_index(op.f("ix_property_amenities_amenity_id"), "property_amenities", ["amenity_id"], unique=False)
-    op.create_index(op.f("ix_property_amenities_property_id"), "property_amenities", ["property_id"], unique=False)
+    op.create_index(
+        op.f("ix_property_amenities_amenity_id"),
+        "property_amenities",
+        ["amenity_id"],
+        unique=False,
+    )
+    op.create_index(
+        op.f("ix_property_amenities_property_id"),
+        "property_amenities",
+        ["property_id"],
+        unique=False,
+    )
 
 
 def downgrade() -> None:
-    op.drop_index(op.f("ix_property_amenities_property_id"), table_name="property_amenities")
-    op.drop_index(op.f("ix_property_amenities_amenity_id"), table_name="property_amenities")
+    op.drop_index(
+        op.f("ix_property_amenities_property_id"), table_name="property_amenities"
+    )
+    op.drop_index(
+        op.f("ix_property_amenities_amenity_id"), table_name="property_amenities"
+    )
     op.drop_table("property_amenities")
 
     op.drop_index(op.f("ix_amenities_name_fr"), table_name="amenities")
@@ -89,6 +122,10 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_amenities_category_id"), table_name="amenities")
     op.drop_table("amenities")
 
-    op.drop_index(op.f("ix_amenity_categories_name_fr"), table_name="amenity_categories")
-    op.drop_index(op.f("ix_amenity_categories_name_en"), table_name="amenity_categories")
+    op.drop_index(
+        op.f("ix_amenity_categories_name_fr"), table_name="amenity_categories"
+    )
+    op.drop_index(
+        op.f("ix_amenity_categories_name_en"), table_name="amenity_categories"
+    )
     op.drop_table("amenity_categories")

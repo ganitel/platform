@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Create Survey Use Case
 """
+
 from datetime import datetime
 
 from app.domain.entities.survey import Survey, SurveyStatus
@@ -22,7 +23,7 @@ class CreateSurveyUseCase:
         start_date: datetime | None = None,
         end_date: datetime | None = None,
         is_anonymous: bool = False,
-        allow_multiple_responses: bool = False
+        allow_multiple_responses: bool = False,
     ) -> Survey:
         """
         Create a survey
@@ -54,8 +55,7 @@ class CreateSurveyUseCase:
             end_date=end_date,
             is_anonymous=is_anonymous,
             allow_multiple_responses=allow_multiple_responses,
-            status=SurveyStatus.DRAFT.value
+            status=SurveyStatus.DRAFT.value,
         )
 
         return self.survey_repository.create(survey)
-

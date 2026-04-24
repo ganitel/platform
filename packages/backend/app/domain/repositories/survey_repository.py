@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Survey Repository Interface
 """
+
 from abc import abstractmethod
 
 from app.domain.entities.survey import Survey, SurveyStatus
@@ -16,7 +17,8 @@ class ISurveyRepository(BaseRepository[Survey]):
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_status(self, status: SurveyStatus, skip: int = 0, limit: int = 100) -> list[Survey]:
+    def get_by_status(
+        self, status: SurveyStatus, skip: int = 0, limit: int = 100
+    ) -> list[Survey]:
         """Get surveys by status"""
         raise NotImplementedError
-
