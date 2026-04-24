@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Mail, User, Users } from "lucide-react";
+import { ArrowLeft, Mail, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useUpdateProfile, useProfile } from "@/hooks/useProfile";
@@ -64,8 +64,8 @@ export default function EditPersonalInformation() {
       });
       toast({ title: "Profile updated" });
       navigate("/profile/personal-information");
-    } catch (err: any) {
-      toast({ title: "Error", description: err?.message || "Could not update profile.", variant: "destructive" });
+    } catch (err: unknown) {
+      toast({ title: "Error", description: (err as { message?: string })?.message || "Could not update profile.", variant: "destructive" });
     }
   };
 

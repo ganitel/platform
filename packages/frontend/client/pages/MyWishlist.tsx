@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Plus, MoreVertical, ChevronLeft, Calendar, Share2, Trash2, Edit2 } from "lucide-react";
+import type { ServiceListItem } from "@shared/api";
 import { useWishlistState } from "@/hooks";
 import { BottomNav } from "@/components/BottomNav";
 import { Header } from "@/components/Header";
@@ -251,7 +252,7 @@ export default function MyWishlist() {
                 return (
                   <PropertySearchResultCard
                     key={p.id}
-                    property={p as any}
+                    property={p as unknown as ServiceListItem}
                     nights={7}
                     onToggleWishlist={() => handleRemoveProperty(p.id, p.title)}
                   />
@@ -357,7 +358,7 @@ export default function MyWishlist() {
               if (!p) return null;
               return (
                 <div key={p.id} className="mx-auto w-full max-w-[328px]">
-                  <PropertyCard property={p as any} />
+                  <PropertyCard property={p as unknown as ServiceListItem} />
                 </div>
               );
             })}

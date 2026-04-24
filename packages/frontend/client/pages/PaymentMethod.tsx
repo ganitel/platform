@@ -1,18 +1,12 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { 
-  ArrowLeft, 
-  CreditCard, 
-  Smartphone, 
-  Globe, 
-  Calendar, 
-  Users, 
-  Home, 
-  Receipt, 
-  Mail, 
-  Edit, 
-  ChevronDown, 
-  ChevronUp, 
+import {
+  ArrowLeft,
+  Calendar,
+  Receipt,
+  Mail,
+  ChevronDown,
+  ChevronUp,
   User,
   Building2
 } from "lucide-react";
@@ -69,7 +63,7 @@ export default function PaymentMethod() {
   const [paypalData, setPaypalData] = useState({
     email: "",
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [_errors, setErrors] = useState<Record<string, string>>({});
 
   // Calculate pricing details
   const calculateNights = () => {
@@ -91,7 +85,7 @@ export default function PaymentMethod() {
   const cleaningFee = bookingData?.pricing?.cleaning_fee || propertyData?.cleaning_fee || 0;
   const taxes = bookingData?.pricing?.taxes || propertyData?.taxes || 0;
   const total = bookingData?.pricing?.total || (subtotal + serviceFee + cleaningFee + taxes);
-  const currency = bookingData?.pricing?.currency || propertyData?.pricing?.currency || propertyData?.currency || "USD";
+  const _currency = bookingData?.pricing?.currency || propertyData?.pricing?.currency || propertyData?.currency || "USD";
 
   const handlePay = () => {
     // Validate based on payment method
@@ -139,12 +133,12 @@ export default function PaymentMethod() {
     }
   };
 
-  const handleEditReview = () => {
+  const _handleEditReview = () => {
     navigate(-1); // Go back to ReviewInformation
   };
 
   // Calculate cancellation deadline (e.g., 7 days before check-in)
-  const getCancellationDeadline = () => {
+  const _getCancellationDeadline = () => {
     if (booking?.checkIn) {
       const checkInDate = new Date(booking.checkIn);
       const cancellationDate = new Date(checkInDate);

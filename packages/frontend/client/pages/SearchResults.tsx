@@ -44,8 +44,7 @@ export default function SearchResults() {
                 setProperties([]);
                 setErrorMessage("Unable to load properties right now. Please try again.");
             } finally {
-                if (!isMounted) return;
-                setIsLoading(false);
+                if (isMounted) setIsLoading(false);
             }
         };
 
@@ -63,7 +62,7 @@ export default function SearchResults() {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    const handleApplyFilters = (filters: any) => {
+    const handleApplyFilters = (filters: Record<string, unknown>) => {
         console.log("Applied filters in Results:", filters);
         // Implement actual filtering logic here if needed
     };

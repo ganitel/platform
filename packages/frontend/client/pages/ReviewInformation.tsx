@@ -1,6 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Calendar, Mail, Users, Building2, Receipt, Edit, User } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ArrowLeft, Calendar, Building2, Receipt, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBookingContext } from "@/contexts/BookingContext";
 
@@ -60,13 +59,13 @@ export default function ReviewInformation() {
     });
   };
 
-  const handleEditTravelerInfo = () => {
+  const _handleEditTravelerInfo = () => {
     navigate("/booking/confirm", {
       state: { propertyData, bookingData }
     });
   };
 
-  const handleEditBookingDetails = () => {
+  const _handleEditBookingDetails = () => {
     navigate(-2); // Go back to BookOrNegotiate page
   };
 

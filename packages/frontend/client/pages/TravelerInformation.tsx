@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, User, Calendar, Mail, Users, Building2, Receipt, Clock } from "lucide-react";
+import { ArrowLeft, User, Calendar, Mail, Building2, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
@@ -173,7 +173,7 @@ export default function TravelerInformation() {
   };
 
   // Format phone number display
-  const fullPhoneNumber = formData.whatsappNumber
+  const _fullPhoneNumber = formData.whatsappNumber
     ? `${formData.countryCode} ${formData.whatsappNumber}`
     : "";
 

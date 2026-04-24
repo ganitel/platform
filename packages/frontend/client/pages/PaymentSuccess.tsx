@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Phone, Mail, CheckCircle, Star, Receipt, Building2 } from "lucide-react";
+import { Phone, Mail, Star, Receipt } from "lucide-react";
 import { useBookingContext } from "@/contexts/BookingContext";
 
 export default function PaymentSuccess() {
