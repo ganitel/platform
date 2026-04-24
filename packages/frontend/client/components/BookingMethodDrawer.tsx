@@ -14,7 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 
 interface BookingMethodDrawerProps {
-  propertyData: any;
+  propertyData: Record<string, unknown>;
   trigger: React.ReactNode;
 }
 
@@ -105,8 +105,9 @@ export function BookingMethodDrawer({ propertyData, trigger }: BookingMethodDraw
     
     const totalGuests = adults + children + infants;
     if (adults === 0) newErrors.guests = "At least 1 adult is required";
-    if (propertyData?.max_guests && totalGuests > propertyData.max_guests) {
-      newErrors.guests = `Maximum ${propertyData.max_guests} guests allowed`;
+    const maxGuests = propertyData?.max_guests as number | undefined;
+    if (maxGuests && totalGuests > maxGuests) {
+      newErrors.guests = `Maximum ${maxGuests} guests allowed`;
     }
 
     setErrors(newErrors);
@@ -128,7 +129,7 @@ export function BookingMethodDrawer({ propertyData, trigger }: BookingMethodDraw
     const checkOutDateTime = `${checkOut}T${checkOutTime}`;
 
     updateBooking({
-      propertyId: propertyData?.id || "",
+      propertyId: (propertyData?.id as string) || "",
       propertyData,
       checkIn: checkInDateTime,
       checkOut: checkOutDateTime,
@@ -301,7 +302,7 @@ export function BookingMethodDrawer({ propertyData, trigger }: BookingMethodDraw
             <div className="flex flex-col gap-1">
               <div className="flex items-baseline gap-1">
                 <span className="text-2xl font-bold text-ganitel-primary">
-                  ${((propertyData?.pricing?.base_price || propertyData?.price_per_night || propertyData?.price || 0) * (nights || 1)).toLocaleString()}
+                  ${(((propertyData?.pricing as { base_price?: number })?.base_price || (propertyData?.price_per_night as number) || (propertyData?.price as number) || 0) * (nights || 1)).toLocaleString()}
                 </span>
                 <span className="text-xs text-gray-500 font-medium">/ {nights || 1} Nights</span>
               </div>

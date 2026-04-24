@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Loader2, Star, User } from "lucide-react";
 import { useServiceReviews } from "@/hooks";
+import type { Review } from "@shared/api";
 
 interface ReviewsSectionProps {
   propertyId: string;
@@ -38,25 +39,20 @@ function roundToOneDecimal(value: number): number {
   return Math.round(value * 10) / 10;
 }
 
-function getReviewRating(review: Record<string, any>): number {
-  const value = review?.overall_rating ?? review?.rating ?? 0;
-  return typeof value === "number" ? value : Number(value) || 0;
-}
-
-function normalizeReview(review: Record<string, any>, index: number): NormalizedReview {
+function normalizeReview(review: Review, index: number): NormalizedReview {
   return {
-    id: review?.id ?? `review-${index}`,
-    name: review?.user?.name ?? review?.user_name ?? "Guest",
-    rating: getReviewRating(review),
-    comment: review?.comment ?? review?.title ?? "",
-    createdAt: review?.created_at ?? "",
+    id: review.id ?? `review-${index}`,
+    name: "Guest",
+    rating: review.overall_rating ?? 0,
+    comment: review.comment ?? review.title ?? "",
+    createdAt: review.created_at ?? "",
     categories: {
-      cleanliness: review?.cleanliness_rating,
-      accuracy: review?.accuracy_rating,
-      communication: review?.communication_rating,
-      location: review?.location_rating,
-      checkIn: review?.checkin_rating,
-      value: review?.value_rating,
+      cleanliness: review.cleanliness_rating,
+      accuracy: review.accuracy_rating,
+      communication: review.communication_rating,
+      location: review.location_rating,
+      checkIn: review.checkin_rating,
+      value: review.value_rating,
     },
   };
 }
@@ -95,7 +91,7 @@ export function ReviewsSection({
 
   const reviews = useMemo(() => {
     const items = data?.items ?? [];
-    return items.map((item, index) => normalizeReview(item as Record<string, any>, index));
+    return items.map((item, index) => normalizeReview(item, index));
   }, [data]);
 
   const filteredReviews = useMemo(() => {

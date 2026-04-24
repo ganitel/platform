@@ -3,7 +3,7 @@ Auth flow tests with real rate-limiting middleware enabled.
 """
 
 import importlib
-from datetime import datetime
+from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import pytest
@@ -47,7 +47,7 @@ class DummyRegisterUserUseCase:
         pass
 
     def execute(self, **kwargs):
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         first_name = kwargs["first_name"]
         last_name = kwargs["last_name"]
         return SimpleNamespace(
@@ -88,8 +88,8 @@ class DummyLoginUserUseCase:
 
 @pytest.fixture
 def rate_limited_auth_client(monkeypatch):
-    import app.core.ratelimit as ratelimit_module
     import app.api.v1.endpoints.auth as auth_module
+    import app.core.ratelimit as ratelimit_module
 
     original_limiter = ratelimit_module.limiter
 
@@ -99,7 +99,7 @@ def rate_limited_auth_client(monkeypatch):
         strategy="fixed-window",
     )
 
-    auth_module = importlib.reload(auth_module)
+    auth_module = importlib.reload(auth_module)  # ty: ignore[invalid-assignment]
 
     monkeypatch.setattr(auth_module, "RegisterUserUseCase", DummyRegisterUserUseCase)
     monkeypatch.setattr(auth_module, "LoginUserUseCase", DummyLoginUserUseCase)
@@ -111,7 +111,7 @@ def rate_limited_auth_client(monkeypatch):
 
     app = FastAPI()
     app.state.limiter = ratelimit_module.limiter
-    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty: ignore[invalid-argument-type]
     app.add_middleware(SlowAPIMiddleware)
     app.include_router(auth_module.router, prefix="/api/v1/auth")
 
@@ -128,7 +128,9 @@ def rate_limited_auth_client(monkeypatch):
 
 
 class TestAuthRateLimitCombinations:
-    def test_register_is_rate_limited_after_five_requests(self, rate_limited_auth_client):
+    def test_register_is_rate_limited_after_five_requests(
+        self, rate_limited_auth_client
+    ):
         client, _ = rate_limited_auth_client
 
         for index in range(5):
@@ -159,7 +161,9 @@ class TestAuthRateLimitCombinations:
 
         assert sixth_response.status_code == 429
 
-    def test_login_lockout_triggers_before_login_success(self, rate_limited_auth_client):
+    def test_login_lockout_triggers_before_login_success(
+        self, rate_limited_auth_client
+    ):
         client, _ = rate_limited_auth_client
 
         for _ in range(5):
@@ -177,13 +181,18 @@ class TestAuthRateLimitCombinations:
         assert lockout_response.status_code == 429
         assert "locked" in lockout_response.json()["detail"].lower()
 
-    def test_login_rate_limit_applies_across_distinct_identifiers(self, rate_limited_auth_client):
+    def test_login_rate_limit_applies_across_distinct_identifiers(
+        self, rate_limited_auth_client
+    ):
         client, _ = rate_limited_auth_client
 
         for index in range(10):
             response = client.post(
                 "/api/v1/auth/login",
-                json={"identifier": f"user{index}@example.com", "password": "wrong-password"},
+                json={
+                    "identifier": f"user{index}@example.com",
+                    "password": "wrong-password",
+                },
             )
             assert response.status_code == 401
 
@@ -194,5 +203,7 @@ class TestAuthRateLimitCombinations:
 
         assert throttled_response.status_code == 429
         response_payload = throttled_response.json()
-        response_message = (response_payload.get("detail") or response_payload.get("error") or "").lower()
+        response_message = (
+            response_payload.get("detail") or response_payload.get("error") or ""
+        ).lower()
         assert "rate limit" in response_message

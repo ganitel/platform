@@ -61,26 +61,18 @@ const otpClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-export { DEV_ADMIN_BYPASS_EMAIL } from '@/services/adminBypass';
-
-export function isDevAdminBypassEmail(email: string): boolean {
-  return isDevAdminBypassEmailShared(email);
-}
-
 // ==================== BACKEND AUTH ADAPTER ====================
 
 export const backendAuthAdapter: AuthAdapter = {
   async sendOtp(email: string): Promise<void> {
-    if (isDevAdminBypassEmail(email)) {
+    if (isDevAdminBypassEmailShared(email)) {
       return;
     }
-    // Hits local Express stub: POST /api/otp/send
-    // TODO: When backend implements OTP, switch to: apiClient.post('/auth/send-otp', { email })
     await otpClient.post('/send', { email });
   },
 
   async verifyOtp(email: string, token: string): Promise<AuthResponse> {
-    if (isDevAdminBypassEmail(email)) {
+    if (isDevAdminBypassEmailShared(email)) {
       storeTokens(DEV_ADMIN_BYPASS_AUTH_RESPONSE);
       activateAdminBypassSession();
       return DEV_ADMIN_BYPASS_AUTH_RESPONSE;

@@ -17,7 +17,7 @@ export function toBackendGuestCount(guests?: Partial<GuestBreakdown> | null): nu
 
 export interface BookingData {
   propertyId: string;
-  propertyData?: any; // PropertyDetail
+  propertyData?: Record<string, unknown>;
   checkIn?: string; // ISO 8601
   checkOut?: string; // ISO 8601
   guests: GuestBreakdown;

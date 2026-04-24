@@ -1,15 +1,15 @@
 """
 Unit tests for service (listing) use cases
 """
-from uuid import uuid4
+
 from unittest.mock import MagicMock
+from uuid import uuid4
 
 import pytest
 
-from app.application.use_cases.services.update_service import UpdateServiceUseCase
 from app.application.use_cases.services.delete_service import DeleteServiceUseCase
-from app.domain.entities.service import ServiceStatus
-from app.exceptions import AuthorizationError, ValidationError, ServiceNotFoundError
+from app.application.use_cases.services.update_service import UpdateServiceUseCase
+from app.exceptions import AuthorizationError, ServiceNotFoundError, ValidationError
 
 
 def _build_service(provider_id):
@@ -33,7 +33,9 @@ def test_update_service_success():
 
     use_case = UpdateServiceUseCase(repository)
 
-    result = use_case.execute(service.id, provider_id, {"title": "Super listing", "base_price": 60000})
+    result = use_case.execute(
+        service.id, provider_id, {"title": "Super listing", "base_price": 60000}
+    )
 
     repository.update.assert_called_once()
     assert result == service
@@ -78,4 +80,3 @@ def test_delete_service_not_found():
 
     with pytest.raises(ServiceNotFoundError):
         use_case.execute(uuid4(), uuid4())
-

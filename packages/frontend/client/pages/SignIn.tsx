@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { isDevAdminBypassEmail } from "@/services/auth.adapter";
+import { isDevAdminBypassEmail } from "@/services/adminBypass";
 
 type AuthStep = "email" | "otp";
 
@@ -91,10 +91,10 @@ export default function SignIn() {
       setOtpError("");
       setOtpValues(Array(OTP_LENGTH).fill(""));
       setResendTimer(RESEND_COUNTDOWN_SECONDS);
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: "Erreur",
-        description: err?.message || "Impossible d'envoyer le code. Réessayez.",
+        description: (err as { message?: string })?.message || "Impossible d'envoyer le code. Réessayez.",
         variant: "destructive",
       });
     } finally {
@@ -116,23 +116,23 @@ export default function SignIn() {
       const searchParams = new URLSearchParams(window.location.search);
       const returnUrl = searchParams.get("returnUrl");
       navigate(returnUrl ? decodeURIComponent(returnUrl) : "/profile", { replace: true });
-    } catch (err: any) {
-      setOtpError(err?.message || "Code incorrect. Veuillez réessayer.");
+    } catch (err: unknown) {
+      setOtpError((err as { message?: string })?.message || "Code incorrect. Veuillez réessayer.");
     } finally {
       setIsVerifyingOtp(false);
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const _handleGoogleSignIn = async () => {
     if (isGoogleLoading) return;
     setIsGoogleLoading(true);
     try {
       await auth.signInWithGoogle();
       // signInWithGoogle redirects — we only reach here in mock mode
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: "Erreur",
-        description: err?.message || "Connexion Google impossible.",
+        description: (err as { message?: string })?.message || "Connexion Google impossible.",
         variant: "destructive",
       });
       setIsGoogleLoading(false);

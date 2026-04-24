@@ -1,11 +1,16 @@
 """
 Ganitel V2 Backend - Cancel Booking Use Case
 """
+
 from uuid import UUID
 
 from app.domain.entities.booking import BookingStatus
 from app.domain.repositories.booking_repository import IBookingRepository
-from app.exceptions import AuthorizationError, BookingNotFoundError, InvalidBookingStatusError
+from app.exceptions import (
+    AuthorizationError,
+    BookingNotFoundError,
+    InvalidBookingStatusError,
+)
 
 
 class CancelBookingUseCase:
@@ -22,10 +27,15 @@ class CancelBookingUseCase:
         if booking.user_id != requester_id and not is_admin:
             raise AuthorizationError("You are not allowed to cancel this booking")
 
-        if booking.status not in [BookingStatus.PENDING.value, BookingStatus.NEGOTIATING.value, BookingStatus.CONFIRMED.value]:
-            raise InvalidBookingStatusError("Booking cannot be cancelled in its current status")
+        if booking.status not in [
+            BookingStatus.PENDING.value,
+            BookingStatus.NEGOTIATING.value,
+            BookingStatus.CONFIRMED.value,
+        ]:
+            raise InvalidBookingStatusError(
+                "Booking cannot be cancelled in its current status"
+            )
 
         booking.status = BookingStatus.CANCELLED.value
         updated = self.booking_repository.update(booking)
         return updated
-

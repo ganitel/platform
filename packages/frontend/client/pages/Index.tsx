@@ -35,8 +35,7 @@ export default function Index() {
         setProperties([]);
         setErrorMessage("Unable to load properties right now. Please try again.");
       } finally {
-        if (!isMounted) return;
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 

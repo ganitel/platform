@@ -122,7 +122,7 @@ export interface ServiceListItem {
  * Detailed service information
  */
 export interface ServiceDetail extends ServiceListItem {
-  availability_calendar?: any; // JSON field
+  availability_calendar?: Record<string, unknown>; // JSON field
   blocked_dates?: string[];
 }
 
@@ -343,7 +343,7 @@ export interface Payment {
   transaction_id?: string;
   status: 'pending' | 'completed' | 'failed' | 'refunded';
   payment_method?: string;
-  provider_response?: any;
+  provider_response?: Record<string, unknown>;
   error_message?: string;
   refund_amount?: number;
   refund_reason?: string;

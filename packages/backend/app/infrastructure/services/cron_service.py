@@ -1,49 +1,50 @@
 """
 Ganitel V2 Backend - Cron Jobs Service
 """
+
 import asyncio
-from datetime import datetime
-from typing import Callable, List
 import logging
+from collections.abc import Callable
+from datetime import UTC, datetime
 
 logger = logging.getLogger(__name__)
 
 
 class CronJob:
     """Cron job definition"""
-    
+
     def __init__(
         self,
         name: str,
         schedule: str,  # Cron expression
         func: Callable,
-        enabled: bool = True
+        enabled: bool = True,
     ):
         self.name = name
         self.schedule = schedule
         self.func = func
         self.enabled = enabled
-        self.last_run: datetime = None
-        self.next_run: datetime = None
+        self.last_run: datetime | None = None
+        self.next_run: datetime | None = None
 
 
 class CronService:
     """Service for managing cron jobs"""
-    
+
     def __init__(self):
-        self.jobs: List[CronJob] = []
+        self.jobs: list[CronJob] = []
         self.running = False
-    
+
     def register_job(self, job: CronJob):
         """Register a cron job"""
         self.jobs.append(job)
         logger.info(f"Registered cron job: {job.name}")
-    
+
     async def run_job(self, job: CronJob):
         """Run a single cron job"""
         try:
             logger.info(f"Running cron job: {job.name}")
-            job.last_run = datetime.utcnow()
+            job.last_run = datetime.now(UTC)
             if asyncio.iscoroutinefunction(job.func):
                 await job.func()
             else:
@@ -51,16 +52,15 @@ class CronService:
             logger.info(f"Completed cron job: {job.name}")
         except Exception as e:
             logger.error(f"Error running cron job {job.name}: {e}")
-    
+
     async def start(self):
         """Start the cron service"""
         self.running = True
         logger.info("Cron service started")
         # In production, use a proper cron scheduler like APScheduler
         # For now, this is a placeholder
-    
+
     async def stop(self):
         """Stop the cron service"""
         self.running = False
         logger.info("Cron service stopped")
-

@@ -5,18 +5,18 @@ Revises: f9b0c1d2e3f5
 Create Date: 2026-02-24 00:00:00.000000
 
 """
-from typing import Sequence, Union
 
-from alembic import op
+from collections.abc import Sequence
+
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 # revision identifiers, used by Alembic.
 revision: str = "a1b2c3d4e5f6"
-down_revision: Union[str, None] = "f9b0c1d2e3f5"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "f9b0c1d2e3f5"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def _create_map_table(table_name: str) -> None:
@@ -27,8 +27,12 @@ def _create_map_table(table_name: str) -> None:
         sa.Column("new_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("source_hash", sa.String(length=64), nullable=True),
         sa.Column("payload", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-        sa.Column("created_at", sa.DateTime(), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.DateTime(), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at", sa.DateTime(), nullable=False, server_default=sa.text("now()")
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(), nullable=False, server_default=sa.text("now()")
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("old_id", name=f"uq_{table_name}_old_id"),
     )

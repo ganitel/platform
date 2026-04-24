@@ -8,24 +8,14 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
   Bell,
-  BellRing,
-  Calendar,
   ChevronRight,
   CircleEllipsis,
   CreditCard,
   DatabaseIcon,
-  Globe,
-  HandCoins,
-  Heart,
-  HelpCircle,
-  Home,
-  Info,
   Loader2,
   LogOut,
-  LogOutIcon,
   PhoneCall,
   Shield,
-  UserCircle2,
   UserPenIcon,
 } from "lucide-react";
 
@@ -54,7 +44,7 @@ export default function Profile() {
     try {
       await signOut();
       navigate("/");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erreur lors de la deconnexion:", err);
     }
   };

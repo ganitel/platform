@@ -1,14 +1,15 @@
 """
 Ganitel V2 Backend - Property Amenity DB Tests
 """
+
 from uuid import uuid4
 
-from app.domain.entities.location import Location
-from app.domain.entities.property_type import PropertyType
-from app.domain.entities.property import Property
-from app.domain.entities.amenity_category import AmenityCategory
 from app.domain.entities.amenity import Amenity
+from app.domain.entities.amenity_category import AmenityCategory
+from app.domain.entities.location import Location
+from app.domain.entities.property import Property
 from app.domain.entities.property_amenity import PropertyAmenity
+from app.domain.entities.property_type import PropertyType
 
 
 def test_property_amenity_join_works(db_session, sample_provider):
@@ -77,7 +78,11 @@ def test_property_amenity_join_works(db_session, sample_provider):
     db_session.add(link)
     db_session.commit()
 
-    stored_link = db_session.query(PropertyAmenity).filter(PropertyAmenity.property_id == prop.id).first()
+    stored_link = (
+        db_session.query(PropertyAmenity)
+        .filter(PropertyAmenity.property_id == prop.id)
+        .first()
+    )
 
     assert stored_link is not None
     assert stored_link.amenity_id == amenity.id

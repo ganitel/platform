@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { paymentsService } from './payments.service';
 import { apiClient } from '@/lib/axios';

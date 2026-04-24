@@ -1,12 +1,10 @@
 """
 Ganitel V2 Backend - Booking Schemas
 """
+
 from datetime import date, datetime
-from typing import Optional, List
 
-from pydantic import BaseModel, Field, validator
-
-from app.domain.entities.booking import BookingStatus
+from pydantic import BaseModel, Field, field_validator
 
 
 class BookingCreateRequest(BaseModel):
@@ -14,11 +12,12 @@ class BookingCreateRequest(BaseModel):
     start_date: date
     end_date: date
     guests: int = Field(..., gt=0)
-    notes: Optional[str] = Field(None, max_length=500)
+    notes: str | None = Field(None, max_length=500)
 
-    @validator("end_date")
-    def validate_dates(cls, end_date, values):
-        start_date = values.get("start_date")
+    @field_validator("end_date")
+    @classmethod
+    def validate_dates(cls, end_date, info):
+        start_date = info.data.get("start_date")
         if start_date and end_date <= start_date:
             raise ValueError("End date must be after start date")
         return end_date
@@ -33,9 +32,9 @@ class BookingResponse(BaseModel):
     guests: int
     status: str  # Changed from BookingStatus enum to str
     total_amount: float
-    negotiated_price: Optional[float]
+    negotiated_price: float | None
     currency: str
-    notes: Optional[str]
+    notes: str | None
     created_at: datetime
     updated_at: datetime
 
@@ -51,11 +50,13 @@ class BookingResponse(BaseModel):
             guests=int(booking.guests),
             status=booking.status,
             total_amount=float(booking.total_amount),
-            negotiated_price=float(booking.negotiated_price) if booking.negotiated_price else None,
+            negotiated_price=float(booking.negotiated_price)
+            if booking.negotiated_price
+            else None,
             currency=booking.currency,
             notes=booking.notes,
             created_at=booking.created_at,
-            updated_at=booking.updated_at
+            updated_at=booking.updated_at,
         )
 
     class Config:
@@ -63,7 +64,7 @@ class BookingResponse(BaseModel):
 
 
 class BookingListResponse(BaseModel):
-    bookings: List[BookingResponse]
+    bookings: list[BookingResponse]
     total: int
     page: int
     per_page: int
@@ -73,4 +74,3 @@ class BookingListResponse(BaseModel):
 class BookingCancelResponse(BaseModel):
     message: str
     booking: BookingResponse
-

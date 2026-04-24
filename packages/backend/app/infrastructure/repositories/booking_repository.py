@@ -1,8 +1,9 @@
 """
 Ganitel V2 Backend - Booking Repository Implementation
 """
-from datetime import date, datetime
-from typing import List, Optional, Dict, Any
+
+from datetime import UTC, date, datetime
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import and_, or_
@@ -24,7 +25,7 @@ class BookingRepository(IBookingRepository):
         self.db.refresh(booking)
         return booking
 
-    def get_by_id(self, booking_id: UUID) -> Optional[Booking]:
+    def get_by_id(self, booking_id: UUID) -> Booking | None:
         return (
             self.db.query(Booking)
             .filter(
@@ -34,7 +35,7 @@ class BookingRepository(IBookingRepository):
             .first()
         )
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[Booking]:
+    def get_all(self, skip: int = 0, limit: int = 100) -> list[Booking]:
         return (
             self.db.query(Booking)
             .filter(Booking.deleted_at.is_(None))
@@ -44,7 +45,7 @@ class BookingRepository(IBookingRepository):
         )
 
     def update(self, booking: Booking) -> Booking:
-        booking.updated_at = datetime.utcnow()
+        booking.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(booking)
         return booking
@@ -65,7 +66,7 @@ class BookingRepository(IBookingRepository):
             return True
         return False
 
-    def count(self, filters: Optional[Dict[str, Any]] = None) -> int:
+    def count(self, filters: dict[str, Any] | None = None) -> int:
         query = self.db.query(Booking).filter(Booking.deleted_at.is_(None))
         if filters:
             for key, value in filters.items():
@@ -84,14 +85,18 @@ class BookingRepository(IBookingRepository):
             is not None
         )
 
-    def find_by_criteria(self, criteria: Dict[str, Any], skip: int = 0, limit: int = 100) -> List[Booking]:
+    def find_by_criteria(
+        self, criteria: dict[str, Any], skip: int = 0, limit: int = 100
+    ) -> list[Booking]:
         query = self.db.query(Booking).filter(Booking.deleted_at.is_(None))
         for key, value in criteria.items():
             if hasattr(Booking, key) and value is not None:
                 query = query.filter(getattr(Booking, key) == value)
         return query.offset(skip).limit(limit).all()
 
-    def get_by_user(self, user_id: UUID, skip: int = 0, limit: int = 100) -> List[Booking]:
+    def get_by_user(
+        self, user_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Booking]:
         return (
             self.db.query(Booking)
             .filter(
@@ -103,12 +108,16 @@ class BookingRepository(IBookingRepository):
             .limit(limit)
             .all()
         )
-    
+
     # Alias for compatibility
-    def get_by_user_id(self, user_id: UUID, skip: int = 0, limit: int = 100) -> List[Booking]:
+    def get_by_user_id(
+        self, user_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Booking]:
         return self.get_by_user(user_id, skip, limit)
 
-    def get_by_service(self, service_id: UUID, skip: int = 0, limit: int = 100) -> List[Booking]:
+    def get_by_service(
+        self, service_id: UUID, skip: int = 0, limit: int = 100
+    ) -> list[Booking]:
         return (
             self.db.query(Booking)
             .filter(
@@ -135,9 +144,13 @@ class BookingRepository(IBookingRepository):
                     ]
                 ),
                 or_(
-                    and_(Booking.start_date <= start_date, Booking.end_date > start_date),
+                    and_(
+                        Booking.start_date <= start_date, Booking.end_date > start_date
+                    ),
                     and_(Booking.start_date < end_date, Booking.end_date >= end_date),
-                    and_(Booking.start_date >= start_date, Booking.end_date <= end_date),
+                    and_(
+                        Booking.start_date >= start_date, Booking.end_date <= end_date
+                    ),
                 ),
             )
             .first()
@@ -149,11 +162,13 @@ class BookingRepository(IBookingRepository):
         if not booking:
             return False
         booking.status = status.value
-        booking.updated_at = datetime.utcnow()
+        booking.updated_at = datetime.now(UTC)
         self.db.commit()
         return True
 
-    def find_by_status(self, status: BookingStatus, skip: int = 0, limit: int = 100) -> List[Booking]:
+    def find_by_status(
+        self, status: BookingStatus, skip: int = 0, limit: int = 100
+    ) -> list[Booking]:
         return (
             self.db.query(Booking)
             .filter(
@@ -165,7 +180,7 @@ class BookingRepository(IBookingRepository):
             .all()
         )
 
-    def find_user_booking(self, user_id: UUID, booking_id: UUID) -> Optional[Booking]:
+    def find_user_booking(self, user_id: UUID, booking_id: UUID) -> Booking | None:
         return (
             self.db.query(Booking)
             .filter(
@@ -175,4 +190,3 @@ class BookingRepository(IBookingRepository):
             )
             .first()
         )
-

@@ -1,8 +1,8 @@
 """
 Ganitel V2 Backend - Create Booking Use Case
 """
+
 from datetime import date
-from typing import Optional
 from uuid import UUID, uuid4
 
 from app.domain.entities.booking import Booking, BookingStatus
@@ -39,7 +39,7 @@ class CreateBookingUseCase:
         start_date: date,
         end_date: date,
         guests: int,
-        notes: Optional[str] = None,
+        notes: str | None = None,
     ) -> Booking:
         """Create booking after validating inputs"""
 
@@ -104,4 +104,3 @@ class CreateBookingUseCase:
 
         if listing.max_guests and guests > listing.max_guests:
             raise ValidationError("Number of guests exceeds listing capacity")
-

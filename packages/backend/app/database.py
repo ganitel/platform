@@ -1,11 +1,13 @@
 """
 Ganitel V2 Backend - Database Connection and Session Management
 """
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import QueuePool
+
 import logging
+from collections.abc import Generator
+
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import QueuePool
 
 from app.config import get_settings
 
@@ -14,7 +16,7 @@ settings = get_settings()
 
 # Create database engine with connection pooling
 engine = create_engine(
-    settings.DATABASE_URL,
+    settings.DATABASE_URL or "",
     poolclass=QueuePool,
     pool_size=settings.DATABASE_POOL_SIZE,
     max_overflow=settings.DATABASE_MAX_OVERFLOW,
@@ -31,19 +33,21 @@ from app.domain.entities.base import Base
 # Metadata for migrations
 metadata = MetaData()
 
-def get_db() -> Session:
+
+def get_db() -> Generator[Session, None, None]:
     """
     Dependency to get database session
     """
     db = SessionLocal()
     try:
         yield db
-    except Exception as e:
+    except Exception:
         logger.exception("Request failed while database session was active")
         db.rollback()
         raise
     finally:
         db.close()
+
 
 def create_tables():
     """Create all tables (for development only)"""
@@ -51,14 +55,15 @@ def create_tables():
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created")
 
+
 def check_db_connection():
     """Check database connection health"""
     try:
         from sqlalchemy import text
+
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         return True
     except Exception as e:
         logger.error(f"Database connection failed: {e}")
         return False
-

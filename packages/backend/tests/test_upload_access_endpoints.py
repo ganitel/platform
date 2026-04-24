@@ -1,12 +1,12 @@
 """Controlled upload access endpoint tests (TX03)."""
 
-from pathlib import Path
-
 from fastapi import status
 
 
 def test_download_requires_authentication(client):
-    response = client.get("/api/v1/upload/download", params={"file_ref": "/uploads/images/public.jpg"})
+    response = client.get(
+        "/api/v1/upload/download", params={"file_ref": "/uploads/images/public.jpg"}
+    )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -22,7 +22,9 @@ def test_download_rejects_invalid_file_reference(client, auth_token):
     assert response.json()["detail"] == "Invalid file reference"
 
 
-def test_download_denies_unauthorized_user(client, auth_token, sample_provider, db_session, monkeypatch, tmp_path):
+def test_download_denies_unauthorized_user(
+    client, auth_token, sample_provider, db_session, monkeypatch, tmp_path
+):
     from app.infrastructure.services import media_access_service as media_module
 
     file_ref = "/uploads/images/provider-private.jpg"
@@ -52,7 +54,9 @@ def test_download_denies_unauthorized_user(client, auth_token, sample_provider, 
     assert response.json()["detail"] == "Access denied"
 
 
-def test_download_returns_file_for_authorized_user(client, auth_token, sample_user, db_session, monkeypatch, tmp_path):
+def test_download_returns_file_for_authorized_user(
+    client, auth_token, sample_user, db_session, monkeypatch, tmp_path
+):
     from app.infrastructure.services import media_access_service as media_module
 
     file_ref = "/uploads/images/user-owned.jpg"

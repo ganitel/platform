@@ -39,7 +39,21 @@ export const servicesService = {
     };
 
     const response = await apiClient.get('/services/', { params });
-    const data = response.data as any;
+    const rawData = response.data;
+
+    if (Array.isArray(rawData)) {
+      const items = rawData as ServiceListItem[];
+      return { items, page: 1, per_page: items.length, total: items.length, pages: 1 };
+    }
+
+    const data = rawData as {
+      items?: ServiceListItem[];
+      services?: ServiceListItem[];
+      page?: number;
+      per_page?: number;
+      total?: number;
+      pages?: number;
+    };
 
     if (Array.isArray(data?.items)) {
       return data as Paginated<ServiceListItem>;
@@ -47,21 +61,11 @@ export const servicesService = {
 
     if (Array.isArray(data?.services)) {
       return {
-        items: data.services,
+        items: data.services!,
         page: data.page ?? 1,
         per_page: data.per_page ?? params.limit,
-        total: data.total ?? data.services.length,
+        total: data.total ?? data.services!.length,
         pages: data.pages ?? 1,
-      };
-    }
-
-    if (Array.isArray(data)) {
-      return {
-        items: data,
-        page: 1,
-        per_page: data.length,
-        total: data.length,
-        pages: 1,
       };
     }
 

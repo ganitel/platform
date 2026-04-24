@@ -1,4 +1,4 @@
-import { Star, Eye, Heart } from "lucide-react";
+import { Star, Eye } from "lucide-react";
 import { usePropertyWishlistToggle } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -32,8 +32,7 @@ export function SimilarProperties() {
         setProperties([]);
         setErrorMessage("Unable to load similar properties right now.");
       } finally {
-        if (!isMounted) return;
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 

@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Get Service Details Use Case
 """
+
 from uuid import UUID
 
 from app.domain.repositories.service_repository import IServiceRepository
@@ -18,4 +19,3 @@ class GetServiceUseCase:
         if not service:
             raise ServiceNotFoundError()
         return service
-

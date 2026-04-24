@@ -1,4 +1,4 @@
-import { Heart, Star, Bed, Bath, LayoutGrid } from "lucide-react";
+import { Star, Bed, Bath, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { usePropertyWishlistToggle } from "@/hooks";

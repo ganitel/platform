@@ -133,7 +133,7 @@ export const createAxiosInstance = (): AxiosInstance => {
       };
 
       if (error.response?.data) {
-        const data = error.response.data as any;
+        const data = error.response.data as { message?: string; errors?: Record<string, string[]>; code?: string };
         apiError.message = data.message || error.message;
         apiError.errors = data.errors;
         apiError.code = data.code;
@@ -157,8 +157,8 @@ export const handleApiError = (error: unknown): ApiError => {
     return {
       status: error.response?.status || 500,
       message: error.message,
-      errors: (error.response?.data as any)?.errors,
-      code: (error.response?.data as any)?.code,
+      errors: (error.response?.data as { errors?: Record<string, string[]> })?.errors,
+      code: (error.response?.data as { code?: string })?.code,
     };
   }
 

@@ -1,4 +1,4 @@
-import { Sparkles, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import { BookingMethodDrawer } from "./BookingMethodDrawer";
 
 interface BookingFooterProps {
@@ -6,7 +6,7 @@ interface BookingFooterProps {
   nights: number;
   checkIn: string;
   checkOut: string;
-  propertyData?: any;
+  propertyData?: Record<string, unknown>;
   rating?: number;
   discount?: number;
 }
@@ -14,15 +14,14 @@ interface BookingFooterProps {
 export function BookingFooter({
   price,
   nights,
-  checkIn,
-  checkOut,
+  checkIn: _checkIn,
+  checkOut: _checkOut,
   propertyData,
   rating,
-  discount = 0
+  discount = 0,
 }: BookingFooterProps) {
-  const totalPrice = price * nights;
-  const discountedPrice = discount > 0 ? totalPrice * (1 - discount / 100) : totalPrice;
-  const hasDiscount = discount > 0;
+  const baseTotal = price * nights;
+  const totalPrice = discount > 0 ? baseTotal * (1 - discount / 100) : baseTotal;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-ganitel-neutral-3 z-50 transition-all duration-300">
@@ -37,6 +36,12 @@ export function BookingFooter({
               / Night
             </span>
           </div>
+
+          {nights > 0 && (
+            <p className="text-ganitel-text-label text-xs mt-0.5">
+              ${totalPrice.toLocaleString()} total · {nights} night{nights !== 1 ? "s" : ""}
+            </p>
+          )}
 
           <div className="flex items-center gap-1.5 mt-0.5">
             <Star className="w-3 h-3 fill-amber-500 text-amber-500" strokeWidth={0} />

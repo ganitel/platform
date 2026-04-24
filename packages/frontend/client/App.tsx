@@ -32,8 +32,6 @@ import Payments from "./pages/Payments";
 import About from "./pages/About";
 import Help from "./pages/Help";
 import Offers from "./pages/Offers";
-// import Support from "./pages/Support";
-// import Policies from "./pages/Policies";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { BookingProvider } from "./contexts/BookingContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -61,9 +59,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/help" element={<Help />} />
             <Route path="/offers" element={<Offers />} />
-            {/* <Route path="/support" element={<Support />} /> */}
-            {/* <Route path="/policies" element={<Policies />} /> */}
-            
+
             {/* Protected User Routes */}
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/profile/personal-information" element={<ProtectedRoute><PersonalInformation /></ProtectedRoute>} />

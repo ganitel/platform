@@ -1,13 +1,19 @@
 """
 Ganitel V2 Backend - Create Service Use Case
 """
-from typing import Optional, List
+
 from uuid import UUID, uuid4
 
-from app.domain.entities.service import Service, ServiceType, ServiceStatus, AccommodationType
+from app.domain.entities.service import (
+    AccommodationType,
+    Service,
+    ServiceStatus,
+    ServiceType,
+)
 from app.domain.repositories.service_repository import IServiceRepository
 from app.domain.repositories.user_repository import IUserRepository
 from app.exceptions import UserNotFoundError, ValidationError
+
 
 class CreateServiceUseCase:
     """Use case responsible for creating new listings/services"""
@@ -31,20 +37,20 @@ class CreateServiceUseCase:
         address: str,
         base_price: float,
         currency: str = "XAF",
-        accommodation_type: Optional[AccommodationType] = None,
-        short_description: Optional[str] = None,
-        max_guests: Optional[int] = None,
-        bedrooms: Optional[int] = None,
-        bathrooms: Optional[int] = None,
-        beds: Optional[int] = None,
-        amenities: Optional[List[str]] = None,
-        house_rules: Optional[List[str]] = None,
-        images: Optional[List[str]] = None,
-        latitude: Optional[float] = None,
-        longitude: Optional[float] = None,
+        accommodation_type: AccommodationType | None = None,
+        short_description: str | None = None,
+        max_guests: int | None = None,
+        bedrooms: int | None = None,
+        bathrooms: int | None = None,
+        beds: int | None = None,
+        amenities: list[str] | None = None,
+        house_rules: list[str] | None = None,
+        images: list[str] | None = None,
+        latitude: float | None = None,
+        longitude: float | None = None,
         instant_book: bool = False,
         min_stay: int = 1,
-        max_stay: Optional[int] = None,
+        max_stay: int | None = None,
         check_in_time: str = "15:00",
         check_out_time: str = "11:00",
     ) -> Service:
@@ -90,4 +96,3 @@ class CreateServiceUseCase:
         service.generate_slug()
         created = self.service_repository.create(service)
         return created
-

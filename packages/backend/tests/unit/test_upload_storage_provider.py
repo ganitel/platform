@@ -29,7 +29,9 @@ async def test_local_storage_upload_accepts_safe_subdirectory(tmp_path):
         "",
     ],
 )
-async def test_local_storage_upload_rejects_suspicious_subdirectory(tmp_path, subdirectory):
+async def test_local_storage_upload_rejects_suspicious_subdirectory(
+    tmp_path, subdirectory
+):
     provider = LocalStorageProvider(upload_dir=str(tmp_path / "uploads"))
 
     with pytest.raises(ValueError):

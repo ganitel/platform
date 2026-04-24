@@ -8,6 +8,18 @@ import { bookingsService } from '@/services/bookings.service';
 import { Booking, BookingRequest, Paginated } from '@shared/api';
 import { queryClient } from '@/lib/query-client';
 
+interface PricingResult {
+  propertyId: string;
+  checkIn: string;
+  checkOut: string;
+  guests: { adults: number; children: number; infants: number };
+  nights: number;
+  basePrice: number;
+  serviceFee: number;
+  taxes: number;
+  total: number;
+}
+
 /**
  * Structure hiérarchique des clés de requête pour les réservations
  *
@@ -209,7 +221,7 @@ export const useCalculatePricing = (
     infants: number;
   },
   enabled: boolean = true
-): UseQueryResult<any, Error> => {
+): UseQueryResult<PricingResult, Error> => {
   return useQuery({
     queryKey:
       propertyId && checkIn && checkOut

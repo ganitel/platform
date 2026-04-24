@@ -1,27 +1,28 @@
 """
 Ganitel V2 Backend - Bookings Endpoints
 """
+
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.booking_schemas import (
-    BookingCreateRequest,
-    BookingResponse,
-    BookingListResponse,
     BookingCancelResponse,
+    BookingCreateRequest,
+    BookingListResponse,
+    BookingResponse,
 )
 from app.application.use_cases.bookings import (
+    CancelBookingUseCase,
     CreateBookingUseCase,
     GetBookingUseCase,
     GetUserBookingsUseCase,
-    CancelBookingUseCase,
 )
 from app.database import get_db
-from app.dependencies import get_current_traveler, get_current_active_user
+from app.dependencies import get_current_active_user, get_current_traveler
 from app.domain.entities.user import User, UserType
-from app.exceptions import GanitelException
+from app.exceptions import GanitelError
 from app.infrastructure.repositories.booking_repository import BookingRepository
 from app.infrastructure.repositories.service_repository import ServiceRepository
 from app.infrastructure.repositories.user_repository import UserRepository
@@ -39,7 +40,9 @@ async def create_booking(
     booking_repository = BookingRepository(db)
     service_repository = ServiceRepository(db)
     user_repository = UserRepository(db)
-    use_case = CreateBookingUseCase(booking_repository, service_repository, user_repository)
+    use_case = CreateBookingUseCase(
+        booking_repository, service_repository, user_repository
+    )
     try:
         booking = use_case.execute(
             traveler_id=current_user.id,
@@ -49,13 +52,18 @@ async def create_booking(
             guests=payload.guests,
             notes=payload.notes,
         )
-        return BookingResponse.from_orm(booking)
+        return BookingResponse.model_validate(booking)
     except ValueError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid identifier format")
-    except GanitelException as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid identifier format"
+        ) from None
+    except GanitelError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Booking creation failed")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Booking creation failed",
+        ) from None
 
 
 @router.get("/{booking_id}", response_model=BookingResponse)
@@ -72,13 +80,18 @@ async def get_booking_details(
             requester_id=current_user.id,
             is_admin=current_user.user_type == UserType.ADMIN.value,
         )
-        return BookingResponse.from_orm(booking)
+        return BookingResponse.model_validate(booking)
     except ValueError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid booking id")
-    except GanitelException as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid booking id"
+        ) from None
+    except GanitelError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unable to fetch booking")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to fetch booking",
+        ) from None
 
 
 @router.get("/users/me/", response_model=BookingListResponse)
@@ -93,7 +106,7 @@ async def get_my_bookings(
     bookings = use_case.execute(current_user.id, skip=skip, limit=limit)
     total = booking_repository.count({"user_id": current_user.id})
     return BookingListResponse(
-        bookings=[BookingResponse.from_orm(b) for b in bookings],
+        bookings=[BookingResponse.model_validate(b) for b in bookings],
         total=total,
         page=skip // limit + 1,
         per_page=limit,
@@ -115,11 +128,18 @@ async def cancel_booking(
             requester_id=current_user.id,
             is_admin=current_user.user_type == UserType.ADMIN.value,
         )
-        return BookingCancelResponse(message="Booking cancelled successfully", booking=BookingResponse.from_orm(booking))
+        return BookingCancelResponse(
+            message="Booking cancelled successfully",
+            booking=BookingResponse.model_validate(booking),
+        )
     except ValueError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid booking id")
-    except GanitelException as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid booking id"
+        ) from None
+    except GanitelError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unable to cancel booking")
-
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to cancel booking",
+        ) from None

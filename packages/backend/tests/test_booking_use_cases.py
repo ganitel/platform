@@ -1,17 +1,18 @@
 """
 Unit tests for booking use cases
 """
+
 from datetime import date, timedelta
-from uuid import uuid4
 from unittest.mock import MagicMock
+from uuid import uuid4
 
 import pytest
 
-from app.application.use_cases.bookings.create_booking import CreateBookingUseCase
 from app.application.use_cases.bookings.cancel_booking import CancelBookingUseCase
+from app.application.use_cases.bookings.create_booking import CreateBookingUseCase
 from app.domain.entities.booking import BookingStatus
 from app.domain.entities.service import ServiceStatus
-from app.exceptions import BookingConflictError, ValidationError, AuthorizationError
+from app.exceptions import AuthorizationError, BookingConflictError, ValidationError
 
 
 def _build_listing(provider_id):
@@ -113,4 +114,3 @@ def test_cancel_booking_protection():
     # Authorized path
     use_case.execute(uuid4(), booking.user_id)
     booking_repo.update.assert_called_once()
-

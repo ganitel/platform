@@ -1,14 +1,15 @@
 """
 Ganitel V2 Backend - Alembic Environment Configuration
 """
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from alembic import context
+
 import os
 import sys
+from logging.config import fileConfig
 from urllib.parse import quote_plus
+
+from alembic import context
 from dotenv import load_dotenv
+from sqlalchemy import engine_from_config, pool
 
 # Load env file so alembic can connect when run locally via uv
 for env_file in (".env.local", ".env"):
@@ -21,15 +22,6 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 # Import your models here
 from app.domain.entities.base import Base
-from app.domain.entities.user import User
-from app.domain.entities.service import Service
-from app.domain.entities.booking import Booking
-from app.domain.entities.location import Location
-from app.domain.entities.property_type import PropertyType
-from app.domain.entities.property import Property
-from app.domain.entities.amenity_category import AmenityCategory
-from app.domain.entities.amenity import Amenity
-from app.domain.entities.property_amenity import PropertyAmenity
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -49,6 +41,7 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+
 def get_database_url():
     """Get database URL from environment variables"""
     db_host = os.getenv("POSTGRES_SERVER")
@@ -59,7 +52,7 @@ def get_database_url():
 
     if all([db_host, db_name, db_user, db_password]):
         return (
-            f"postgresql://{quote_plus(db_user)}:{quote_plus(db_password)}"
+            f"postgresql://{quote_plus(db_user or '')}:{quote_plus(db_password or '')}"
             f"@{db_host}:{db_port}/{db_name}"
         )
 
@@ -67,9 +60,8 @@ def get_database_url():
     if db_url:
         return db_url
 
-    raise ValueError(
-        "Database configuration is required (POSTGRES_* or DATABASE_URL)"
-    )
+    raise ValueError("Database configuration is required (POSTGRES_* or DATABASE_URL)")
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -104,10 +96,10 @@ def run_migrations_online() -> None:
     """
     # Create a custom configuration dict
     configuration = {
-        'sqlalchemy.url': get_database_url(),
-        'sqlalchemy.poolclass': 'pool.NullPool'
+        "sqlalchemy.url": get_database_url(),
+        "sqlalchemy.poolclass": "pool.NullPool",
     }
-    
+
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",
@@ -115,9 +107,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

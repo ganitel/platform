@@ -95,10 +95,10 @@ export default function SignUp() {
       setOtpError("");
       setOtpValues(Array(OTP_LENGTH).fill(""));
       setResendTimer(RESEND_COUNTDOWN_SECONDS);
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: "Erreur",
-        description: err?.message || "Impossible d'envoyer le code.",
+        description: (err as { message?: string })?.message || "Impossible d'envoyer le code.",
         variant: "destructive",
       });
     } finally {
@@ -113,8 +113,8 @@ export default function SignUp() {
       await auth.verifyOtp(email.trim(), otp);
       // OTP verified — now collect profile info
       setStep("profile");
-    } catch (err: any) {
-      setOtpError(err?.message || "Code incorrect. Veuillez réessayer.");
+    } catch (err: unknown) {
+      setOtpError((err as { message?: string })?.message || "Code incorrect. Veuillez réessayer.");
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -137,10 +137,10 @@ export default function SignUp() {
         city: '',
       });
       setStep("success");
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: "Erreur",
-        description: err?.message || "Erreur lors de l'inscription.",
+        description: (err as { message?: string })?.message || "Erreur lors de l'inscription.",
         variant: "destructive",
       });
     } finally {
@@ -148,15 +148,15 @@ export default function SignUp() {
     }
   };
 
-  const handleGoogleSignUp = async () => {
+  const _handleGoogleSignUp = async () => {
     if (isGoogleLoading) return;
     setIsGoogleLoading(true);
     try {
       await auth.signInWithGoogle();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: "Erreur",
-        description: err?.message || "Connexion Google impossible.",
+        description: (err as { message?: string })?.message || "Connexion Google impossible.",
         variant: "destructive",
       });
       setIsGoogleLoading(false);

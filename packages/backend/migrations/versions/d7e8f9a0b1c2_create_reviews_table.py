@@ -5,17 +5,17 @@ Revises: e4c5d6f7a8b9
 Create Date: 2026-02-15 11:30:00.000000
 
 """
-from typing import Sequence, Union
 
-from alembic import op
+from collections.abc import Sequence
+
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "d7e8f9a0b1c2"
-down_revision: Union[str, None] = "e4c5d6f7a8b9"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "e4c5d6f7a8b9"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -25,8 +25,12 @@ def upgrade() -> None:
         sa.Column("user_id", sa.UUID(), nullable=False),
         sa.Column("booking_id", sa.UUID(), nullable=True),
         sa.Column("overall_rating", sa.Numeric(precision=3, scale=2), nullable=False),
-        sa.Column("cleanliness_rating", sa.Numeric(precision=3, scale=2), nullable=True),
-        sa.Column("communication_rating", sa.Numeric(precision=3, scale=2), nullable=True),
+        sa.Column(
+            "cleanliness_rating", sa.Numeric(precision=3, scale=2), nullable=True
+        ),
+        sa.Column(
+            "communication_rating", sa.Numeric(precision=3, scale=2), nullable=True
+        ),
         sa.Column("checkin_rating", sa.Numeric(precision=3, scale=2), nullable=True),
         sa.Column("accuracy_rating", sa.Numeric(precision=3, scale=2), nullable=True),
         sa.Column("location_rating", sa.Numeric(precision=3, scale=2), nullable=True),
@@ -48,8 +52,12 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("service_id", "user_id", name="uq_review_one_per_user"),
     )
-    op.create_index(op.f("ix_reviews_booking_id"), "reviews", ["booking_id"], unique=False)
-    op.create_index(op.f("ix_reviews_service_id"), "reviews", ["service_id"], unique=False)
+    op.create_index(
+        op.f("ix_reviews_booking_id"), "reviews", ["booking_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_reviews_service_id"), "reviews", ["service_id"], unique=False
+    )
     op.create_index(op.f("ix_reviews_user_id"), "reviews", ["user_id"], unique=False)
 
 

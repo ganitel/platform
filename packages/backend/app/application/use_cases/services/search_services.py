@@ -1,12 +1,13 @@
 """
 Ganitel V2 Backend - Search Services Use Case
 """
-from typing import Optional, List, Dict, Any
+
 from datetime import date
-from uuid import UUID
+from typing import Any
 
 from app.domain.entities.service import ServiceType
 from app.domain.repositories.service_repository import IServiceRepository
+
 
 class SearchServicesUseCase:
     """Use case for searching services with various filters"""
@@ -16,23 +17,23 @@ class SearchServicesUseCase:
 
     def execute(
         self,
-        query: Optional[str] = None,
-        service_type: Optional[ServiceType] = None,
-        country: Optional[str] = None,
-        city: Optional[str] = None,
-        min_price: Optional[float] = None,
-        max_price: Optional[float] = None,
-        amenities: Optional[List[str]] = None,
-        max_guests: Optional[int] = None,
-        check_in: Optional[date] = None,
-        check_out: Optional[date] = None,
-        latitude: Optional[float] = None,
-        longitude: Optional[float] = None,
-        radius_km: Optional[float] = None,
+        query: str | None = None,
+        service_type: ServiceType | None = None,
+        country: str | None = None,
+        city: str | None = None,
+        min_price: float | None = None,
+        max_price: float | None = None,
+        amenities: list[str] | None = None,
+        max_guests: int | None = None,
+        check_in: date | None = None,
+        check_out: date | None = None,
+        latitude: float | None = None,
+        longitude: float | None = None,
+        radius_km: float | None = None,
         sort_by: str = "relevance",
         skip: int = 0,
         limit: int = 20,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         services = []
         total = 0
 
@@ -50,7 +51,7 @@ class SearchServicesUseCase:
             )
             total = self.service_repository.count({"status": "active"})
         elif latitude and longitude and radius_km:
-            services = self.service_repository.get_nearby_services(
+            services = self.service_repository.get_nearby_services(  # ty: ignore[unresolved-attribute]
                 latitude=latitude,
                 longitude=longitude,
                 radius_km=radius_km,
@@ -79,24 +80,28 @@ class SearchServicesUseCase:
                 criteria["country"] = country
             if city:
                 criteria["city"] = city
-            
-            services = self.service_repository.find_by_criteria(criteria, skip=skip, limit=limit)
+
+            services = self.service_repository.find_by_criteria(
+                criteria, skip=skip, limit=limit
+            )
             total = self.service_repository.count(criteria)
 
         # Convert services to dict format
         services_data = []
         for service in services:
-            services_data.append({
-                "id": str(service.id),
-                "title": service.title,
-                "description": service.description,
-                "service_type": service.service_type,
-                "base_price": float(service.base_price),
-                "currency": service.currency,
-                "country": service.country,
-                "city": service.city,
-                "images": service.images or [],
-            })
+            services_data.append(
+                {
+                    "id": str(service.id),
+                    "title": service.title,
+                    "description": service.description,
+                    "service_type": service.service_type,
+                    "base_price": float(service.base_price),
+                    "currency": service.currency,
+                    "country": service.country,
+                    "city": service.city,
+                    "images": service.images or [],
+                }
+            )
 
         pages = (total + limit - 1) // limit if limit > 0 else 1
         current_page = (skip // limit) + 1 if limit > 0 else 1
@@ -115,10 +120,13 @@ class SearchServicesUseCase:
                 "query": query,
                 "service_type": service_type.value if service_type else None,
                 "location": f"{city}, {country}" if city and country else None,
-                "price_range": f"{min_price}-{max_price}" if min_price and max_price else None,
+                "price_range": f"{min_price}-{max_price}"
+                if min_price and max_price
+                else None,
                 "amenities": amenities,
                 "guests": max_guests,
-                "dates": f"{check_in} to {check_out}" if check_in and check_out else None,
+                "dates": f"{check_in} to {check_out}"
+                if check_in and check_out
+                else None,
             },
         }
-

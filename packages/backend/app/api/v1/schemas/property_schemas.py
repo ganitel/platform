@@ -1,17 +1,19 @@
 """
 Ganitel V2 Backend - Property API Schemas
 """
-from typing import Optional, List, Dict, Any
+
 from datetime import datetime
-from pydantic import BaseModel, validator
 from uuid import UUID
+
+from pydantic import BaseModel, field_validator
 
 
 class LocationResponse(BaseModel):
     """Location response schema"""
+
     id: UUID
     name: str
-    region: Optional[str] = None
+    region: str | None = None
 
     class Config:
         from_attributes = True
@@ -19,6 +21,7 @@ class LocationResponse(BaseModel):
 
 class PropertyTypeResponse(BaseModel):
     """Property type response schema"""
+
     id: UUID
     name: str
 
@@ -28,10 +31,11 @@ class PropertyTypeResponse(BaseModel):
 
 class AmenityResponse(BaseModel):
     """Amenity response schema"""
+
     id: UUID
     name_en: str
     name_fr: str
-    icon_path: Optional[str] = None
+    icon_path: str | None = None
 
     class Config:
         from_attributes = True
@@ -39,6 +43,7 @@ class AmenityResponse(BaseModel):
 
 class PropertyAmenityResponse(BaseModel):
     """Property amenity response schema"""
+
     amenity: AmenityResponse
 
     class Config:
@@ -47,6 +52,7 @@ class PropertyAmenityResponse(BaseModel):
 
 class ProximityCategoryResponse(BaseModel):
     """Proximity item response"""
+
     destination_name: str
     minutes_away: int
     travel_mode: str
@@ -58,129 +64,141 @@ class ProximityCategoryResponse(BaseModel):
 # Create/Update Schemas
 class PropertyCreateRequest(BaseModel):
     """Create property request schema"""
+
     title: str
     description: str
-    short_description: Optional[str] = None
+    short_description: str | None = None
     location_id: UUID
     property_type_id: UUID
     address: str
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
+    latitude: float | None = None
+    longitude: float | None = None
     base_price: float
     currency: str = "XAF"
     price_per: str = "night"
-    max_guests: Optional[int] = None
-    bedrooms: Optional[int] = None
-    bathrooms: Optional[int] = None
-    beds: Optional[int] = None
-    living_rooms: Optional[int] = None
-    balconies: Optional[int] = None
-    amenity_ids: Optional[List[UUID]] = []
-    images: Optional[List[str]] = []
+    max_guests: int | None = None
+    bedrooms: int | None = None
+    bathrooms: int | None = None
+    beds: int | None = None
+    living_rooms: int | None = None
+    balconies: int | None = None
+    amenity_ids: list[UUID] | None = []
+    images: list[str] | None = []
     instant_book: bool = False
     min_stay: int = 1
-    max_stay: Optional[int] = None
+    max_stay: int | None = None
     check_in_time: str = "15:00"
     check_out_time: str = "11:00"
 
-    @validator('title')
+    @field_validator("title")
+    @classmethod
     def validate_title(cls, v):
         if len(v.strip()) < 10:
-            raise ValueError('Title must be at least 10 characters long')
+            raise ValueError("Title must be at least 10 characters long")
         if len(v.strip()) > 200:
-            raise ValueError('Title must be less than 200 characters')
+            raise ValueError("Title must be less than 200 characters")
         return v.strip()
 
-    @validator('description')
+    @field_validator("description")
+    @classmethod
     def validate_description(cls, v):
         if len(v.strip()) < 50:
-            raise ValueError('Description must be at least 50 characters long')
+            raise ValueError("Description must be at least 50 characters long")
         return v.strip()
 
-    @validator('base_price')
+    @field_validator("base_price")
+    @classmethod
     def validate_price(cls, v):
         if v <= 0:
-            raise ValueError('Base price must be greater than 0')
+            raise ValueError("Base price must be greater than 0")
         if v > 10000000:
-            raise ValueError('Base price is too high')
+            raise ValueError("Base price is too high")
         return v
 
-    @validator('latitude')
+    @field_validator("latitude")
+    @classmethod
     def validate_latitude(cls, v):
         if v is not None and (v < -90 or v > 90):
-            raise ValueError('Latitude must be between -90 and 90')
+            raise ValueError("Latitude must be between -90 and 90")
         return v
 
-    @validator('longitude')
+    @field_validator("longitude")
+    @classmethod
     def validate_longitude(cls, v):
         if v is not None and (v < -180 or v > 180):
-            raise ValueError('Longitude must be between -180 and 180')
+            raise ValueError("Longitude must be between -180 and 180")
         return v
 
-    @validator('max_guests', 'bedrooms', 'bathrooms', 'beds', 'living_rooms', 'balconies')
+    @field_validator(
+        "max_guests", "bedrooms", "bathrooms", "beds", "living_rooms", "balconies"
+    )
+    @classmethod
     def validate_positive_integers(cls, v):
         if v is not None and v < 0:
-            raise ValueError('Value cannot be negative')
+            raise ValueError("Value cannot be negative")
         return v
 
-    @validator('min_stay')
+    @field_validator("min_stay")
+    @classmethod
     def validate_min_stay(cls, v):
         if v < 1:
-            raise ValueError('Minimum stay must be at least 1')
+            raise ValueError("Minimum stay must be at least 1")
         return v
 
 
 class PropertyUpdateRequest(BaseModel):
     """Update property request schema"""
-    title: Optional[str] = None
-    description: Optional[str] = None
-    short_description: Optional[str] = None
-    location_id: Optional[UUID] = None
-    property_type_id: Optional[UUID] = None
-    address: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    base_price: Optional[float] = None
-    currency: Optional[str] = None
-    price_per: Optional[str] = None
-    max_guests: Optional[int] = None
-    bedrooms: Optional[int] = None
-    bathrooms: Optional[int] = None
-    beds: Optional[int] = None
-    living_rooms: Optional[int] = None
-    balconies: Optional[int] = None
-    amenity_ids: Optional[List[UUID]] = None
-    images: Optional[List[str]] = None
-    instant_book: Optional[bool] = None
-    min_stay: Optional[int] = None
-    max_stay: Optional[int] = None
-    check_in_time: Optional[str] = None
-    check_out_time: Optional[str] = None
+
+    title: str | None = None
+    description: str | None = None
+    short_description: str | None = None
+    location_id: UUID | None = None
+    property_type_id: UUID | None = None
+    address: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    base_price: float | None = None
+    currency: str | None = None
+    price_per: str | None = None
+    max_guests: int | None = None
+    bedrooms: int | None = None
+    bathrooms: int | None = None
+    beds: int | None = None
+    living_rooms: int | None = None
+    balconies: int | None = None
+    amenity_ids: list[UUID] | None = None
+    images: list[str] | None = None
+    instant_book: bool | None = None
+    min_stay: int | None = None
+    max_stay: int | None = None
+    check_in_time: str | None = None
+    check_out_time: str | None = None
 
 
 # Response Schemas
 class PropertyBaseResponse(BaseModel):
     """Base property response schema"""
+
     id: UUID
     title: str
     description: str
-    short_description: Optional[str]
+    short_description: str | None
     address: str
-    latitude: Optional[float]
-    longitude: Optional[float]
+    latitude: float | None
+    longitude: float | None
     base_price: float
     currency: str
     price_per: str
-    max_guests: Optional[int]
-    bedrooms: Optional[int]
-    bathrooms: Optional[int]
-    beds: Optional[int]
-    living_rooms: Optional[int]
-    balconies: Optional[int]
-    images: Optional[List[str]]
+    max_guests: int | None
+    bedrooms: int | None
+    bathrooms: int | None
+    beds: int | None
+    living_rooms: int | None
+    balconies: int | None
+    images: list[str] | None
     instant_book: bool
     min_stay: int
-    max_stay: Optional[int]
+    max_stay: int | None
     check_in_time: str
     check_out_time: str
     created_at: datetime
@@ -192,9 +210,10 @@ class PropertyBaseResponse(BaseModel):
 
 class PropertyResponse(PropertyBaseResponse):
     """Full property response schema with relationships"""
+
     location: LocationResponse
     property_type: PropertyTypeResponse
-    property_amenities: List[PropertyAmenityResponse] = []
+    property_amenities: list[PropertyAmenityResponse] = []
 
     class Config:
         from_attributes = True
@@ -202,7 +221,8 @@ class PropertyResponse(PropertyBaseResponse):
 
 class PropertyListResponse(BaseModel):
     """Property list response schema"""
-    items: List[PropertyResponse]
+
+    items: list[PropertyResponse]
     total: int
     page: int
     per_page: int
@@ -214,6 +234,7 @@ class PropertyListResponse(BaseModel):
 
 class PropertyDetailResponse(PropertyResponse):
     """Property detail response with additional fields"""
+
     provider_id: UUID
 
     class Config:
@@ -222,6 +243,7 @@ class PropertyDetailResponse(PropertyResponse):
 
 class PropertyCreateResponse(PropertyResponse):
     """Property create response"""
+
     provider_id: UUID
 
     class Config:
@@ -230,6 +252,7 @@ class PropertyCreateResponse(PropertyResponse):
 
 class PropertyUpdateResponse(PropertyResponse):
     """Property update response"""
+
     pass
 
     class Config:
@@ -238,14 +261,15 @@ class PropertyUpdateResponse(PropertyResponse):
 
 class PropertySimpleResponse(BaseModel):
     """Simple property response for listings"""
+
     id: UUID
     title: str
-    short_description: Optional[str]
+    short_description: str | None
     base_price: float
     currency: str
     location: LocationResponse
     property_type: PropertyTypeResponse
-    images: Optional[List[str]]
+    images: list[str] | None
     instant_book: bool
 
     class Config:
@@ -254,4 +278,5 @@ class PropertySimpleResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     """Message response schema"""
+
     message: str

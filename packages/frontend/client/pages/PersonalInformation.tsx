@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { useProfile } from "@/hooks/useProfile";
@@ -7,11 +6,6 @@ import { Loader2, ArrowLeft, Edit, Mail, Phone, MapPin, User } from "lucide-reac
 export default function PersonalInformation() {
   const navigate = useNavigate();
   const { data: profile, isLoading, isError, refetch } = useProfile();
-
-  const fullName = useMemo(() => {
-    const name = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ");
-    return name || profile?.email || "User";
-  }, [profile]);
 
   if (isLoading) {
     return (
@@ -65,7 +59,7 @@ export default function PersonalInformation() {
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
         {/* Fields */}
         <div className="space-y-3">
-          {fields.map((field, i) => (
+          {fields.map((field) => (
             <div
               key={field.label}
               className="flex items-center justify-between px-4 py-3.5 rounded-xl"

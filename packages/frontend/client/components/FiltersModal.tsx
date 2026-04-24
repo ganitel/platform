@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, ChevronDown, Minus, Plus, ArrowRight } from "lucide-react";
-import { Button } from "./ui/button";
+import { X, Minus, Plus, ArrowRight } from "lucide-react";
 import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
 import {
@@ -9,12 +8,11 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "./ui/accordion";
-import { cn } from "@/lib/utils";
 
 interface FiltersModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onApply: (filters: any) => void;
+    onApply: (filters: Record<string, unknown>) => void;
     resultsCount?: number;
 }
 

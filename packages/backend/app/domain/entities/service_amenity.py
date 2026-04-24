@@ -1,14 +1,18 @@
 """
 Ganitel V2 Backend - Service Amenity Entity
 """
-from sqlalchemy import Column, String, Text, Integer
-from enum import Enum
+
+from enum import StrEnum
+
+from sqlalchemy import Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.domain.entities.base import AuditableEntity, SoftDeleteEntity
 
 
-class AmenityType(str, Enum):
+class AmenityType(StrEnum):
     """Amenity type enumeration"""
+
     BASIC = "basic"
     PREMIUM = "premium"
     SAFETY = "safety"
@@ -25,18 +29,24 @@ class ServiceAmenity(AuditableEntity, SoftDeleteEntity):
     """
     Service Amenity entity for service amenities/features
     """
+
     __tablename__ = "service_amenities"
-    
+
     # Basic Information
-    name = Column(String(100), nullable=False, unique=True, index=True)
-    slug = Column(String(100), unique=True, index=True, nullable=True)
-    description = Column(Text, nullable=True)
-    icon = Column(String(100), nullable=True)
-    amenity_type = Column(String(50), default=AmenityType.BASIC.value, nullable=False, index=True)
-    
+    name: Mapped[str] = mapped_column(
+        String(100), nullable=False, unique=True, index=True
+    )
+    slug: Mapped[str | None] = mapped_column(
+        String(100), unique=True, index=True, nullable=True
+    )
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    icon: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    amenity_type: Mapped[str] = mapped_column(
+        String(50), default=AmenityType.BASIC.value, nullable=False, index=True
+    )
+
     # Display
-    display_order = Column(Integer, default=0, nullable=False)
-    
+    display_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
     def __repr__(self):
         return f"<ServiceAmenity(id={self.id}, name={self.name}, type={self.amenity_type})>"
-

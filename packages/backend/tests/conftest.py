@@ -2,8 +2,9 @@
 Ganitel V2 Backend - Pytest Configuration and Fixtures
 T12: Sécurité des tests + Factory App uniforme
 """
-import sys
+
 import os
+import sys
 from pathlib import Path
 
 # Add root directory to Python path FIRST
@@ -18,47 +19,58 @@ sys.path.insert(0, str(root_dir))
 _bootstrap_environment = os.getenv("ENVIRONMENT", "local").strip().lower()
 if _bootstrap_environment == "development":
     _bootstrap_environment = "local"
-if _bootstrap_environment not in {"staging", "production"} and os.getenv("TESTING") is None:
+if (
+    _bootstrap_environment not in {"staging", "production"}
+    and os.getenv("TESTING") is None
+):
     os.environ["TESTING"] = "true"
+
 
 # Create a no-op limiter that disables rate limiting
 class NoOpLimiter:
     """A limiter that does nothing - used for testing"""
+
     def __init__(self):
         self.enabled = False
-    
+
     def limit(self, limit_string: str):
         """Return a decorator that doesn't actually limit"""
+
         def decorator(func):
             return func
+
         return decorator
-    
+
     def __call__(self, *args, **kwargs):
         pass
-    
+
     def reset(self):
         pass
-    
+
     def __iter__(self):
         """Support iteration"""
         return iter([])
-    
+
     def __getattr__(self, name):
         """Return self for any other attribute to allow chaining"""
         return self
 
+
 # Replace the limiter in app.core.ratelimit BEFORE it gets used
 import app.core.ratelimit
-app.core.ratelimit.limiter = NoOpLimiter()
+
+app.core.ratelimit.limiter = NoOpLimiter()  # ty: ignore[invalid-assignment]
 
 # Import pytest and other modules after disabling rate limiting
+from collections.abc import Callable, Generator
+from typing import ClassVar
+from unittest.mock import Mock
+
 import pytest
-from typing import Generator, Callable
-from sqlalchemy import create_engine, MetaData, inspect
-from sqlalchemy.orm import sessionmaker, Session
-from fastapi.testclient import TestClient
-from unittest.mock import Mock, MagicMock
 import redis
+from fastapi.testclient import TestClient
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 # T12: Check that tests are running in TESTING mode
 # This prevents accidental test execution against production
@@ -68,12 +80,8 @@ if _ENVIRONMENT == "development":
     _ENVIRONMENT = "local"
 
 if _ENVIRONMENT in ["production", "staging"] and not _TESTING_ENV:
-    pytest.exit(
-        "❌ SECURITY ERROR: Tests cannot run without TESTING=true environment variable\n"
-        "   This prevents accidentally running tests against production databases.\n"
-        "   Please set: export TESTING=true",
-        1
-    )
+    _msg = "❌ SECURITY ERROR: Tests cannot run without TESTING=true environment variable\n   This prevents accidentally running tests against production databases.\n   Please set: export TESTING=true"
+    pytest.exit(_msg, 1)  # ty: ignore[invalid-argument-type,too-many-positional-arguments]
 
 
 def pytest_collection_modifyitems(config, items):
@@ -96,31 +104,32 @@ def pytest_collection_modifyitems(config, items):
         else:
             item.add_marker(pytest.mark.integration)
 
+
 # Add root directory to Python path
 root_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(root_dir))
 
-from app.main import app
+from datetime import date, timedelta
+from uuid import uuid4
+
+from passlib.context import CryptContext
+
 from app.database import Base, get_db
-from app.config import get_settings
+from app.domain.entities.booking import Booking, BookingStatus
+from app.domain.entities.service import (
+    AccommodationType,
+    Service,
+    ServiceStatus,
+    ServiceType,
+)
 
 # Import entities - will use Base from app.domain.entities.base
 # For SQLite compatibility, we'll use the actual Base which should work with PostgreSQL
-from app.domain.entities.user import User, UserType, UserStatus
-from app.domain.entities.service import Service, ServiceType, ServiceStatus, AccommodationType
-from app.domain.entities.booking import Booking, BookingStatus
-from app.domain.entities.location import Location
-from app.domain.entities.property_type import PropertyType
-from app.domain.entities.property import Property
-from app.domain.entities.amenity_category import AmenityCategory
-from app.domain.entities.amenity import Amenity
-from app.domain.entities.property_amenity import PropertyAmenity
-from app.infrastructure.repositories.user_repository import UserRepository
-from app.infrastructure.repositories.service_repository import ServiceRepository
+from app.domain.entities.user import User, UserStatus, UserType
 from app.infrastructure.repositories.booking_repository import BookingRepository
-from passlib.context import CryptContext
-from uuid import uuid4
-from datetime import date, datetime, timedelta
+from app.infrastructure.repositories.service_repository import ServiceRepository
+from app.infrastructure.repositories.user_repository import UserRepository
+from app.main import app
 
 
 def pytest_configure(config):
@@ -129,11 +138,14 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "integration: marks tests as integration tests")
     config.addinivalue_line("markers", "unit: marks tests as unit tests")
     config.addinivalue_line("markers", "e2e: marks tests as end-to-end tests")
-    config.addinivalue_line("markers", "external: marks tests that require external services")
+    config.addinivalue_line(
+        "markers", "external: marks tests that require external services"
+    )
     config.addinivalue_line("markers", "payment: marks tests related to payments")
     config.addinivalue_line("markers", "auth: marks tests related to authentication")
     config.addinivalue_line("markers", "booking: marks tests related to bookings")
     config.addinivalue_line("markers", "service: marks tests related to services")
+
 
 # Test database URL - PostgreSQL only (no SQLite fallback)
 
@@ -147,7 +159,9 @@ ENVIRONMENT = os.getenv("ENVIRONMENT", "local").lower()
 if ENVIRONMENT == "development":
     ENVIRONMENT = "local"
 
-DEFAULT_TEST_DB_HOST = "db-test" if IN_DOCKER else os.getenv("TEST_DB_HOST", "localhost")
+DEFAULT_TEST_DB_HOST = (
+    "db-test" if IN_DOCKER else os.getenv("TEST_DB_HOST", "localhost")
+)
 DEFAULT_TEST_DB_PORT = "5432" if IN_DOCKER else os.getenv("TEST_POSTGRES_PORT", "5433")
 
 TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")
@@ -156,31 +170,31 @@ if not TEST_DATABASE_URL:
     POSTGRES_PORT = os.getenv("POSTGRES_PORT", DEFAULT_TEST_DB_PORT)
     POSTGRES_USER = os.getenv("POSTGRES_USER", "ganitel_user")
     POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "ganitel_local_password_2024")
-    POSTGRES_DB = os.getenv("TEST_POSTGRES_DB", os.getenv("POSTGRES_DB", "ganitel_test_db"))
-    TEST_DATABASE_URL = (
-        f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    POSTGRES_DB = os.getenv(
+        "TEST_POSTGRES_DB", os.getenv("POSTGRES_DB", "ganitel_test_db")
     )
+    TEST_DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
 if not TEST_DATABASE_URL.startswith("postgresql://"):
     pytest.exit(
-        "❌ Invalid TEST_DATABASE_URL: tests must run on PostgreSQL (postgresql://...).",
-        1
+        "❌ Invalid TEST_DATABASE_URL: tests must run on PostgreSQL (postgresql://...).",  # ty: ignore[invalid-argument-type]
+        1,  # ty: ignore[too-many-positional-arguments]
     )
 
 try:
     test_engine = create_engine(TEST_DATABASE_URL)
     with test_engine.connect() as conn:
         from sqlalchemy import text
+
         conn.execute(text("SELECT 1"))
 except Exception as e:
     pytest.exit(
-        "❌ PostgreSQL test database is required and unreachable. "
-        f"Connection target: {TEST_DATABASE_URL}. Error: {e}",
-        1,
+        f"❌ PostgreSQL test database is required and unreachable. Connection target: {TEST_DATABASE_URL}. Error: {e}",  # ty: ignore[invalid-argument-type]
+        1,  # ty: ignore[too-many-positional-arguments]
     )
 
 print(
-    f"ℹ️  Running tests in {ENVIRONMENT} using PostgreSQL: "
+    f"[i] Running tests in {ENVIRONMENT} using PostgreSQL: "
     f"{TEST_DATABASE_URL.split('@')[1] if '@' in TEST_DATABASE_URL else TEST_DATABASE_URL}"
 )
 
@@ -197,21 +211,22 @@ class TestAppFactory:
     Factory pour créer une instance d'app pour les tests
     Uniformise l'utilisation de l'app à travers performance, security, et autres suites
     """
-    _app_instance = None
-    _original_overrides = {}
-    
+
+    _app_instance: ClassVar = None
+    _original_overrides: ClassVar[dict] = {}
+
     @classmethod
     def create_app(cls) -> Callable:
         """Crée une nouvelle instance d'app pour tests"""
         if cls._app_instance is None:
             cls._app_instance = app
-        return cls._app_instance
-    
+        return cls._app_instance  # ty: ignore[invalid-return-type]
+
     @classmethod
     def reset(cls):
         """Reset la factory et restaure les overrides"""
         cls._app_instance = None
-        app.dependency_overrides.clear()
+        app.dependency_overrides.clear()  # ty: ignore[unresolved-attribute]
 
 
 # T12: Database Cleanup via Metadata
@@ -224,20 +239,21 @@ def cleanup_database_metadata(engine):
     try:
         metadata = MetaData()
         metadata.reflect(bind=engine)
-        
-        if engine.dialect.name == 'postgresql':
+
+        if engine.dialect.name == "postgresql":
             with engine.connect() as conn:
                 from sqlalchemy import text
+
                 # Désactive temporairement les vérifications de clés étrangères
                 conn.execute(text("SET session_replication_role = 'replica';"))
-                
+
                 # Truncate toutes les tables reflétées
                 for table_name in reversed(metadata.sorted_tables):
                     try:
                         conn.execute(text(f"TRUNCATE TABLE {table_name.name} CASCADE;"))
                     except Exception:
                         pass
-                
+
                 # Réactive les vérifications de clés étrangères
                 conn.execute(text("SET session_replication_role = 'origin';"))
                 conn.commit()
@@ -245,13 +261,14 @@ def cleanup_database_metadata(engine):
             # Pour SQLite, utilise DELETE
             with engine.connect() as conn:
                 from sqlalchemy import text
+
                 for table_name in reversed(metadata.sorted_tables):
                     try:
                         conn.execute(text(f"DELETE FROM {table_name.name};"))
                     except Exception:
                         pass
                 conn.commit()
-    except Exception as e:
+    except Exception:
         # Connexion peut échouer, c'est OK pour certains tests
         pass
 
@@ -307,9 +324,9 @@ def setup_test_database():
     # Crée toutes les tables
     Base.metadata.create_all(bind=test_engine)
     ensure_booking_exclusion_constraint(test_engine)
-    
+
     yield
-    
+
     # Nettoyage en fin de suite de tests
     cleanup_database_metadata(test_engine)
     try:
@@ -336,7 +353,7 @@ def db_session() -> Generator[Session, None, None]:
     """
     # Create session
     session = TestSessionLocal()
-    
+
     try:
         yield session
         # Only commit if no exception occurred
@@ -353,11 +370,11 @@ def db_session() -> Generator[Session, None, None]:
 
 
 @pytest.fixture
-def client(db_session: Session) -> TestClient:
+def client(db_session: Session) -> TestClient:  # ty: ignore[invalid-return-type]
     """
     T12: Fixture client utilisant la factory app uniforme
     Crée un TestClient avec la même instance d'app pour toutes les suites de tests
-    
+
     Utilisé par:
     - tests/security/test_security.py
     - tests/performance/test_api_performance.py
@@ -365,23 +382,23 @@ def client(db_session: Session) -> TestClient:
     """
     # Crée l'app via la factory
     test_app = TestAppFactory.create_app()
-    
+
     # Override la dépendance du DB
     def override_get_db():
         try:
             yield db_session
         finally:
             pass
-    
-    test_app.dependency_overrides[get_db] = override_get_db
-    
+
+    test_app.dependency_overrides[get_db] = override_get_db  # ty: ignore[unresolved-attribute]
+
     # Crée le client avec l'app
     test_client = TestClient(test_app)
-    
+
     yield test_client
-    
+
     # Nettoyage après le test
-    test_app.dependency_overrides.clear()
+    test_app.dependency_overrides.clear()  # ty: ignore[unresolved-attribute]
     TestAppFactory.reset()
 
 
@@ -411,8 +428,7 @@ def mock_redis() -> Mock:
 
     def mock_getdel(key):
         value = storage.get(key)
-        if key in storage:
-            del storage[key]
+        storage.pop(key, None)
         return value
 
     mock.get.side_effect = mock_get
@@ -572,7 +588,9 @@ def sample_service_2(db_session: Session, sample_provider: User) -> Service:
 
 
 @pytest.fixture
-def sample_booking(db_session: Session, sample_user: User, sample_service: Service) -> Booking:
+def sample_booking(
+    db_session: Session, sample_user: User, sample_service: Service
+) -> Booking:
     """
     Create a sample booking for testing
     """
@@ -580,7 +598,7 @@ def sample_booking(db_session: Session, sample_user: User, sample_service: Servi
     end_date = start_date + timedelta(days=3)
     nights = (end_date - start_date).days
     total_amount = float(sample_service.base_price) * nights
-    
+
     booking = Booking(
         id=uuid4(),
         user_id=sample_user.id,
@@ -630,10 +648,7 @@ def auth_token(client: TestClient, sample_user: User) -> str:
     """
     response = client.post(
         "/api/v1/auth/login",
-        json={
-            "identifier": sample_user.email,
-            "password": "password123"
-        }
+        json={"identifier": sample_user.email, "password": "password123"},
     )
     if response.status_code == 200:
         return response.json()["access_token"]
@@ -647,10 +662,7 @@ def provider_token(client: TestClient, sample_provider: User) -> str:
     """
     response = client.post(
         "/api/v1/auth/login",
-        json={
-            "identifier": sample_provider.email,
-            "password": "password123"
-        }
+        json={"identifier": sample_provider.email, "password": "password123"},
     )
     if response.status_code == 200:
         return response.json()["access_token"]
@@ -664,10 +676,7 @@ def admin_token(client: TestClient, sample_admin: User) -> str:
     """
     response = client.post(
         "/api/v1/auth/login",
-        json={
-            "identifier": sample_admin.email,
-            "password": "password123"
-        }
+        json={"identifier": sample_admin.email, "password": "password123"},
     )
     if response.status_code == 200:
         return response.json()["access_token"]
@@ -707,7 +716,13 @@ def test_admin(sample_admin: User) -> User:
 
 
 @pytest.fixture
-def test_data(db_session: Session, sample_user: User, sample_provider: User, sample_service: Service, sample_booking: Booking):
+def test_data(
+    db_session: Session,
+    sample_user: User,
+    sample_provider: User,
+    sample_service: Service,
+    sample_booking: Booking,
+):
     """
     Create test data for performance and security tests
     """
@@ -716,28 +731,30 @@ def test_data(db_session: Session, sample_user: User, sample_provider: User, sam
         "traveler": sample_user,  # Alias for compatibility
         "provider": sample_provider,
         "service": sample_service,
-        "booking": sample_booking
+        "booking": sample_booking,
     }
 
 
 @pytest.fixture
-def client_no_rate_limit(db_session: Session) -> TestClient:
+def client_no_rate_limit(db_session: Session) -> TestClient:  # ty: ignore[invalid-return-type]
     """
     Create a test client with database override and rate limiting disabled
     This is useful for testing endpoints that have rate limiting decorators
     """
     from unittest.mock import patch
-    
+
     def override_get_db():
         try:
             yield db_session
         finally:
             pass
-    
-    app.dependency_overrides[get_db] = override_get_db
-    
+
+    app.dependency_overrides[get_db] = override_get_db  # ty: ignore[unresolved-attribute]
+
     # Mock the limiter.limit decorator to pass through the function unchanged
-    with patch("app.core.ratelimit.limiter.limit", lambda limit_string: lambda func: func):
-        yield TestClient(app)
-    
-    app.dependency_overrides.clear()
+    with patch(
+        "app.core.ratelimit.limiter.limit", lambda limit_string: lambda func: func
+    ):
+        yield TestClient(app)  # ty: ignore[invalid-argument-type]
+
+    app.dependency_overrides.clear()  # ty: ignore[unresolved-attribute]

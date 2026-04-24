@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { X, ArrowLeft, Calendar, Users, Bed, Search, SlidersHorizontal, Binoculars, MapPin } from "lucide-react";
+import { X, ArrowLeft, Calendar, Users, Bed, SlidersHorizontal, Binoculars, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Calendar as CalendarComponent } from "./ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { MOCK_PROPERTIES } from "@/mockData";
@@ -140,7 +138,7 @@ export function SearchModal({
         setSearchParams({ ...searchParams, rooms: count });
     };
 
-    const handleApplyFilters = (filters: any) => {
+    const handleApplyFilters = (filters: Record<string, unknown>) => {
         console.log("Applied filters:", filters);
         // Here you would normally update the search params or state
         handleSearch(); // For now, just trigger search

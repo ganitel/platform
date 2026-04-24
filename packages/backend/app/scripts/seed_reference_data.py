@@ -7,9 +7,9 @@ Seeder idempotent des données de référence:
 - amenity categories
 - amenities
 """
+
 import sys
 from pathlib import Path
-from typing import Dict
 from uuid import uuid4
 
 from sqlalchemy import or_
@@ -21,13 +21,10 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.database import SessionLocal
+from app.domain.entities.amenity import Amenity
+from app.domain.entities.amenity_category import AmenityCategory
 from app.domain.entities.location import Location
 from app.domain.entities.property_type import PropertyType
-from app.domain.entities.amenity_category import AmenityCategory
-from app.domain.entities.amenity import Amenity
-from app.domain.entities.property import Property
-from app.domain.entities.property_amenity import PropertyAmenity
-
 
 # Reference data to seed
 LOCATIONS_DATA = [
@@ -57,41 +54,137 @@ AMENITY_CATEGORIES_DATA = [
 AMENITIES_DATA = {
     "General": [
         {"name_en": "WiFi", "name_fr": "WiFi", "icon_path": "amenities/wifi.svg"},
-        {"name_en": "Cable TV", "name_fr": "Télévision câblée", "icon_path": "amenities/cable_tv.svg"},
-        {"name_en": "Parking", "name_fr": "Parking", "icon_path": "amenities/parking.svg"},
-        {"name_en": "Air Conditioning", "name_fr": "Climatisation", "icon_path": "amenities/air_conditioning.svg"},
-        {"name_en": "Heating", "name_fr": "Chauffage", "icon_path": "amenities/heating.svg"},
-        {"name_en": "Washer", "name_fr": "Lave-linge", "icon_path": "amenities/washer.svg"},
-        {"name_en": "Dryer", "name_fr": "Sèche-linge", "icon_path": "amenities/dryer.svg"},
+        {
+            "name_en": "Cable TV",
+            "name_fr": "Télévision câblée",
+            "icon_path": "amenities/cable_tv.svg",
+        },
+        {
+            "name_en": "Parking",
+            "name_fr": "Parking",
+            "icon_path": "amenities/parking.svg",
+        },
+        {
+            "name_en": "Air Conditioning",
+            "name_fr": "Climatisation",
+            "icon_path": "amenities/air_conditioning.svg",
+        },
+        {
+            "name_en": "Heating",
+            "name_fr": "Chauffage",
+            "icon_path": "amenities/heating.svg",
+        },
+        {
+            "name_en": "Washer",
+            "name_fr": "Lave-linge",
+            "icon_path": "amenities/washer.svg",
+        },
+        {
+            "name_en": "Dryer",
+            "name_fr": "Sèche-linge",
+            "icon_path": "amenities/dryer.svg",
+        },
     ],
     "Living Room": [
         {"name_en": "Sofa", "name_fr": "Canapé", "icon_path": "amenities/sofa.svg"},
-        {"name_en": "Coffee Table", "name_fr": "Table basse", "icon_path": "amenities/coffee_table.svg"},
-        {"name_en": "Dining Table", "name_fr": "Table à manger", "icon_path": "amenities/dining_table.svg"},
-        {"name_en": "Balcony", "name_fr": "Balcon", "icon_path": "amenities/balcony.svg"},
-        {"name_en": "Terrace", "name_fr": "Terrasse", "icon_path": "amenities/terrace.svg"},
+        {
+            "name_en": "Coffee Table",
+            "name_fr": "Table basse",
+            "icon_path": "amenities/coffee_table.svg",
+        },
+        {
+            "name_en": "Dining Table",
+            "name_fr": "Table à manger",
+            "icon_path": "amenities/dining_table.svg",
+        },
+        {
+            "name_en": "Balcony",
+            "name_fr": "Balcon",
+            "icon_path": "amenities/balcony.svg",
+        },
+        {
+            "name_en": "Terrace",
+            "name_fr": "Terrasse",
+            "icon_path": "amenities/terrace.svg",
+        },
     ],
     "Main Bedroom": [
-        {"name_en": "King Bed", "name_fr": "Lit King-Size", "icon_path": "amenities/king_bed.svg"},
-        {"name_en": "Queen Bed", "name_fr": "Lit Queen-Size", "icon_path": "amenities/queen_bed.svg"},
-        {"name_en": "Single Bed", "name_fr": "Lit simple", "icon_path": "amenities/single_bed.svg"},
-        {"name_en": "Wardrobe", "name_fr": "Armoire", "icon_path": "amenities/wardrobe.svg"},
-        {"name_en": "Bedside Lamp", "name_fr": "Lampe de chevet", "icon_path": "amenities/bedside_lamp.svg"},
+        {
+            "name_en": "King Bed",
+            "name_fr": "Lit King-Size",
+            "icon_path": "amenities/king_bed.svg",
+        },
+        {
+            "name_en": "Queen Bed",
+            "name_fr": "Lit Queen-Size",
+            "icon_path": "amenities/queen_bed.svg",
+        },
+        {
+            "name_en": "Single Bed",
+            "name_fr": "Lit simple",
+            "icon_path": "amenities/single_bed.svg",
+        },
+        {
+            "name_en": "Wardrobe",
+            "name_fr": "Armoire",
+            "icon_path": "amenities/wardrobe.svg",
+        },
+        {
+            "name_en": "Bedside Lamp",
+            "name_fr": "Lampe de chevet",
+            "icon_path": "amenities/bedside_lamp.svg",
+        },
     ],
     "Kitchen": [
         {"name_en": "Oven", "name_fr": "Four", "icon_path": "amenities/oven.svg"},
-        {"name_en": "Microwave", "name_fr": "Micro-ondes", "icon_path": "amenities/microwave.svg"},
-        {"name_en": "Refrigerator", "name_fr": "Réfrigérateur", "icon_path": "amenities/refrigerator.svg"},
-        {"name_en": "Dishwasher", "name_fr": "Lave-vaisselle", "icon_path": "amenities/dishwasher.svg"},
-        {"name_en": "Utensils", "name_fr": "Ustensiles", "icon_path": "amenities/utensils.svg"},
-        {"name_en": "Stove", "name_fr": "Cuisinière", "icon_path": "amenities/stove.svg"},
+        {
+            "name_en": "Microwave",
+            "name_fr": "Micro-ondes",
+            "icon_path": "amenities/microwave.svg",
+        },
+        {
+            "name_en": "Refrigerator",
+            "name_fr": "Réfrigérateur",
+            "icon_path": "amenities/refrigerator.svg",
+        },
+        {
+            "name_en": "Dishwasher",
+            "name_fr": "Lave-vaisselle",
+            "icon_path": "amenities/dishwasher.svg",
+        },
+        {
+            "name_en": "Utensils",
+            "name_fr": "Ustensiles",
+            "icon_path": "amenities/utensils.svg",
+        },
+        {
+            "name_en": "Stove",
+            "name_fr": "Cuisinière",
+            "icon_path": "amenities/stove.svg",
+        },
     ],
     "Security": [
-        {"name_en": "Security Room", "name_fr": "Salle de sécurité", "icon_path": "amenities/security_room.svg"},
+        {
+            "name_en": "Security Room",
+            "name_fr": "Salle de sécurité",
+            "icon_path": "amenities/security_room.svg",
+        },
         {"name_en": "CCTV", "name_fr": "CCTV", "icon_path": "amenities/cctv.svg"},
-        {"name_en": "Security Guard", "name_fr": "Garde de sécurité", "icon_path": "amenities/security_guard.svg"},
-        {"name_en": "Emergency Light", "name_fr": "Éclairage d'urgence", "icon_path": "amenities/emergency_light.svg"},
-        {"name_en": "Fire Extinguisher", "name_fr": "Extincteur", "icon_path": "amenities/fire_extinguisher.svg"},
+        {
+            "name_en": "Security Guard",
+            "name_fr": "Garde de sécurité",
+            "icon_path": "amenities/security_guard.svg",
+        },
+        {
+            "name_en": "Emergency Light",
+            "name_fr": "Éclairage d'urgence",
+            "icon_path": "amenities/emergency_light.svg",
+        },
+        {
+            "name_en": "Fire Extinguisher",
+            "name_fr": "Extincteur",
+            "icon_path": "amenities/fire_extinguisher.svg",
+        },
     ],
 }
 
@@ -105,7 +198,7 @@ def _restore_soft_deleted(entity) -> bool:
     return True
 
 
-def seed_locations(db: Session) -> Dict[str, int]:
+def seed_locations(db: Session) -> dict[str, int]:
     """Seed locations idempotently and safely with soft-delete aware logic."""
     stats = {"created": 0, "restored": 0, "updated": 0}
 
@@ -139,12 +232,16 @@ def seed_locations(db: Session) -> Dict[str, int]:
     return stats
 
 
-def seed_property_types(db: Session) -> Dict[str, int]:
+def seed_property_types(db: Session) -> dict[str, int]:
     """Seed property types idempotently and safely with soft-delete aware logic."""
     stats = {"created": 0, "restored": 0, "updated": 0}
 
     for property_type_name in PROPERTY_TYPES_DATA:
-        property_type = db.query(PropertyType).filter(PropertyType.name == property_type_name).first()
+        property_type = (
+            db.query(PropertyType)
+            .filter(PropertyType.name == property_type_name)
+            .first()
+        )
 
         if property_type is None:
             db.add(PropertyType(id=uuid4(), name=property_type_name))
@@ -161,7 +258,7 @@ def seed_property_types(db: Session) -> Dict[str, int]:
     return stats
 
 
-def seed_amenities(db: Session) -> Dict[str, int]:
+def seed_amenities(db: Session) -> dict[str, int]:
     """Seed amenity categories and amenities with idempotent upsert behavior."""
     stats = {
         "categories_created": 0,
@@ -173,12 +270,16 @@ def seed_amenities(db: Session) -> Dict[str, int]:
     }
 
     for category_data in AMENITY_CATEGORIES_DATA:
-        category = db.query(AmenityCategory).filter(
-            or_(
-                AmenityCategory.name_en == category_data["name_en"],
-                AmenityCategory.name_fr == category_data["name_fr"],
+        category = (
+            db.query(AmenityCategory)
+            .filter(
+                or_(
+                    AmenityCategory.name_en == category_data["name_en"],
+                    AmenityCategory.name_fr == category_data["name_fr"],
+                )
             )
-        ).first()
+            .first()
+        )
 
         if category is None:
             category = AmenityCategory(
@@ -198,13 +299,13 @@ def seed_amenities(db: Session) -> Dict[str, int]:
 
             category_changed = False
             if category.name_en != category_data["name_en"]:
-                category.name_en = category_data["name_en"]
+                category.name_en = category_data["name_en"]  # ty: ignore[invalid-assignment]
                 category_changed = True
             if category.name_fr != category_data["name_fr"]:
-                category.name_fr = category_data["name_fr"]
+                category.name_fr = category_data["name_fr"]  # ty: ignore[invalid-assignment]
                 category_changed = True
             if category.display_order != category_data["display_order"]:
-                category.display_order = category_data["display_order"]
+                category.display_order = category_data["display_order"]  # ty: ignore[invalid-assignment]
                 category_changed = True
 
             if category_changed:
@@ -215,13 +316,19 @@ def seed_amenities(db: Session) -> Dict[str, int]:
             elif category_changed:
                 print(f"✓ Updated amenity category: {category_data['name_en']}")
             else:
-                print(f"✓ Amenity category already up-to-date: {category_data['name_en']}")
+                print(
+                    f"✓ Amenity category already up-to-date: {category_data['name_en']}"
+                )
 
-        for amenity_data in AMENITIES_DATA.get(category_data["name_en"], []):
-            amenity = db.query(Amenity).filter(
-                Amenity.category_id == category.id,
-                Amenity.name_en == amenity_data["name_en"],
-            ).first()
+        for amenity_data in AMENITIES_DATA.get(category_data["name_en"], []):  # ty: ignore[no-matching-overload]
+            amenity = (
+                db.query(Amenity)
+                .filter(
+                    Amenity.category_id == category.id,
+                    Amenity.name_en == amenity_data["name_en"],
+                )
+                .first()
+            )
 
             if amenity is None:
                 db.add(
@@ -264,9 +371,9 @@ def seed_amenities(db: Session) -> Dict[str, int]:
 
 def main():
     """Seed all reference data with a single transaction."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🌱 Ganitel Reference Data Seeder - T08")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     db = SessionLocal()
     try:
@@ -300,9 +407,15 @@ def main():
 
         print("✨ Seeding Amenity Categories and Amenities...")
         amenity_stats = seed_amenities(db)
-        total_created += amenity_stats["categories_created"] + amenity_stats["amenities_created"]
-        total_restored += amenity_stats["categories_restored"] + amenity_stats["amenities_restored"]
-        total_updated += amenity_stats["categories_updated"] + amenity_stats["amenities_updated"]
+        total_created += (
+            amenity_stats["categories_created"] + amenity_stats["amenities_created"]
+        )
+        total_restored += (
+            amenity_stats["categories_restored"] + amenity_stats["amenities_restored"]
+        )
+        total_updated += (
+            amenity_stats["categories_updated"] + amenity_stats["amenities_updated"]
+        )
         print(
             "   "
             f"(categories: {amenity_stats['categories_created']} created, "
@@ -315,15 +428,15 @@ def main():
 
         db.commit()
 
-        print("="*60)
+        print("=" * 60)
         print("✅ Seed completed successfully!")
         print(f"   Total created:  {total_created}")
         print(f"   Total restored: {total_restored}")
         print(f"   Total updated:  {total_updated}")
-        print("="*60 + "\n")
+        print("=" * 60 + "\n")
 
     except Exception as e:
-        print(f"\n❌ Error during seeding: {str(e)}")
+        print(f"\n❌ Error during seeding: {e!s}")
         db.rollback()
         raise
     finally:

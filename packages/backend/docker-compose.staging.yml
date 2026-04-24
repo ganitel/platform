@@ -72,12 +72,7 @@ services:
   # FastAPI Application (Staging - Production mode)
   # ============================================
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: runtime
-      args:
-        ENVIRONMENT: staging
+    image: ${BACKEND_IMAGE:?BACKEND_IMAGE is required (set in .deploy.env)}
     env_file:
       - .env.staging
     command:
@@ -167,46 +162,25 @@ services:
       - "${APP_HOST_PORT:-8001}:8000"
 
   # ============================================
-  # Test Runner (Staging)
+  # Frontend (Staging)
   # ============================================
-  app-test:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: test
-      args:
-        ENVIRONMENT: staging
-    command: ["pytest", "-q"]
-    env_file:
-      - .env.staging
-    environment:
-      ENVIRONMENT: test
-      TESTING: "True"
-      DOCKER_ENV: "true"
-      POSTGRES_SERVER: db
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: ${POSTGRES_DB:-ganitel_staging_db}
-      POSTGRES_USER: ${POSTGRES_USER:-ganitel_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      TEST_DATABASE_URL: postgresql://${POSTGRES_USER:-ganitel_user}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-ganitel_staging_db}
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
-    volumes:
-      - ./tests:/app/tests:ro
-      - ./uploads:/app/uploads
-      - ./logs:/app/logs
+  frontend:
+    image: ${FRONTEND_IMAGE:?FRONTEND_IMAGE is required (set in .deploy.env)}
+    ports:
+      - "${FRONTEND_HOST_PORT:-3000}:80"
     networks:
       - ganitel-network
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    profiles:
-      - test
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
-# Nginx runs on host, not in container
-# See: /etc/nginx/sites-available/staging.ganitel.com
-# Configuration file: nginx/staging-host.conf
+# Nginx config: nginx/staging.conf
+# Install to: /etc/nginx/sites-available/staging.ganitel.com
+# For host nginx: change upstream server from app:8000 to localhost:8001
 
 # ============================================
 # Networks

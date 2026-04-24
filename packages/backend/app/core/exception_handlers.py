@@ -1,13 +1,14 @@
 """
 Ganitel V2 Backend - Global Exception Handlers
 """
+
 import logging
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.exceptions import GanitelException
+from app.exceptions import GanitelError
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +18,8 @@ def _request_id_from(request: Request) -> str:
 
 
 def register_exception_handlers(app: FastAPI) -> None:
-    @app.exception_handler(GanitelException)
-    async def ganitel_exception_handler(request: Request, exc: GanitelException):
+    @app.exception_handler(GanitelError)
+    async def ganitel_exception_handler(request: Request, exc: GanitelError):
         request_id = _request_id_from(request)
         log_payload = {
             "request_id": request_id,
@@ -29,9 +30,9 @@ def register_exception_handlers(app: FastAPI) -> None:
         }
 
         if exc.status_code >= 500:
-            logger.error("Handled GanitelException", extra=log_payload)
+            logger.error("Handled GanitelError", extra=log_payload)
         else:
-            logger.warning("Handled GanitelException", extra=log_payload)
+            logger.warning("Handled GanitelError", extra=log_payload)
 
         return JSONResponse(
             status_code=exc.status_code,

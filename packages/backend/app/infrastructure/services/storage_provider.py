@@ -1,6 +1,7 @@
 """
 Ganitel V2 Backend - Storage Provider Abstraction
 """
+
 import os
 import re
 from abc import ABC, abstractmethod
@@ -8,6 +9,7 @@ from pathlib import Path
 
 import aioboto3
 from botocore.config import Config
+
 from app.config import get_settings
 
 settings = get_settings()
@@ -71,11 +73,14 @@ def _resolve_within_base(base_dir: Path, *parts: str) -> Path:
 
     return candidate
 
+
 class StorageProvider(ABC):
     """Abstract base class for storage providers"""
-    
+
     @abstractmethod
-    async def upload_file(self, file_content: bytes, filename: str, subdirectory: str) -> str:
+    async def upload_file(
+        self, file_content: bytes, filename: str, subdirectory: str
+    ) -> str:
         """Upload a file and return its URL or path"""
         pass
 
@@ -87,29 +92,33 @@ class StorageProvider(ABC):
 
 class LocalStorageProvider(StorageProvider):
     """Local filesystem storage provider"""
-    
+
     def __init__(self, upload_dir: str = "uploads"):
         self.upload_dir = Path(upload_dir)
         self.upload_dir.mkdir(parents=True, exist_ok=True)
 
-    async def upload_file(self, file_content: bytes, filename: str, subdirectory: str) -> str:
+    async def upload_file(
+        self, file_content: bytes, filename: str, subdirectory: str
+    ) -> str:
         safe_subdirectory = _sanitize_subdirectory(subdirectory)
         safe_filename = _sanitize_filename(filename)
 
         dest_dir = _resolve_within_base(self.upload_dir, safe_subdirectory)
         dest_dir.mkdir(parents=True, exist_ok=True)
-        dest_path = _resolve_within_base(self.upload_dir, safe_subdirectory, safe_filename)
-        
+        dest_path = _resolve_within_base(
+            self.upload_dir, safe_subdirectory, safe_filename
+        )
+
         with open(dest_path, "wb") as f:
             f.write(file_content)
-            
+
         return f"/uploads/{safe_subdirectory}/{safe_filename}"
 
     async def delete_file(self, file_path: str) -> bool:
         # Expected format: /uploads/subdirectory/filename
         if not file_path.startswith("/uploads/"):
             return False
-            
+
         rel_path = file_path.removeprefix("/uploads/").strip("/")
         if "/" not in rel_path:
             return False
@@ -119,10 +128,12 @@ class LocalStorageProvider(StorageProvider):
         try:
             safe_subdirectory = _sanitize_subdirectory(subdirectory)
             safe_filename = _sanitize_filename(filename)
-            full_path = _resolve_within_base(self.upload_dir, safe_subdirectory, safe_filename)
+            full_path = _resolve_within_base(
+                self.upload_dir, safe_subdirectory, safe_filename
+            )
         except ValueError:
             return False
-        
+
         if full_path.exists() and full_path.is_file():
             full_path.unlink()
             return True
@@ -131,28 +142,32 @@ class LocalStorageProvider(StorageProvider):
 
 class R2StorageProvider(StorageProvider):
     """Cloudflare R2 storage provider (S3 compatible)"""
-    
+
     def __init__(self):
         self.session = aioboto3.Session()
         self.bucket_name = settings.R2_BUCKET_NAME
         self.public_url = settings.R2_PUBLIC_URL.rstrip("/")
-        
+
         # Build endpoint URL if not provided
         self.endpoint_url = settings.R2_ENDPOINT_URL
         if not self.endpoint_url and settings.R2_ACCOUNT_ID:
-            self.endpoint_url = f"https://{settings.R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+            self.endpoint_url = (
+                f"https://{settings.R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+            )
 
-    async def upload_file(self, file_content: bytes, filename: str, subdirectory: str) -> str:
+    async def upload_file(
+        self, file_content: bytes, filename: str, subdirectory: str
+    ) -> str:
         safe_subdirectory = _sanitize_subdirectory(subdirectory)
         safe_filename = _sanitize_filename(filename)
         key = f"{safe_subdirectory}/{safe_filename}"
-        
+
         async with self.session.client(
-            's3',
+            "s3",
             endpoint_url=self.endpoint_url,
             aws_access_key_id=settings.R2_ACCESS_KEY_ID,
             aws_secret_access_key=settings.R2_SECRET_ACCESS_KEY,
-            config=Config(signature_version='s3v4')
+            config=Config(signature_version="s3v4"),
         ) as s3:
             await s3.put_object(
                 Bucket=self.bucket_name,
@@ -160,22 +175,22 @@ class R2StorageProvider(StorageProvider):
                 Body=file_content,
                 # ACL='public-read' is not always supported/needed on R2 if bucket is public
             )
-            
+
         return f"{self.public_url}/{key}"
 
     async def delete_file(self, file_url: str) -> bool:
         # Extract key from URL
         if not file_url.startswith(self.public_url):
             return False
-            
+
         key = file_url.replace(f"{self.public_url}/", "")
-        
+
         async with self.session.client(
-            's3',
+            "s3",
             endpoint_url=self.endpoint_url,
             aws_access_key_id=settings.R2_ACCESS_KEY_ID,
             aws_secret_access_key=settings.R2_SECRET_ACCESS_KEY,
-            config=Config(signature_version='s3v4')
+            config=Config(signature_version="s3v4"),
         ) as s3:
             try:
                 await s3.delete_object(Bucket=self.bucket_name, Key=key)

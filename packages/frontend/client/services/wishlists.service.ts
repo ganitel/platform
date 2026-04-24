@@ -9,7 +9,6 @@
  * sans changer les signatures publiques.
  */
 
-import type { ServiceListItem } from '@shared/api';
 import { apiClient } from '@/lib/axios';
 
 // ---------------------------------------------------------------------------

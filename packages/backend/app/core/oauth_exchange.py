@@ -1,12 +1,11 @@
 """
 Ganitel V2 Backend - OAuth temporary exchange code utilities
 """
+
 import json
 import secrets
-from typing import Dict
 
 import redis
-
 
 OAUTH_EXCHANGE_KEY_PREFIX = "oauth_exchange_code"
 OAUTH_EXCHANGE_TTL_SECONDS = 60
@@ -32,7 +31,7 @@ def create_oauth_exchange_code(
     return code
 
 
-def consume_oauth_exchange_code(redis_client: redis.Redis, code: str) -> Dict[str, str]:
+def consume_oauth_exchange_code(redis_client: redis.Redis, code: str) -> dict[str, str]:
     """Consume a one-time OAuth exchange code and return associated payload."""
     key = _build_exchange_key(code)
 
@@ -47,7 +46,7 @@ def consume_oauth_exchange_code(redis_client: redis.Redis, code: str) -> Dict[st
         raise ValueError("Invalid or expired OAuth exchange code")
 
     try:
-        payload = json.loads(raw_payload)
+        payload = json.loads(raw_payload)  # ty: ignore[invalid-argument-type]
     except (TypeError, json.JSONDecodeError) as exc:
         raise ValueError("Invalid OAuth exchange payload") from exc
 

@@ -1,7 +1,7 @@
 """
 Ganitel V2 Backend - Update Service Use Case
 """
-from typing import Optional, List
+
 from uuid import UUID
 
 from app.domain.entities.service import Service, ServiceStatus
@@ -34,9 +34,11 @@ class UpdateServiceUseCase:
             if hasattr(service, key) and value is not None:
                 setattr(service, key, value)
 
-        if "title" in updates and updates["title"]:
+        if updates.get("title"):
             service.generate_slug()
-            if self.service_repository.slug_exists(service.slug, exclude_service_id=service.id):
+            if service.slug and self.service_repository.slug_exists(
+                service.slug, exclude_service_id=service.id
+            ):
                 service.slug = f"{service.slug}-{str(service.id)[:8]}"
 
         updated = self.service_repository.update(service)
@@ -53,6 +55,7 @@ class UpdateServiceUseCase:
             if key in updates and updates[key] is not None and updates[key] < 0:
                 raise ValidationError(f"{key} cannot be negative")
 
-        if "status" in updates and updates["status"] not in [status.value for status in ServiceStatus]:
+        if "status" in updates and updates["status"] not in [
+            status.value for status in ServiceStatus
+        ]:
             raise ValidationError("Invalid service status provided")
-

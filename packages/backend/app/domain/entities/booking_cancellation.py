@@ -1,15 +1,22 @@
 """
 Ganitel V2 Backend - Booking Cancellation Entity
 """
-from sqlalchemy import Column, String, Numeric, ForeignKey, Text, DateTime
-from sqlalchemy.dialects.postgresql import UUID
-from enum import Enum
+
+from datetime import datetime
+from decimal import Decimal
+from enum import StrEnum
+from uuid import UUID
+
+from sqlalchemy import DateTime, ForeignKey, Numeric, String, Text
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.domain.entities.base import AuditableEntity
 
 
-class CancellationReason(str, Enum):
+class CancellationReason(StrEnum):
     """Cancellation reason enumeration"""
+
     USER_REQUEST = "user_request"
     PROVIDER_REQUEST = "provider_request"
     PAYMENT_FAILED = "payment_failed"
@@ -19,8 +26,9 @@ class CancellationReason(str, Enum):
     OTHER = "other"
 
 
-class CancellationStatus(str, Enum):
+class CancellationStatus(StrEnum):
     """Cancellation status enumeration"""
+
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -31,26 +39,42 @@ class BookingCancellation(AuditableEntity):
     """
     Booking Cancellation entity for detailed cancellation tracking
     """
+
     __tablename__ = "booking_cancellations"
-    
+
     # Relationships
-    booking_id = Column(UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=False, unique=True, index=True)
-    cancelled_by_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
-    
+    booking_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("bookings.id"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+    cancelled_by_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )
+
     # Cancellation Information
-    reason = Column(String(50), nullable=False, index=True)
-    status = Column(String(20), default=CancellationStatus.PENDING.value, nullable=False, index=True)
-    cancellation_message = Column(Text, nullable=True)
-    
+    reason: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    status: Mapped[str] = mapped_column(
+        String(20), default=CancellationStatus.PENDING.value, nullable=False, index=True
+    )
+    cancellation_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+
     # Refund Information
-    refund_amount = Column(Numeric(10, 2), nullable=True)
-    refund_percentage = Column(Numeric(5, 2), nullable=True)
-    refund_status = Column(String(20), nullable=True)  # pending, processed, failed
-    
+    refund_amount: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+    refund_percentage: Mapped[Decimal | None] = mapped_column(
+        Numeric(5, 2), nullable=True
+    )
+    refund_status: Mapped[str | None] = mapped_column(
+        String(20), nullable=True
+    )  # pending, processed, failed
+
     # Processing
-    processed_at = Column(DateTime, nullable=True)
-    processed_by_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
-    
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    processed_by_id: Mapped[UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id"), nullable=True
+    )
+
     def __repr__(self):
         return f"<BookingCancellation(id={self.id}, booking_id={self.booking_id}, reason={self.reason})>"
-

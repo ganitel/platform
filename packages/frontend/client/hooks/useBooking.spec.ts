@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { queryClient } from '@/lib/query-client';
 import {
@@ -59,7 +60,7 @@ describe('useBooking hooks', () => {
   describe('Disabled hooks', () => {
     it('should have proper enabled parameter support', () => {
       // Verify that hooks accept the enabled parameter
-      const mockBookingId = 'booking-123';
+      const _mockBookingId = 'booking-123';
       const createTest = () => {
         // Don't actually call the hook, just verify the signature is correct
         const isFunction = typeof useBooking === 'function';
