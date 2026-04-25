@@ -179,7 +179,9 @@ test_engine = None
 TestSessionLocal = None
 
 if not TEST_DATABASE_URL.startswith("postgresql://"):
-    print("⚠️  TEST_DATABASE_URL is not a PostgreSQL URL. DB-dependent tests will be skipped.")
+    print(
+        "⚠️  TEST_DATABASE_URL is not a PostgreSQL URL. DB-dependent tests will be skipped."
+    )
 else:
     try:
         test_engine = create_engine(TEST_DATABASE_URL)
@@ -188,7 +190,9 @@ else:
 
             conn.execute(text("SELECT 1"))
         _db_available = True
-        TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+        TestSessionLocal = sessionmaker(
+            autocommit=False, autoflush=False, bind=test_engine
+        )
         print(
             f"[i] Running tests in {ENVIRONMENT} using PostgreSQL: "
             f"{TEST_DATABASE_URL.split('@')[1] if '@' in TEST_DATABASE_URL else TEST_DATABASE_URL}"
