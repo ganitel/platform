@@ -81,7 +81,7 @@ if _ENVIRONMENT == "development":
 
 if _ENVIRONMENT in ["production", "staging"] and not _TESTING_ENV:
     _msg = "❌ SECURITY ERROR: Tests cannot run without TESTING=true environment variable\n   This prevents accidentally running tests against production databases.\n   Please set: export TESTING=true"
-    pytest.exit(_msg, 1)  # ty: ignore[invalid-argument-type,too-many-positional-arguments]
+    pytest.exit(_msg, 1)
 
 
 def pytest_collection_modifyitems(config, items):
@@ -354,7 +354,7 @@ def db_session() -> Generator[Session, None, None]:
     Create a test database session
     Database is already cleaned by clean_database fixture
     """
-    if not _db_available:
+    if not _db_available or TestSessionLocal is None:
         pytest.skip("PostgreSQL not available")
     # Create session
     session = TestSessionLocal()
