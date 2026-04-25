@@ -112,8 +112,7 @@ sys.path.insert(0, str(root_dir))
 from datetime import date, timedelta
 from uuid import uuid4
 
-from passlib.context import CryptContext
-
+from app.core.password import hash_password
 from app.database import Base, get_db
 from app.domain.entities.booking import Booking, BookingStatus
 from app.domain.entities.service import (
@@ -198,8 +197,6 @@ print(
     f"{TEST_DATABASE_URL.split('@')[1] if '@' in TEST_DATABASE_URL else TEST_DATABASE_URL}"
 )
 
-# Password context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Create test session factory
 TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
@@ -449,7 +446,7 @@ def sample_user(db_session: Session) -> User:
         phone="+237690000000",
         first_name="Test",
         last_name="User",
-        hashed_password=pwd_context.hash("password123"),
+        hashed_password=hash_password("password123"),
         user_type=UserType.TRAVELER.value,
         status=UserStatus.ACTIVE.value,
         is_verified=True,
@@ -472,7 +469,7 @@ def sample_provider(db_session: Session) -> User:
         phone="+237690000001",
         first_name="Provider",
         last_name="User",
-        hashed_password=pwd_context.hash("password123"),
+        hashed_password=hash_password("password123"),
         user_type=UserType.PROVIDER.value,
         status=UserStatus.ACTIVE.value,
         is_verified=True,
@@ -495,7 +492,7 @@ def sample_admin(db_session: Session) -> User:
         phone="+237690000002",
         first_name="Admin",
         last_name="User",
-        hashed_password=pwd_context.hash("password123"),
+        hashed_password=hash_password("password123"),
         user_type=UserType.ADMIN.value,
         status=UserStatus.ACTIVE.value,
         is_verified=True,

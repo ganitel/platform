@@ -10,11 +10,10 @@ import redis
 from jose import jwt
 
 from app.config import get_settings
+from app.core.password import verify_password
 from app.domain.entities.user import UserStatus
 from app.domain.repositories.user_repository import IUserRepository
 from app.exceptions import AuthorizationError, UserNotFoundError, ValidationError
-
-from app.core.password import hash_password, verify_password
 
 settings = get_settings()
 DUMMY_PASSWORD_HASH = "$2b$12$zR/pJ0d6fV7GQogfW1VxE.rmy9jre7hN3Qj0x2I8wYh6w8d6l0w2K"
