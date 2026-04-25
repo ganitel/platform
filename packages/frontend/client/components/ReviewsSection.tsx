@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Loader2, Star, User } from "lucide-react";
 import { useServiceReviews } from "@/hooks";
 import type { Review } from "@shared/api";
@@ -76,18 +76,30 @@ export function ReviewsSection({
   totalReviews,
   maxVisible = 3,
 }: ReviewsSectionProps) {
-  const [page, setPage] = useState(1);
   const [selectedRating, setSelectedRating] = useState<number | undefined>(undefined);
+  const [paginationState, setPaginationState] = useState({
+    page: 1,
+    forPropertyId: propertyId,
+    forRating: undefined as number | undefined,
+  });
+
+  // Derived: automatically resets to page 1 when filters change (no effect needed)
+  const page =
+    paginationState.forPropertyId === propertyId && paginationState.forRating === selectedRating
+      ? paginationState.page
+      : 1;
+
+  const setPage = (newPage: number | ((prev: number) => number)) =>
+    setPaginationState((prev) => {
+      const next = typeof newPage === "function" ? newPage(prev.page) : newPage;
+      return { page: next, forPropertyId: propertyId, forRating: selectedRating };
+    });
 
   const { data, isLoading, isError } = useServiceReviews(
     propertyId,
     page,
     maxVisible
   );
-
-  useEffect(() => {
-    setPage(1);
-  }, [propertyId, selectedRating]);
 
   const reviews = useMemo(() => {
     const items = data?.items ?? [];

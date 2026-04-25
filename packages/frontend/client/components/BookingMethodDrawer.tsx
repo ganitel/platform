@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Briefcase, Handshake, Plus, Minus, Calendar, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,14 +31,18 @@ export function BookingMethodDrawer({ propertyData, trigger }: BookingMethodDraw
   
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<"book" | "negotiate">("book");
-  const [checkIn, setCheckIn] = useState<string>("");
-  const [checkInTime, setCheckInTime] = useState<string>("14:00");
-  const [checkOut, setCheckOut] = useState<string>("");
-  const [checkOutTime, setCheckOutTime] = useState<string>("11:00");
-  const [adults, setAdults] = useState(1);
-  const [children, setChildren] = useState(0);
-  const [infants, setInfants] = useState(0);
-  const [nights, setNights] = useState(0);
+  const [checkIn, setCheckIn] = useState<string>(() => booking?.checkIn?.split('T')[0] ?? "");
+  const checkInTime = booking?.checkIn?.split('T')[1] ?? "14:00";
+  const [checkOut, setCheckOut] = useState<string>(() => booking?.checkOut?.split('T')[0] ?? "");
+  const checkOutTime = booking?.checkOut?.split('T')[1] ?? "11:00";
+  const [adults, setAdults] = useState(() => booking?.guests?.adults ?? 1);
+  const [children, setChildren] = useState(() => booking?.guests?.children ?? 0);
+  const infants = booking?.guests?.infants ?? 0;
+  const nights = useMemo(() => {
+    if (!checkIn || !checkOut) return 0;
+    const diff = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24));
+    return Math.max(diff, 1);
+  }, [checkIn, checkOut]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const bookingOptions: BookingOption[] = [
@@ -57,35 +61,6 @@ export function BookingMethodDrawer({ propertyData, trigger }: BookingMethodDraw
       icon: <Handshake className="w-4 h-4" />,
     },
   ];
-
-  // Load persisted booking data on mount
-  useEffect(() => {
-    if (booking?.checkIn) {
-      const [date, time] = booking.checkIn.split('T');
-      if (date) setCheckIn(date);
-      if (time) setCheckInTime(time);
-    }
-    if (booking?.checkOut) {
-      const [date, time] = booking.checkOut.split('T');
-      if (date) setCheckOut(date);
-      if (time) setCheckOutTime(time);
-    }
-    if (booking?.guests?.adults) setAdults(booking.guests.adults);
-    if (booking?.guests?.children) setChildren(booking.guests.children);
-    if (booking?.guests?.infants) setInfants(booking.guests.infants);
-  }, [booking]);
-
-  // Calculate nights
-  useEffect(() => {
-    if (checkIn && checkOut) {
-      const checkInDate = new Date(checkIn);
-      const checkOutDate = new Date(checkOut);
-      const diff = Math.ceil(
-        (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      setNights(Math.max(diff, 1));
-    }
-  }, [checkIn, checkOut]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};

@@ -2,12 +2,9 @@
 Ganitel V2 Backend - Reset Password Use Case
 """
 
-from passlib.context import CryptContext
-
+from app.core.password import hash_password
 from app.domain.repositories.user_repository import IUserRepository
 from app.exceptions import AuthorizationError, ValidationError
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class ResetPasswordUseCase:
@@ -56,7 +53,7 @@ class ResetPasswordUseCase:
             raise AuthorizationError("Invalid or expired reset token")
 
         # Hash new password
-        hashed_password = pwd_context.hash(new_password)
+        hashed_password = hash_password(new_password)
 
         # Update password and clear reset token
         self.user_repository.change_password(user.id, hashed_password)

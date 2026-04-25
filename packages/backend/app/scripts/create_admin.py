@@ -18,14 +18,12 @@ import argparse
 import os
 import sys
 
-from passlib.context import CryptContext
 from sqlalchemy import inspect
 
 from app.config import get_settings
+from app.core.password import hash_password
 from app.database import SessionLocal
 from app.domain.entities.user import User, UserStatus, UserType
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def _resolve_value(
@@ -103,7 +101,7 @@ def main() -> int:
                 user.status = UserStatus.ACTIVE.value
                 user.is_active = True
                 user.is_verified = True
-                user.hashed_password = pwd_context.hash(password)
+                user.hashed_password = hash_password(password)
                 db.commit()
                 print(f"✅ Admin already existed and has been refreshed: {email}")
                 return 0
@@ -119,7 +117,7 @@ def main() -> int:
             user.first_name = first_name or user.first_name
             user.last_name = last_name or user.last_name
             user.phone = phone or user.phone
-            user.hashed_password = pwd_context.hash(password)
+            user.hashed_password = hash_password(password)
             db.commit()
             print(f"✅ Existing user promoted to admin: {email}")
             return 0
@@ -129,7 +127,7 @@ def main() -> int:
             phone=phone,
             first_name=first_name,
             last_name=last_name,
-            hashed_password=pwd_context.hash(password),
+            hashed_password=hash_password(password),
             user_type=UserType.ADMIN.value,
             status=UserStatus.ACTIVE.value,
             is_verified=True,

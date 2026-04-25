@@ -170,11 +170,8 @@ class TestLoginEndpoint:
         """Test login fails for suspended user"""
         from uuid import uuid4
 
-        from passlib.context import CryptContext
-
+        from app.core.password import hash_password
         from app.domain.entities.user import User, UserStatus, UserType
-
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
         user = User(
             id=uuid4(),
@@ -182,7 +179,7 @@ class TestLoginEndpoint:
             phone="+237690001100",
             first_name="Suspended",
             last_name="User",
-            hashed_password=pwd_context.hash("password123"),
+            hashed_password=hash_password("password123"),
             user_type=UserType.TRAVELER.value,
             status=UserStatus.SUSPENDED.value,
             is_verified=True,

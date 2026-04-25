@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Briefcase, Handshake, Plus, Minus, Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useBookingContext } from "@/contexts/BookingContext";
 
 interface BookingOption {
@@ -19,14 +19,18 @@ export default function BookOrNegotiate() {
   const propertyData = location.state?.propertyData;
   const { booking } = useBookingContext();
   const [selectedOption, setSelectedOption] = useState<"book" | "negotiate">("book");
-  const [checkIn, setCheckIn] = useState<string>("");
-  const [checkInTime, setCheckInTime] = useState<string>("14:00");
-  const [checkOut, setCheckOut] = useState<string>("");
-  const [checkOutTime, setCheckOutTime] = useState<string>("11:00");
-  const [adults, setAdults] = useState(1);
-  const [children, setChildren] = useState(0);
-  const [infants, setInfants] = useState(0);
-  const [nights, setNights] = useState(0);
+  const [checkIn, setCheckIn] = useState<string>(() => booking?.checkIn?.split('T')[0] ?? "");
+  const [checkInTime, setCheckInTime] = useState<string>(() => booking?.checkIn?.split('T')[1] ?? "14:00");
+  const [checkOut, setCheckOut] = useState<string>(() => booking?.checkOut?.split('T')[0] ?? "");
+  const [checkOutTime, setCheckOutTime] = useState<string>(() => booking?.checkOut?.split('T')[1] ?? "11:00");
+  const [adults, setAdults] = useState(() => booking?.guests?.adults ?? 1);
+  const [children, setChildren] = useState(() => booking?.guests?.children ?? 0);
+  const [infants, setInfants] = useState(() => booking?.guests?.infants ?? 0);
+  const nights = useMemo(() => {
+    if (!checkIn || !checkOut) return 0;
+    const diff = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24));
+    return Math.max(diff, 1);
+  }, [checkIn, checkOut]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Convert 24-hour format to 12-hour format with AM/PM
@@ -64,37 +68,8 @@ export default function BookOrNegotiate() {
     }
   };
 
-  // Load persisted booking data on mount
+  // Persist booking data with time in 24h format whenever dates/guests change
   useEffect(() => {
-    if (booking?.checkIn) {
-      // Extract date and time from ISO format (YYYY-MM-DDTHH:MM)
-      const [date, time] = booking.checkIn.split('T');
-      if (date) setCheckIn(date);
-      if (time) setCheckInTime(time);
-    }
-    if (booking?.checkOut) {
-      // Extract date and time from ISO format (YYYY-MM-DDTHH:MM)
-      const [date, time] = booking.checkOut.split('T');
-      if (date) setCheckOut(date);
-      if (time) setCheckOutTime(time);
-    }
-    if (booking?.guests?.adults) setAdults(booking.guests.adults);
-    if (booking?.guests?.children) setChildren(booking.guests.children);
-    if (booking?.guests?.infants) setInfants(booking.guests.infants);
-  }, [booking]);
-
-  // Calculate nights when dates change and persist booking data
-  useEffect(() => {
-    if (checkIn && checkOut) {
-      const checkInDate = new Date(checkIn);
-      const checkOutDate = new Date(checkOut);
-      const diff = Math.ceil(
-        (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      setNights(Math.max(diff, 1));
-    }
-    
-    // Persist booking data with time in 24h format
     updateBooking({
       checkIn: checkIn ? `${checkIn}T${checkInTime}` : checkIn,
       checkOut: checkOut ? `${checkOut}T${checkOutTime}` : checkOut,

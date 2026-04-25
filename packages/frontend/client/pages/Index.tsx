@@ -9,6 +9,20 @@ import { useEffect, useState } from "react";
 import { servicesService } from "@/services/services.service";
 import type { ServiceListItem } from "@shared/api";
 
+function PropertySkeleton() {
+  return (
+    <div className="flex gap-3 overflow-x-auto pb-2 -mr-4 pr-4">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="min-w-[280px] w-[280px] h-[350px] shrink-0">
+          <Skeleton className="w-full h-[200px] rounded-xl mb-3" />
+          <Skeleton className="w-[150px] h-5 mb-2" />
+          <Skeleton className="w-[100px] h-4" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
   const [properties, setProperties] = useState<ServiceListItem[]>([]);
@@ -56,17 +70,6 @@ export default function Index() {
 
 
 
-  const PropertySkeleton = () => (
-    <div className="flex gap-3 overflow-x-auto pb-2 -mr-4 pr-4">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="min-w-[280px] w-[280px] h-[350px] shrink-0">
-          <Skeleton className="w-full h-[200px] rounded-xl mb-3" />
-          <Skeleton className="w-[150px] h-5 mb-2" />
-          <Skeleton className="w-[100px] h-4" />
-        </div>
-      ))}
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-white flex flex-col pb-24">

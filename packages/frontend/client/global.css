@@ -1,5 +1,7 @@
 /** @import must precede all other statements */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
 
 @font-face {
   font-family: 'Infoma';
@@ -15,9 +17,70 @@
   font-family: 'Infoma', sans-serif;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --color-ganitel-primary: #18100C;
+  --color-ganitel-secondary: #D39E70;
+  --color-ganitel-neutral-1: #FAFAFA;
+  --color-ganitel-neutral-2: #F6F5F5;
+  --color-ganitel-neutral-3: #EDECEC;
+  --color-ganitel-text-title: #18100C;
+  --color-ganitel-text-subtitle: #4D4744;
+  --color-ganitel-text-placeholder: #67615F;
+  --color-ganitel-text-label: #67615F;
+  --color-ganitel-text-active: #18100C;
+  --color-ganitel-text-badge: #4D4744;
+  --color-ganitel-text-button: #FFFFFF;
+  --color-ganitel-stroke-neutral: #EDECEC;
+  --color-ganitel-background-primary: #18100C;
+  --color-ganitel-background-secondary: #FFFFFF;
+  --color-ganitel-background-neutral1: #FAFAFA;
+  --color-ganitel-background-neutral2: #F6F5F5;
+  --color-ganitel-accent-green: #EAEEE7;
+  --color-ganitel-accent-grey: #E1E0DF;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+}
+
+@variant dark (&:is(.dark *));
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
 
 @layer base {
   :root {
@@ -109,5 +172,14 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+
+  @media (width >= 87.5rem) {
+    max-width: 87.5rem;
   }
 }

@@ -20,7 +20,7 @@ test("property details page loads", async ({ page }) => {
     await page.getByText("Description").waitFor({ state: "visible", timeout: 8000 });
     detailsVisible = true;
   } catch {
-    detailsVisible = false;
+    // detailsVisible stays false
   }
 
   if (!detailsVisible) {

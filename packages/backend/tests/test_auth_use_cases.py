@@ -5,13 +5,13 @@ Ganitel V2 Backend - Authentication Use Cases Tests
 from uuid import uuid4
 
 import pytest
-from passlib.context import CryptContext
 
 from app.application.use_cases.auth import (
     LoginUserUseCase,
     RefreshTokenUseCase,
     RegisterUserUseCase,
 )
+from app.core.password import hash_password
 from app.domain.entities.user import User, UserStatus, UserType
 from app.exceptions import (
     AuthorizationError,
@@ -20,8 +20,6 @@ from app.exceptions import (
     ValidationError,
 )
 from tests.helpers import unique_email, unique_phone
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class TestRegisterUserUseCase:
@@ -261,7 +259,7 @@ class TestLoginUserUseCase:
             phone="+237690000200",
             first_name="Suspended",
             last_name="User",
-            hashed_password=pwd_context.hash("password123"),
+            hashed_password=hash_password("password123"),
             user_type=UserType.TRAVELER.value,
             status=UserStatus.SUSPENDED.value,
             is_verified=True,
@@ -287,7 +285,7 @@ class TestLoginUserUseCase:
             phone="+237690000201",
             first_name="Inactive",
             last_name="User",
-            hashed_password=pwd_context.hash("password123"),
+            hashed_password=hash_password("password123"),
             user_type=UserType.TRAVELER.value,
             status=UserStatus.INACTIVE.value,
             is_verified=False,

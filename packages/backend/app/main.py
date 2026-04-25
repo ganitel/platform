@@ -28,13 +28,11 @@ logger = logging.getLogger(__name__)
 async def create_default_admin():
     """Create default admin account on startup if it doesn't exist"""
     try:
-        from passlib.context import CryptContext
         from sqlalchemy import inspect
 
+        from app.core.password import hash_password
         from app.database import SessionLocal
         from app.domain.entities.user import User, UserStatus, UserType
-
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
         db = SessionLocal()
         try:
@@ -72,7 +70,7 @@ async def create_default_admin():
                 phone="+237600000000",  # Default phone
                 first_name=settings.ADMIN_FIRST_NAME,
                 last_name=settings.ADMIN_LAST_NAME,
-                hashed_password=pwd_context.hash(settings.ADMIN_PASSWORD),
+                hashed_password=hash_password(settings.ADMIN_PASSWORD),
                 user_type=UserType.ADMIN.value,
                 status=UserStatus.ACTIVE.value,
                 is_verified=True,

@@ -6,7 +6,6 @@ from datetime import date, timedelta
 from uuid import uuid4
 
 import pytest
-from passlib.context import CryptContext
 
 from app.application.use_cases.bookings import (
     CancelBookingUseCase,
@@ -21,8 +20,6 @@ from app.exceptions import (
     BookingNotFoundError,
     ValidationError,
 )
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class TestCreateBookingUseCase:

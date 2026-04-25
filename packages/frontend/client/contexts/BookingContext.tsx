@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 
 export interface GuestBreakdown {
   adults: number;
@@ -57,38 +57,37 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  const setBooking = useCallback((booking: BookingData) => {
-    setBookingState(booking);
-    // Persist to sessionStorage
-    sessionStorage.setItem("ganitel_booking", JSON.stringify(booking));
+  // Sync booking state to sessionStorage (write to external system, not setState)
+  useEffect(() => {
+    if (booking) {
+      sessionStorage.setItem("ganitel_booking", JSON.stringify(booking));
+    } else {
+      sessionStorage.removeItem("ganitel_booking");
+    }
+  }, [booking]);
+
+  const setBooking = useCallback((newBooking: BookingData) => {
+    setBookingState(newBooking);
   }, []);
 
   const updateBooking = useCallback((updates: Partial<BookingData>) => {
-    setBookingState((prev) => {
-      const updated = prev ? { ...prev, ...updates } : (updates as BookingData);
-      sessionStorage.setItem("ganitel_booking", JSON.stringify(updated));
-      return updated;
-    });
+    setBookingState((prev) => (prev ? { ...prev, ...updates } : (updates as BookingData)));
   }, []);
 
   const clearBooking = useCallback(() => {
     setBookingState(null);
-    sessionStorage.removeItem("ganitel_booking");
   }, []);
 
   const calculateNights = useCallback(() => {
     if (!booking?.checkIn || !booking?.checkOut) return 0;
-    const checkIn = new Date(booking.checkIn);
-    const checkOut = new Date(booking.checkOut);
-    const nights = Math.ceil(
-      (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    return Math.max(nights, 0);
-  }, [booking?.checkIn, booking?.checkOut]);
+    const checkInDate = new Date(booking.checkIn);
+    const checkOutDate = new Date(booking.checkOut);
+    return Math.max(Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)), 0);
+  }, [booking]);
 
   const getTotalGuests = useCallback(() => {
     return toBackendGuestCount(booking?.guests);
-  }, [booking?.guests]);
+  }, [booking]);
 
   return (
     <BookingContext.Provider

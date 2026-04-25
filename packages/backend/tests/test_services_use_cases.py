@@ -5,7 +5,6 @@ Ganitel V2 Backend - Service Use Cases Tests
 from uuid import uuid4
 
 import pytest
-from passlib.context import CryptContext
 
 from app.application.use_cases.services import (
     CreateServiceUseCase,
@@ -18,8 +17,6 @@ from app.exceptions import (
     UserNotFoundError,
     ValidationError,
 )
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class TestCreateServiceUseCase:

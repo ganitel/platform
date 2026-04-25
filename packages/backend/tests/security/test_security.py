@@ -787,11 +787,8 @@ class TestDataLeakage:
         # First create a test user to verify against
         from uuid import uuid4
 
-        from passlib.context import CryptContext
-
+        from app.core.password import hash_password
         from app.domain.entities.user import User, UserStatus, UserType
-
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
         test_user = User(
             id=uuid4(),
@@ -799,7 +796,7 @@ class TestDataLeakage:
             phone="+237690111111",
             first_name="Enum",
             last_name="Test",
-            hashed_password=pwd_context.hash("password123"),
+            hashed_password=hash_password("password123"),
             user_type=UserType.TRAVELER.value,
             status=UserStatus.PENDING_VERIFICATION.value,
             is_verified=False,

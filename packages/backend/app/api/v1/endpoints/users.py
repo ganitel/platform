@@ -15,6 +15,7 @@ from app.api.v1.schemas.user_schemas import (
     UserUpdateRequest,
 )
 from app.application.use_cases.bookings.get_user_bookings import GetUserBookingsUseCase
+from app.core.password import hash_password, verify_password
 from app.database import get_db
 from app.dependencies import get_current_active_user, get_current_admin
 from app.domain.entities.user import User
@@ -139,13 +140,10 @@ async def change_password(
     Change current user's password
     """
     try:
-        from passlib.context import CryptContext
-
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         user_repository = UserRepository(db)
 
         # Verify current password
-        if not pwd_context.verify(
+        if not current_user.hashed_password or not verify_password(
             password_data.current_password, current_user.hashed_password
         ):
             raise HTTPException(
@@ -154,7 +152,7 @@ async def change_password(
             )
 
         # Hash new password
-        new_hashed_password = pwd_context.hash(password_data.new_password)
+        new_hashed_password = hash_password(password_data.new_password)
 
         # Update password
         success = user_repository.change_password(current_user.id, new_hashed_password)

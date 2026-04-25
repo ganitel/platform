@@ -5,8 +5,7 @@ Ganitel V2 Backend - Repository Tests
 from datetime import timedelta
 from uuid import uuid4
 
-from passlib.context import CryptContext
-
+from app.core.password import hash_password
 from app.domain.entities.booking import Booking, BookingStatus
 from app.domain.entities.service import (
     AccommodationType,
@@ -15,8 +14,6 @@ from app.domain.entities.service import (
     ServiceType,
 )
 from app.domain.entities.user import User, UserStatus, UserType
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class TestUserRepository:
@@ -30,7 +27,7 @@ class TestUserRepository:
             phone="+237690003000",
             first_name="Repo",
             last_name="Test",
-            hashed_password=pwd_context.hash("password123"),
+            hashed_password=hash_password("password123"),
             user_type=UserType.TRAVELER.value,
             status=UserStatus.ACTIVE.value,
             is_verified=True,

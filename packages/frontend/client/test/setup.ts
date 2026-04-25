@@ -1,5 +1,30 @@
 import "@testing-library/jest-dom/vitest";
-import { vi } from "vitest";
+import { beforeEach, vi } from "vitest";
+
+// Provide a proper localStorage mock for jsdom 29 compatibility
+const createLocalStorageMock = () => {
+  let store: Record<string, string> = {};
+  return {
+    get length() { return Object.keys(store).length; },
+    key: (index: number) => Object.keys(store)[index] ?? null,
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => { store[key] = String(value); },
+    removeItem: (key: string) => { delete store[key]; },
+    clear: () => { store = {}; },
+  };
+};
+
+const localStorageMock = createLocalStorageMock();
+
+Object.defineProperty(window, "localStorage", {
+  value: localStorageMock,
+  writable: true,
+  configurable: true,
+});
+
+beforeEach(() => {
+  localStorageMock.clear();
+});
 
 class MockResizeObserver {
   observe() {}

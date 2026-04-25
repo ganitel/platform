@@ -5,7 +5,6 @@ Ganitel V2 Backend - Status Transitions Tests
 from uuid import uuid4
 
 import pytest
-from passlib.context import CryptContext
 
 from app.application.use_cases.bookings import (
     CompleteBookingUseCase,
@@ -13,12 +12,11 @@ from app.application.use_cases.bookings import (
 )
 from app.application.use_cases.services import UpdateServiceStatusUseCase
 from app.application.use_cases.users import UpdateUserStatusUseCase
+from app.core.password import hash_password
 from app.domain.entities.booking import BookingStatus
 from app.domain.entities.service import ServiceStatus
 from app.domain.entities.user import User, UserStatus, UserType
 from app.exceptions import ValidationError
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class TestUserStatusTransitions:
@@ -26,17 +24,13 @@ class TestUserStatusTransitions:
 
     def test_transition_pending_to_active(self, user_repository, db_session):
         """Test transition: pending_verification → active"""
-        from passlib.context import CryptContext
-
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
         user = User(
             id=uuid4(),
             email="pending@example.com",
             phone="+237690002000",
             first_name="Pending",
             last_name="User",
-            hashed_password=pwd_context.hash("password123"),
+            hashed_password=hash_password("password123"),
             user_type=UserType.TRAVELER.value,
             status=UserStatus.PENDING_VERIFICATION.value,
             is_verified=False,
@@ -60,17 +54,13 @@ class TestUserStatusTransitions:
 
     def test_transition_suspended_to_active(self, user_repository, db_session):
         """Test transition: suspended → active"""
-        from passlib.context import CryptContext
-
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
         user = User(
             id=uuid4(),
             email="suspended2@example.com",
             phone="+237690002001",
             first_name="Suspended",
             last_name="User",
-            hashed_password=pwd_context.hash("password123"),
+            hashed_password=hash_password("password123"),
             user_type=UserType.TRAVELER.value,
             status=UserStatus.SUSPENDED.value,
             is_verified=True,
