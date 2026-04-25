@@ -5,8 +5,6 @@ Ganitel V2 Backend - User Management Endpoints
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.core.password import hash_password, verify_password
-
 from app.api.v1.schemas.booking_schemas import BookingListResponse, BookingResponse
 from app.api.v1.schemas.user_schemas import (
     ChangePasswordRequest,
@@ -17,6 +15,7 @@ from app.api.v1.schemas.user_schemas import (
     UserUpdateRequest,
 )
 from app.application.use_cases.bookings.get_user_bookings import GetUserBookingsUseCase
+from app.core.password import hash_password, verify_password
 from app.database import get_db
 from app.dependencies import get_current_active_user, get_current_admin
 from app.domain.entities.user import User
@@ -144,7 +143,7 @@ async def change_password(
         user_repository = UserRepository(db)
 
         # Verify current password
-        if not verify_password(
+        if not current_user.hashed_password or not verify_password(
             password_data.current_password, current_user.hashed_password
         ):
             raise HTTPException(

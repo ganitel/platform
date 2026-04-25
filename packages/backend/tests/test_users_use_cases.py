@@ -5,7 +5,6 @@ Ganitel V2 Backend - User Management Use Cases Tests
 from uuid import uuid4
 
 import pytest
-from passlib.context import CryptContext
 
 from app.application.use_cases.users import (
     ChangePasswordUseCase,
@@ -14,10 +13,9 @@ from app.application.use_cases.users import (
     UpdateUserStatusUseCase,
     VerifyUserUseCase,
 )
+from app.core.password import hash_password, verify_password
 from app.domain.entities.user import User, UserStatus, UserType
 from app.exceptions import AuthorizationError, UserNotFoundError, ValidationError
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class TestGetUserProfileUseCase:
@@ -96,11 +94,8 @@ class TestChangePasswordUseCase:
         assert result is True
 
         # Verify new password works
-        from passlib.context import CryptContext
-
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         updated_user = user_repository.get_by_id(sample_user.id)
-        assert pwd_context.verify("newpassword456", updated_user.hashed_password)
+        assert verify_password("newpassword456", updated_user.hashed_password)
 
     def test_change_password_wrong_current(self, user_repository, sample_user):
         """Test password change fails with wrong current password"""
@@ -147,7 +142,7 @@ class TestUpdateUserStatusUseCase:
             phone="+237690000300",
             first_name="Inactive",
             last_name="User",
-            hashed_password=pwd_context.hash("password123"),
+            hashed_password=hash_password("password123"),
             user_type=UserType.TRAVELER.value,
             status=UserStatus.INACTIVE.value,
             is_verified=False,
@@ -181,7 +176,7 @@ class TestUpdateUserStatusUseCase:
             phone="+237690000301",
             first_name="Suspended",
             last_name="User",
-            hashed_password=pwd_context.hash("password123"),
+            hashed_password=hash_password("password123"),
             user_type=UserType.TRAVELER.value,
             status=UserStatus.SUSPENDED.value,
             is_verified=True,
@@ -224,7 +219,7 @@ class TestVerifyUserUseCase:
             phone="+237690000400",
             first_name="Unverified",
             last_name="User",
-            hashed_password=pwd_context.hash("password123"),
+            hashed_password=hash_password("password123"),
             user_type=UserType.TRAVELER.value,
             status=UserStatus.PENDING_VERIFICATION.value,
             is_verified=False,

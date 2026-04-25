@@ -68,7 +68,7 @@ class Settings(BaseSettings):
     """Application settings with environment variable support"""
 
     model_config = SettingsConfigDict(
-        env_file=".env", case_sensitive=True, env_parse_none_str="null"
+        env_file=".env", case_sensitive=True, env_parse_none_str="null", extra="ignore"
     )
 
     # Application
