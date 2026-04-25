@@ -39,6 +39,20 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ganitel_user
+          POSTGRES_PASSWORD: ganitel_local_password_2024
+          POSTGRES_DB: ganitel_test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
@@ -49,4 +63,11 @@ jobs:
         run: uv sync --frozen --all-groups
 
       - name: Run tests
+        env:
+          POSTGRES_SERVER: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: ganitel_user
+          POSTGRES_PASSWORD: ganitel_local_password_2024
+          POSTGRES_DB: ganitel_test_db
+          TESTING: "true"
         run: uv run pytest
