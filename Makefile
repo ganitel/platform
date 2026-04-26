@@ -1,13 +1,16 @@
 .DEFAULT_GOAL := help
 
-UV := uv --directory packages/backend
-BUN := bun --cwd packages/frontend
+# Each recipe line runs in its own subshell, so `cd <pkg> && cmd` is safe and
+# doesn't leak between lines. We use this instead of tool-specific flags
+# (`uv --directory`, `bun --cwd`) for consistency across tools and to avoid
+# bun's footgun where `bun --cwd <path> run <script>` silently swallows the
+# script.
 
 # ── Bootstrap ─────────────────────────────────────────────────────────────────
 
 install: ## Install all deps (backend uv sync + frontend bun install)
-	$(UV) sync --frozen --all-groups
-	$(BUN) install
+	cd packages/backend && uv sync --frozen --all-groups
+	cd packages/frontend && bun install
 
 # ── Dev ───────────────────────────────────────────────────────────────────────
 # Requires PostgreSQL (with PostGIS) + Redis running locally on the standard
@@ -22,57 +25,57 @@ dev: ## Start frontend + backend dev servers concurrently (hot reload)
 
 dev-backend: ## Backend FastAPI dev server (http://localhost:8000)
 	@echo "→ FastAPI dev server: http://localhost:8000"
-	$(UV) run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	cd packages/backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 dev-frontend: ## Frontend Vite dev server (http://localhost:3000)
 	@echo "→ Vite dev server: http://localhost:3000"
-	$(BUN) run dev
+	cd packages/frontend && bun run dev
 
 # ── Database ──────────────────────────────────────────────────────────────────
 
 db-revision: ## Generate a migration (M="message")
 	@[ -n "$(M)" ] || (echo "Usage: make db-revision M=\"message\""; exit 1)
-	$(UV) run alembic revision --autogenerate -m "$(M)"
+	cd packages/backend && uv run alembic revision --autogenerate -m "$(M)"
 
 db-upgrade: ## Apply pending migrations
-	$(UV) run alembic upgrade head
+	cd packages/backend && uv run alembic upgrade head
 
 db-downgrade: ## Roll back one migration
-	$(UV) run alembic downgrade -1
+	cd packages/backend && uv run alembic downgrade -1
 
 seed: ## Seed local DB with demo host + ~10 published properties (idempotent)
-	$(UV) run python -m scripts.seed_demo
+	cd packages/backend && uv run python -m scripts.seed_demo
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
 
 test: test-backend test-frontend ## Run all tests
 
 test-backend: ## Backend unit tests (no DB required)
-	$(UV) run pytest tests/unit/ -v
+	cd packages/backend && uv run pytest tests/unit/ -v
 
 test-frontend: ## Frontend tests (vitest)
-	$(BUN) run test
+	cd packages/frontend && bun run test
 
 # ── Code quality ──────────────────────────────────────────────────────────────
 
 lint: ## Lint everything
-	$(UV) run ruff check .
-	$(BUN) run lint
+	cd packages/backend && uv run ruff check .
+	cd packages/frontend && bun run lint
 
 format: ## Format everything (writes)
-	$(UV) run ruff format .
-	$(BUN) run format
+	cd packages/backend && uv run ruff format .
+	cd packages/frontend && bun run format
 
 typecheck: ## Type-check everything (ty + tsc)
-	$(UV) run ty check app
-	$(BUN) run typecheck
+	cd packages/backend && uv run ty check app
+	cd packages/frontend && bun run typecheck
 
 check: lint typecheck ## Lint + typecheck
 
 # ── Build ─────────────────────────────────────────────────────────────────────
 
-build: ## Build frontend for production (dist/spa)
-	$(BUN) run build
+build: ## Build frontend for production (build/{client,server})
+	cd packages/frontend && bun run build
 
 # ── Help ──────────────────────────────────────────────────────────────────────
 
