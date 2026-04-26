@@ -1,12 +1,13 @@
 .DEFAULT_GOAL := help
 
 UV := uv --directory packages/backend
+BUN := bun --cwd packages/frontend
 
 # ── Bootstrap ─────────────────────────────────────────────────────────────────
 
 install: ## Install all deps (backend uv sync + frontend bun install)
 	$(UV) sync --frozen --all-groups
-	bun install --cwd packages/frontend
+	$(BUN) install
 
 # ── Dev ───────────────────────────────────────────────────────────────────────
 # Requires PostgreSQL (with PostGIS) + Redis running locally on the standard
@@ -25,7 +26,7 @@ dev-backend: ## Backend FastAPI dev server (http://localhost:8000)
 
 dev-frontend: ## Frontend Vite dev server (http://localhost:3000)
 	@echo "→ Vite dev server: http://localhost:3000"
-	bun run --cwd packages/frontend dev
+	$(BUN) run dev
 
 # ── Database ──────────────────────────────────────────────────────────────────
 
@@ -50,28 +51,28 @@ test-backend: ## Backend unit tests (no DB required)
 	$(UV) run pytest tests/unit/ -v
 
 test-frontend: ## Frontend tests (vitest)
-	bun run --cwd packages/frontend test
+	$(BUN) run test
 
 # ── Code quality ──────────────────────────────────────────────────────────────
 
 lint: ## Lint everything
 	$(UV) run ruff check .
-	bun run --cwd packages/frontend lint
+	$(BUN) run lint
 
 format: ## Format everything (writes)
 	$(UV) run ruff format .
-	bun run --cwd packages/frontend format
+	$(BUN) run format
 
 typecheck: ## Type-check everything (ty + tsc)
 	$(UV) run ty check app
-	bun run --cwd packages/frontend typecheck
+	$(BUN) run typecheck
 
 check: lint typecheck ## Lint + typecheck
 
 # ── Build ─────────────────────────────────────────────────────────────────────
 
 build: ## Build frontend for production (dist/spa)
-	bun run --cwd packages/frontend build
+	$(BUN) run build
 
 # ── Help ──────────────────────────────────────────────────────────────────────
 
