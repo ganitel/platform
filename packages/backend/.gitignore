@@ -116,3 +116,5 @@ uploads/
 backups/
 *.sql
 !docker/postgres/init.sql
+
+*_legacy/

@@ -112,15 +112,16 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 ## 🔧 Development Tools
 
-### Available Scripts
+### Makefile (from `packages/backend`)
 
-#### Utility Scripts
 ```bash
-./scripts/reset-local.sh   # Reset entire local environment
-./scripts/logs.sh [service] # View container logs
-./scripts/db-backup.sh     # Backup database
-./scripts/db-restore.sh <file> # Restore database
-./scripts/migrate.sh       # Migration helper
+make help          # List targets
+make up            # Postgres, Redis, MinIO (docker compose)
+make dev           # API with reload (local uvicorn)
+make db-upgrade    # Apply Alembic migrations
+make db-revision M="message"  # Autogenerate migration
+make test          # pytest
+docker compose -f docker-compose.local.yml logs -f  # Follow service logs
 ```
 
 #### Lint and types (Ruff + ty)
@@ -136,27 +137,41 @@ make local-check       # ruff check + ruff format --check + ty (matches CI)
 
 Configuration lives in `pyproject.toml` (`[tool.ruff]`, `[tool.ty.environment]`).
 
-#### Makefile Commands
+### Seeding demo data
+
+Populate your local DB with a demo host and ~10 published properties spread
+across Cameroon, Senegal and Côte d'Ivoire — handy for browsing the UI without
+manually creating listings.
+
 ```bash
-make help          # Show all available commands
-make build         # Build Docker images
-make up            # Start all services
-make down          # Stop services
-make logs          # View logs
-make shell         # Open app container shell
-make db-shell      # Open PostgreSQL shell
-make test          # Run tests
+make seed                       # idempotent — re-running wipes & re-inserts
+# or, equivalently:
+uv run python -m scripts.seed_demo
 ```
+
+What it does:
+
+- Creates (or reuses) a demo host identified by `clerk_user_id="seed_demo_host"`.
+- Wipes that host's previous properties and their `media` rows, then re-inserts
+  the canonical 10 listings (mix of apartments, villas, studios, guesthouses,
+  rooms, houses; XAF/XOF prices; real-ish geo coordinates; FR copy).
+- Each listing gets 5 photos via `picsum.photos` URLs stored directly in
+  `media.key`. The storage layer (`app/core/storage.public_or_signed_url`)
+  treats full URLs as a pass-through, so the photos render without any S3 /
+  Supabase setup.
+
+The script lives at `scripts/seed_demo.py` — extend `LISTINGS` to add more
+fixtures. It is dev-only and never runs in production.
 
 ### Access Points
 
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| **API** | http://localhost:8000 | - |
-| **API Docs** | http://localhost:8000/docs | - |
-| **ReDoc** | http://localhost:8000/redoc | - |
-| **Health Check** | http://localhost:8000/api/v1/health/ | - |
-| **PgAdmin** | http://localhost:5050 | admin@ganitel.local / admin123 |
+| Service          | URL                                  | Credentials                    |
+| ---------------- | ------------------------------------ | ------------------------------ |
+| **API**          | http://localhost:8000                | -                              |
+| **API Docs**     | http://localhost:8000/docs           | -                              |
+| **ReDoc**        | http://localhost:8000/redoc          | -                              |
+| **Health Check** | http://localhost:8000/api/v1/health/ | -                              |
+| **PgAdmin**      | http://localhost:5050                | admin@ganitel.local / admin123 |
 
 ---
 

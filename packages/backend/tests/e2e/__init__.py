@@ -1,3 +1,0 @@
-"""
-Tests end-to-end
-"""

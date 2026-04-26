@@ -83,10 +83,8 @@ docker-compose*.yml
 # Migration files (included in image)
 # migrations/
 
-# Scripts that shouldn't be in final image
+# Shell scripts not copied into image
 *.sh
-!scripts/entrypoint.sh
-!scripts/wait-for-it.sh
 
 # Database dumps
 *.sql
