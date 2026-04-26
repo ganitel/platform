@@ -59,7 +59,7 @@ const dict = {
   "landing.cta_section.tag": { fr: "Prêt à partir ?", en: "Ready to go?" },
   "landing.cta_section.title": { fr: "Trouvez votre lieu,", en: "Find your place," },
   "landing.cta_section.title_em": { fr: "à votre rythme.", en: "at your own pace." },
-  "landing.footer.regions": {
+  "footer.regions": {
     fr: "Cameroun · Sénégal · Côte d'Ivoire",
     en: "Cameroon · Senegal · Côte d'Ivoire",
   },

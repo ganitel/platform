@@ -1,7 +1,6 @@
 import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { ArrowDown, Play } from "lucide-react";
-import { UserButton, useAuth, useClerk } from "@clerk/react-router";
 import type { CSSProperties } from "react";
 
 import { useT } from "@/shared/lib/i18n";
@@ -21,20 +20,18 @@ const ENTRANCE_EASE = [0.2, 0.7, 0.2, 1] as const;
 
 export function Landing({ items }: { items: PropertyPublic[] }) {
   return (
-    <div className="bg-ganitel-paper">
+    <>
       <Hero />
       {items.length > 0 ? <FeaturedSection items={items} /> : null}
       <FinalCTA />
-      <SiteFooter />
-    </div>
+    </>
   );
 }
 
 function Hero() {
   return (
-    <section className="relative h-svh min-h-[640px] overflow-hidden bg-[#0a0c08] p-5">
+    <section className="relative h-[calc(100svh-4rem)] min-h-[600px] overflow-hidden p-5">
       <Stage />
-      <NavStrip />
       <HeroPanel />
       <FeatureCard />
       <ScrollHint />
@@ -82,99 +79,6 @@ function Stage() {
   );
 }
 
-function NavStrip() {
-  const t = useT();
-  const { isLoaded, isSignedIn } = useAuth();
-  // Force a render once Clerk has booted; first paint (incl. SSR) shows
-  // the signed-out chrome to avoid a flash for anonymous visitors.
-  useClerk();
-
-  return (
-    <motion.header
-      initial={{ y: "-130%", opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 1.1, ease: ENTRANCE_EASE }}
-      className="absolute left-1/2 top-5 z-20 grid w-[min(1240px,calc(100%-80px))] -translate-x-1/2 grid-cols-[auto_1fr_auto] items-center gap-8 rounded-b-[22px] bg-ganitel-paper px-3.5 py-3 pl-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_28px_60px_-32px_rgba(0,0,0,0.55)]"
-    >
-      <Link
-        to="/"
-        className="inline-flex items-center gap-2 text-ganitel-text-title"
-        aria-label="Ganitel"
-      >
-        <span className="grid size-7 -rotate-[4deg] place-items-center rounded-lg bg-ganitel-text-title text-[13px] font-extrabold leading-none text-ganitel-paper">
-          G
-        </span>
-        <span className="font-display text-[22px] font-extrabold leading-none tracking-[-0.045em]">
-          Ganitel
-        </span>
-      </Link>
-
-      <nav className="hidden justify-center gap-9 pl-2 md:inline-flex" aria-label="Primary">
-        <NavItem to="/" active>
-          {t("nav.home")}
-        </NavItem>
-        <NavItem to="/browse">{t("landing.nav.properties")}</NavItem>
-        <NavItem to="/browse">{t("landing.nav.experiences")}</NavItem>
-      </nav>
-
-      <div className="inline-flex items-center gap-1.5 justify-self-end">
-        {isLoaded && isSignedIn ? (
-          <>
-            <PillLink to="/browse" size="sm" variant="solid">
-              {t("nav.browse")}
-            </PillLink>
-            <UserButton />
-          </>
-        ) : (
-          <>
-            <PillLink to="/sign-up" size="sm" variant="outline">
-              {t("common.signup")}
-            </PillLink>
-            <PillLink to="/sign-in" size="sm" variant="solid">
-              {t("common.signin")}
-            </PillLink>
-          </>
-        )}
-      </div>
-    </motion.header>
-  );
-}
-
-function NavItem({
-  to,
-  active,
-  children,
-}: {
-  to: string;
-  active?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      to={to}
-      className={
-        "group relative pb-1 pt-1.5 text-sm tracking-tight transition-colors duration-200 " +
-        (active
-          ? "font-semibold text-ganitel-text-title"
-          : "font-medium text-ganitel-text-placeholder hover:text-ganitel-text-title")
-      }
-    >
-      {children}
-      {active ? (
-        <span
-          aria-hidden
-          className="absolute -bottom-2 left-1/2 size-1 -translate-x-1/2 rounded-full bg-ganitel-text-title"
-        />
-      ) : (
-        <span
-          aria-hidden
-          className="absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 bg-ganitel-text-title transition-transform duration-300 ease-out group-hover:scale-x-100"
-        />
-      )}
-    </Link>
-  );
-}
-
 const HEADLINE_STYLE: CSSProperties = {
   fontSize: "clamp(2.75rem, 5.6vw, 5.75rem)",
 };
@@ -182,7 +86,7 @@ const HEADLINE_STYLE: CSSProperties = {
 function HeroPanel() {
   const t = useT();
   return (
-    <motion.main
+    <motion.div
       initial={{ y: 40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 1, delay: 0.15, ease: ENTRANCE_EASE }}
@@ -222,7 +126,7 @@ function HeroPanel() {
           <b className="font-semibold text-ganitel-text-title">en</b>
         </span>
       </div>
-    </motion.main>
+    </motion.div>
   );
 }
 
@@ -367,25 +271,5 @@ function FinalCTA() {
         </div>
       </motion.div>
     </section>
-  );
-}
-
-function SiteFooter() {
-  const t = useT();
-  return (
-    <footer className="border-t border-ganitel-stroke-neutral px-6 py-10 md:px-12">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6 text-xs text-ganitel-text-placeholder">
-        <Link to="/" className="inline-flex items-center gap-2 text-ganitel-text-title">
-          <span className="grid size-5 -rotate-[4deg] place-items-center rounded-md bg-ganitel-text-title text-[10px] font-extrabold leading-none text-ganitel-paper">
-            G
-          </span>
-          <span className="font-display text-[14px] font-extrabold tracking-[-0.04em]">
-            Ganitel
-          </span>
-          <span className="text-ganitel-text-placeholder">· 2026</span>
-        </Link>
-        <span className="tracking-tight">{t("landing.footer.regions")}</span>
-      </div>
-    </footer>
   );
 }
