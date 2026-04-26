@@ -3,6 +3,7 @@
 from decimal import Decimal
 
 import pytest
+from pydantic import ValidationError
 
 from app.core.money import CURRENCY_EXPONENT, Currency, Money, zero
 
@@ -73,7 +74,7 @@ def test_zero_helper() -> None:
 
 def test_frozen_immutable() -> None:
     m = Money(amount=Decimal("100"), currency=Currency.XAF)
-    with pytest.raises(Exception):  # pydantic ValidationError or similar
+    with pytest.raises(ValidationError):
         m.amount = Decimal("200")  # type: ignore[misc]
 
 
