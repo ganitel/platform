@@ -1,11 +1,10 @@
 .DEFAULT_GOAL := help
 
-# Each recipe line runs in its own subshell, so `cd <pkg> && cmd` is safe and
-# doesn't leak between lines. We use this instead of tool-specific flags
-# (`uv --directory`, `bun --cwd`) for consistency across tools and to avoid
-# bun's footgun where `bun --cwd <path> run <script>` silently swallows the
-# script.
-
+.PHONY: install dev dev-backend dev-frontend \
+        db-revision db-upgrade db-downgrade seed \
+        test test-backend test-frontend \
+        lint format typecheck check build help
+		
 # ── Bootstrap ─────────────────────────────────────────────────────────────────
 
 install: ## Install all deps (backend uv sync + frontend bun install)
@@ -82,8 +81,3 @@ build: ## Build frontend for production (build/{client,server})
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
-
-.PHONY: install dev dev-backend dev-frontend \
-        db-revision db-upgrade db-downgrade seed \
-        test test-backend test-frontend \
-        lint format typecheck check build help

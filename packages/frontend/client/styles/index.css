@@ -3,12 +3,6 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
-/*
- * `Infoma` is the intended display font but the .woff/.woff2/.ttf files are
- * not in the repo, so the @font-face is omitted to avoid RR's request handler
- * logging "No route matches URL '/fonts/Infoma.woff2'" on every page render.
- * `.font-infoma` falls back to the sans stack until the font ships.
- */
 .font-infoma {
   font-family: 'Inter', system-ui, sans-serif;
   font-weight: 600;
