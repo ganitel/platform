@@ -4,12 +4,12 @@ on:
   pull_request:
     paths:
       - "packages/frontend/**"
-      - ".github/workflows/frontend-lint.yml"
+      - ".github/workflows/frontend"
   push:
     branches: [main, develop]
     paths:
       - "packages/frontend/**"
-      - ".github/workflows/frontend-lint.yml"
+      - ".github/workflows/frontend"
 
 defaults:
   run:

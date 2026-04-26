@@ -70,7 +70,9 @@ async def create_draft(session: AsyncSession, host: User, payload: PropertyCreat
     return prop
 
 
-async def update(session: AsyncSession, property: Property, user: User, patch: PropertyUpdateIn) -> Property:
+async def update(
+    session: AsyncSession, property: Property, user: User, patch: PropertyUpdateIn
+) -> Property:
     _ensure_owner(user, property)
     data = patch.model_dump(exclude_unset=True)
     if "location" in data and data["location"] is not None:
@@ -126,7 +128,9 @@ async def get(session: AsyncSession, property_id: UUID) -> Property:
     return prop
 
 
-async def attach_photo(session: AsyncSession, property: Property, user: User, *, media_id: UUID, position: int) -> PropertyPhoto:
+async def attach_photo(
+    session: AsyncSession, property: Property, user: User, *, media_id: UUID, position: int
+) -> PropertyPhoto:
     _ensure_owner(user, property)
     media = await session.get(Media, media_id)
     if media is None:
@@ -140,7 +144,9 @@ async def attach_photo(session: AsyncSession, property: Property, user: User, *,
     return photo
 
 
-async def detach_photo(session: AsyncSession, property: Property, user: User, photo_id: UUID) -> None:
+async def detach_photo(
+    session: AsyncSession, property: Property, user: User, photo_id: UUID
+) -> None:
     _ensure_owner(user, property)
     photo = await session.get(PropertyPhoto, photo_id)
     if photo is None or photo.property_id != property.id:

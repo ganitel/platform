@@ -12,5 +12,7 @@ router = APIRouter(prefix="/media", tags=["media"])
 
 
 @router.post("", response_model=MediaUploadOut, status_code=status.HTTP_201_CREATED)
-async def request_upload(body: MediaUploadIn, user: CurrentUser, session: DbSession) -> MediaUploadOut:
+async def request_upload(
+    body: MediaUploadIn, user: CurrentUser, session: DbSession
+) -> MediaUploadOut:
     return await create_upload(session, user, mime_type=body.mime_type, size_bytes=body.size_bytes)

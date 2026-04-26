@@ -33,7 +33,9 @@ async def initiate_payment(
     session.add(payment)
     await session.flush()
 
-    intent = await provider.create_intent(payment=payment, return_url=get_settings().PAYMENT_RETURN_URL)
+    intent = await provider.create_intent(
+        payment=payment, return_url=get_settings().PAYMENT_RETURN_URL
+    )
     payment.provider_intent_id = intent.provider_intent_id
     payment.raw_init_response = intent.raw
     booking.payment_id = payment.id

@@ -5,6 +5,7 @@ Revises: 0001_init_users
 Create Date: 2026-04-25
 
 """
+
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -23,12 +24,19 @@ def upgrade() -> None:
     op.create_table(
         "media",
         sa.Column("id", sa.Uuid(), primary_key=True),
-        sa.Column("owner_user_id", sa.Uuid(), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "owner_user_id",
+            sa.Uuid(),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("bucket", sa.String(120), nullable=False),
         sa.Column("key", sa.String(512), nullable=False),
         sa.Column("mime_type", sa.String(100), nullable=False),
         sa.Column("size_bytes", sa.BigInteger()),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
     )
     op.create_index("ix_media_owner_user_id", "media", ["owner_user_id"])
 
@@ -88,10 +96,19 @@ def upgrade() -> None:
     op.create_table(
         "property_photos",
         sa.Column("id", sa.Uuid(), primary_key=True),
-        sa.Column("property_id", sa.Uuid(), sa.ForeignKey("properties.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("media_id", sa.Uuid(), sa.ForeignKey("media.id", ondelete="RESTRICT"), nullable=False),
+        sa.Column(
+            "property_id",
+            sa.Uuid(),
+            sa.ForeignKey("properties.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.Column(
+            "media_id", sa.Uuid(), sa.ForeignKey("media.id", ondelete="RESTRICT"), nullable=False
+        ),
         sa.Column("position", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
     )
     op.create_index("ix_property_photos_property_id", "property_photos", ["property_id"])
 

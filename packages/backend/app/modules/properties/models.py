@@ -70,7 +70,9 @@ class Property(Base):
     beds: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     bathrooms: Mapped[Decimal] = mapped_column(Numeric(4, 1), nullable=False, default=Decimal("0"))
 
-    amenities: Mapped[list[str]] = mapped_column(ARRAY(String(40)), nullable=False, server_default="{}")
+    amenities: Mapped[list[str]] = mapped_column(
+        ARRAY(String(40)), nullable=False, server_default="{}"
+    )
 
     house_rules: Mapped[str | None] = mapped_column(Text())
     cancellation_policy: Mapped[CancellationPolicy] = mapped_column(

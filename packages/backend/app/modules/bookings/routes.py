@@ -80,7 +80,10 @@ async def initiate_payment(
 
     async def _do():
         result = await payment_service.initiate_payment(
-            session, booking=booking, provider_name=body.provider, idempotency_key=idempotency_key or uuid4().hex
+            session,
+            booking=booking,
+            provider_name=body.provider,
+            idempotency_key=idempotency_key or uuid4().hex,
         )
         return result
 

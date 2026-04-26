@@ -67,9 +67,7 @@ async def count(session: AsyncSession, f: SearchFilters) -> int:
 
 
 async def search(session: AsyncSession, f: SearchFilters) -> list[tuple[Property, float | None]]:
-    stmt = select(Property).options(
-        selectinload(Property.photos).selectinload(PropertyPhoto.media)
-    )
+    stmt = select(Property).options(selectinload(Property.photos).selectinload(PropertyPhoto.media))
     stmt = _apply_filters(stmt, f)
 
     distance_expr = None

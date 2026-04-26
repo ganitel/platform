@@ -91,8 +91,16 @@ LISTINGS: list[dict[str, Any]] = [
         "beds": 5,
         "bathrooms": Decimal("3"),
         "amenities": [
-            "wifi", "ac", "kitchen", "pool", "garden", "free_parking",
-            "backup_generator", "washer", "tv", "security_cameras",
+            "wifi",
+            "ac",
+            "kitchen",
+            "pool",
+            "garden",
+            "free_parking",
+            "backup_generator",
+            "washer",
+            "tv",
+            "security_cameras",
         ],
         "house_rules": "Pas d'événements sans accord préalable.",
         "cancellation_policy": CancellationPolicy.STRICT,
@@ -157,8 +165,15 @@ LISTINGS: list[dict[str, Any]] = [
         "beds": 6,
         "bathrooms": Decimal("4"),
         "amenities": [
-            "wifi", "ac", "kitchen", "hot_water", "terrace", "garden",
-            "paid_parking", "smoke_alarm", "backup_generator",
+            "wifi",
+            "ac",
+            "kitchen",
+            "hot_water",
+            "terrace",
+            "garden",
+            "paid_parking",
+            "smoke_alarm",
+            "backup_generator",
         ],
         "house_rules": "Silence de 22h à 7h.",
         "cancellation_policy": CancellationPolicy.MODERATE,
@@ -202,8 +217,16 @@ LISTINGS: list[dict[str, Any]] = [
         "beds": 2,
         "bathrooms": Decimal("2"),
         "amenities": [
-            "wifi", "ac", "kitchen", "fridge", "microwave", "hot_water",
-            "terrace", "free_parking", "tv", "security_cameras",
+            "wifi",
+            "ac",
+            "kitchen",
+            "fridge",
+            "microwave",
+            "hot_water",
+            "terrace",
+            "free_parking",
+            "tv",
+            "security_cameras",
         ],
         "house_rules": "Pas de fêtes.",
         "cancellation_policy": CancellationPolicy.MODERATE,
@@ -247,8 +270,18 @@ LISTINGS: list[dict[str, Any]] = [
         "beds": 3,
         "bathrooms": Decimal("2"),
         "amenities": [
-            "wifi", "ac", "kitchen", "fridge", "microwave", "hot_water",
-            "pool", "terrace", "tv", "workspace", "free_parking", "security_cameras",
+            "wifi",
+            "ac",
+            "kitchen",
+            "fridge",
+            "microwave",
+            "hot_water",
+            "pool",
+            "terrace",
+            "tv",
+            "workspace",
+            "free_parking",
+            "security_cameras",
         ],
         "house_rules": "Lisse de 22h à 7h.",
         "cancellation_policy": CancellationPolicy.STRICT,
@@ -306,17 +339,23 @@ async def _wipe_demo_listings(session: Any, host_id: Any) -> int:
     """Drop all properties owned by the demo host (cascade clears photos),
     plus their associated Media rows. Returns the count of removed properties."""
     rows = (
-        await session.execute(select(Property.id).where(Property.host_id == host_id))
-    ).scalars().all()
+        (await session.execute(select(Property.id).where(Property.host_id == host_id)))
+        .scalars()
+        .all()
+    )
     if not rows:
         return 0
 
     # Find media used by demo properties so we can purge it after.
     media_ids = (
-        await session.execute(
-            select(PropertyPhoto.media_id).where(PropertyPhoto.property_id.in_(rows))
+        (
+            await session.execute(
+                select(PropertyPhoto.media_id).where(PropertyPhoto.property_id.in_(rows))
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
 
     await session.execute(delete(Property).where(Property.id.in_(rows)))
     if media_ids:
@@ -363,9 +402,7 @@ async def _create_listing(session: Any, host: User, listing: dict[str, Any]) -> 
     await session.flush()  # populate prop.id
 
     for position, media in enumerate(photos):
-        session.add(
-            PropertyPhoto(property_id=prop.id, media_id=media.id, position=position)
-        )
+        session.add(PropertyPhoto(property_id=prop.id, media_id=media.id, position=position))
 
     return prop
 
@@ -388,8 +425,7 @@ async def main() -> None:
             inserted=len(LISTINGS),
         )
         print(
-            f"✓ seed complete — host={host.display_name!r}, "
-            f"wiped={wiped}, inserted={len(LISTINGS)}"
+            f"✓ seed complete — host={host.display_name!r}, wiped={wiped}, inserted={len(LISTINGS)}"
         )
     finally:
         await dispose_engine()

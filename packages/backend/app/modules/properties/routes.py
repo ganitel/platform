@@ -26,7 +26,9 @@ router = APIRouter(prefix="/properties", tags=["properties"])
 
 
 @router.post("", response_model=PropertyDetail, status_code=status.HTTP_201_CREATED)
-async def create_property(body: PropertyCreateIn, user: CurrentUser, session: DbSession) -> PropertyDetail:
+async def create_property(
+    body: PropertyCreateIn, user: CurrentUser, session: DbSession
+) -> PropertyDetail:
     prop = await service.create_draft(session, user, body)
     fresh = await service.get(session, prop.id)
     return await service.to_detail(fresh, user)
@@ -92,7 +94,9 @@ async def update_property(
 
 
 @router.post("/{property_id}/publish", response_model=PropertyDetail)
-async def publish_property(property_id: UUID, user: CurrentUser, session: DbSession) -> PropertyDetail:
+async def publish_property(
+    property_id: UUID, user: CurrentUser, session: DbSession
+) -> PropertyDetail:
     prop = await service.get(session, property_id)
     await service.publish(session, prop, user)
     fresh = await service.get(session, property_id)
@@ -100,7 +104,9 @@ async def publish_property(property_id: UUID, user: CurrentUser, session: DbSess
 
 
 @router.post("/{property_id}/unpublish", response_model=PropertyDetail)
-async def unpublish_property(property_id: UUID, user: CurrentUser, session: DbSession) -> PropertyDetail:
+async def unpublish_property(
+    property_id: UUID, user: CurrentUser, session: DbSession
+) -> PropertyDetail:
     prop = await service.get(session, property_id)
     await service.unpublish(session, prop, user)
     fresh = await service.get(session, property_id)
@@ -112,7 +118,9 @@ async def attach_photo(
     property_id: UUID, body: AttachPhotoIn, user: CurrentUser, session: DbSession
 ) -> dict:
     prop = await service.get(session, property_id)
-    photo = await service.attach_photo(session, prop, user, media_id=body.media_id, position=body.position)
+    photo = await service.attach_photo(
+        session, prop, user, media_id=body.media_id, position=body.position
+    )
     return {"id": str(photo.id), "position": photo.position}
 
 

@@ -44,8 +44,15 @@ class ForbiddenError(AppError):
     code = "forbidden"
 
 
-def _problem(*, status: int, code: str, detail: str, extra: dict[str, Any] | None = None) -> JSONResponse:
-    body: dict[str, Any] = {"type": f"about:blank#{code}", "title": code, "status": status, "detail": detail}
+def _problem(
+    *, status: int, code: str, detail: str, extra: dict[str, Any] | None = None
+) -> JSONResponse:
+    body: dict[str, Any] = {
+        "type": f"about:blank#{code}",
+        "title": code,
+        "status": status,
+        "detail": detail,
+    }
     if extra:
         body["extra"] = extra
     return JSONResponse(status_code=status, content=body, media_type="application/problem+json")
@@ -54,16 +61,30 @@ def _problem(*, status: int, code: str, detail: str, extra: dict[str, Any] | Non
 def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(AppError)
     async def _app_error(_: Request, exc: AppError) -> JSONResponse:
-        return _problem(status=exc.status_code, code=exc.code, detail=exc.detail, extra=exc.extra or None)
+        return _problem(
+            status=exc.status_code, code=exc.code, detail=exc.detail, extra=exc.extra or None
+        )
 
     @app.exception_handler(HTTPException)
     async def _http(_: Request, exc: HTTPException) -> JSONResponse:
-        return _problem(status=exc.status_code, code=f"http.{exc.status_code}", detail=str(exc.detail))
+        return _problem(
+            status=exc.status_code, code=f"http.{exc.status_code}", detail=str(exc.detail)
+        )
 
     @app.exception_handler(RequestValidationError)
     async def _validation(_: Request, exc: RequestValidationError) -> JSONResponse:
-        return _problem(status=422, code="validation_failed", detail="request validation failed", extra={"errors": exc.errors()})
+        return _problem(
+            status=422,
+            code="validation_failed",
+            detail="request validation failed",
+            extra={"errors": exc.errors()},
+        )
 
     @app.exception_handler(IntegrityError)
     async def _integrity(_: Request, exc: IntegrityError) -> JSONResponse:
-        return _problem(status=409, code="conflict", detail="database constraint violation", extra={"sqlstate": getattr(exc.orig, "sqlstate", None)})
+        return _problem(
+            status=409,
+            code="conflict",
+            detail="database constraint violation",
+            extra={"sqlstate": getattr(exc.orig, "sqlstate", None)},
+        )

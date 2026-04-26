@@ -59,7 +59,9 @@ class TranzakProvider:
         self._cached_token = (token, time.time() + ttl)
         return token
 
-    async def create_intent(self, *, payment: Payment, return_url: str | None = None) -> PaymentIntent:
+    async def create_intent(
+        self, *, payment: Payment, return_url: str | None = None
+    ) -> PaymentIntent:
         token = await self._get_token()
         # TODO: confirm exact endpoint for collection — typically POST /xp021/v1/request/create
         body: dict[str, Any] = {
@@ -98,8 +100,10 @@ class TranzakProvider:
         data = json.loads(body)
         provider_status = (data.get("status") or data.get("data", {}).get("status") or "").lower()
         # TODO: confirm tranzak status vocabulary; typical values: "successful", "failed", "pending"
-        status = "captured" if provider_status in {"successful", "success", "captured"} else (
-            "failed" if provider_status in {"failed", "cancelled", "error"} else "pending"
+        status = (
+            "captured"
+            if provider_status in {"successful", "success", "captured"}
+            else ("failed" if provider_status in {"failed", "cancelled", "error"} else "pending")
         )
         return PaymentEvent(
             provider_intent_id=data.get("requestId") or data.get("data", {}).get("requestId", ""),

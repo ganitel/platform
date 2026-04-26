@@ -9,7 +9,9 @@ class PaymentIntent:
     """Result of creating an intent at a provider."""
 
     provider_intent_id: str
-    client_action: dict[str, Any]  # what the frontend should do (redirect URL, USSD prompt, client_secret, etc.)
+    client_action: dict[
+        str, Any
+    ]  # what the frontend should do (redirect URL, USSD prompt, client_secret, etc.)
     raw: dict[str, Any]
 
 
@@ -25,7 +27,9 @@ class PaymentEvent:
 class PaymentProvider(Protocol):
     name: str
 
-    async def create_intent(self, *, payment: Payment, return_url: str | None = None) -> PaymentIntent: ...
+    async def create_intent(
+        self, *, payment: Payment, return_url: str | None = None
+    ) -> PaymentIntent: ...
 
     async def parse_webhook(self, *, headers: dict[str, str], body: bytes) -> PaymentEvent: ...
 

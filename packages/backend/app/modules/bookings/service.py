@@ -191,7 +191,9 @@ async def cancel_as_host(session: AsyncSession, booking: Booking, host: User) ->
     return booking
 
 
-async def list_for_guest(session: AsyncSession, guest: User, *, limit: int = 50, offset: int = 0) -> list[Booking]:
+async def list_for_guest(
+    session: AsyncSession, guest: User, *, limit: int = 50, offset: int = 0
+) -> list[Booking]:
     stmt = (
         select(Booking)
         .where(Booking.guest_id == guest.id)

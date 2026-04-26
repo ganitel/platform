@@ -25,7 +25,9 @@ def _make_key(user_id: str, mime_type: str) -> str:
     return f"u/{user_id}/{uuid4().hex}.{ext}"
 
 
-async def create_upload(session: AsyncSession, user: User, *, mime_type: str, size_bytes: int | None) -> MediaUploadOut:
+async def create_upload(
+    session: AsyncSession, user: User, *, mime_type: str, size_bytes: int | None
+) -> MediaUploadOut:
     s = get_settings()
     key = _make_key(str(user.id), mime_type)
     media = Media(
@@ -39,7 +41,9 @@ async def create_upload(session: AsyncSession, user: User, *, mime_type: str, si
     await session.commit()
     await session.refresh(media)
     upload_url = await presign_put(key=key, content_type=mime_type)
-    return MediaUploadOut(media_id=media.id, upload_url=upload_url, expires_in=s.MEDIA_PUT_URL_TTL_SECONDS)
+    return MediaUploadOut(
+        media_id=media.id, upload_url=upload_url, expires_in=s.MEDIA_PUT_URL_TTL_SECONDS
+    )
 
 
 async def to_public(media: Media) -> MediaPublic:

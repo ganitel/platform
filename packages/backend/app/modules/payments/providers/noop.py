@@ -14,7 +14,9 @@ from app.modules.payments.providers.base import PaymentEvent, PaymentIntent
 class NoopProvider:
     name = "noop"
 
-    async def create_intent(self, *, payment: Payment, return_url: str | None = None) -> PaymentIntent:
+    async def create_intent(
+        self, *, payment: Payment, return_url: str | None = None
+    ) -> PaymentIntent:
         intent_id = f"noop-{uuid4().hex}"
         return PaymentIntent(
             provider_intent_id=intent_id,

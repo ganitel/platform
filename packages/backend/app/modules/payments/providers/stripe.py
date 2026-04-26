@@ -6,7 +6,9 @@ from app.modules.payments.providers.base import PaymentEvent, PaymentIntent
 class StripeProvider:
     name = "stripe"
 
-    async def create_intent(self, *, payment: Payment, return_url: str | None = None) -> PaymentIntent:
+    async def create_intent(
+        self, *, payment: Payment, return_url: str | None = None
+    ) -> PaymentIntent:
         raise AppError("stripe not yet wired", extra={"status_code": 501})
 
     async def parse_webhook(self, *, headers: dict[str, str], body: bytes) -> PaymentEvent:
