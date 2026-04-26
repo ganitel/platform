@@ -22,8 +22,31 @@ const dict = {
   "common.signout": { fr: "Se déconnecter", en: "Sign out" },
 
   "nav.home": { fr: "Accueil", en: "Home" },
+  "nav.browse": { fr: "Découvrir", en: "Browse" },
   "nav.bookings": { fr: "Réservations", en: "Trips" },
   "nav.profile": { fr: "Profil", en: "Profile" },
+
+  "landing.nav.properties": { fr: "Logements", en: "Properties" },
+  "landing.nav.experiences": { fr: "Expériences", en: "Experiences" },
+  "landing.tag.line1": { fr: "Logements", en: "Properties" },
+  "landing.tag.line2": { fr: "& Séjours", en: "& Stays" },
+  "landing.lede": {
+    fr: "Des logements choisis dans des lieux calmes, et les expériences qui les entourent. Du Cameroun à la Côte d'Ivoire — trouvez où poser vos valises.",
+    en: "Curated stays in quiet places, paired with the experiences that come with them. From Cameroon to Côte d'Ivoire — find where to settle in.",
+  },
+  "landing.title.line1": { fr: "Là où la lumière", en: "Stay where the" },
+  "landing.title.line2_pre": { fr: "prend son", en: "light moves" },
+  "landing.title.line2_em": { fr: "temps.", en: "slowly." },
+  "landing.cta": { fr: "Découvrir les séjours", en: "Browse stays" },
+  "landing.cta.hint": { fr: "Réservation immédiate", en: "Instant booking" },
+  "landing.feature.tour": { fr: "Visite live", en: "Live tour" },
+  "landing.feature.title": { fr: "Cabane Belledonne", en: "Belledonne Cabin" },
+  "landing.feature.caption": {
+    fr: "Une visite de douze minutes dans notre logement le plus aimé — perché au-dessus de la vallée, construit autour d'une seule fenêtre.",
+    en: "A twelve-minute tour of our most-loved stay — perched above the valley, built around a single window.",
+  },
+  "landing.play": { fr: "Lancer la visite", en: "Play tour" },
+  "landing.info": { fr: "Lire l'histoire de l'hôte", en: "Read the host story" },
 
   "browse.title": { fr: "Explorer", en: "Explore" },
   "browse.subtitle": {

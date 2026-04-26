@@ -6,9 +6,12 @@ import {
 } from "@react-router/dev/routes";
 
 export default [
+  // Marketing landing — its own chrome (custom nav strip), no app shell.
+  index("routes/_index.tsx"),
+
   // Pages with the public app shell (header / nav / footer).
   layout("routes/_app.tsx", [
-    index("routes/_index.tsx"),
+    route("browse", "routes/browse.tsx"),
     route("properties/:id", "routes/properties.$id.tsx"),
     route("bookings", "routes/bookings.tsx"),
     route("profile", "routes/profile.tsx"),

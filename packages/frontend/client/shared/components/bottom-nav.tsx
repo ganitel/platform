@@ -1,11 +1,12 @@
-import { Compass, Heart, User as UserIcon } from "lucide-react";
+import { Compass, Heart, Home, User as UserIcon } from "lucide-react";
 import { NavLink } from "react-router";
 
 import { cn } from "@/shared/lib/cn";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 
 const items: { to: string; labelKey: TranslationKey; icon: typeof Compass }[] = [
-  { to: "/", labelKey: "nav.home", icon: Compass },
+  { to: "/", labelKey: "nav.home", icon: Home },
+  { to: "/browse", labelKey: "nav.browse", icon: Compass },
   { to: "/bookings", labelKey: "nav.bookings", icon: Heart },
   { to: "/profile", labelKey: "nav.profile", icon: UserIcon },
 ];

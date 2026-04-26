@@ -25,6 +25,9 @@ export function Header() {
           <Link to="/" className="hover:text-ganitel-text-title">
             {t("nav.home")}
           </Link>
+          <Link to="/browse" className="hover:text-ganitel-text-title">
+            {t("nav.browse")}
+          </Link>
           <Link to="/bookings" className="hover:text-ganitel-text-title">
             {t("nav.bookings")}
           </Link>
