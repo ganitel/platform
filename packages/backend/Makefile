@@ -1,121 +1,47 @@
 .DEFAULT_GOAL := help
 
-COMPOSE := COMPOSE_PROJECT_NAME=ganitel-local docker compose -f docker-compose.local.yml --env-file .env.local
+COMPOSE := docker compose -f docker-compose.local.yml
 
-# ── Development ───────────────────────────────────────────────────────────────
+dev: ## Run FastAPI locally with reload
+	uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-dev: ## Start FastAPI dev server with live reload
-	uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+up: ## Start postgres + redis
+	$(COMPOSE) up -d
 
-install: up ## Install deps, sync, and run migrations
-	uv sync
-	$(MAKE) migrate
-	@echo "✅ Ready — run: make dev"
+down: ## Stop services
+	$(COMPOSE) down
 
-# ── Docker ────────────────────────────────────────────────────────────────────
+down-v: ## Stop services and wipe volumes
+	$(COMPOSE) down -v
 
-up: ## Start local services (postgres, redis)
-	$(COMPOSE) up -d --remove-orphans
+db-revision: ## Generate a migration (M="message")
+	@[ -n "$(M)" ] || (echo "Usage: make db-revision M=\"message\""; exit 1)
+	uv run alembic revision --autogenerate -m "$(M)"
 
-down: ## Stop local services
-	$(COMPOSE) down --remove-orphans
-
-down-v: ## Stop local services and delete volumes
-	$(COMPOSE) down -v --remove-orphans
-
-restart: ## Restart local services
-	$(COMPOSE) restart
-
-logs: ## Tail all service logs
-	$(COMPOSE) logs -f
-
-ps: ## Show running containers
-	$(COMPOSE) ps
-
-shell-app: ## Shell into the app container
-	$(COMPOSE) exec app /bin/bash
-
-shell-db: ## Open psql shell
-	$(COMPOSE) exec db psql -U ganitel_user -d ganitel_db
-
-shell-redis: ## Open redis-cli
-	$(COMPOSE) exec redis redis-cli
-
-# ── Database ──────────────────────────────────────────────────────────────────
-
-migrate: ## Run pending Alembic migrations
+db-upgrade: ## Apply pending migrations
 	uv run alembic upgrade head
 
-migrate-status: ## Show current migration revision
-	uv run alembic current
+db-downgrade: ## Roll back one migration
+	uv run alembic downgrade -1
 
-migrate-history: ## Show migration history
-	uv run alembic history
+seed: ## Seed the local DB with a demo host + ~10 published properties (idempotent)
+	uv run python -m scripts.seed_demo
 
-db-reset: ## DESTRUCTIVE: wipe DB volumes and re-run migrations
-	@read -p "Type yes to confirm: " c && [ "$$c" = "yes" ]
-	$(COMPOSE) down -v
-	$(MAKE) up
-	@sleep 3
-	$(MAKE) migrate
+test: ## Run tests
+	uv run pytest
 
-db-backup: ## Backup local DB into backups/
-	@mkdir -p backups
-	$(COMPOSE) exec -T db pg_dump -U ganitel_user ganitel_db > backups/local_$$(date +%Y%m%d_%H%M%S).sql
-	@echo "✅ Backup saved to backups/"
-
-db-restore: ## Restore local DB (FILE=backups/file.sql)
-	@[ -n "$(FILE)" ] || (echo "❌ Usage: make db-restore FILE=backups/file.sql"; exit 1)
-	$(COMPOSE) exec -T db psql -U ganitel_user ganitel_db < $(FILE)
-
-# ── Admin ─────────────────────────────────────────────────────────────────────
-
-admin-create: ## Create or promote admin (EMAIL= PASSWORD= FIRST_NAME= LAST_NAME=)
-	uv run python -m app.scripts.create_admin
-
-# ── Tests ─────────────────────────────────────────────────────────────────────
-
-test: _test-db-up ## Run all tests with coverage
-	uv run pytest --cov=app --cov-report=term-missing
-
-test-unit: _test-db-up ## Run unit tests
-	uv run pytest -m unit --cov=app --cov-report=term-missing
-
-test-integration: _test-db-up ## Run integration tests
-	uv run pytest -m integration --cov=app --cov-report=term-missing
-
-test-fast: _test-db-up ## Run all tests except slow ones
-	uv run pytest -m "not slow"
-
-test-file: _test-db-up ## Run a specific file (FILE=tests/test_foo.py)
-	@[ -n "$(FILE)" ] || (echo "❌ Usage: make test-file FILE=tests/test_foo.py"; exit 1)
-	uv run pytest $(FILE) --cov=app --cov-report=term-missing
-
-_test-db-up:
-	$(COMPOSE) --profile test up -d db-test
-	@sleep 2
-
-# ── Code quality ──────────────────────────────────────────────────────────────
-
-lint: ## Lint with ruff
+lint: ## Lint (ruff)
 	uv run ruff check .
 
-format: ## Format with ruff
+fmt: ## Format (ruff)
 	uv run ruff format .
 
-typecheck: ## Type-check with ty
-	uv run ty check .
+typecheck: ## Type-check (ty)
+	uv run ty check app
 
-check: lint typecheck ## Lint + typecheck (CI equivalent)
-
-# ── Help ──────────────────────────────────────────────────────────────────────
+check: lint typecheck ## Lint + typecheck
 
 help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: dev install up down down-v restart logs ps shell-app shell-db shell-redis \
-        migrate migrate-status migrate-history db-reset db-backup db-restore \
-        admin-create \
-        test test-unit test-integration test-fast test-file _test-db-up \
-        lint format typecheck check help
+.PHONY: dev up down down-v db-revision db-upgrade db-downgrade seed test lint fmt typecheck check help

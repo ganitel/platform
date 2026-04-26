@@ -1,99 +1,58 @@
-# ============================================
-# GANITEL BACKEND — LOCAL DEVELOPMENT
-# FastAPI runs locally via `uv run`; only infrastructure services here.
-# ============================================
-
 services:
   db:
-    image: postgres:15-alpine
-    restart: unless-stopped
+    # arm64-native PostGIS for Apple Silicon dev; production uses postgis/postgis (x86_64)
+    image: imresamu/postgis-arm64:16-3.4
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-ganitel_db}
-      POSTGRES_USER: ${POSTGRES_USER:-ganitel_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ganitel_local_password_2024}
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
-    ports:
-      - "${POSTGRES_HOST_PORT:-5432}:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_DB: ganitel
+      POSTGRES_USER: ganitel
+      POSTGRES_PASSWORD: ganitel
+    ports: ["15432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ganitel_user} -d ${POSTGRES_DB:-ganitel_db}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks:
-      - ganitel-network
-
-  db-test:
-    image: postgres:15-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${TEST_POSTGRES_DB:-ganitel_test_db}
-      POSTGRES_USER: ${POSTGRES_USER:-ganitel_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ganitel_local_password_2024}
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
-    ports:
-      - "${TEST_POSTGRES_HOST_PORT:-5433}:5432"
-    volumes:
-      - postgres_test_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ganitel_user} -d ${TEST_POSTGRES_DB:-ganitel_test_db}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks:
-      - ganitel-network
-    profiles:
-      - test
+      test: ["CMD-SHELL", "pg_isready -U ganitel"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   redis:
     image: redis:7-alpine
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    ports:
-      - "${REDIS_HOST_PORT:-6379}:6379"
-    volumes:
-      - redis_data:/data
+    ports: ["6390:6379"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
+      interval: 5s
       timeout: 3s
-      retries: 5
-      start_period: 10s
-    networks:
-      - ganitel-network
+      retries: 10
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    restart: unless-stopped
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ganitel.local}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "${PGADMIN_HOST_PORT:-5050}:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - "9000:9000"
+      - "9001:9001"
+    volumes: ["miniodata:/data"]
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio-init:
+    image: minio/mc:latest
     depends_on:
-      - db
-    networks:
-      - ganitel-network
-    profiles:
-      - tools
+      minio:
+        condition: service_started
+    entrypoint: >
+      /bin/sh -c "
+      until /usr/bin/mc alias set local http://minio:9000 minioadmin minioadmin >/dev/null 2>&1; do sleep 1; done;
+      /usr/bin/mc mb -p local/ganitel-uploads >/dev/null 2>&1 || true;
+      /usr/bin/mc anonymous set download local/ganitel-uploads >/dev/null 2>&1 || true;
+      echo 'minio bucket ready';
+      "
+    restart: "no"
 
 volumes:
-  postgres_data:
-    driver: local
-  postgres_test_data:
-    driver: local
-  redis_data:
-    driver: local
-  pgadmin_data:
-    driver: local
-
-networks:
-  ganitel-network:
-    driver: bridge
+  pgdata:
+  miniodata:

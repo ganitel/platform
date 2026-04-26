@@ -9,7 +9,6 @@ omit =
     */venv/*
     */.venv/*
     */migrations/*
-    */scripts/*
 
 [report]
 # Report configuration
