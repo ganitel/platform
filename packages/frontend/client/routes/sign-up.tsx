@@ -1,9 +1,16 @@
-import { SignUp } from "@clerk/clerk-react";
+import { SignUp } from "@clerk/react-router";
+
+import type { Route } from "./+types/sign-up";
 
 import { AuthShell } from "@/features/auth/components/auth-shell";
 import { clerkAppearance } from "@/features/auth/components/clerk-appearance";
 
-export function SignUpPage() {
+export const meta: Route.MetaFunction = () => [
+  { title: "Inscription — Ganitel" },
+  { name: "robots", content: "noindex" },
+];
+
+export default function SignUpPage() {
   return (
     <AuthShell title="Créer votre compte" subtitle="Inscription">
       <SignUp

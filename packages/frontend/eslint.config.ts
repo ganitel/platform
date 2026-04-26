@@ -9,7 +9,13 @@ import vitest from "@vitest/eslint-plugin";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
-  globalIgnores(["dist", "node_modules", "coverage"]),
+  globalIgnores([
+    "dist",
+    "build",
+    "node_modules",
+    "coverage",
+    ".react-router",
+  ]),
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

@@ -25,12 +25,18 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
 
-    "types": ["vite/client", "vitest/globals"],
+    "types": ["@react-router/node", "vite/client", "vitest/globals"],
+    "rootDirs": [".", "./.react-router/types"],
 
     "paths": {
       "@/*": ["./client/*"]
     }
   },
-  "include": ["client/**/*", "vite.config.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "client/**/*",
+    ".react-router/types/**/*",
+    "vite.config.ts",
+    "react-router.config.ts"
+  ],
+  "exclude": ["node_modules", "dist", "build"]
 }

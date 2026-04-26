@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 import type { PropertyPublic } from "@/features/properties/types";
 import { formatMoney } from "@/shared/lib/format";

@@ -1,30 +1,26 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { reactRouter } from "@react-router/dev/vite";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import { defineConfig } from "vite";
 
-// https://vitejs.dev/config/
-export default defineConfig(({ mode: _mode }) => ({
+// React Router v7 framework mode. SSR is configured via react-router.config.ts.
+// `@vitejs/plugin-react` is bundled inside `@react-router/dev/vite`; do not
+// register it again here or routes will hot-reload twice and break.
+export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 3000,
     proxy: {
-      // Proxy API calls to local backend — avoids CORS in dev
-      '/api': {
-        target: 'http://localhost:8000',
+      "/api": {
+        target: "http://localhost:8000",
         changeOrigin: true,
         secure: false,
       },
     },
-    fs: {
-      allow: [".", "./client"],
-      deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**"],
-    },
   },
-  build: {
-    outDir: "dist/spa",
-  },
-  plugins: [react(), tailwindcss()],
+  // The vitest test runner doesn't understand the reactRouter plugin, so swap
+  // it out for plain `@vitejs/plugin-react` when running tests.
+  plugins: mode === "test" ? [tailwindcss()] : [tailwindcss(), reactRouter()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./client"),
@@ -34,6 +30,6 @@ export default defineConfig(({ mode: _mode }) => ({
     environment: "jsdom",
     setupFiles: "./client/shared/test/setup.ts",
     globals: true,
-    exclude: ["**/node_modules/**", "**/dist/**"],
+    exclude: ["**/node_modules/**", "**/dist/**", "**/build/**"],
   },
 }));

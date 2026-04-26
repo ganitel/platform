@@ -1,23 +1,58 @@
-import { useParams } from "react-router-dom";
+import { data } from "react-router";
 
-import { useProperty } from "@/features/properties/hooks";
-import { PropertyGallery } from "@/features/properties/components/property-gallery";
+import type { Route } from "./+types/properties.$id";
+
 import { HostCard } from "@/features/properties/components/host-card";
+import { PropertyGallery } from "@/features/properties/components/property-gallery";
 import { Button } from "@/shared/ui/button";
 import { ErrorState } from "@/shared/components/error-state";
-import { PageSpinner } from "@/shared/components/page-spinner";
 import { formatMoney } from "@/shared/lib/format";
+import { serverFetch, ServerApiError } from "@/shared/api/server";
 import { useLocale, useT } from "@/shared/lib/i18n";
+import type { PropertyDetail } from "@/features/properties/types";
 
-export function PropertyDetailPage() {
-  const { id } = useParams();
+export const meta: Route.MetaFunction = ({ data }) => {
+  if (!data?.property) {
+    return [{ title: "Logement introuvable — Ganitel" }];
+  }
+  const p = data.property;
+  const title = `${p.title} — ${p.city} | Ganitel`;
+  const description = p.description.slice(0, 160) || `${p.property_type} à ${p.city}`;
+  const ogImage = p.cover_photo?.url;
+  return [
+    { title },
+    { name: "description", content: description },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+    { property: "og:type", content: "website" },
+    ...(ogImage
+      ? [
+          { property: "og:image", content: ogImage },
+          { name: "twitter:card", content: "summary_large_image" },
+          { name: "twitter:image", content: ogImage },
+        ]
+      : []),
+  ];
+};
+
+export async function loader({ params }: Route.LoaderArgs) {
+  try {
+    const property = await serverFetch<PropertyDetail>(`/properties/${params.id}`);
+    return { property };
+  } catch (e) {
+    if (e instanceof ServerApiError && e.status === 404) {
+      throw data("Logement introuvable", { status: 404 });
+    }
+    throw e;
+  }
+}
+
+export default function PropertyDetailRoute({
+  loaderData,
+}: Route.ComponentProps) {
+  const { property } = loaderData;
   const locale = useLocale();
   const t = useT();
-  const { data: property, isLoading, isError, refetch } = useProperty(id);
-
-  if (isLoading) return <PageSpinner />;
-  if (isError || !property) return <ErrorState onRetry={() => refetch()} />;
-
   const price = formatMoney(property.base_price, locale);
 
   return (
@@ -40,14 +75,12 @@ export function PropertyDetailPage() {
 
       <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
         <section className="space-y-10">
-          <div>
-            <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-ganitel-text-subtitle">
-              <li>{property.capacity} {t("property.guests")}</li>
-              <li>{property.bedrooms} {t("property.bedrooms")}</li>
-              <li>{property.beds} {t("property.beds")}</li>
-              <li>{property.bathrooms} {t("property.bathrooms")}</li>
-            </ul>
-          </div>
+          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-ganitel-text-subtitle">
+            <li>{property.capacity} {t("property.guests")}</li>
+            <li>{property.bedrooms} {t("property.bedrooms")}</li>
+            <li>{property.beds} {t("property.beds")}</li>
+            <li>{property.bathrooms} {t("property.bathrooms")}</li>
+          </ul>
 
           <div>
             <h2 className="mb-3 text-lg font-semibold text-ganitel-text-title">
@@ -65,7 +98,9 @@ export function PropertyDetailPage() {
               </h2>
               <ul className="grid grid-cols-2 gap-y-2 text-sm text-ganitel-text-subtitle md:grid-cols-3">
                 {property.amenities.map((a) => (
-                  <li key={a} className="capitalize">{a.replace(/_/g, " ")}</li>
+                  <li key={a} className="capitalize">
+                    {a.replace(/_/g, " ")}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -77,7 +112,9 @@ export function PropertyDetailPage() {
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-2xl border border-ganitel-stroke-neutral bg-ganitel-background-secondary p-6 shadow-sm">
             <p className="text-sm text-ganitel-text-subtitle">
-              <span className="text-2xl font-semibold text-ganitel-text-title">{price}</span>
+              <span className="text-2xl font-semibold text-ganitel-text-title">
+                {price}
+              </span>
               <span> · {t("property.per_night")}</span>
             </p>
             <Button
@@ -90,5 +127,13 @@ export function PropertyDetailPage() {
         </aside>
       </div>
     </article>
+  );
+}
+
+export function ErrorBoundary() {
+  return (
+    <div className="mx-auto w-full max-w-3xl px-4 py-12 md:px-8">
+      <ErrorState />
+    </div>
   );
 }

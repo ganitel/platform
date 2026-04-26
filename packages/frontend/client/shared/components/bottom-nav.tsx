@@ -1,5 +1,5 @@
 import { Compass, Heart, User as UserIcon } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink } from "react-router";
 
 import { cn } from "@/shared/lib/cn";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
