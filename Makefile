@@ -1,6 +1,16 @@
 .DEFAULT_GOAL := help
 
+UV := uv --directory packages/backend
+
+# ── Bootstrap ─────────────────────────────────────────────────────────────────
+
+install: ## Install all deps (backend uv sync + frontend bun install)
+	$(UV) sync --frozen --all-groups
+	bun install --cwd packages/frontend
+
 # ── Dev ───────────────────────────────────────────────────────────────────────
+# Requires PostgreSQL (with PostGIS) + Redis running locally on the standard
+# ports (5432 / 6379). Override via DATABASE_URL / REDIS_URL in .env.
 
 dev: ## Start frontend + backend dev servers concurrently (hot reload)
 	@echo "Starting frontend + backend dev servers (Ctrl+C to stop)…"
@@ -9,54 +19,67 @@ dev: ## Start frontend + backend dev servers concurrently (hot reload)
 		($(MAKE) -s dev-frontend 2>&1 | sed -e 's/^/[frontend] /') & \
 		wait
 
-dev-frontend: ## Start frontend dev server
+dev-backend: ## Backend FastAPI dev server (http://localhost:8000)
+	@echo "→ FastAPI dev server: http://localhost:8000"
+	$(UV) run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+dev-frontend: ## Frontend Vite dev server (http://localhost:3000)
 	@echo "→ Vite dev server: http://localhost:3000"
 	bun run --cwd packages/frontend dev
 
-dev-backend: ## Start backend FastAPI dev server
-	$(MAKE) -C packages/backend dev
+# ── Database ──────────────────────────────────────────────────────────────────
 
-# ── Install ───────────────────────────────────────────────────────────────────
+db-revision: ## Generate a migration (M="message")
+	@[ -n "$(M)" ] || (echo "Usage: make db-revision M=\"message\""; exit 1)
+	$(UV) run alembic revision --autogenerate -m "$(M)"
 
-install: ## Install all dependencies (frontend + backend)
-	bun install --cwd packages/frontend
-	$(MAKE) -C packages/backend install
+db-upgrade: ## Apply pending migrations
+	$(UV) run alembic upgrade head
 
-# ── Build ─────────────────────────────────────────────────────────────────────
+db-downgrade: ## Roll back one migration
+	$(UV) run alembic downgrade -1
 
-build-frontend: ## Build frontend for production
-	bun run --cwd packages/frontend build
+seed: ## Seed local DB with demo host + ~10 published properties (idempotent)
+	$(UV) run python -m scripts.seed_demo
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
 
-test-frontend: ## Run frontend tests
+test: test-backend test-frontend ## Run all tests
+
+test-backend: ## Backend unit tests (no DB required)
+	$(UV) run pytest tests/unit/ -v
+
+test-frontend: ## Frontend tests (vitest)
 	bun run --cwd packages/frontend test
-
-test-backend: ## Run backend tests
-	$(MAKE) -C packages/backend test
-
-test: test-frontend test-backend ## Run all tests
 
 # ── Code quality ──────────────────────────────────────────────────────────────
 
 lint: ## Lint everything
+	$(UV) run ruff check .
 	bun run --cwd packages/frontend lint
-	$(MAKE) -C packages/backend lint
 
-format: ## Format everything
+format: ## Format everything (writes)
+	$(UV) run ruff format .
 	bun run --cwd packages/frontend format
-	$(MAKE) -C packages/backend format
 
-check: ## Lint + typecheck everything
-	bun run --cwd packages/frontend lint
-	$(MAKE) -C packages/backend check
+typecheck: ## Type-check everything (ty + tsc)
+	$(UV) run ty check app
+	bun run --cwd packages/frontend typecheck
+
+check: lint typecheck ## Lint + typecheck
+
+# ── Build ─────────────────────────────────────────────────────────────────────
+
+build: ## Build frontend for production (dist/spa)
+	bun run --cwd packages/frontend build
 
 # ── Help ──────────────────────────────────────────────────────────────────────
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: dev dev-frontend dev-backend install build-frontend \
-        test-frontend test-backend test \
-        lint format check help
+.PHONY: install dev dev-backend dev-frontend \
+        db-revision db-upgrade db-downgrade seed \
+        test test-backend test-frontend \
+        lint format typecheck check build help

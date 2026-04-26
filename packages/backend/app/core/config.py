@@ -82,12 +82,13 @@ class Settings(PaymentSettings, ObjectStorageSettings, BaseSettings):
     APP_NAME: str = "Ganitel API"
     APP_VERSION: str = "0.1.0"
 
-    # Defaults match local docker-compose; env always overrides in real deployments.
+    # Defaults assume local Postgres (with PostGIS) + Redis on standard ports.
+    # Env always overrides in real deployments.
     DATABASE_URL: PostgresDsn = cast(
         PostgresDsn,
-        "postgresql+asyncpg://ganitel:ganitel@localhost:15432/ganitel",
+        "postgresql+asyncpg://ganitel:ganitel@localhost:5432/ganitel",
     )
-    REDIS_URL: RedisDsn = cast(RedisDsn, "redis://localhost:6390/0")
+    REDIS_URL: RedisDsn = cast(RedisDsn, "redis://localhost:6379/0")
 
     CORS_ORIGINS: Annotated[list[str], NoDecode] = Field(default_factory=list)
 

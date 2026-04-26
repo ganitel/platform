@@ -1,345 +1,71 @@
-# Ganitel V2 Backend
+# Ganitel Backend
 
-Backend API pour la plateforme Ganitel - Multi-service travel platform
+FastAPI service for the Ganitel platform. Feature-organized; auth via Clerk.
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.109.0-009688.svg?style=flat&logo=FastAPI&logoColor=white)](https://fastapi.tiangolo.com)
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791.svg?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com)
+## Layout
 
-## 🚀 Quick Start (Docker - Recommended)
+```
+app/
+  main.py                    FastAPI factory
+  api/                       Aggregated API router (mounted at /api)
+  core/                      Cross-cutting infra (auth, config, db, errors,
+                             logging, middleware, money, redis, storage)
+  modules/                   Per-feature folders, each with
+                             routes.py / schemas.py / service.py / models.py
+    users/   properties/   bookings/   media/   payments/
+    reference/   outbox/   idempotency/
+migrations/                  Alembic
+scripts/seed_demo.py         Demo data seed (idempotent)
+tests/unit/                  Pure unit tests (no DB / Redis / app boot)
+```
 
-The **fastest way** to get started with Ganitel Backend is using Docker:
+## Prerequisites
+
+- **Python 3.11+** (managed via [uv](https://github.com/astral-sh/uv))
+- **PostgreSQL** with the **PostGIS** extension — `geoalchemy2` requires it
+- **Redis**
+
+Standard ports (5432 / 6379). Override via `DATABASE_URL` / `REDIS_URL` in `.env`.
+
+## Setup
+
+From the **repo root**:
 
 ```bash
-# 1. Build images
-docker-compose -f docker-compose.local.yml build
+cp packages/backend/.env.example packages/backend/.env
+# fill in CLERK_JWKS_URL, CLERK_ISSUER, S3_* if you need media uploads
 
-# 2. Create initial migration
-docker-compose -f docker-compose.local.yml run --rm --no-deps --entrypoint "alembic" app revision --autogenerate -m "initial_schema"
-
-# 3. Start everything
-docker-compose -f docker-compose.local.yml up -d
+make install        # uv sync + bun install
+make db-upgrade     # apply migrations
+make seed           # 10 demo properties spread across CM/SN/CI
+make dev            # backend (:8000) + frontend (:3000) with hot reload
 ```
 
-**That's it!** 🎉 Your API is now running at:
-- **API:** http://localhost:8000
-- **Interactive Docs:** http://localhost:8000/docs
-- **Health Check:** http://localhost:8000/api/v1/health/
-
-### 🔄 CI/CD Pipeline
-
-Automated deployment to staging is configured with GitHub Actions:
-- **Trigger:** Push to `develop` branch
-- **Process:** Tests → Build → Deploy → Health Check
-- **Setup Guide:** [.github/CICD_SETUP.md](.github/CICD_SETUP.md)
-
-**Staging Environment:** https://staging.ganitel.com
-
-### Default Admin Credentials
-```
-Email: admin@ganitel.com
-Password: YourSecurePassword123!
-```
-⚠️ **Change this password after first login!**
-
-### Using Makefile (Even Easier!)
-
-If you have `make` installed:
-```bash
-make build        # Build images
-make migrate-init # Create initial migration
-make up           # Start services
-make logs         # View logs
-```
-
-See all available commands: `make help`
-
----
-
-## 📚 Full Documentation
-
-For detailed setup, configuration, and deployment guides, see:
-- **[Local Setup Guide](DOCKER_SETUP_LOCAL.md)** - Complete Docker setup and usage
-- **[Deployment Plan](deployment_plan.md)** - Staging and production deployment
-- **[Project Documentation](01_docs/)** - Architecture, API specs, and more
-- **[Environment Mapping Baseline](01_docs/backend_docs/v1/v1.1/pre_sprint/envs_mapping.md)** - Canonical dev/test/staging/prod config matrix
-
----
-
-## 🛠️ Alternative: Local Python Setup
-
-If you prefer running without Docker:
-
-### Prerequisites
-
-- Python 3.11+
-- PostgreSQL 15+
-- Redis 7+
-
-### Installation
-
-1. **Create virtual environment**:
-```bash
-python3 -m venv .venv
-source .venv/bin/activate  # Linux/Mac
-# or
-.venv\Scripts\activate  # Windows
-```
-
-2. **Install dependencies**:
-```bash
-pip install -r requirements.txt
-```
-
-3. **Configure environment**:
-```bash
-cp .env.example .env
-# Edit .env with your settings
-```
-
-4. **Run migrations**:
-```bash
-alembic upgrade head
-```
-
-5. **Start the server**:
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
----
-
-## 🔧 Development Tools
-
-### Makefile (from `packages/backend`)
-
-```bash
-make help          # List targets
-make up            # Postgres, Redis, MinIO (docker compose)
-make dev           # API with reload (local uvicorn)
-make db-upgrade    # Apply Alembic migrations
-make db-revision M="message"  # Autogenerate migration
-make test          # pytest
-docker compose -f docker-compose.local.yml logs -f  # Follow service logs
-```
-
-#### Lint and types (Ruff + ty)
-
-From `packages/backend` with [uv](https://github.com/astral-sh/uv) (`uv sync` installs dev tools):
-
-```bash
-make local-lint        # ruff check
-make local-format      # ruff format (write)
-make local-typecheck   # ty check
-make local-check       # ruff check + ruff format --check + ty (matches CI)
-```
-
-Configuration lives in `pyproject.toml` (`[tool.ruff]`, `[tool.ty.environment]`).
-
-### Seeding demo data
-
-Populate your local DB with a demo host and ~10 published properties spread
-across Cameroon, Senegal and Côte d'Ivoire — handy for browsing the UI without
-manually creating listings.
-
-```bash
-make seed                       # idempotent — re-running wipes & re-inserts
-# or, equivalently:
-uv run python -m scripts.seed_demo
-```
-
-What it does:
-
-- Creates (or reuses) a demo host identified by `clerk_user_id="seed_demo_host"`.
-- Wipes that host's previous properties and their `media` rows, then re-inserts
-  the canonical 10 listings (mix of apartments, villas, studios, guesthouses,
-  rooms, houses; XAF/XOF prices; real-ish geo coordinates; FR copy).
-- Each listing gets 5 photos via `picsum.photos` URLs stored directly in
-  `media.key`. The storage layer (`app/core/storage.public_or_signed_url`)
-  treats full URLs as a pass-through, so the photos render without any S3 /
-  Supabase setup.
-
-The script lives at `scripts/seed_demo.py` — extend `LISTINGS` to add more
-fixtures. It is dev-only and never runs in production.
-
-### Access Points
-
-| Service          | URL                                  | Credentials                    |
-| ---------------- | ------------------------------------ | ------------------------------ |
-| **API**          | http://localhost:8000                | -                              |
-| **API Docs**     | http://localhost:8000/docs           | -                              |
-| **ReDoc**        | http://localhost:8000/redoc          | -                              |
-| **Health Check** | http://localhost:8000/api/v1/health/ | -                              |
-| **PgAdmin**      | http://localhost:5050                | admin@ganitel.local / admin123 |
-
----
-
-## 🧪 Testing
-
-### Tous les tests
-
-```bash
-# Activer l'environnement virtuel
-source .venv/bin/activate
-
-# Lancer tous les tests
-pytest
-
-# Avec verbosité
-pytest -v
-
-# Avec couverture de code
-pytest --cov=app --cov-report=html
-```
-
-### Tests spécifiques
-
-```bash
-# Tests simples (sans base de données)
-pytest tests/test_simple.py
-
-# Tests des use cases de services
-pytest tests/test_service_use_cases.py
-
-# Tests des use cases de bookings
-pytest tests/test_booking_use_cases.py
-
-# Un test spécifique
-pytest tests/test_simple.py::test_health_endpoint
-```
-
-### Options utiles
-
-```bash
-# Afficher les print statements
-pytest -s
-
-# Arrêter au premier échec
-pytest -x
-
-# Exécuter seulement les tests qui ont échoué la dernière fois
-pytest --lf
-
-# Mode verbose avec traces
-pytest -vv
-```
-
-## 📝 Commandes utiles
-
-### Vérifier que l'application se charge
-
-```bash
-source .venv/bin/activate
-python3 -c "from app.main import app; print('✅ Application OK')"
-```
-
-### Tester un endpoint manuellement
-
-```bash
-# Health check
-curl http://localhost:8000/api/v1/health/
-
-# Root endpoint
-curl http://localhost:8000/
-
-# Recherche de services
-curl http://localhost:8000/api/v1/services/search
-```
-
-## 🗄️ Base de données et migrations
-
-### Configuration initiale
-
-1. **Créer la base de données PostgreSQL** :
-```sql
-CREATE DATABASE ganitel_db;
-CREATE USER ganitel_user WITH PASSWORD 'ganitel_password';
-GRANT ALL PRIVILEGES ON DATABASE ganitel_db TO ganitel_user;
-```
-
-2. **Configurer `.env`** :
-```env
-DATABASE_URL=postgresql://ganitel_user:ganitel_password@localhost:5432/ganitel_db
-REDIS_URL=redis://localhost:6379/0
-SECRET_KEY=your-secret-key-here
-DEBUG=True
-ENVIRONMENT=development
-```
-
-### Migrations Alembic
-
-**Avec le script** (recommandé) :
-```bash
-# Appliquer toutes les migrations
-./migrate.sh upgrade
-
-# Créer une nouvelle migration
-./migrate.sh create "Description des changements"
-
-# Voir la version actuelle
-./migrate.sh current
-
-# Voir l'historique
-./migrate.sh history
-
-# Revenir en arrière
-./migrate.sh downgrade
-```
-
-**Commandes directes** :
-```bash
-source .venv/bin/activate
-
-# Créer une nouvelle migration (auto-détection)
-alembic revision --autogenerate -m "description"
-
-# Appliquer les migrations
-alembic upgrade head
-
-# Revenir en arrière
-alembic downgrade -1
-
-# Voir l'état
-alembic current
-alembic history
-```
-
-📚 **Voir `MIGRATIONS.md` pour plus de détails**
-
-## 📚 Structure du projet
-
-```
-ganitel-backend/
-├── app/
-│   ├── api/v1/          # Endpoints API
-│   ├── application/      # Use cases (logique métier)
-│   ├── domain/           # Entités et interfaces
-│   ├── infrastructure/   # Implémentations (repositories)
-│   ├── config.py         # Configuration
-│   ├── database.py       # Configuration DB
-│   ├── main.py           # Point d'entrée FastAPI
-│   └── exceptions.py     # Exceptions personnalisées
-├── tests/                # Tests
-├── migrations/           # Migrations Alembic
-└── README.md            # Ce fichier
-```
-
-## 🐛 Dépannage
-
-### Port déjà utilisé
-
-Si le port 8000 est déjà utilisé :
-```bash
-python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
-```
-
-### Erreurs d'import
-
-Vérifier que vous êtes dans le bon répertoire et que l'environnement virtuel est activé.
-
-### Erreurs de base de données
-
-Les tests simples ne nécessitent pas de base de données. Pour les fonctionnalités complètes, configurer PostgreSQL et Redis.
-
-
+## Make targets
+
+All from the repo root — there is no per-package Makefile. Run `make help`
+for the full list. Common ones:
+
+| Target | What |
+| --- | --- |
+| `make install` | install backend + frontend deps |
+| `make dev` | both dev servers, prefixed logs, Ctrl+C cleans up |
+| `make dev-backend` / `make dev-frontend` | one side only |
+| `make db-revision M="…"` | autogenerate an Alembic migration |
+| `make db-upgrade` / `make db-downgrade` | apply / roll back |
+| `make seed` | seed demo data |
+| `make test` | unit tests, both halves |
+| `make lint` / `make format` / `make typecheck` / `make check` | code quality |
+
+## Auth (Clerk)
+
+The backend never issues tokens. It verifies Clerk session JWTs against the
+configured JWKs (`CLERK_JWKS_URL`, `CLERK_ISSUER`) and mirrors the user into
+a local `users` row keyed by `clerk_user_id`. See `app/core/auth.py` and
+`app/core/deps.py` (`CurrentUser` / `OptionalUser`).
+
+## Logging
+
+`structlog`. Dev → colored kv; prod → JSON. `RequestIdMiddleware` binds
+`request_id` into the contextvar, `AccessLogMiddleware` emits one structured
+line per HTTP request. See `app/core/logging.py`.
