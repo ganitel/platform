@@ -1,13 +1,16 @@
 .DEFAULT_GOAL := help
 
 UV := uv --directory packages/backend
-BUN := bun --cwd packages/frontend
+# Bun's `--cwd` flag belongs *after* the subcommand for `run`, so we keep
+# install and run paths separate. Don't collapse to a single `bun --cwd …`
+# macro — `bun --cwd <path> run <script>` silently swallows the script.
+BUN_RUN := bun run --cwd packages/frontend
 
 # ── Bootstrap ─────────────────────────────────────────────────────────────────
 
 install: ## Install all deps (backend uv sync + frontend bun install)
 	$(UV) sync --frozen --all-groups
-	$(BUN) install
+	bun install --cwd packages/frontend
 
 # ── Dev ───────────────────────────────────────────────────────────────────────
 # Requires PostgreSQL (with PostGIS) + Redis running locally on the standard
@@ -26,7 +29,7 @@ dev-backend: ## Backend FastAPI dev server (http://localhost:8000)
 
 dev-frontend: ## Frontend Vite dev server (http://localhost:3000)
 	@echo "→ Vite dev server: http://localhost:3000"
-	$(BUN) run dev
+	$(BUN_RUN) dev
 
 # ── Database ──────────────────────────────────────────────────────────────────
 
@@ -51,28 +54,28 @@ test-backend: ## Backend unit tests (no DB required)
 	$(UV) run pytest tests/unit/ -v
 
 test-frontend: ## Frontend tests (vitest)
-	$(BUN) run test
+	$(BUN_RUN) test
 
 # ── Code quality ──────────────────────────────────────────────────────────────
 
 lint: ## Lint everything
 	$(UV) run ruff check .
-	$(BUN) run lint
+	$(BUN_RUN) lint
 
 format: ## Format everything (writes)
 	$(UV) run ruff format .
-	$(BUN) run format
+	$(BUN_RUN) format
 
 typecheck: ## Type-check everything (ty + tsc)
 	$(UV) run ty check app
-	$(BUN) run typecheck
+	$(BUN_RUN) typecheck
 
 check: lint typecheck ## Lint + typecheck
 
 # ── Build ─────────────────────────────────────────────────────────────────────
 
-build: ## Build frontend for production (dist/spa)
-	$(BUN) run build
+build: ## Build frontend for production (build/{client,server})
+	$(BUN_RUN) build
 
 # ── Help ──────────────────────────────────────────────────────────────────────
 
