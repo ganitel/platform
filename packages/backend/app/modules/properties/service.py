@@ -3,6 +3,7 @@ unpublish, photo attach/detach, and the `to_public` / `to_detail`
 mappers that turn ORM rows into API schemas."""
 
 from datetime import UTC, datetime
+from typing import Literal, cast
 from uuid import UUID
 
 from geoalchemy2.shape import from_shape, to_shape
@@ -12,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.errors import ForbiddenError, NotFoundError, ValidationError
-from app.core.money import Money
+from app.core.money import Currency, Money
 from app.modules.media.models import Media
 from app.modules.media.service import to_public as media_to_public
 from app.modules.properties.models import Property, PropertyPhoto, PropertyStatus
@@ -168,13 +169,15 @@ async def to_detail(property: Property, host: User) -> PropertyDetail:
         bedrooms=property.bedrooms,
         beds=property.beds,
         bathrooms=property.bathrooms,
-        base_price=Money(amount=property.base_price_amount, currency=property.base_price_currency),
+        base_price=Money(
+            amount=property.base_price_amount, currency=Currency(property.base_price_currency)
+        ),
         amenities=list(property.amenities),
         cover_photo=photos[0] if photos else None,
         description=property.description,
         house_rules=property.house_rules,
         cancellation_policy=property.cancellation_policy,
-        content_language=property.content_language,
+        content_language=cast(Literal["fr", "en"], property.content_language),
         status=property.status,
         host=HostPublic.model_validate(host),
         photos=photos,
@@ -196,7 +199,9 @@ async def to_public(property: Property, *, distance_km: float | None = None) -> 
         bedrooms=property.bedrooms,
         beds=property.beds,
         bathrooms=property.bathrooms,
-        base_price=Money(amount=property.base_price_amount, currency=property.base_price_currency),
+        base_price=Money(
+            amount=property.base_price_amount, currency=Currency(property.base_price_currency)
+        ),
         amenities=list(property.amenities),
         cover_photo=await media_to_public(cover.media) if cover else None,
         distance_km=distance_km,

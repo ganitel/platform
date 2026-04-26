@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from typing import cast
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.core.errors import ConflictError
 from app.modules.bookings.models import Booking, BookingStatus
-from app.modules.bookings.schemas import InitiatePaymentOut
+from app.modules.bookings.schemas import InitiatePaymentOut, PaymentProvider
 from app.modules.outbox import service as outbox_service
 from app.modules.payments.models import Payment, PaymentStatus
 from app.modules.payments.providers import get_provider
@@ -44,7 +45,7 @@ async def initiate_payment(
 
     return InitiatePaymentOut(
         payment_id=payment.id,
-        provider=provider.name,
+        provider=cast(PaymentProvider, provider.name),
         provider_intent_id=intent.provider_intent_id,
         client_action=intent.client_action,
     )

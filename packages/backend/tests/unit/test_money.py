@@ -9,12 +9,12 @@ from app.core.money import CURRENCY_EXPONENT, Currency, Money, zero
 
 
 def test_constructs_from_str() -> None:
-    m = Money(amount="100", currency=Currency.XAF)
+    m = Money.model_validate({"amount": "100", "currency": Currency.XAF})
     assert m.amount == Decimal("100")
 
 
 def test_constructs_from_int() -> None:
-    m = Money(amount=100, currency=Currency.XAF)
+    m = Money.model_validate({"amount": 100, "currency": Currency.XAF})
     assert m.amount == Decimal("100")
 
 

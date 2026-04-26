@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.errors import ConflictError, ForbiddenError, NotFoundError, ValidationError
-from app.core.money import Money
+from app.core.money import Currency, Money
 from app.modules.bookings.models import ACTIVE_STATUSES, Booking, BookingStatus
 from app.modules.bookings.schemas import BookingCreateIn, BookingPublic
 from app.modules.outbox import service as outbox_service
@@ -214,8 +214,10 @@ def to_public(booking: Booking) -> BookingPublic:
         check_out_date=booking.check_out_date,
         nights=nights,
         guest_count=booking.guest_count,
-        subtotal=Money(amount=booking.subtotal_amount, currency=booking.subtotal_currency),
-        total=Money(amount=booking.total_amount, currency=booking.total_currency),
+        subtotal=Money(
+            amount=booking.subtotal_amount, currency=Currency(booking.subtotal_currency)
+        ),
+        total=Money(amount=booking.total_amount, currency=Currency(booking.total_currency)),
         status=booking.status,
         hold_expires_at=booking.hold_expires_at,
         confirmed_at=booking.confirmed_at,

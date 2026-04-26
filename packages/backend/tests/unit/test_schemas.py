@@ -2,6 +2,7 @@
 
 from datetime import date, timedelta
 from decimal import Decimal
+from typing import Any
 
 import pytest
 from pydantic import ValidationError
@@ -21,9 +22,9 @@ UUID_FIXTURE = "00000000-0000-0000-0000-000000000001"
 # -------------------- bookings --------------------
 
 
-def _booking(**overrides: object) -> dict[str, object]:
+def _booking(**overrides: Any) -> dict[str, Any]:
     today = date.today()
-    base: dict[str, object] = {
+    base: dict[str, Any] = {
         "property_id": UUID_FIXTURE,
         "check_in_date": today + timedelta(days=1),
         "check_out_date": today + timedelta(days=4),
@@ -34,14 +35,14 @@ def _booking(**overrides: object) -> dict[str, object]:
 
 
 def test_booking_accepts_valid_payload() -> None:
-    BookingCreateIn(**_booking())
+    BookingCreateIn.model_validate(_booking())
 
 
 def test_booking_rejects_check_out_before_check_in() -> None:
     today = date.today()
     with pytest.raises(ValidationError, match="check_out_date must be after"):
-        BookingCreateIn(
-            **_booking(
+        BookingCreateIn.model_validate(
+            _booking(
                 check_in_date=today + timedelta(days=4),
                 check_out_date=today + timedelta(days=2),
             )
@@ -51,8 +52,8 @@ def test_booking_rejects_check_out_before_check_in() -> None:
 def test_booking_rejects_check_out_equal_to_check_in() -> None:
     today = date.today()
     with pytest.raises(ValidationError, match="check_out_date must be after"):
-        BookingCreateIn(
-            **_booking(
+        BookingCreateIn.model_validate(
+            _booking(
                 check_in_date=today + timedelta(days=2),
                 check_out_date=today + timedelta(days=2),
             )
@@ -61,12 +62,12 @@ def test_booking_rejects_check_out_equal_to_check_in() -> None:
 
 def test_booking_rejects_zero_guests() -> None:
     with pytest.raises(ValidationError):
-        BookingCreateIn(**_booking(guest_count=0))
+        BookingCreateIn.model_validate(_booking(guest_count=0))
 
 
 def test_booking_rejects_unknown_field() -> None:
     with pytest.raises(ValidationError, match="Extra inputs"):
-        BookingCreateIn(**_booking(unknown_field="x"))
+        BookingCreateIn.model_validate(_booking(unknown_field="x"))
 
 
 def test_initiate_payment_accepts_known_provider() -> None:
@@ -77,14 +78,14 @@ def test_initiate_payment_accepts_known_provider() -> None:
 
 def test_initiate_payment_rejects_unknown_provider() -> None:
     with pytest.raises(ValidationError):
-        InitiatePaymentIn(provider="paypal")
+        InitiatePaymentIn.model_validate({"provider": "paypal"})
 
 
 # -------------------- properties --------------------
 
 
-def _property(**overrides: object) -> dict[str, object]:
-    base: dict[str, object] = {
+def _property(**overrides: Any) -> dict[str, Any]:
+    base: dict[str, Any] = {
         "title": "Loft lumineux",
         "description": "Belle vue sur le port.",
         "property_type": "apartment",
@@ -103,37 +104,37 @@ def _property(**overrides: object) -> dict[str, object]:
 
 
 def test_property_accepts_valid_payload() -> None:
-    PropertyCreateIn(**_property())
+    PropertyCreateIn.model_validate(_property())
 
 
 def test_property_rejects_lowercase_country_code() -> None:
     with pytest.raises(ValidationError, match="country_code"):
-        PropertyCreateIn(**_property(country_code="cm"))
+        PropertyCreateIn.model_validate(_property(country_code="cm"))
 
 
 def test_property_rejects_three_letter_country_code() -> None:
     with pytest.raises(ValidationError):
-        PropertyCreateIn(**_property(country_code="CMR"))
+        PropertyCreateIn.model_validate(_property(country_code="CMR"))
 
 
 def test_property_rejects_invalid_geo_lat() -> None:
     with pytest.raises(ValidationError):
-        PropertyCreateIn(**_property(location=GeoPoint(lat=91.0, lng=0.0)))
+        PropertyCreateIn.model_validate(_property(location=GeoPoint(lat=91.0, lng=0.0)))
 
 
 def test_property_default_cancellation_policy_is_moderate() -> None:
-    p = PropertyCreateIn(**_property())
+    p = PropertyCreateIn.model_validate(_property())
     assert p.cancellation_policy.value == "moderate"
 
 
 def test_property_rejects_unknown_content_language() -> None:
     with pytest.raises(ValidationError):
-        PropertyCreateIn(**_property(content_language="es"))
+        PropertyCreateIn.model_validate(_property(content_language="es"))
 
 
 def test_property_amenities_cap() -> None:
     with pytest.raises(ValidationError):
-        PropertyCreateIn(**_property(amenities=[f"a{i}" for i in range(65)]))
+        PropertyCreateIn.model_validate(_property(amenities=[f"a{i}" for i in range(65)]))
 
 
 # -------------------- users --------------------
@@ -150,12 +151,12 @@ def test_update_me_rejects_empty_display_name() -> None:
 
 def test_update_me_rejects_unsupported_language() -> None:
     with pytest.raises(ValidationError):
-        UpdateMe(language="es")
+        UpdateMe.model_validate({"language": "es"})
 
 
 def test_update_me_rejects_unknown_field() -> None:
     with pytest.raises(ValidationError, match="Extra inputs"):
-        UpdateMe(display_name="A", role="admin")  # type: ignore[call-arg]
+        UpdateMe.model_validate({"display_name": "A", "role": "admin"})
 
 
 # -------------------- media --------------------
@@ -170,7 +171,7 @@ def test_media_upload_accepts_image_mime() -> None:
 
 def test_media_upload_rejects_non_image_mime() -> None:
     with pytest.raises(ValidationError):
-        MediaUploadIn(mime_type="application/pdf")
+        MediaUploadIn.model_validate({"mime_type": "application/pdf"})
 
 
 def test_media_upload_rejects_oversize() -> None:

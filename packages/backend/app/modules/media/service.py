@@ -1,6 +1,7 @@
 """Media operations: presigned upload URL minting and the `to_public`
 mapper used by callers (property photos, avatars, …)."""
 
+from typing import cast
 from uuid import uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.core.storage import presign_put, public_or_signed_url
 from app.modules.media.models import Media
-from app.modules.media.schemas import MediaPublic, MediaUploadOut
+from app.modules.media.schemas import ImageMimeType, MediaPublic, MediaUploadOut
 from app.modules.users.models import User
 
 _EXTENSIONS = {
@@ -50,6 +51,6 @@ async def to_public(media: Media) -> MediaPublic:
     return MediaPublic(
         id=media.id,
         url=await public_or_signed_url(media.key),
-        mime_type=media.mime_type,
+        mime_type=cast(ImageMimeType, media.mime_type),
         created_at=media.created_at,
     )
