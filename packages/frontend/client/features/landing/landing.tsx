@@ -1,10 +1,12 @@
 import { Link } from "react-router";
 import { motion } from "framer-motion";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowDown, ArrowRight, Play } from "lucide-react";
 import { UserButton, useAuth, useClerk } from "@clerk/react-router";
 import type { CSSProperties } from "react";
 
 import { useT } from "@/shared/lib/i18n";
+import type { PropertyPublic } from "@/features/properties/types";
+import { PropertyGrid } from "@/features/properties/components/property-grid";
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=2600&q=85&auto=format&fit=crop";
@@ -15,14 +17,26 @@ const FEATURE_FALLBACK = "https://picsum.photos/seed/ganitelfeat/900/700";
 
 const ENTRANCE_EASE = [0.2, 0.7, 0.2, 1] as const;
 
-export function Landing() {
+export function Landing({ items }: { items: PropertyPublic[] }) {
   return (
-    <div className="relative min-h-svh overflow-hidden bg-[#0a0c08] p-5">
+    <div className="bg-ganitel-paper">
+      <Hero />
+      {items.length > 0 ? <FeaturedSection items={items} /> : null}
+      <FinalCTA />
+      <SiteFooter />
+    </div>
+  );
+}
+
+function Hero() {
+  return (
+    <section className="relative h-svh min-h-[640px] overflow-hidden bg-[#0a0c08] p-5">
       <Stage />
       <NavStrip />
       <HeroPanel />
       <FeatureCard />
-    </div>
+      <ScrollHint />
+    </section>
   );
 }
 
@@ -278,5 +292,150 @@ function FeatureCard() {
         </p>
       </div>
     </motion.aside>
+  );
+}
+
+function ScrollHint() {
+  const t = useT();
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 1.4, duration: 1 }}
+      className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 max-md:hidden"
+    >
+      <motion.span
+        animate={{ y: [0, 6, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-white/65"
+      >
+        <ArrowDown className="size-3" strokeWidth={1.5} aria-hidden />
+        {t("landing.scroll")}
+      </motion.span>
+    </motion.div>
+  );
+}
+
+const SECTION_TITLE_STYLE: CSSProperties = {
+  fontSize: "clamp(2.25rem, 4.4vw, 4.5rem)",
+};
+
+function FeaturedSection({ items }: { items: PropertyPublic[] }) {
+  const t = useT();
+  return (
+    <section className="px-6 py-24 md:px-12 md:py-32">
+      <motion.header
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-15%" }}
+        transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
+        className="mx-auto grid max-w-7xl gap-x-12 gap-y-6 md:grid-cols-[1fr_minmax(0,520px)] md:items-end"
+      >
+        <div>
+          <span className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-ganitel-text-title">
+            {t("landing.featured.tag")}
+          </span>
+          <h2
+            style={SECTION_TITLE_STYLE}
+            className="font-display mt-4 text-balance font-bold leading-[1] tracking-[-0.04em] text-ganitel-text-title"
+          >
+            {t("landing.featured.title")}{" "}
+            <em className="font-italic-serif text-ganitel-secondary">
+              {t("landing.featured.title_em")}
+            </em>
+          </h2>
+        </div>
+        <p className="m-0 max-w-prose text-sm leading-[1.6] text-ganitel-text-subtitle md:text-[15px]">
+          {t("landing.featured.lede")}
+        </p>
+      </motion.header>
+
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-10%" }}
+        transition={{ duration: 0.8, delay: 0.1, ease: ENTRANCE_EASE }}
+        className="mx-auto mt-16 max-w-7xl md:mt-20"
+      >
+        <PropertyGrid items={items} />
+      </motion.div>
+
+      <div className="mx-auto mt-12 flex max-w-7xl justify-center md:mt-16">
+        <Link
+          to="/browse"
+          className="group inline-flex items-center gap-3 rounded-full border border-ganitel-text-title px-7 py-4 text-sm font-medium tracking-tight text-ganitel-text-title transition-colors hover:bg-ganitel-text-title hover:text-ganitel-paper"
+        >
+          <span>{t("landing.featured.see_all")}</span>
+          <ArrowRight
+            className="size-3.5 transition-transform group-hover:translate-x-1"
+            strokeWidth={2}
+            aria-hidden
+          />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function FinalCTA() {
+  const t = useT();
+  return (
+    <section className="px-6 pb-24 md:px-12 md:pb-32">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-10%" }}
+        transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
+        className="mx-auto max-w-7xl rounded-[28px] bg-ganitel-text-title px-8 py-20 md:px-16 md:py-28"
+      >
+        <div className="grid gap-12 md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <span className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-ganitel-paper-warm">
+              {t("landing.cta_section.tag")}
+            </span>
+            <h2
+              style={SECTION_TITLE_STYLE}
+              className="font-display mt-4 text-balance font-bold leading-[1.02] tracking-[-0.04em] text-ganitel-paper"
+            >
+              {t("landing.cta_section.title")}{" "}
+              <em className="font-italic-serif text-ganitel-secondary">
+                {t("landing.cta_section.title_em")}
+              </em>
+            </h2>
+          </div>
+          <Link
+            to="/browse"
+            className="group inline-flex items-center gap-3 self-start rounded-full bg-ganitel-paper px-7 py-4 text-sm font-medium tracking-tight text-ganitel-text-title shadow-[0_18px_36px_-16px_rgba(0,0,0,0.5)] transition-all hover:-translate-y-0.5 hover:bg-white md:self-end"
+          >
+            <span>{t("landing.cta")}</span>
+            <ArrowRight
+              className="size-3.5 transition-transform group-hover:translate-x-1"
+              strokeWidth={2}
+              aria-hidden
+            />
+          </Link>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
+function SiteFooter() {
+  const t = useT();
+  return (
+    <footer className="border-t border-ganitel-stroke-neutral px-6 py-10 md:px-12">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6 text-xs text-ganitel-text-placeholder">
+        <Link to="/" className="inline-flex items-center gap-2 text-ganitel-text-title">
+          <span className="grid size-5 -rotate-[4deg] place-items-center rounded-md bg-ganitel-text-title text-[10px] font-extrabold leading-none text-ganitel-paper">
+            G
+          </span>
+          <span className="font-display text-[14px] font-extrabold tracking-[-0.04em]">
+            Ganitel
+          </span>
+          <span className="text-ganitel-text-placeholder">· 2026</span>
+        </Link>
+        <span className="tracking-tight">{t("landing.footer.regions")}</span>
+      </div>
+    </footer>
   );
 }

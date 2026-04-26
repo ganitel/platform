@@ -47,6 +47,22 @@ const dict = {
   },
   "landing.play": { fr: "Lancer la visite", en: "Play tour" },
   "landing.info": { fr: "Lire l'histoire de l'hôte", en: "Read the host story" },
+  "landing.scroll": { fr: "Faire défiler", en: "Scroll" },
+  "landing.featured.tag": { fr: "Sélection · 2026", en: "Selection · 2026" },
+  "landing.featured.title": { fr: "Une sélection,", en: "A short list," },
+  "landing.featured.title_em": { fr: "un seul ton.", en: "one tone." },
+  "landing.featured.lede": {
+    fr: "Chaque logement est visité avant d'être listé. Si nous n'y dormirions pas, vous ne le trouverez pas ici.",
+    en: "We visit every stay before it goes live. If we wouldn't sleep there, you won't find it here.",
+  },
+  "landing.featured.see_all": { fr: "Voir tous les logements", en: "See all stays" },
+  "landing.cta_section.tag": { fr: "Prêt à partir ?", en: "Ready to go?" },
+  "landing.cta_section.title": { fr: "Trouvez votre lieu,", en: "Find your place," },
+  "landing.cta_section.title_em": { fr: "à votre rythme.", en: "at your own pace." },
+  "landing.footer.regions": {
+    fr: "Cameroun · Sénégal · Côte d'Ivoire",
+    en: "Cameroon · Senegal · Côte d'Ivoire",
+  },
 
   "browse.title": { fr: "Explorer", en: "Explore" },
   "browse.subtitle": {
