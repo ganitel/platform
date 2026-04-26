@@ -2,36 +2,22 @@
   "name": "ganitel-frontend",
   "private": true,
   "type": "module",
-  "pkg": {
-    "assets": [
-      "dist/spa/*"
-    ],
-    "scripts": [
-      "dist/server/**/*.js"
-    ]
-  },
   "scripts": {
     "dev": "vite",
-    "build": "bun run build:client && bun run build:server",
-    "build:client": "vite build",
-    "build:server": "vite build --config vite.config.server.ts",
-    "start": "bun dist/server/node-build.mjs",
+    "build": "vite build",
     "test": "vitest --run",
-    "test:e2e": "playwright test",
     "format": "prettier --write .",
     "lint": "eslint .",
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.61.3",
     "axios": "^1.13.4",
-    "dotenv": "^17.2.1",
-    "express": "^5.1.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@hookform/resolvers": "^5.2.1",
-    "@playwright/test": "^1.58.2",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -59,7 +45,6 @@
     "@radix-ui/react-toggle": "^1.1.9",
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
-    "@swc/core": "^1.13.3",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.2.4",
     "@tanstack/react-query": "^5.84.2",
@@ -67,16 +52,13 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react-swc": "^4.0.0",
+    "@vitejs/plugin-react": "^6.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
-    "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "eslint": "^10.2.1",
@@ -97,12 +79,10 @@
     "react-resizable-panels": "^4.10.0",
     "react-router-dom": "^7.14.2",
     "recharts": "^3.8.1",
-    "serverless-http": "^4.0.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.4",
     "tailwindcss-animate": "^1.0.7",
-    "tsx": "^4.20.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.0.0",
     "vaul": "^1.1.2",
