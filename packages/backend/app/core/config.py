@@ -92,8 +92,6 @@ class Settings(PaymentSettings, ObjectStorageSettings, BaseSettings):
 
     CORS_ORIGINS: Annotated[list[str], NoDecode] = Field(default_factory=list)
 
-    DEFAULT_CURRENCY: str = "XAF"
-
     # Clerk — backend only verifies tokens; sign-in/sign-up happen on Clerk.
     CLERK_JWKS_URL: str | None = None
     CLERK_ISSUER: str | None = None  # e.g. https://<instance>.clerk.accounts.dev
