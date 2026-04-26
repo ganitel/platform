@@ -5,7 +5,7 @@ import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import jsxA11y from "eslint-plugin-jsx-a11y";
-import vitest from "eslint-plugin-vitest";
+import vitest from "@vitest/eslint-plugin";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
@@ -26,7 +26,7 @@ export default defineConfig(
       globals: globals.browser,
     },
     settings: {
-      react: { version: "detect" },
+      react: { version: "19" },
     },
     plugins: {
       "react-refresh": reactRefresh,
@@ -34,6 +34,10 @@ export default defineConfig(
     rules: {
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "react/prop-types": "off",
+      "react/no-unknown-property": [
+        "error",
+        { ignore: ["cmdk-input-wrapper", "cmdk-item", "cmdk-group", "cmdk-group-heading", "cmdk-input"] },
+      ],
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
@@ -48,5 +52,13 @@ export default defineConfig(
   {
     files: ["**/*.{test,spec}.{ts,tsx}"],
     extends: [vitest.configs.recommended, vitest.configs.env],
+  },
+  {
+    // shadcn/radix primitives pass content via `children` in `props`; a11y rules false-positive on the definitions.
+    files: ["**/client/shared/ui/**"],
+    rules: {
+      "jsx-a11y/heading-has-content": "off",
+      "jsx-a11y/anchor-has-content": "off",
+    },
   },
 );
