@@ -123,10 +123,18 @@ export function ErrorBoundary() {
 }
 
 /**
- * Root loader — wraps Clerk's auth loader so request-scoped auth state flows
- * to all child routes via React Router's data store.
+ * Clerk's middleware reads the session JWT once per request and stashes auth
+ * state on the request context. It must run before any loader that calls
+ * `rootAuthLoader` or `getAuth`. Gated behind RR's `v8_middleware` future
+ * flag (see react-router.config.ts).
+ *
+ * Server-only imports — RR's vite plugin tree-shakes these out of the client
+ * bundle because they're only referenced from server-only exports.
  */
+import { clerkMiddleware, rootAuthLoader } from "@clerk/react-router/server";
+
+export const middleware: Route.MiddlewareFunction[] = [clerkMiddleware()];
+
 export async function loader(args: Route.LoaderArgs) {
-  const { rootAuthLoader } = await import("@clerk/react-router/ssr.server");
   return rootAuthLoader(args);
 }
