@@ -1,6 +1,6 @@
-import os
+"""pytest scaffolding.
 
-os.environ["ENVIRONMENT"] = "test"
-os.environ["DATABASE_URL"] = "postgresql+asyncpg://ganitel:ganitel@localhost:15432/ganitel_test"
-os.environ["REDIS_URL"] = "redis://localhost:6390/1"
-os.environ["CORS_ORIGINS"] = ""
+Intentionally minimal — true unit tests must not depend on env, DB, Redis,
+or any external service. If a fixture needs a DB/Redis URL, add it under
+`tests/integration/` with the `integration` marker instead.
+"""
