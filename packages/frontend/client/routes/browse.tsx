@@ -10,6 +10,7 @@ import { SearchBar } from "@/features/properties/components/search-bar";
 import { ErrorState } from "@/shared/components/error-state";
 import { useT } from "@/shared/lib/i18n";
 import { serverFetch } from "@/shared/api/server";
+import { SectionHeader } from "@/shared/ui/section-header";
 import type { SearchOut } from "@/features/properties/types";
 
 export const meta: Route.MetaFunction = ({ location }) => {
@@ -55,20 +56,17 @@ export default function BrowseRoute({ loaderData }: Route.ComponentProps) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-8 md:py-12">
-      <header className="mb-8 flex flex-col gap-3">
-        <p className="text-xs uppercase tracking-[0.2em] text-ganitel-secondary">
-          Ganitel
-        </p>
-        <h1 className="font-infoma text-4xl text-ganitel-text-title md:text-5xl">
-          {t("browse.title")}
-        </h1>
-        <p className="max-w-xl text-sm text-ganitel-text-subtitle">
-          {t("browse.subtitle")}
-        </p>
-      </header>
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-20">
+      <SectionHeader
+        level="h1"
+        tag={t("nav.browse")}
+        title={t("browse.title")}
+        lede={t("browse.subtitle")}
+        animate={false}
+        className="mb-12 md:mb-16"
+      />
 
-      <div className="mb-10 max-w-3xl">
+      <div className="mb-12 max-w-3xl md:mb-16">
         <SearchBar initialQuery={q ?? ""} onSubmit={handleSearch} />
       </div>
 
@@ -85,7 +83,7 @@ export default function BrowseRoute({ loaderData }: Route.ComponentProps) {
 
 export function HydrateFallback() {
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-8 md:py-12">
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-20">
       <PropertyGridSkeleton />
     </div>
   );

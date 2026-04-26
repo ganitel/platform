@@ -16,7 +16,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-ganitel-stroke-neutral bg-ganitel-background-secondary md:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-ganitel-stroke-neutral bg-ganitel-paper md:hidden"
       aria-label="Primary"
     >
       <ul className="mx-auto flex max-w-md justify-around px-2 py-2">

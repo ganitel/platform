@@ -1,12 +1,14 @@
 import { Link } from "react-router";
 import { motion } from "framer-motion";
-import { ArrowDown, ArrowRight, Play } from "lucide-react";
+import { ArrowDown, Play } from "lucide-react";
 import { UserButton, useAuth, useClerk } from "@clerk/react-router";
 import type { CSSProperties } from "react";
 
 import { useT } from "@/shared/lib/i18n";
 import type { PropertyPublic } from "@/features/properties/types";
 import { PropertyGrid } from "@/features/properties/components/property-grid";
+import { PillLink } from "@/shared/ui/pill-link";
+import { SectionHeader } from "@/shared/ui/section-header";
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=2600&q=85&auto=format&fit=crop";
@@ -94,7 +96,11 @@ function NavStrip() {
       transition={{ duration: 1.1, ease: ENTRANCE_EASE }}
       className="absolute left-1/2 top-5 z-20 grid w-[min(1240px,calc(100%-80px))] -translate-x-1/2 grid-cols-[auto_1fr_auto] items-center gap-8 rounded-b-[22px] bg-ganitel-paper px-3.5 py-3 pl-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_28px_60px_-32px_rgba(0,0,0,0.55)]"
     >
-      <Link to="/" className="inline-flex items-center gap-2 text-ganitel-text-title" aria-label="Ganitel">
+      <Link
+        to="/"
+        className="inline-flex items-center gap-2 text-ganitel-text-title"
+        aria-label="Ganitel"
+      >
         <span className="grid size-7 -rotate-[4deg] place-items-center rounded-lg bg-ganitel-text-title text-[13px] font-extrabold leading-none text-ganitel-paper">
           G
         </span>
@@ -114,28 +120,19 @@ function NavStrip() {
       <div className="inline-flex items-center gap-1.5 justify-self-end">
         {isLoaded && isSignedIn ? (
           <>
-            <Link
-              to="/browse"
-              className="inline-flex items-center rounded-full bg-ganitel-text-title px-4 py-2.5 text-[13px] font-medium tracking-tight text-ganitel-paper transition-colors hover:bg-ganitel-text-subtitle"
-            >
+            <PillLink to="/browse" size="sm" variant="solid">
               {t("nav.browse")}
-            </Link>
+            </PillLink>
             <UserButton />
           </>
         ) : (
           <>
-            <Link
-              to="/sign-up"
-              className="inline-flex items-center rounded-full border border-[rgba(20,20,14,0.18)] px-4 py-2.5 text-[13px] font-medium tracking-tight text-ganitel-text-title transition-colors hover:border-ganitel-text-title hover:bg-[rgba(20,20,14,0.05)]"
-            >
+            <PillLink to="/sign-up" size="sm" variant="outline">
               {t("common.signup")}
-            </Link>
-            <Link
-              to="/sign-in"
-              className="inline-flex items-center rounded-full bg-ganitel-text-title px-4 py-2.5 text-[13px] font-medium tracking-tight text-ganitel-paper transition-colors hover:bg-ganitel-text-subtitle"
-            >
+            </PillLink>
+            <PillLink to="/sign-in" size="sm" variant="solid">
               {t("common.signin")}
-            </Link>
+            </PillLink>
           </>
         )}
       </div>
@@ -216,17 +213,9 @@ function HeroPanel() {
       </h1>
 
       <div className="flex flex-wrap items-center gap-5">
-        <Link
-          to="/browse"
-          className="group inline-flex items-center gap-3.5 rounded-full bg-ganitel-text-title px-7 py-4 text-sm font-medium tracking-tight text-ganitel-paper shadow-[0_18px_36px_-16px_rgba(20,20,14,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-ganitel-moss"
-        >
-          <span>{t("landing.cta")}</span>
-          <ArrowRight
-            className="size-3.5 transition-transform duration-200 group-hover:translate-x-1"
-            strokeWidth={2}
-            aria-hidden
-          />
-        </Link>
+        <PillLink to="/browse" variant="solid" arrow>
+          {t("landing.cta")}
+        </PillLink>
         <span className="text-xs tracking-tight text-ganitel-text-placeholder">
           {t("landing.cta.hint")} ·{" "}
           <b className="font-semibold text-ganitel-text-title">fr</b> /{" "}
@@ -316,39 +305,17 @@ function ScrollHint() {
   );
 }
 
-const SECTION_TITLE_STYLE: CSSProperties = {
-  fontSize: "clamp(2.25rem, 4.4vw, 4.5rem)",
-};
-
 function FeaturedSection({ items }: { items: PropertyPublic[] }) {
   const t = useT();
   return (
     <section className="px-6 py-24 md:px-12 md:py-32">
-      <motion.header
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-15%" }}
-        transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
-        className="mx-auto grid max-w-7xl gap-x-12 gap-y-6 md:grid-cols-[1fr_minmax(0,520px)] md:items-end"
-      >
-        <div>
-          <span className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-ganitel-text-title">
-            {t("landing.featured.tag")}
-          </span>
-          <h2
-            style={SECTION_TITLE_STYLE}
-            className="font-display mt-4 text-balance font-bold leading-[1] tracking-[-0.04em] text-ganitel-text-title"
-          >
-            {t("landing.featured.title")}{" "}
-            <em className="font-italic-serif text-ganitel-secondary">
-              {t("landing.featured.title_em")}
-            </em>
-          </h2>
-        </div>
-        <p className="m-0 max-w-prose text-sm leading-[1.6] text-ganitel-text-subtitle md:text-[15px]">
-          {t("landing.featured.lede")}
-        </p>
-      </motion.header>
+      <SectionHeader
+        className="mx-auto max-w-7xl"
+        tag={t("landing.featured.tag")}
+        title={t("landing.featured.title")}
+        emphasis={t("landing.featured.title_em")}
+        lede={t("landing.featured.lede")}
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -361,17 +328,9 @@ function FeaturedSection({ items }: { items: PropertyPublic[] }) {
       </motion.div>
 
       <div className="mx-auto mt-12 flex max-w-7xl justify-center md:mt-16">
-        <Link
-          to="/browse"
-          className="group inline-flex items-center gap-3 rounded-full border border-ganitel-text-title px-7 py-4 text-sm font-medium tracking-tight text-ganitel-text-title transition-colors hover:bg-ganitel-text-title hover:text-ganitel-paper"
-        >
-          <span>{t("landing.featured.see_all")}</span>
-          <ArrowRight
-            className="size-3.5 transition-transform group-hover:translate-x-1"
-            strokeWidth={2}
-            aria-hidden
-          />
-        </Link>
+        <PillLink to="/browse" variant="ghost" arrow>
+          {t("landing.featured.see_all")}
+        </PillLink>
       </div>
     </section>
   );
@@ -389,31 +348,22 @@ function FinalCTA() {
         className="mx-auto max-w-7xl rounded-[28px] bg-ganitel-text-title px-8 py-20 md:px-16 md:py-28"
       >
         <div className="grid gap-12 md:grid-cols-[1fr_auto] md:items-end">
-          <div>
-            <span className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-ganitel-paper-warm">
-              {t("landing.cta_section.tag")}
-            </span>
-            <h2
-              style={SECTION_TITLE_STYLE}
-              className="font-display mt-4 text-balance font-bold leading-[1.02] tracking-[-0.04em] text-ganitel-paper"
-            >
-              {t("landing.cta_section.title")}{" "}
-              <em className="font-italic-serif text-ganitel-secondary">
-                {t("landing.cta_section.title_em")}
-              </em>
-            </h2>
-          </div>
-          <Link
+          <SectionHeader
+            tag={t("landing.cta_section.tag")}
+            title={t("landing.cta_section.title")}
+            emphasis={t("landing.cta_section.title_em")}
+            align="stacked"
+            inverted
+            animate={false}
+          />
+          <PillLink
             to="/browse"
-            className="group inline-flex items-center gap-3 self-start rounded-full bg-ganitel-paper px-7 py-4 text-sm font-medium tracking-tight text-ganitel-text-title shadow-[0_18px_36px_-16px_rgba(0,0,0,0.5)] transition-all hover:-translate-y-0.5 hover:bg-white md:self-end"
+            variant="paper"
+            arrow
+            className="self-start md:self-end"
           >
-            <span>{t("landing.cta")}</span>
-            <ArrowRight
-              className="size-3.5 transition-transform group-hover:translate-x-1"
-              strokeWidth={2}
-              aria-hidden
-            />
-          </Link>
+            {t("landing.cta")}
+          </PillLink>
         </div>
       </motion.div>
     </section>

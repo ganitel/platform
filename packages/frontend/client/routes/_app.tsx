@@ -10,7 +10,7 @@ import { BottomNav } from "@/shared/components/bottom-nav";
 
 export default function AppShell() {
   return (
-    <div className="flex min-h-screen flex-col bg-ganitel-background-secondary">
+    <div className="flex min-h-screen flex-col bg-ganitel-paper">
       <Header />
       <main className="flex-1 pb-24 md:pb-0">
         <Outlet />

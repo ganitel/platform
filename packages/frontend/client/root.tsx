@@ -46,7 +46,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="bg-ganitel-background-secondary text-ganitel-text-title antialiased">
+      <body className="bg-ganitel-paper text-ganitel-text-title antialiased">
         {children}
         <ScrollRestoration />
         <Scripts />
