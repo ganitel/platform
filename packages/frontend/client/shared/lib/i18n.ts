@@ -23,7 +23,7 @@ const dict = {
 
   "nav.home": { fr: "Accueil", en: "Home" },
   "nav.browse": { fr: "Découvrir", en: "Browse" },
-  "nav.bookings": { fr: "Réservations", en: "Trips" },
+  "nav.bookings": { fr: "Mes réservations", en: "My bookings" },
   "nav.profile": { fr: "Profil", en: "Profile" },
 
   "landing.nav.properties": { fr: "Logements", en: "Properties" },
@@ -65,13 +65,23 @@ const dict = {
   },
 
   "browse.title": { fr: "Explorer", en: "Explore" },
-  "browse.subtitle": {
-    fr: "Séjours et expériences soigneusement sélectionnés.",
-    en: "Stays and experiences, carefully curated.",
+  "browse.tabs.stays": { fr: "Logements", en: "Stays" },
+  "browse.tabs.experiences": { fr: "Expériences", en: "Experiences" },
+  "browse.lede.stays": {
+    fr: "Logements soigneusement sélectionnés au Cameroun, au Sénégal et en Côte d'Ivoire.",
+    en: "Stays carefully selected in Cameroon, Senegal and Côte d'Ivoire.",
   },
-  "browse.empty": {
+  "browse.lede.experiences": {
+    fr: "Des expériences à vivre — autour de nos logements ou en escapade.",
+    en: "Experiences worth the trip — around our stays or as standalone escapes.",
+  },
+  "browse.empty.stays": {
     fr: "Aucun logement ne correspond à votre recherche.",
-    en: "No properties match your search.",
+    en: "No stays match your search.",
+  },
+  "browse.empty.experiences": {
+    fr: "Les expériences arrivent bientôt.",
+    en: "Experiences are coming soon.",
   },
 
   "property.guests": { fr: "voyageurs", en: "guests" },
