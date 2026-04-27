@@ -61,9 +61,7 @@ async def count(session: AsyncSession, f: SearchFilters) -> int:
     return int((await session.execute(stmt)).scalar_one())
 
 
-async def search(
-    session: AsyncSession, f: SearchFilters
-) -> list[tuple[Experience, float | None]]:
+async def search(session: AsyncSession, f: SearchFilters) -> list[tuple[Experience, float | None]]:
     stmt = select(Experience).options(
         selectinload(Experience.photos).selectinload(ExperiencePhoto.media)
     )

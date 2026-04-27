@@ -73,9 +73,7 @@ def upgrade() -> None:
     op.create_index("ix_experiences_country_code", "experiences", ["country_code"])
     op.create_index("ix_experiences_status", "experiences", ["status"])
     op.execute("CREATE INDEX ix_experiences_location_gist ON experiences USING GIST (location)")
-    op.execute(
-        "CREATE INDEX ix_experiences_search_tsv_gin ON experiences USING GIN (search_tsv)"
-    )
+    op.execute("CREATE INDEX ix_experiences_search_tsv_gin ON experiences USING GIN (search_tsv)")
 
     op.create_table(
         "experience_photos",

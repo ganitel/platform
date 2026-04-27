@@ -47,7 +47,9 @@ async def get(session: AsyncSession, experience_id: UUID) -> Experience:
     return exp
 
 
-async def to_public(experience: Experience, *, distance_km: float | None = None) -> ExperiencePublic:
+async def to_public(
+    experience: Experience, *, distance_km: float | None = None
+) -> ExperiencePublic:
     cover = experience.photos[0] if experience.photos else None
     return ExperiencePublic(
         id=experience.id,

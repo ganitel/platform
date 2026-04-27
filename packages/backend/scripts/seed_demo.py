@@ -587,9 +587,7 @@ async def _create_experience(session: Any, host: User, item: dict[str, Any]) -> 
     await session.flush()
 
     for position, media in enumerate(photos):
-        session.add(
-            ExperiencePhoto(experience_id=exp.id, media_id=media.id, position=position)
-        )
+        session.add(ExperiencePhoto(experience_id=exp.id, media_id=media.id, position=position))
 
     return exp
 
