@@ -1,10 +1,15 @@
-"""Seed the local DB with a demo host, ~10 published properties, and a
-handful of published experiences.
+"""Seed the local DB with a handful of demo hosts, ~10 published
+properties, and a handful of published experiences spread across them.
 
-Idempotent: identifies the demo host by `clerk_user_id="seed_demo_host"`,
-wipes that host's previous properties + experiences (cascade clears
-their photos), and re-inserts the canonical demo set. Run repeatedly
-without accumulating dupes.
+Idempotent: every seed host is identified by a `clerk_user_id` prefixed
+with `seed_host_` (plus the legacy `seed_demo_host` from the previous
+single-host version of this script). On each run we:
+
+1. Ensure each host in `SEED_HOSTS` exists.
+2. Wipe every property + experience owned by any seed host (cascade
+   clears photos), plus their associated `media` rows.
+3. Re-insert the canonical demo set, with each listing/experience tied
+   to its assigned host via `host_key`.
 
 Photos use seeded `picsum.photos` URLs stored directly as `media.key`.
 The storage layer treats full URLs as a pass-through, so the public URL
@@ -43,10 +48,55 @@ from app.modules.properties.models import (
 )
 from app.modules.users.models import User
 
-DEMO_HOST_CLERK_ID = "seed_demo_host"
-DEMO_HOST_DISPLAY_NAME = "Aïcha (demo host)"
-DEMO_HOST_EMAIL = "demo-host@ganitel.local"
-DEMO_HOST_AVATAR = "https://i.pravatar.cc/200?img=47"
+# Pre-`seed_host_*` script versions used a single host with this id.
+# Kept here so the wipe step also clears its leftover data on re-run.
+LEGACY_HOST_CLERK_IDS: list[str] = ["seed_demo_host"]
+
+# Each host is referenced by `key` from LISTINGS / EXPERIENCES below.
+# Avatars use pravatar's deterministic image index so demo hosts stay
+# visually distinct across re-seeds.
+SEED_HOSTS: list[dict[str, Any]] = [
+    {
+        "key": "mvondo",
+        "clerk_user_id": "seed_host_mvondo",
+        "email": "daniel.mvondo@ganitel.local",
+        "display_name": "Daniel Mvondo",
+        "avatar_url": "https://i.pravatar.cc/200?img=12",
+        "language": "fr",
+    },
+    {
+        "key": "ekambi",
+        "clerk_user_id": "seed_host_ekambi",
+        "email": "christelle.ekambi@ganitel.local",
+        "display_name": "Christelle Ekambi",
+        "avatar_url": "https://i.pravatar.cc/200?img=45",
+        "language": "fr",
+    },
+    {
+        "key": "sow",
+        "clerk_user_id": "seed_host_sow",
+        "email": "babacar.sow@ganitel.local",
+        "display_name": "Babacar Sow",
+        "avatar_url": "https://i.pravatar.cc/200?img=33",
+        "language": "fr",
+    },
+    {
+        "key": "faye",
+        "clerk_user_id": "seed_host_faye",
+        "email": "coumba.faye@ganitel.local",
+        "display_name": "Coumba Faye",
+        "avatar_url": "https://i.pravatar.cc/200?img=49",
+        "language": "fr",
+    },
+    {
+        "key": "konan",
+        "clerk_user_id": "seed_host_konan",
+        "email": "yao.konan@ganitel.local",
+        "display_name": "Yao Konan",
+        "avatar_url": "https://i.pravatar.cc/200?img=15",
+        "language": "fr",
+    },
+]
 
 
 def _picsum(seed: str, w: int = 1200, h: int = 800) -> str:
@@ -63,8 +113,10 @@ def _currency_for(country_code: str) -> str:
 
 # Each entry is everything needed to materialise one Property + its photos.
 # Coordinates are real (rough city center / neighbourhood points).
+# `host_key` references a host in SEED_HOSTS.
 LISTINGS: list[dict[str, Any]] = [
     {
+        "host_key": "mvondo",
         "title": "Loft lumineux face à la mer — Bonapriso",
         "description": (
             "Loft de 70 m² au dernier étage avec vue panoramique sur le Wouri. "
@@ -87,6 +139,7 @@ LISTINGS: list[dict[str, Any]] = [
         "photos_seed": "douala-loft",
     },
     {
+        "host_key": "ekambi",
         "title": "Villa avec piscine — Bastos",
         "description": (
             "Villa familiale de 4 chambres dans le quartier diplomatique de Yaoundé. "
@@ -119,6 +172,7 @@ LISTINGS: list[dict[str, Any]] = [
         "photos_seed": "yaounde-villa",
     },
     {
+        "host_key": "ekambi",
         "title": "Bungalow pieds dans l'eau — Down Beach",
         "description": (
             "Bungalow en bois sur la plage de Limbé, à deux pas du sable noir "
@@ -140,6 +194,7 @@ LISTINGS: list[dict[str, Any]] = [
         "photos_seed": "limbe-bungalow",
     },
     {
+        "host_key": "ekambi",
         "title": "Studio cosy — centre Kribi",
         "description": (
             "Studio rénové à 5 minutes à pied de la plage de Kribi. Parfait pour "
@@ -161,6 +216,7 @@ LISTINGS: list[dict[str, Any]] = [
         "photos_seed": "kribi-studio",
     },
     {
+        "host_key": "mvondo",
         "title": "Maison d'hôtes coloniale — Akwa",
         "description": (
             "Maison d'hôtes de charme dans une bâtisse coloniale rénovée. "
@@ -192,6 +248,7 @@ LISTINGS: list[dict[str, Any]] = [
         "photos_seed": "douala-akwa",
     },
     {
+        "host_key": "sow",
         "title": "Chambre privée — Mermoz",
         "description": (
             "Chambre privée dans une maison familiale de Dakar, quartier calme et "
@@ -213,6 +270,7 @@ LISTINGS: list[dict[str, Any]] = [
         "photos_seed": "dakar-room",
     },
     {
+        "host_key": "sow",
         "title": "Appartement design — Almadies",
         "description": (
             "Appartement de 2 chambres avec vue océan, dans le quartier branché "
@@ -245,6 +303,7 @@ LISTINGS: list[dict[str, Any]] = [
         "photos_seed": "dakar-almadies",
     },
     {
+        "host_key": "faye",
         "title": "Maison de pêcheur — Saint-Louis",
         "description": (
             "Maison traditionnelle restaurée sur l'île de Saint-Louis, classée "
@@ -266,6 +325,7 @@ LISTINGS: list[dict[str, Any]] = [
         "photos_seed": "saintlouis-house",
     },
     {
+        "host_key": "konan",
         "title": "Penthouse Cocody — Riviera",
         "description": (
             "Penthouse de 3 chambres avec rooftop privé surplombant la lagune "
@@ -300,6 +360,7 @@ LISTINGS: list[dict[str, Any]] = [
         "photos_seed": "abidjan-cocody",
     },
     {
+        "host_key": "konan",
         "title": "Studio étudiant — Plateau",
         "description": (
             "Studio fonctionnel au cœur du Plateau, idéal pour court séjour "
@@ -327,6 +388,7 @@ LISTINGS: list[dict[str, Any]] = [
 # LISTINGS — duration_minutes replaces bedrooms/beds/bathrooms.
 EXPERIENCES: list[dict[str, Any]] = [
     {
+        "host_key": "ekambi",
         "title": "Cours de cuisine traditionnelle — Bonanjo",
         "description": (
             "Trois heures aux côtés d'une cheffe douala : marché du matin, ndolé "
@@ -345,6 +407,7 @@ EXPERIENCES: list[dict[str, Any]] = [
         "photos_seed": "douala-cooking",
     },
     {
+        "host_key": "sow",
         "title": "Visite guidée du marché Sandaga",
         "description": (
             "Une plongée de deux heures et demie dans le poumon commerçant de "
@@ -363,6 +426,7 @@ EXPERIENCES: list[dict[str, Any]] = [
         "photos_seed": "dakar-sandaga",
     },
     {
+        "host_key": "faye",
         "title": "Pirogue au coucher de soleil — Joal-Fadiouth",
         "description": (
             "Deux heures à bord d'une pirogue traditionnelle entre les bolongs "
@@ -381,6 +445,7 @@ EXPERIENCES: list[dict[str, Any]] = [
         "photos_seed": "joal-pirogue",
     },
     {
+        "host_key": "faye",
         "title": "Atelier de teinture indigo",
         "description": (
             "Quatre heures dans un atelier de Saint-Louis pour apprendre la "
@@ -399,6 +464,7 @@ EXPERIENCES: list[dict[str, Any]] = [
         "photos_seed": "saintlouis-indigo",
     },
     {
+        "host_key": "faye",
         "title": "Bain de son sous les baobabs",
         "description": (
             "Une heure trente d'écoute allongée sous les baobabs de la réserve "
@@ -417,6 +483,7 @@ EXPERIENCES: list[dict[str, Any]] = [
         "photos_seed": "bandia-soundbath",
     },
     {
+        "host_key": "konan",
         "title": "Plantations de cacao — N'duékro",
         "description": (
             "Six heures avec une coopérative de planteurs : visite des cabosses, "
@@ -439,35 +506,42 @@ EXPERIENCES: list[dict[str, Any]] = [
 log = get_logger(__name__)
 
 
-async def _ensure_demo_host(session: Any) -> User:
-    stmt = select(User).where(User.clerk_user_id == DEMO_HOST_CLERK_ID)
-    user = (await session.execute(stmt)).scalar_one_or_none()
-    if user is not None:
-        return user
-    user = User(
-        clerk_user_id=DEMO_HOST_CLERK_ID,
-        email=DEMO_HOST_EMAIL,
-        phone=None,
-        display_name=DEMO_HOST_DISPLAY_NAME,
-        avatar_url=DEMO_HOST_AVATAR,
-        language="fr",
-        is_host=True,
-        is_admin=False,
-        status="active",
-    )
-    session.add(user)
-    await session.flush()
-    return user
+async def _ensure_demo_hosts(session: Any) -> dict[str, User]:
+    """Create-or-fetch every host in SEED_HOSTS. Returns a dict keyed by
+    `key` so listings/experiences can look up their owner by host_key."""
+    hosts_by_key: dict[str, User] = {}
+    for cfg in SEED_HOSTS:
+        stmt = select(User).where(User.clerk_user_id == cfg["clerk_user_id"])
+        user = (await session.execute(stmt)).scalar_one_or_none()
+        if user is None:
+            user = User(
+                clerk_user_id=cfg["clerk_user_id"],
+                email=cfg["email"],
+                phone=None,
+                display_name=cfg["display_name"],
+                avatar_url=cfg["avatar_url"],
+                language=cfg["language"],
+                is_host=True,
+                is_admin=False,
+                status="active",
+            )
+            session.add(user)
+            await session.flush()
+        hosts_by_key[cfg["key"]] = user
+    return hosts_by_key
 
 
-async def _wipe_demo_data(session: Any, host_id: Any) -> tuple[int, int]:
-    """Drop all properties + experiences owned by the demo host (cascade
-    clears photos), plus their associated Media rows. Returns
+async def _wipe_demo_data(session: Any, host_ids: list[Any]) -> tuple[int, int]:
+    """Drop all properties + experiences owned by the given seed host ids
+    (cascade clears photos), plus their associated Media rows. Returns
     (properties_removed, experiences_removed)."""
+    if not host_ids:
+        return 0, 0
+
     media_ids: list[Any] = []
 
     prop_ids = (
-        (await session.execute(select(Property.id).where(Property.host_id == host_id)))
+        (await session.execute(select(Property.id).where(Property.host_id.in_(host_ids))))
         .scalars()
         .all()
     )
@@ -484,7 +558,7 @@ async def _wipe_demo_data(session: Any, host_id: Any) -> tuple[int, int]:
         await session.execute(delete(Property).where(Property.id.in_(prop_ids)))
 
     exp_ids = (
-        (await session.execute(select(Experience.id).where(Experience.host_id == host_id)))
+        (await session.execute(select(Experience.id).where(Experience.host_id.in_(host_ids))))
         .scalars()
         .all()
     )
@@ -506,6 +580,26 @@ async def _wipe_demo_data(session: Any, host_id: Any) -> tuple[int, int]:
         await session.execute(delete(Media).where(Media.id.in_(media_ids)))
 
     return len(prop_ids), len(exp_ids)
+
+
+async def _all_seed_host_ids(session: Any, current_hosts: dict[str, User]) -> list[Any]:
+    """Collect ids for every host that has ever been a seed host —
+    current SEED_HOSTS plus any LEGACY_HOST_CLERK_IDS still in the DB.
+    Used by the wipe step so re-runs also clean up data left behind by
+    earlier versions of this script."""
+    ids: list[Any] = [u.id for u in current_hosts.values()]
+    if LEGACY_HOST_CLERK_IDS:
+        legacy = (
+            (
+                await session.execute(
+                    select(User.id).where(User.clerk_user_id.in_(LEGACY_HOST_CLERK_IDS))
+                )
+            )
+            .scalars()
+            .all()
+        )
+        ids.extend(legacy)
+    return ids
 
 
 async def _create_listing(session: Any, host: User, listing: dict[str, Any]) -> Property:
@@ -596,25 +690,32 @@ async def main() -> None:
     configure_logging(debug=True)
     try:
         async for session in get_session():
-            host = await _ensure_demo_host(session)
-            wiped_props, wiped_exps = await _wipe_demo_data(session, host.id)
+            hosts = await _ensure_demo_hosts(session)
+
+            seed_host_ids = await _all_seed_host_ids(session, hosts)
+            wiped_props, wiped_exps = await _wipe_demo_data(session, seed_host_ids)
+
             for listing in LISTINGS:
+                host = hosts[listing["host_key"]]
                 await _create_listing(session, host, listing)
             for item in EXPERIENCES:
+                host = hosts[item["host_key"]]
                 await _create_experience(session, host, item)
+
             await session.commit()
             break
 
         log.info(
             "seed.complete",
-            host_id=str(host.id),
+            host_count=len(hosts),
             wiped_properties=wiped_props,
             wiped_experiences=wiped_exps,
             inserted_properties=len(LISTINGS),
             inserted_experiences=len(EXPERIENCES),
         )
+        host_names = ", ".join(sorted(u.display_name for u in hosts.values()))
         print(
-            f"✓ seed complete — host={host.display_name!r}, "
+            f"✓ seed complete — hosts=[{host_names}], "
             f"properties={len(LISTINGS)} (wiped {wiped_props}), "
             f"experiences={len(EXPERIENCES)} (wiped {wiped_exps})"
         )
