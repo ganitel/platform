@@ -93,6 +93,9 @@ const dict = {
   "property.host": { fr: "Hôte", en: "Host" },
   "property.amenities": { fr: "Équipements", en: "Amenities" },
   "property.description": { fr: "À propos du logement", en: "About this place" },
+
+  "experience.per_person": { fr: "par personne", en: "per person" },
+  "experience.duration": { fr: "durée", en: "duration" },
 } satisfies Dict;
 
 export type TranslationKey = keyof typeof dict;

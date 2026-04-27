@@ -8,6 +8,7 @@ import {
   PropertyGrid,
   PropertyGridSkeleton,
 } from "@/features/properties/components/property-grid";
+import { ExperienceGrid } from "@/features/experiences/components/experience-grid";
 import { SearchBar } from "@/features/properties/components/search-bar";
 import { ErrorState } from "@/shared/components/error-state";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
@@ -15,17 +16,16 @@ import { cn } from "@/shared/lib/cn";
 import { serverFetch } from "@/shared/api/server";
 import { SectionHeader } from "@/shared/ui/section-header";
 import type { PropertyPublic, SearchOut } from "@/features/properties/types";
+import type {
+  ExperiencePublic,
+  ExperienceSearchOut,
+} from "@/features/experiences/types";
 
 type BrowseKind = "stays" | "experiences";
 
 function parseKind(value: string | null): BrowseKind {
   return value === "experiences" ? "experiences" : "stays";
 }
-
-const ENDPOINTS: Record<BrowseKind, string> = {
-  stays: "/properties",
-  experiences: "/experiences",
-};
 
 const TITLE_KEY: Record<BrowseKind, TranslationKey> = {
   stays: "browse.tabs.stays",
@@ -65,7 +65,23 @@ export const meta: Route.MetaFunction = ({ location }) => {
   ];
 };
 
-export async function loader({ request }: Route.LoaderArgs) {
+type StaysData = {
+  kind: "stays";
+  q: string | null;
+  items: PropertyPublic[];
+  total: number;
+};
+
+type ExperiencesData = {
+  kind: "experiences";
+  q: string | null;
+  items: ExperiencePublic[];
+  total: number;
+};
+
+type LoaderData = StaysData | ExperiencesData;
+
+export async function loader({ request }: Route.LoaderArgs): Promise<LoaderData> {
   const url = new URL(request.url);
   const kind = parseKind(url.searchParams.get("kind"));
   const params = new URLSearchParams();
@@ -73,29 +89,27 @@ export async function loader({ request }: Route.LoaderArgs) {
   if (q) params.set("q", q);
   params.set("limit", "24");
 
-  // /experiences may not exist yet — fall back to an empty result so the
-  // tab still renders an editorial empty state instead of erroring out.
+  if (kind === "experiences") {
+    try {
+      const data = await serverFetch<ExperienceSearchOut>(
+        `/experiences?${params.toString()}`,
+      );
+      return { kind, q, items: data.items, total: data.total };
+    } catch {
+      return { kind, q, items: [], total: 0 };
+    }
+  }
+
   try {
-    const data = await serverFetch<SearchOut>(
-      `${ENDPOINTS[kind]}?${params.toString()}`,
-    );
-    return { search: data, q, kind };
+    const data = await serverFetch<SearchOut>(`/properties?${params.toString()}`);
+    return { kind, q, items: data.items, total: data.total };
   } catch {
-    return {
-      search: {
-        items: [] as PropertyPublic[],
-        total: 0,
-        limit: 24,
-        offset: 0,
-      } satisfies SearchOut,
-      q,
-      kind,
-    };
+    return { kind, q, items: [], total: 0 };
   }
 }
 
 export default function BrowseRoute({ loaderData }: Route.ComponentProps) {
-  const { search, q, kind } = loaderData;
+  const { kind, q } = loaderData;
   const t = useT();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -124,12 +138,14 @@ export default function BrowseRoute({ loaderData }: Route.ComponentProps) {
         <SearchBar initialQuery={q ?? ""} onSubmit={handleSearch} />
       </div>
 
-      {search.items.length === 0 ? (
+      {loaderData.items.length === 0 ? (
         <p className="py-16 text-center text-sm text-ganitel-text-subtitle">
           {t(EMPTY_KEY[kind])}
         </p>
+      ) : loaderData.kind === "stays" ? (
+        <PropertyGrid items={loaderData.items} />
       ) : (
-        <PropertyGrid items={search.items} />
+        <ExperienceGrid items={loaderData.items} />
       )}
     </div>
   );
