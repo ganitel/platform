@@ -12,8 +12,8 @@ app/
                              logging, middleware, money, storage)
   modules/                   Per-feature folders, each with
                              routes.py / schemas.py / service.py / models.py
-    users/   properties/   bookings/   media/   payments/
-    reference/   outbox/   idempotency/
+    users/   properties/   experiences/   bookings/   media/
+    payments/   reference/   outbox/   idempotency/
 migrations/                  Alembic
 scripts/seed_demo.py         Demo data seed (idempotent)
 tests/unit/                  Pure unit tests (no DB / app boot)
@@ -21,7 +21,7 @@ tests/unit/                  Pure unit tests (no DB / app boot)
 
 ## Prerequisites
 
-- **Python 3.11+** (managed via [uv](https://github.com/astral-sh/uv))
+- **Python 3.12+** (managed via [uv](https://github.com/astral-sh/uv))
 - **PostgreSQL** with the **PostGIS** extension — `geoalchemy2` requires it
 
 Default DB URL targets `localhost:5432`. Override via `DATABASE_URL` in `.env`.
