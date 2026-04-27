@@ -1,31 +1,41 @@
 # Ganitel
 
-Africa-first marketplace for housing, experiences, and payments.
+**Africa-first marketplace for stays, experiences, and payments.**
 
-Mono-repo with a FastAPI backend and a React Router v7 frontend, orchestrated
-from a single root `Makefile`.
+Ganitel lets travellers discover places to sleep and things to do across the
+continent — starting with Cameroon, Senegal, and Côte d'Ivoire — and lets
+hosts list properties and experiences from a single account. The product
+ships in French and English, with payments built in rather than bolted on.
 
-## Repository layout
+## Codebase highlights
 
-```
-packages/
-  backend/     FastAPI service (Python 3.12, uv)
-  frontend/    React Router v7 app (Bun, Vite, Tailwind, shadcn/ui)
-Makefile       Single source of truth for dev / db / test / lint / build
-```
-
-Each package has its own `README.md` with details specific to that side of
-the stack.
+- **Monorepo, two packages.** `packages/backend` (FastAPI, Python 3.12) and
+  `packages/frontend` (React Router v7), driven by a single root `Makefile`.
+- **Feature-modular backend.** Every domain (`properties`, `experiences`,
+  `bookings`, `payments`, `media`, `users`, …) lives in
+  `app/modules/<feature>` with its own `routes.py` / `schemas.py` /
+  `service.py` / `models.py`. Cross-cutting concerns (auth, db, errors,
+  storage, money, logging) sit in `app/core`.
+- **Geo-aware data layer.** SQLAlchemy 2 async + asyncpg over PostgreSQL,
+  with PostGIS / GeoAlchemy2 / Shapely so listings can be queried by
+  proximity, not just by city string.
+- **Outbox + idempotency modules** for safe webhook delivery and replay-safe
+  POSTs against payments and bookings.
+- **React Router v7 in framework mode with SSR**, Tailwind v4, shadcn/ui on
+  top of Radix, TanStack Query for server state, react-hook-form + Zod for
+  forms.
+- **Editorial, mobile-first UI** with anonymous browse — auth is only
+  required at booking and host actions.
 
 ## Prerequisites
 
-- **Python 3.12+** and [uv](https://github.com/astral-sh/uv)
-- **Bun** (frontend package manager + runtime)
-- **PostgreSQL with PostGIS** on `localhost:5432` (override via `DATABASE_URL`)
-- A **Clerk** application — the backend verifies Clerk session JWTs, it never
-  issues its own
+- **Python 3.12+** with [uv](https://github.com/astral-sh/uv)
+- **Bun** for the frontend
+- **PostgreSQL with PostGIS** on `localhost:5432` (override via
+  `DATABASE_URL`)
+- A **Clerk** application for the auth keys referenced in `.env`
 
-## Quick start
+## Get started
 
 From the repo root:
 
@@ -39,49 +49,11 @@ make seed           # ~10 demo properties + 6 experiences across CM/SN/CI
 make dev            # backend :8000 + frontend :3000, hot reload, prefixed logs
 ```
 
-## Common tasks
-
-Run `make help` for the full list. The most common targets:
-
-| Target                                                        | What                                              |
-| ------------------------------------------------------------- | ------------------------------------------------- |
-| `make install`                                                | install backend + frontend deps                   |
-| `make dev`                                                    | both dev servers, prefixed logs, Ctrl+C cleans up |
-| `make dev-backend` / `make dev-frontend`                      | one side only                                     |
-| `make db-revision M="…"`                                      | autogenerate an Alembic migration                 |
-| `make db-upgrade` / `make db-downgrade`                       | apply / roll back                                 |
-| `make seed`                                                   | seed demo data                                    |
-| `make test`                                                   | unit tests, both halves                           |
-| `make lint` / `make format` / `make typecheck` / `make check` | code quality                                      |
-| `make build`                                                  | production build of the frontend                  |
-
-## Stack
-
-**Backend** — FastAPI, SQLAlchemy 2 (async) + asyncpg, Alembic, GeoAlchemy2 +
-Shapely (PostGIS), Pydantic v2, structlog, aioboto3 for S3-compatible
-storage, Clerk JWT verification via PyJWT.
-
-**Frontend** — React 19, React Router v7 (framework mode, SSR), Tailwind v4,
-shadcn/ui (Radix primitives), TanStack Query, Axios, react-hook-form + Zod,
-Clerk for auth, Vitest + Testing Library.
-
-## Auth
-
-Clerk is the identity provider. The frontend obtains session JWTs from Clerk
-and forwards them to the backend, which verifies them against the configured
-JWKs (`CLERK_JWKS_URL`, `CLERK_ISSUER`) and mirrors each user into a local
-`users` row keyed by `clerk_user_id`. See `packages/backend/app/core/auth.py`.
-
-## Contributing
-
-- Work on a feature branch and open a PR — `main` is protected.
-- `make check` (lint + typecheck) and `make test` should be green before
-  asking for review.
-- CI lives in `.github/workflows/{backend,frontend}.yml`.
+Run `make help` for the full list of targets — `dev`, `test`, `lint`,
+`format`, `typecheck`, `check`, `build`, plus DB helpers (`db-revision`,
+`db-upgrade`, `db-downgrade`, `seed`).
 
 ## Per-package docs
 
-- [packages/backend/README.md](packages/backend/README.md) — module layout,
-  Clerk integration, logging, env vars
-- [packages/frontend/README.md](packages/frontend/README.md) — feature folder
-  structure and UI conventions
+- [packages/backend/README.md](packages/backend/README.md)
+- [packages/frontend/README.md](packages/frontend/README.md)
