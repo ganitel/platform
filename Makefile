@@ -42,7 +42,7 @@ db-upgrade: ## Apply pending migrations
 db-downgrade: ## Roll back one migration
 	cd packages/backend && uv run alembic downgrade -1
 
-seed: ## Seed local DB with demo host + ~10 published properties (idempotent)
+seed: ## Seed local DB with ~5 demo hosts + ~10 properties + ~6 experiences (idempotent)
 	cd packages/backend && uv run python -m scripts.seed_demo
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
