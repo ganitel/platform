@@ -2,11 +2,11 @@ import { Link } from "react-router";
 import type { ReactNode } from "react";
 
 /**
- * Two-pane shell shared by sign-in and sign-up.
+ * Two-pane layout shared by sign-in and sign-up.
  * Left pane: brand panel on the warm-dark primary.
  * Right pane: Clerk card centered on a neutral background.
  */
-export function AuthShell({
+export function AuthLayout({
   title,
   subtitle,
   children,

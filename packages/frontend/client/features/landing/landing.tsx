@@ -1,4 +1,3 @@
-import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { ArrowDown, Play } from "lucide-react";
 import type { CSSProperties } from "react";
@@ -98,7 +97,10 @@ function HeroPanel() {
           <br />
           {t("landing.tag.line2")}
         </span>
-        <span aria-hidden className="block h-full min-h-[38px] w-px bg-[rgba(20,20,14,0.18)] max-sm:hidden" />
+        <span
+          aria-hidden
+          className="block h-full min-h-[38px] w-px bg-[rgba(20,20,14,0.18)] max-sm:hidden"
+        />
         <p className="m-0 max-w-[44ch] text-sm leading-[1.6] text-ganitel-text-subtitle">
           {t("landing.lede")}
         </p>
@@ -157,7 +159,10 @@ function FeatureCard() {
         />
 
         <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/55 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-white backdrop-blur">
-          <span aria-hidden className="size-1.5 animate-pulse rounded-full bg-[#f0c97a]" />
+          <span
+            aria-hidden
+            className="size-1.5 animate-pulse rounded-full bg-[#f0c97a]"
+          />
           {t("landing.feature.tour")}
         </span>
 
@@ -166,7 +171,12 @@ function FeatureCard() {
           aria-label={t("landing.play")}
           className="absolute bottom-3 right-3 z-10 grid size-10 place-items-center rounded-full bg-ganitel-paper shadow-[0_4px_12px_rgba(0,0,0,0.35)] transition-transform hover:scale-110"
         >
-          <Play className="ml-0.5 size-3.5 text-ganitel-text-title" fill="currentColor" strokeWidth={0} aria-hidden />
+          <Play
+            className="ml-0.5 size-3.5 text-ganitel-text-title"
+            fill="currentColor"
+            strokeWidth={0}
+            aria-hidden
+          />
         </button>
       </div>
 
