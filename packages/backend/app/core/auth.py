@@ -48,7 +48,7 @@ def verify_clerk_jwt(token: str) -> ClerkClaims:
             signing_key,
             algorithms=["RS256"],
             issuer=settings.CLERK_ISSUER,
-            options={"verify_aud": False},  # Clerk audience varies; rely on issuer + signature
+            options={"verify_aud": False},
         )
     except jwt.InvalidTokenError as e:
         raise AuthError("invalid token") from e
