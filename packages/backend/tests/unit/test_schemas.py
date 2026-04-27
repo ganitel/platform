@@ -95,7 +95,7 @@ def _property(**overrides: Any) -> dict[str, Any]:
         "capacity": 2,
         "bedrooms": 1,
         "beds": 1,
-        "bathrooms": Decimal("1"),
+        "bathrooms": 1,
         "amenities": ["wifi", "ac"],
         "base_price": Money(amount=Decimal("38000"), currency=Currency.XAF),
     }

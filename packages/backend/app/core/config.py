@@ -7,7 +7,7 @@ CORS origins, payment provider keys, …) belongs here."""
 from functools import lru_cache
 from typing import Annotated, Literal, cast
 
-from pydantic import BaseModel, Field, PostgresDsn, RedisDsn, field_validator
+from pydantic import BaseModel, Field, PostgresDsn, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -82,13 +82,11 @@ class Settings(PaymentSettings, ObjectStorageSettings, BaseSettings):
     APP_NAME: str = "Ganitel API"
     APP_VERSION: str = "0.1.0"
 
-    # Defaults assume local Postgres (with PostGIS) + Redis on standard ports.
-    # Env always overrides in real deployments.
+    # Defaults assume local Postgres (with PostGIS). Env overrides in real deployments.
     DATABASE_URL: PostgresDsn = cast(
         PostgresDsn,
         "postgresql+asyncpg://ganitel:ganitel@localhost:5432/ganitel",
     )
-    REDIS_URL: RedisDsn = cast(RedisDsn, "redis://localhost:6379/0")
 
     CORS_ORIGINS: Annotated[list[str], NoDecode] = Field(default_factory=list)
 

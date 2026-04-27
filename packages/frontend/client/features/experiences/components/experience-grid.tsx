@@ -1,19 +1,19 @@
-import type { PropertyPublic } from "@/features/properties/types";
-import { PropertyCard } from "@/features/properties/components/property-card";
+import type { ExperiencePublic } from "@/features/experiences/types";
+import { ExperienceCard } from "@/features/experiences/components/experience-card";
 
-export function PropertyGrid({ items }: { items: PropertyPublic[] }) {
+export function ExperienceGrid({ items }: { items: ExperiencePublic[] }) {
   return (
     <ul className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((p) => (
-        <li key={p.id}>
-          <PropertyCard property={p} />
+      {items.map((e) => (
+        <li key={e.id}>
+          <ExperienceCard experience={e} />
         </li>
       ))}
     </ul>
   );
 }
 
-export function PropertyGridSkeleton({ count = 6 }: { count?: number }) {
+export function ExperienceGridSkeleton({ count = 6 }: { count?: number }) {
   return (
     <ul className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: count }).map((_, i) => (

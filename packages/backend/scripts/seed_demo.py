@@ -1,19 +1,20 @@
-"""Seed the local DB with a demo host and ~10 published properties.
+"""Seed the local DB with a demo host, ~10 published properties, and a
+handful of published experiences.
 
 Idempotent: identifies the demo host by `clerk_user_id="seed_demo_host"`,
-wipes that host's previous properties (cascade clears their photos), and
-re-inserts the canonical demo set. Run repeatedly without accumulating dupes.
+wipes that host's previous properties + experiences (cascade clears
+their photos), and re-inserts the canonical demo set. Run repeatedly
+without accumulating dupes.
 
-Photos use seeded `picsum.photos` URLs stored directly as `media.key`. The
-storage layer treats full URLs as a pass-through, so the public URL resolves
-without any S3/Supabase setup. See `app/core/storage.public_or_signed_url`.
+Photos use seeded `picsum.photos` URLs stored directly as `media.key`.
+The storage layer treats full URLs as a pass-through, so the public URL
+resolves without any S3/Supabase setup. See
+`app/core/storage.public_or_signed_url`.
 
 Usage:
     uv run python -m scripts.seed_demo
     # or
     make seed
-
-Experiences are not yet seeded — the experiences module doesn't exist yet.
 """
 
 import asyncio
@@ -27,6 +28,12 @@ from sqlalchemy import delete, select
 
 from app.core.db import dispose_engine, get_session
 from app.core.logging import configure_logging, get_logger
+from app.modules.experiences.models import (
+    Experience,
+    ExperienceCancellationPolicy,
+    ExperiencePhoto,
+    ExperienceStatus,
+)
 from app.modules.media.models import Media
 from app.modules.properties.models import (
     CancellationPolicy,
@@ -50,6 +57,10 @@ def _photo_set(seed_prefix: str, count: int = 5) -> list[str]:
     return [_picsum(f"{seed_prefix}-{i}") for i in range(count)]
 
 
+def _currency_for(country_code: str) -> str:
+    return "XAF" if country_code in {"CM", "CI"} else "XOF"
+
+
 # Each entry is everything needed to materialise one Property + its photos.
 # Coordinates are real (rough city center / neighbourhood points).
 LISTINGS: list[dict[str, Any]] = [
@@ -68,7 +79,7 @@ LISTINGS: list[dict[str, Any]] = [
         "capacity": 2,
         "bedrooms": 1,
         "beds": 1,
-        "bathrooms": Decimal("1"),
+        "bathrooms": 1,
         "amenities": ["wifi", "ac", "kitchen", "fridge", "hot_water", "balcony", "smoke_alarm"],
         "house_rules": "Non-fumeur. Pas de soirées.",
         "cancellation_policy": CancellationPolicy.MODERATE,
@@ -89,7 +100,7 @@ LISTINGS: list[dict[str, Any]] = [
         "capacity": 8,
         "bedrooms": 4,
         "beds": 5,
-        "bathrooms": Decimal("3"),
+        "bathrooms": 3,
         "amenities": [
             "wifi",
             "ac",
@@ -121,7 +132,7 @@ LISTINGS: list[dict[str, Any]] = [
         "capacity": 2,
         "bedrooms": 1,
         "beds": 1,
-        "bathrooms": Decimal("1"),
+        "bathrooms": 1,
         "amenities": ["wifi", "fan", "hot_water", "garden", "terrace"],
         "house_rules": None,
         "cancellation_policy": CancellationPolicy.FLEXIBLE,
@@ -142,7 +153,7 @@ LISTINGS: list[dict[str, Any]] = [
         "capacity": 2,
         "bedrooms": 0,
         "beds": 1,
-        "bathrooms": Decimal("1"),
+        "bathrooms": 1,
         "amenities": ["wifi", "fan", "kitchen", "fridge", "hot_water"],
         "house_rules": "Check-in à partir de 14h.",
         "cancellation_policy": CancellationPolicy.FLEXIBLE,
@@ -163,7 +174,7 @@ LISTINGS: list[dict[str, Any]] = [
         "capacity": 10,
         "bedrooms": 5,
         "beds": 6,
-        "bathrooms": Decimal("4"),
+        "bathrooms": 4,
         "amenities": [
             "wifi",
             "ac",
@@ -194,7 +205,7 @@ LISTINGS: list[dict[str, Any]] = [
         "capacity": 1,
         "bedrooms": 1,
         "beds": 1,
-        "bathrooms": Decimal("0.5"),
+        "bathrooms": 1,
         "amenities": ["wifi", "ac", "kitchen", "hot_water", "workspace", "fan"],
         "house_rules": "Non-fumeur. Visiteurs sur demande.",
         "cancellation_policy": CancellationPolicy.FLEXIBLE,
@@ -215,7 +226,7 @@ LISTINGS: list[dict[str, Any]] = [
         "capacity": 4,
         "bedrooms": 2,
         "beds": 2,
-        "bathrooms": Decimal("2"),
+        "bathrooms": 2,
         "amenities": [
             "wifi",
             "ac",
@@ -247,7 +258,7 @@ LISTINGS: list[dict[str, Any]] = [
         "capacity": 4,
         "bedrooms": 2,
         "beds": 3,
-        "bathrooms": Decimal("1"),
+        "bathrooms": 1,
         "amenities": ["wifi", "fan", "kitchen", "hot_water", "garden", "terrace"],
         "house_rules": None,
         "cancellation_policy": CancellationPolicy.FLEXIBLE,
@@ -268,7 +279,7 @@ LISTINGS: list[dict[str, Any]] = [
         "capacity": 6,
         "bedrooms": 3,
         "beds": 3,
-        "bathrooms": Decimal("2"),
+        "bathrooms": 2,
         "amenities": [
             "wifi",
             "ac",
@@ -302,12 +313,126 @@ LISTINGS: list[dict[str, Any]] = [
         "capacity": 2,
         "bedrooms": 0,
         "beds": 1,
-        "bathrooms": Decimal("1"),
+        "bathrooms": 1,
         "amenities": ["wifi", "fan", "kitchen", "hot_water", "workspace"],
         "house_rules": "Non-fumeur.",
         "cancellation_policy": CancellationPolicy.FLEXIBLE,
         "price": Decimal("16000"),
         "photos_seed": "abidjan-plateau",
+    },
+]
+
+
+# Six published experiences across CM / SN / CI. Distinct shape from
+# LISTINGS — duration_minutes replaces bedrooms/beds/bathrooms.
+EXPERIENCES: list[dict[str, Any]] = [
+    {
+        "title": "Cours de cuisine traditionnelle — Bonanjo",
+        "description": (
+            "Trois heures aux côtés d'une cheffe douala : marché du matin, ndolé "
+            "et poisson braisé à la flamme, dégustation à table autour d'un thé "
+            "à la menthe. Tablier fourni, recettes à emporter."
+        ),
+        "experience_type": "workshop",
+        "city": "Douala",
+        "country_code": "CM",
+        "lat": 4.0464,
+        "lng": 9.6960,
+        "capacity": 6,
+        "duration_minutes": 180,
+        "cancellation_policy": ExperienceCancellationPolicy.FLEXIBLE,
+        "price": Decimal("12000"),
+        "photos_seed": "douala-cooking",
+    },
+    {
+        "title": "Visite guidée du marché Sandaga",
+        "description": (
+            "Une plongée de deux heures et demie dans le poumon commerçant de "
+            "Dakar — étoffes wax, épices, tisanes, percussions. Guide local "
+            "francophone, dégustation de bissap incluse."
+        ),
+        "experience_type": "tour",
+        "city": "Dakar",
+        "country_code": "SN",
+        "lat": 14.6760,
+        "lng": -17.4408,
+        "capacity": 8,
+        "duration_minutes": 150,
+        "cancellation_policy": ExperienceCancellationPolicy.FLEXIBLE,
+        "price": Decimal("8000"),
+        "photos_seed": "dakar-sandaga",
+    },
+    {
+        "title": "Pirogue au coucher de soleil — Joal-Fadiouth",
+        "description": (
+            "Deux heures à bord d'une pirogue traditionnelle entre les bolongs "
+            "et l'île aux coquillages. Apéritif servi à bord ; capitaine "
+            "lebou natif du village."
+        ),
+        "experience_type": "boat_trip",
+        "city": "Joal-Fadiouth",
+        "country_code": "SN",
+        "lat": 14.1647,
+        "lng": -16.8367,
+        "capacity": 6,
+        "duration_minutes": 120,
+        "cancellation_policy": ExperienceCancellationPolicy.MODERATE,
+        "price": Decimal("18000"),
+        "photos_seed": "joal-pirogue",
+    },
+    {
+        "title": "Atelier de teinture indigo",
+        "description": (
+            "Quatre heures dans un atelier de Saint-Louis pour apprendre la "
+            "teinture à l'indigo et au pagne tissé. Repartez avec votre "
+            "carré de tissu teint à la main et séché au soleil."
+        ),
+        "experience_type": "workshop",
+        "city": "Saint-Louis",
+        "country_code": "SN",
+        "lat": 16.0303,
+        "lng": -16.5023,
+        "capacity": 4,
+        "duration_minutes": 240,
+        "cancellation_policy": ExperienceCancellationPolicy.MODERATE,
+        "price": Decimal("22000"),
+        "photos_seed": "saintlouis-indigo",
+    },
+    {
+        "title": "Bain de son sous les baobabs",
+        "description": (
+            "Une heure trente d'écoute allongée sous les baobabs de la réserve "
+            "de Bandia, avec bols tibétains, gongs et chants. Coussin et "
+            "couverture fournis ; arrivée 15 minutes avant."
+        ),
+        "experience_type": "sound_bath",
+        "city": "Bandia",
+        "country_code": "SN",
+        "lat": 14.5833,
+        "lng": -17.0167,
+        "capacity": 8,
+        "duration_minutes": 90,
+        "cancellation_policy": ExperienceCancellationPolicy.FLEXIBLE,
+        "price": Decimal("14000"),
+        "photos_seed": "bandia-soundbath",
+    },
+    {
+        "title": "Plantations de cacao — N'duékro",
+        "description": (
+            "Six heures avec une coopérative de planteurs : visite des cabosses, "
+            "fermentation, séchage, dégustation. Déjeuner ivoirien partagé "
+            "(attiéké poisson) en bord de plantation."
+        ),
+        "experience_type": "tour",
+        "city": "Yamoussoukro",
+        "country_code": "CI",
+        "lat": 6.8276,
+        "lng": -5.2893,
+        "capacity": 10,
+        "duration_minutes": 360,
+        "cancellation_policy": ExperienceCancellationPolicy.MODERATE,
+        "price": Decimal("25000"),
+        "photos_seed": "yamoussoukro-cacao",
     },
 ]
 
@@ -335,32 +460,52 @@ async def _ensure_demo_host(session: Any) -> User:
     return user
 
 
-async def _wipe_demo_listings(session: Any, host_id: Any) -> int:
-    """Drop all properties owned by the demo host (cascade clears photos),
-    plus their associated Media rows. Returns the count of removed properties."""
-    rows = (
+async def _wipe_demo_data(session: Any, host_id: Any) -> tuple[int, int]:
+    """Drop all properties + experiences owned by the demo host (cascade
+    clears photos), plus their associated Media rows. Returns
+    (properties_removed, experiences_removed)."""
+    media_ids: list[Any] = []
+
+    prop_ids = (
         (await session.execute(select(Property.id).where(Property.host_id == host_id)))
         .scalars()
         .all()
     )
-    if not rows:
-        return 0
-
-    # Find media used by demo properties so we can purge it after.
-    media_ids = (
-        (
-            await session.execute(
-                select(PropertyPhoto.media_id).where(PropertyPhoto.property_id.in_(rows))
+    if prop_ids:
+        media_ids.extend(
+            (
+                await session.execute(
+                    select(PropertyPhoto.media_id).where(PropertyPhoto.property_id.in_(prop_ids))
+                )
             )
+            .scalars()
+            .all()
         )
+        await session.execute(delete(Property).where(Property.id.in_(prop_ids)))
+
+    exp_ids = (
+        (await session.execute(select(Experience.id).where(Experience.host_id == host_id)))
         .scalars()
         .all()
     )
+    if exp_ids:
+        media_ids.extend(
+            (
+                await session.execute(
+                    select(ExperiencePhoto.media_id).where(
+                        ExperiencePhoto.experience_id.in_(exp_ids)
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        await session.execute(delete(Experience).where(Experience.id.in_(exp_ids)))
 
-    await session.execute(delete(Property).where(Property.id.in_(rows)))
     if media_ids:
         await session.execute(delete(Media).where(Media.id.in_(media_ids)))
-    return len(rows)
+
+    return len(prop_ids), len(exp_ids)
 
 
 async def _create_listing(session: Any, host: User, listing: dict[str, Any]) -> Property:
@@ -393,7 +538,7 @@ async def _create_listing(session: Any, host: User, listing: dict[str, Any]) -> 
         house_rules=listing["house_rules"],
         cancellation_policy=listing["cancellation_policy"],
         base_price_amount=listing["price"],
-        base_price_currency="XAF" if listing["country_code"] in {"CM", "CI"} else "XOF",
+        base_price_currency=_currency_for(listing["country_code"]),
         content_language="fr",
         status=PropertyStatus.PUBLISHED,
         published_at=datetime.now(UTC),
@@ -407,25 +552,71 @@ async def _create_listing(session: Any, host: User, listing: dict[str, Any]) -> 
     return prop
 
 
+async def _create_experience(session: Any, host: User, item: dict[str, Any]) -> Experience:
+    photos: list[Media] = []
+    for url in _photo_set(item["photos_seed"], count=4):
+        m = Media(
+            owner_user_id=host.id,
+            bucket="seed",
+            key=url,
+            mime_type="image/jpeg",
+            size_bytes=None,
+        )
+        session.add(m)
+        photos.append(m)
+    await session.flush()
+
+    exp = Experience(
+        host_id=host.id,
+        title=item["title"],
+        description=item["description"],
+        experience_type=item["experience_type"],
+        city=item["city"],
+        country_code=item["country_code"],
+        location=from_shape(Point(item["lng"], item["lat"]), srid=4326),
+        capacity=item["capacity"],
+        duration_minutes=item["duration_minutes"],
+        cancellation_policy=item["cancellation_policy"],
+        base_price_amount=item["price"],
+        base_price_currency=_currency_for(item["country_code"]),
+        content_language="fr",
+        status=ExperienceStatus.PUBLISHED,
+        published_at=datetime.now(UTC),
+    )
+    session.add(exp)
+    await session.flush()
+
+    for position, media in enumerate(photos):
+        session.add(ExperiencePhoto(experience_id=exp.id, media_id=media.id, position=position))
+
+    return exp
+
+
 async def main() -> None:
     configure_logging(debug=True)
     try:
         async for session in get_session():
             host = await _ensure_demo_host(session)
-            wiped = await _wipe_demo_listings(session, host.id)
+            wiped_props, wiped_exps = await _wipe_demo_data(session, host.id)
             for listing in LISTINGS:
                 await _create_listing(session, host, listing)
+            for item in EXPERIENCES:
+                await _create_experience(session, host, item)
             await session.commit()
             break
 
         log.info(
             "seed.complete",
             host_id=str(host.id),
-            wiped=wiped,
-            inserted=len(LISTINGS),
+            wiped_properties=wiped_props,
+            wiped_experiences=wiped_exps,
+            inserted_properties=len(LISTINGS),
+            inserted_experiences=len(EXPERIENCES),
         )
         print(
-            f"✓ seed complete — host={host.display_name!r}, wiped={wiped}, inserted={len(LISTINGS)}"
+            f"✓ seed complete — host={host.display_name!r}, "
+            f"properties={len(LISTINGS)} (wiped {wiped_props}), "
+            f"experiences={len(EXPERIENCES)} (wiped {wiped_exps})"
         )
     finally:
         await dispose_engine()

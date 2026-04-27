@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.modules.bookings.routes import router as bookings_router
+from app.modules.experiences.routes import router as experiences_router
 from app.modules.media.routes import router as media_router
 from app.modules.payments.routes import router as webhooks_router
 from app.modules.properties.routes import router as properties_router
@@ -19,5 +20,6 @@ api_router.include_router(users_router)
 api_router.include_router(reference_router)
 api_router.include_router(media_router)
 api_router.include_router(properties_router)
+api_router.include_router(experiences_router)
 api_router.include_router(bookings_router)
 api_router.include_router(webhooks_router)

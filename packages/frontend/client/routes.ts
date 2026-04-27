@@ -6,9 +6,10 @@ import {
 } from "@react-router/dev/routes";
 
 export default [
-  // Pages with the public app shell (header / nav / footer).
+  // Every public page shares the same chrome (Header + BottomNav).
   layout("routes/_app.tsx", [
     index("routes/_index.tsx"),
+    route("browse", "routes/browse.tsx"),
     route("properties/:id", "routes/properties.$id.tsx"),
     route("bookings", "routes/bookings.tsx"),
     route("profile", "routes/profile.tsx"),

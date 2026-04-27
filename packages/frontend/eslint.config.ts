@@ -56,11 +56,33 @@ export default defineConfig(
     },
   },
   {
+    // React Router modules export framework hooks (meta, loader, …) alongside components.
+    files: ["**/client/routes/**/*.tsx", "**/client/root.tsx"],
+    rules: {
+      "react-refresh/only-export-components": [
+        "warn",
+        {
+          allowConstantExport: true,
+          allowExportNames: [
+            "meta",
+            "links",
+            "headers",
+            "loader",
+            "clientLoader",
+            "action",
+            "clientAction",
+            "shouldRevalidate",
+            "middleware",
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ["**/*.{test,spec}.{ts,tsx}"],
     extends: [vitest.configs.recommended, vitest.configs.env],
   },
   {
-    // shadcn/radix primitives pass content via `children` in `props`; a11y rules false-positive on the definitions.
     files: ["**/client/shared/ui/**"],
     rules: {
       "jsx-a11y/heading-has-content": "off",

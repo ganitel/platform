@@ -22,17 +22,66 @@ const dict = {
   "common.signout": { fr: "Se déconnecter", en: "Sign out" },
 
   "nav.home": { fr: "Accueil", en: "Home" },
-  "nav.bookings": { fr: "Réservations", en: "Trips" },
+  "nav.browse": { fr: "Découvrir", en: "Browse" },
+  "nav.bookings": { fr: "Mes réservations", en: "My bookings" },
   "nav.profile": { fr: "Profil", en: "Profile" },
 
-  "browse.title": { fr: "Explorer", en: "Explore" },
-  "browse.subtitle": {
-    fr: "Séjours et expériences soigneusement sélectionnés.",
-    en: "Stays and experiences, carefully curated.",
+  "landing.nav.properties": { fr: "Logements", en: "Properties" },
+  "landing.nav.experiences": { fr: "Expériences", en: "Experiences" },
+  "landing.tag.line1": { fr: "Logements", en: "Properties" },
+  "landing.tag.line2": { fr: "& Séjours", en: "& Stays" },
+  "landing.lede": {
+    fr: "Des logements choisis dans des lieux calmes, et les expériences qui les entourent. Du Cameroun à la Côte d'Ivoire — trouvez où poser vos valises.",
+    en: "Curated stays in quiet places, paired with the experiences that come with them. From Cameroon to Côte d'Ivoire — find where to settle in.",
   },
-  "browse.empty": {
+  "landing.title.line1": { fr: "Là où la lumière", en: "Stay where the" },
+  "landing.title.line2_pre": { fr: "prend son", en: "light moves" },
+  "landing.title.line2_em": { fr: "temps.", en: "slowly." },
+  "landing.cta": { fr: "Découvrir les séjours", en: "Browse stays" },
+  "landing.cta.hint": { fr: "Réservation immédiate", en: "Instant booking" },
+  "landing.feature.tour": { fr: "Visite live", en: "Live tour" },
+  "landing.feature.title": { fr: "Cabane Belledonne", en: "Belledonne Cabin" },
+  "landing.feature.caption": {
+    fr: "Une visite de douze minutes dans notre logement le plus aimé — perché au-dessus de la vallée, construit autour d'une seule fenêtre.",
+    en: "A twelve-minute tour of our most-loved stay — perched above the valley, built around a single window.",
+  },
+  "landing.play": { fr: "Lancer la visite", en: "Play tour" },
+  "landing.info": { fr: "Lire l'histoire de l'hôte", en: "Read the host story" },
+  "landing.scroll": { fr: "Faire défiler", en: "Scroll" },
+  "landing.featured.tag": { fr: "Sélection · 2026", en: "Selection · 2026" },
+  "landing.featured.title": { fr: "Une sélection,", en: "A short list," },
+  "landing.featured.title_em": { fr: "un seul ton.", en: "one tone." },
+  "landing.featured.lede": {
+    fr: "Chaque logement est visité avant d'être listé. Si nous n'y dormirions pas, vous ne le trouverez pas ici.",
+    en: "We visit every stay before it goes live. If we wouldn't sleep there, you won't find it here.",
+  },
+  "landing.featured.see_all": { fr: "Voir tous les logements", en: "See all stays" },
+  "landing.cta_section.tag": { fr: "Prêt à partir ?", en: "Ready to go?" },
+  "landing.cta_section.title": { fr: "Trouvez votre lieu,", en: "Find your place," },
+  "landing.cta_section.title_em": { fr: "à votre rythme.", en: "at your own pace." },
+  "footer.regions": {
+    fr: "Cameroun · Sénégal · Côte d'Ivoire",
+    en: "Cameroon · Senegal · Côte d'Ivoire",
+  },
+
+  "browse.title": { fr: "Explorer", en: "Explore" },
+  "browse.tabs.stays": { fr: "Logements", en: "Stays" },
+  "browse.tabs.experiences": { fr: "Expériences", en: "Experiences" },
+  "browse.lede.stays": {
+    fr: "Logements soigneusement sélectionnés au Cameroun, au Sénégal et en Côte d'Ivoire.",
+    en: "Stays carefully selected in Cameroon, Senegal and Côte d'Ivoire.",
+  },
+  "browse.lede.experiences": {
+    fr: "Des expériences à vivre autour de nos logements ou en escapade.",
+    en: "Experiences worth the trip — around our stays or as standalone escapes.",
+  },
+  "browse.empty.stays": {
     fr: "Aucun logement ne correspond à votre recherche.",
-    en: "No properties match your search.",
+    en: "No stays match your search.",
+  },
+  "browse.empty.experiences": {
+    fr: "Les expériences arrivent bientôt.",
+    en: "Experiences are coming soon.",
   },
 
   "property.guests": { fr: "voyageurs", en: "guests" },
@@ -44,6 +93,9 @@ const dict = {
   "property.host": { fr: "Hôte", en: "Host" },
   "property.amenities": { fr: "Équipements", en: "Amenities" },
   "property.description": { fr: "À propos du logement", en: "About this place" },
+
+  "experience.per_person": { fr: "par personne", en: "per person" },
+  "experience.duration": { fr: "durée", en: "duration" },
 } satisfies Dict;
 
 export type TranslationKey = keyof typeof dict;

@@ -1,6 +1,6 @@
 """FastAPI application factory.
 
-Wires logging, lifespan (cleanup of DB pool + Redis), middleware
+Wires logging, lifespan (cleanup of DB pool), middleware
 (request id, access log, CORS), exception handlers, and the
 aggregated API router. The exported `app` is what uvicorn runs."""
 
@@ -17,14 +17,12 @@ from app.core.errors import register_exception_handlers
 from app.core.logging import configure_logging
 from app.core.middleware.access_log import AccessLogMiddleware
 from app.core.middleware.request_id import RequestIdMiddleware
-from app.core.redis import close_redis
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     yield
     await dispose_engine()
-    await close_redis()
 
 
 def create_app() -> FastAPI:

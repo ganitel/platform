@@ -12,8 +12,8 @@ install: ## Install all deps (backend uv sync + frontend bun install)
 	cd packages/frontend && bun install
 
 # ── Dev ───────────────────────────────────────────────────────────────────────
-# Requires PostgreSQL (with PostGIS) + Redis running locally on the standard
-# ports (5432 / 6379). Override via DATABASE_URL / REDIS_URL in .env.
+# Requires PostgreSQL (with PostGIS) on the standard port (5432).
+# Override via DATABASE_URL in .env.
 
 dev: ## Start frontend + backend dev servers concurrently (hot reload)
 	@echo "Starting frontend + backend dev servers (Ctrl+C to stop)…"
