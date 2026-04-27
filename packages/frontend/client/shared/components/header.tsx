@@ -27,7 +27,7 @@ export function Header() {
           className="inline-flex items-center gap-2 text-ganitel-text-title"
           aria-label="Ganitel"
         >
-          <span className="grid size-7 -rotate-[4deg] place-items-center rounded-lg bg-ganitel-text-title text-[13px] font-extrabold leading-none text-ganitel-paper">
+          <span className="grid size-7 rotate-[-4deg] place-items-center rounded-lg bg-ganitel-text-title text-[13px] font-extrabold leading-none text-ganitel-paper">
             G
           </span>
           <span className="font-display text-[22px] font-extrabold leading-none tracking-[-0.045em]">
@@ -62,7 +62,13 @@ export function Header() {
   );
 }
 
-function HeaderNavItem({ to, children }: { to: string; children: React.ReactNode }) {
+function HeaderNavItem({
+  to,
+  children,
+}: {
+  to: string;
+  children: React.ReactNode;
+}) {
   return (
     <NavLink
       to={to}

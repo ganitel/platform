@@ -68,7 +68,7 @@ class Property(Base):
     capacity: Mapped[int] = mapped_column(Integer, nullable=False)
     bedrooms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     beds: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    bathrooms: Mapped[Decimal] = mapped_column(Numeric(4, 1), nullable=False, default=Decimal("0"))
+    bathrooms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     amenities: Mapped[list[str]] = mapped_column(
         ARRAY(String(40)), nullable=False, server_default="{}"

@@ -53,7 +53,7 @@ export const meta: Route.MetaFunction = ({ location }) => {
     : `${sectionFR} — Ganitel`;
   const description =
     kind === "experiences"
-      ? "Expériences à vivre au Cameroun, au Sénégal et en Côte d'Ivoire — autour de nos logements ou en escapade."
+      ? "Expériences à vivre au Cameroun, au Sénégal et en Côte d'Ivoire autour de nos logements ou en escapade."
       : "Logements soigneusement sélectionnés à Douala, Yaoundé, Dakar, Abidjan et plus.";
   return [
     { title },

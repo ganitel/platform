@@ -72,7 +72,7 @@ const dict = {
     en: "Stays carefully selected in Cameroon, Senegal and Côte d'Ivoire.",
   },
   "browse.lede.experiences": {
-    fr: "Des expériences à vivre — autour de nos logements ou en escapade.",
+    fr: "Des expériences à vivre autour de nos logements ou en escapade.",
     en: "Experiences worth the trip — around our stays or as standalone escapes.",
   },
   "browse.empty.stays": {

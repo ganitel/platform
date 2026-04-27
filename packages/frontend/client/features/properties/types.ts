@@ -36,7 +36,7 @@ export interface PropertyPublic {
   capacity: number;
   bedrooms: number;
   beds: number;
-  bathrooms: string;
+  bathrooms: number;
   base_price: Money;
   amenities: string[];
   cover_photo: MediaPublic | null;

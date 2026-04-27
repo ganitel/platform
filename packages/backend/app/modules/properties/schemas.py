@@ -4,7 +4,6 @@ results, and full detail responses. Money is exposed via the shared
 though storage splits it into two columns."""
 
 from datetime import datetime
-from decimal import Decimal
 from typing import Annotated, Literal
 from uuid import UUID
 
@@ -36,7 +35,7 @@ class PropertyCreateIn(BaseModel):
     capacity: int = Field(..., ge=1, le=64)
     bedrooms: int = Field(default=0, ge=0, le=32)
     beds: int = Field(default=0, ge=0, le=64)
-    bathrooms: Decimal = Field(default=Decimal("0"), ge=0, le=Decimal("32"))
+    bathrooms: int = Field(default=0, ge=0, le=32)
     amenities: list[str] = Field(default_factory=list, max_length=64)
     house_rules: str | None = Field(default=None, max_length=4000)
     cancellation_policy: CancellationPolicy = CancellationPolicy.MODERATE
@@ -56,7 +55,7 @@ class PropertyUpdateIn(BaseModel):
     capacity: int | None = Field(default=None, ge=1, le=64)
     bedrooms: int | None = Field(default=None, ge=0, le=32)
     beds: int | None = Field(default=None, ge=0, le=64)
-    bathrooms: Decimal | None = Field(default=None, ge=0)
+    bathrooms: int | None = Field(default=None, ge=0, le=32)
     amenities: list[str] | None = None
     house_rules: str | None = None
     cancellation_policy: CancellationPolicy | None = None
@@ -84,7 +83,7 @@ class PropertyPublic(BaseModel):
     capacity: int
     bedrooms: int
     beds: int
-    bathrooms: Decimal
+    bathrooms: int
     base_price: Money
     amenities: list[str]
     cover_photo: MediaPublic | None
