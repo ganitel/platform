@@ -59,7 +59,6 @@ export default function CompleteProfilePage() {
             placeholder="Ex. Daniel Mvondo"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            autoFocus
             required
             className="h-11"
           />

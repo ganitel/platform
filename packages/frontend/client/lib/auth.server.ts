@@ -23,7 +23,7 @@ async function twilioSendOtp(phone: string, code: string) {
       body: new URLSearchParams({
         To: phone,
         From: from,
-        Body: `Votre code Ganitel : ${code}`,
+        Body: `Votre code Ganitel: ${code}`,
       }).toString(),
     },
   );
