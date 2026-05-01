@@ -51,3 +51,6 @@ Thumbs.db
 # Uploads (runtime)
 apps/backend/uploads/
 .worktrees/
+
+# Superpowers (AI planning artifacts)
+docs/superpowers/
