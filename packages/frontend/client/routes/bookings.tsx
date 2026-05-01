@@ -18,7 +18,7 @@ export async function loader(args: Route.LoaderArgs) {
   const auth = await getAuth(args);
   if (!auth.userId) {
     const url = new URL(args.request.url);
-    return redirect(`/sign-in?redirect_url=${encodeURIComponent(url.pathname)}`);
+    return redirect(`/sign-in?redirect_url=${encodeURIComponent(url.pathname + url.search)}`);
   }
   return null;
 }
