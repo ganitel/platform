@@ -1,7 +1,7 @@
 """Seed the local DB with a handful of demo hosts, ~10 published
 properties, and a handful of published experiences spread across them.
 
-Idempotent: every seed host is identified by a `clerk_user_id` prefixed
+Idempotent: every seed host is identified by an `auth_user_id` prefixed
 with `seed_host_` (plus the legacy `seed_demo_host` from the previous
 single-host version of this script). On each run we:
 
@@ -50,7 +50,7 @@ from app.modules.users.models import User
 
 # Pre-`seed_host_*` script versions used a single host with this id.
 # Kept here so the wipe step also clears its leftover data on re-run.
-LEGACY_HOST_CLERK_IDS: list[str] = ["seed_demo_host"]
+LEGACY_HOST_AUTH_IDS: list[str] = ["seed_demo_host"]
 
 # Each host is referenced by `key` from LISTINGS / EXPERIENCES below.
 # Avatars use pravatar's deterministic image index so demo hosts stay
@@ -58,7 +58,7 @@ LEGACY_HOST_CLERK_IDS: list[str] = ["seed_demo_host"]
 SEED_HOSTS: list[dict[str, Any]] = [
     {
         "key": "mvondo",
-        "clerk_user_id": "seed_host_mvondo",
+        "auth_user_id": "seed_host_mvondo",
         "email": "daniel.mvondo@ganitel.local",
         "display_name": "Daniel Mvondo",
         "avatar_url": "https://i.pravatar.cc/200?img=12",
@@ -66,7 +66,7 @@ SEED_HOSTS: list[dict[str, Any]] = [
     },
     {
         "key": "ekambi",
-        "clerk_user_id": "seed_host_ekambi",
+        "auth_user_id": "seed_host_ekambi",
         "email": "christelle.ekambi@ganitel.local",
         "display_name": "Christelle Ekambi",
         "avatar_url": "https://i.pravatar.cc/200?img=45",
@@ -74,7 +74,7 @@ SEED_HOSTS: list[dict[str, Any]] = [
     },
     {
         "key": "sow",
-        "clerk_user_id": "seed_host_sow",
+        "auth_user_id": "seed_host_sow",
         "email": "babacar.sow@ganitel.local",
         "display_name": "Babacar Sow",
         "avatar_url": "https://i.pravatar.cc/200?img=33",
@@ -82,7 +82,7 @@ SEED_HOSTS: list[dict[str, Any]] = [
     },
     {
         "key": "faye",
-        "clerk_user_id": "seed_host_faye",
+        "auth_user_id": "seed_host_faye",
         "email": "coumba.faye@ganitel.local",
         "display_name": "Coumba Faye",
         "avatar_url": "https://i.pravatar.cc/200?img=49",
@@ -90,7 +90,7 @@ SEED_HOSTS: list[dict[str, Any]] = [
     },
     {
         "key": "konan",
-        "clerk_user_id": "seed_host_konan",
+        "auth_user_id": "seed_host_konan",
         "email": "yao.konan@ganitel.local",
         "display_name": "Yao Konan",
         "avatar_url": "https://i.pravatar.cc/200?img=15",
@@ -511,11 +511,11 @@ async def _ensure_demo_hosts(session: Any) -> dict[str, User]:
     `key` so listings/experiences can look up their owner by host_key."""
     hosts_by_key: dict[str, User] = {}
     for cfg in SEED_HOSTS:
-        stmt = select(User).where(User.clerk_user_id == cfg["clerk_user_id"])
+        stmt = select(User).where(User.auth_user_id == cfg["auth_user_id"])
         user = (await session.execute(stmt)).scalar_one_or_none()
         if user is None:
             user = User(
-                clerk_user_id=cfg["clerk_user_id"],
+                auth_user_id=cfg["auth_user_id"],
                 email=cfg["email"],
                 phone=None,
                 display_name=cfg["display_name"],
@@ -584,15 +584,15 @@ async def _wipe_demo_data(session: Any, host_ids: list[Any]) -> tuple[int, int]:
 
 async def _all_seed_host_ids(session: Any, current_hosts: dict[str, User]) -> list[Any]:
     """Collect ids for every host that has ever been a seed host —
-    current SEED_HOSTS plus any LEGACY_HOST_CLERK_IDS still in the DB.
+    current SEED_HOSTS plus any LEGACY_HOST_AUTH_IDS still in the DB.
     Used by the wipe step so re-runs also clean up data left behind by
     earlier versions of this script."""
     ids: list[Any] = [u.id for u in current_hosts.values()]
-    if LEGACY_HOST_CLERK_IDS:
+    if LEGACY_HOST_AUTH_IDS:
         legacy = (
             (
                 await session.execute(
-                    select(User.id).where(User.clerk_user_id.in_(LEGACY_HOST_CLERK_IDS))
+                    select(User.id).where(User.auth_user_id.in_(LEGACY_HOST_AUTH_IDS))
                 )
             )
             .scalars()
