@@ -1,7 +1,7 @@
 """Application settings loaded from env via pydantic-settings.
 
 `get_settings()` is cached and is the single source of truth for
-config. Anything that varies by environment (DB URL, Clerk JWKS,
+config. Anything that varies by environment (DB URL, better-auth JWKS,
 CORS origins, payment provider keys, …) belongs here."""
 
 from functools import lru_cache
@@ -90,9 +90,9 @@ class Settings(PaymentSettings, ObjectStorageSettings, BaseSettings):
 
     CORS_ORIGINS: Annotated[list[str], NoDecode] = Field(default_factory=list)
 
-    # Clerk — backend only verifies tokens; sign-in/sign-up happen on Clerk.
-    CLERK_JWKS_URL: str | None = None
-    CLERK_ISSUER: str | None = None  # e.g. https://<instance>.clerk.accounts.dev
+    # better-auth — backend only verifies tokens; JWKS exposed by the jwt plugin.
+    BETTER_AUTH_JWKS_URL: str | None = None
+    BETTER_AUTH_ISSUER: str | None = None  # e.g. http://localhost:3000
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
