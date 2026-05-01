@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 /**
  * Two-pane layout shared by sign-in and sign-up.
  * Left pane: brand panel on the warm-dark primary.
- * Right pane: Clerk card centered on a neutral background.
+ * Right pane: auth form centered on a neutral background.
  */
 export function AuthLayout({
   title,

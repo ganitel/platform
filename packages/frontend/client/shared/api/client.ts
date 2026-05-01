@@ -1,9 +1,8 @@
 /**
  * Axios instance for the Ganitel backend.
  *
- * Auth: a Clerk session token is attached per-request via setAuthTokenGetter().
- * The getter is registered once at app boot from the Clerk provider, so any
- * call site can issue requests without thinking about tokens.
+ * Auth: a better-auth JWT is attached per-request via setAuthTokenGetter().
+ * The getter is registered once at app boot from entry.client.tsx.
  */
 
 import axios, { AxiosError, type AxiosInstance } from "axios";
