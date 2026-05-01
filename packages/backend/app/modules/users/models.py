@@ -1,5 +1,5 @@
 """SQLAlchemy ORM model for the `users` table — the local mirror of a
-Clerk-managed identity (linked by `clerk_user_id`). Contains profile
+better-auth identity (linked by `auth_user_id`). Contains profile
 fields, role flags (`is_host`, `is_admin`), language, and status."""
 
 from datetime import datetime
@@ -15,7 +15,7 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
-    clerk_user_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    auth_user_id: Mapped[str] = mapped_column(String(36), unique=True, nullable=False, index=True)
     email: Mapped[str | None] = mapped_column(String(255), index=True)
     phone: Mapped[str | None] = mapped_column(String(32), index=True)
     display_name: Mapped[str] = mapped_column(String(120), nullable=False)

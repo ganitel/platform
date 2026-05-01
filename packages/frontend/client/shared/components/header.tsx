@@ -1,6 +1,7 @@
-import { UserButton, useAuth, useClerk } from "@clerk/react-router";
 import { Link, NavLink } from "react-router";
 
+import { authClient } from "@/lib/auth-client";
+import { UserMenu } from "@/features/auth/components/user-menu";
 import { cn } from "@/shared/lib/cn";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { PillLink } from "@/shared/ui/pill-link";
@@ -14,10 +15,7 @@ const NAV_ITEMS: { to: string; labelKey: TranslationKey }[] = [
 
 export function Header() {
   const t = useT();
-  const { isLoaded, isSignedIn } = useAuth();
-  // Force a render once Clerk has booted; first paint (incl. SSR) shows
-  // the signed-out chrome to avoid a flash for anonymous visitors.
-  useClerk();
+  const { data: session, isPending } = authClient.useSession();
 
   return (
     <header className="sticky top-0 z-30 border-b border-ganitel-stroke-neutral bg-ganitel-paper/85 backdrop-blur supports-[backdrop-filter]:bg-ganitel-paper/70">
@@ -44,14 +42,14 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {isLoaded && isSignedIn ? (
-            <UserButton />
+          {!isPending && session ? (
+            <UserMenu session={session} />
           ) : (
             <>
               <PillLink to="/sign-in" size="sm" variant="outline">
                 {t("common.signin")}
               </PillLink>
-              <PillLink to="/sign-up" size="sm" variant="solid">
+              <PillLink to="/sign-in" size="sm" variant="solid">
                 {t("common.signup")}
               </PillLink>
             </>

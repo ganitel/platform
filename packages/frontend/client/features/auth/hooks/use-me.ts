@@ -1,16 +1,16 @@
-import { useAuth } from "@clerk/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { authClient } from "@/lib/auth-client";
 import { fetchMe, patchMe, type UpdateMePayload, type UserMe } from "@/features/auth/api/me";
 
 export const meKey = ["me"] as const;
 
 export function useMe() {
-  const { isSignedIn } = useAuth();
+  const { data: session } = authClient.useSession();
   return useQuery({
     queryKey: meKey,
     queryFn: fetchMe,
-    enabled: !!isSignedIn,
+    enabled: !!session,
   });
 }
 

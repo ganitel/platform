@@ -1,30 +1,34 @@
-"""User domain operations: mirror Clerk identities into our DB on first
-sign-in, look up by Clerk ID, and apply patches from `/me`. Routes
-stay thin; business rules live here."""
+"""User domain operations: mirror better-auth identities into our DB on
+first sign-in, look up by auth user ID, and apply patches from `/me`."""
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.auth import ClerkClaims
+from app.core.auth import AuthClaims
 from app.modules.users.models import User
 from app.modules.users.schemas import UpdateMe
 
 
-async def get_by_clerk_id(session: AsyncSession, clerk_user_id: str) -> User | None:
+async def get_by_auth_user_id(session: AsyncSession, auth_user_id: str) -> User | None:
     return (
-        await session.execute(select(User).where(User.clerk_user_id == clerk_user_id))
+        await session.execute(select(User).where(User.auth_user_id == auth_user_id))
     ).scalar_one_or_none()
 
 
-async def get_or_create_from_clerk(session: AsyncSession, claims: ClerkClaims) -> User:
-    user = await get_by_clerk_id(session, claims.user_id)
+async def get_or_create_from_jwt(session: AsyncSession, claims: AuthClaims) -> User:
+    user = await get_by_auth_user_id(session, claims.user_id)
     if user is not None:
         return user
+    # Phone-only users: name claim is the raw phone number — start blank so
+    # the frontend redirects them to /complete-profile to collect a real name.
+    raw_name = claims.name or ""
+    is_phone_placeholder = raw_name.startswith("+") or raw_name.replace(" ", "").isdigit()
+    display_name = "" if is_phone_placeholder else raw_name
     user = User(
-        clerk_user_id=claims.user_id,
+        auth_user_id=claims.user_id,
         email=claims.email,
         phone=claims.phone,
-        display_name=claims.name or f"User-{claims.user_id[-6:]}",
+        display_name=display_name,
     )
     session.add(user)
     await session.commit()

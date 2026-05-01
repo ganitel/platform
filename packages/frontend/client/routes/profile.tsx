@@ -1,11 +1,10 @@
 import { redirect } from "react-router";
-import { getAuth } from "@clerk/react-router/server";
 
 import type { Route } from "./+types/profile";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { ErrorState } from "@/shared/components/error-state";
-import { serverFetch } from "@/shared/api/server";
+import { getServerToken, serverFetch } from "@/shared/api/server";
 import type { UserMe } from "@/features/auth/api/me";
 
 export const meta: Route.MetaFunction = () => [
@@ -13,15 +12,12 @@ export const meta: Route.MetaFunction = () => [
   { name: "robots", content: "noindex" },
 ];
 
-export async function loader(args: Route.LoaderArgs) {
-  const auth = await getAuth(args);
-  if (!auth.userId) {
-    const redirectUrl = encodeURIComponent(
-      new URL(args.request.url).pathname + new URL(args.request.url).search,
-    );
-    return redirect(`/sign-in?redirect_url=${redirectUrl}`);
+export async function loader({ request }: Route.LoaderArgs) {
+  const token = await getServerToken(request);
+  if (!token) {
+    const url = new URL(request.url);
+    return redirect(`/sign-in?redirect_url=${encodeURIComponent(url.pathname + url.search)}`);
   }
-  const token = await auth.getToken();
   const me = await serverFetch<UserMe>("/me", { token });
   return { me };
 }

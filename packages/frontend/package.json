@@ -13,12 +13,14 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
-    "@clerk/react-router": "^3.1.7",
+    "@prelude.so/sdk": "^0.10.0",
     "@react-router/dev": "^7.14.2",
     "@react-router/node": "^7.14.2",
     "@react-router/serve": "^7.14.2",
     "axios": "^1.13.4",
+    "better-auth": "^1.6.9",
     "isbot": "^5.1.39",
+    "pg": "^8.20.0",
     "react-router": "^7.14.2",
     "zod": "^4.3.6"
   },
@@ -61,6 +63,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/eslint-plugin-jsx-a11y": "^6.10.1",
     "@types/node": "^25.6.0",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",

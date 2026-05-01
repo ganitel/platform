@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useAuth } from "@clerk/react-router";
+import { authClient } from "@/lib/auth-client";
 import { CheckCircle2 } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
@@ -33,7 +33,8 @@ interface Props {
 export function BookingPanel({ property }: Props) {
   const locale = useLocale();
   const t = useT();
-  const { isSignedIn } = useAuth();
+  const { data: session } = authClient.useSession();
+  const isSignedIn = !!session;
 
   const [range, setRange] = useState<DateRange | undefined>();
   const [guests, setGuests] = useState(1);

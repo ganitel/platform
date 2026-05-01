@@ -4,7 +4,6 @@
  * Routes call this; components must keep using `apiClient` from `./client`.
  * Why a separate helper:
  *   - relative URLs can't resolve at request time on the SSR server
- *   - we want explicit auth-token plumbing from Clerk's `getAuth()`
  *   - native fetch is plenty (no axios in the server bundle)
  *
  * The internal API URL is configurable via `INTERNAL_API_URL`. In prod, point
@@ -12,9 +11,26 @@
  * backend port for local work.
  */
 
+import { auth } from "@/lib/auth.server";
+
 const baseUrl = (
   globalThis.process?.env?.INTERNAL_API_URL ?? "http://localhost:8000/api"
 ).replace(/\/+$/, "");
+
+/**
+ * Retrieve a signed JWT for the current session without an HTTP round-trip.
+ * Returns null if the request is unauthenticated.
+ */
+export async function getServerToken(request: Request): Promise<string | null> {
+  const authUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+  const tokenReq = new Request(`${authUrl}/api/auth/token`, {
+    headers: { cookie: request.headers.get("cookie") ?? "" },
+  });
+  const res = await auth.handler(tokenReq);
+  if (!res.ok) return null;
+  const body = (await res.json()) as { token?: string };
+  return body.token ?? null;
+}
 
 export interface ServerFetchOptions extends RequestInit {
   /** Bearer token from `getAuth()` for routes that need an authenticated user. */

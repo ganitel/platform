@@ -1,11 +1,3 @@
-/**
- * Root document. Rendered on every request — server-side first, then hydrated.
- *
- * Owns:
- *   - `<html>` skeleton + `<Links>` (route stylesheets) and `<Meta>` (route SEO).
- *   - Cross-cutting providers (Clerk, TanStack Query, Tooltip).
- *   - The single `<Outlet />` where every route renders.
- */
 import {
   Links,
   Meta,
@@ -15,7 +7,6 @@ import {
   isRouteErrorResponse,
   useRouteError,
 } from "react-router";
-import { ClerkProvider } from "@clerk/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 
@@ -43,6 +34,7 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="fr">
       <head>
+        <meta charSet="utf-8" />
         <Meta />
         <Links />
       </head>
@@ -55,10 +47,7 @@ export function Layout({ children }: { children: ReactNode }) {
   );
 }
 
-export default function App({ loaderData }: Route.ComponentProps) {
-  // QueryClient lives per-request in module scope on the server, per-tab on the client.
-  // Using `useState` ensures a stable instance across re-renders without leaking
-  // between requests on the server (each request gets a fresh component tree).
+export default function App() {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -76,29 +65,17 @@ export default function App({ loaderData }: Route.ComponentProps) {
   const [locale] = useState<Locale>("fr");
 
   return (
-    <ClerkProvider
-      loaderData={loaderData}
-      publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
-      signInFallbackRedirectUrl="/"
-      signUpFallbackRedirectUrl="/"
-    >
-      <QueryClientProvider client={queryClient}>
-        <LocaleContext.Provider value={locale}>
-          <TooltipProvider delayDuration={200}>
-            <Outlet />
-            <Toaster />
-          </TooltipProvider>
-        </LocaleContext.Provider>
-      </QueryClientProvider>
-    </ClerkProvider>
+    <QueryClientProvider client={queryClient}>
+      <LocaleContext.Provider value={locale}>
+        <TooltipProvider delayDuration={200}>
+          <Outlet />
+          <Toaster />
+        </TooltipProvider>
+      </LocaleContext.Provider>
+    </QueryClientProvider>
   );
 }
 
-/**
- * Top-level error boundary.
- * Returns a route response (4xx/5xx) for HTTP-shaped errors, falls back to a
- * generic message for thrown JS errors. Rendered inside `Layout`.
- */
 export function ErrorBoundary() {
   const error = useRouteError();
   const isResponse = isRouteErrorResponse(error);
@@ -120,21 +97,4 @@ export function ErrorBoundary() {
       <p className="mt-2 text-sm text-ganitel-text-subtitle">{detail}</p>
     </main>
   );
-}
-
-/**
- * Clerk's middleware reads the session JWT once per request and stashes auth
- * state on the request context. It must run before any loader that calls
- * `rootAuthLoader` or `getAuth`. Gated behind RR's `v8_middleware` future
- * flag (see react-router.config.ts).
- *
- * Server-only imports — RR's vite plugin tree-shakes these out of the client
- * bundle because they're only referenced from server-only exports.
- */
-import { clerkMiddleware, rootAuthLoader } from "@clerk/react-router/server";
-
-export const middleware: Route.MiddlewareFunction[] = [clerkMiddleware()];
-
-export async function loader(args: Route.LoaderArgs) {
-  return rootAuthLoader(args);
 }
