@@ -4,9 +4,12 @@ Wires logging, lifespan (cleanup of DB pool), middleware
 (request id, access log, CORS), exception handlers, and the
 aggregated API router. The exported `app` is what uvicorn runs."""
 
+import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+from alembic import command
+from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -19,8 +22,14 @@ from app.core.middleware.access_log import AccessLogMiddleware
 from app.core.middleware.request_id import RequestIdMiddleware
 
 
+def _run_migrations() -> None:
+    cfg = Config("alembic.ini")
+    command.upgrade(cfg, "head")
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    await asyncio.get_event_loop().run_in_executor(None, _run_migrations)
     yield
     await dispose_engine()
 
