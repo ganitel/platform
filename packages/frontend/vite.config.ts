@@ -11,7 +11,9 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 3000,
     proxy: {
-      "/api": {
+      // /api/auth/* is handled by better-auth in the React Router SSR process.
+      // All other /api/* routes proxy to the FastAPI backend.
+      "^/api/(?!auth)": {
         target: "http://localhost:8000",
         changeOrigin: true,
         secure: false,
