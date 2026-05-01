@@ -3,8 +3,9 @@ import { NavLink } from "react-router";
 
 import { cn } from "@/shared/lib/cn";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
+import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 
-const items: { to: string; labelKey: TranslationKey; icon: typeof Compass }[] = [
+const ALL_ITEMS: { to: string; labelKey: TranslationKey; icon: typeof Compass }[] = [
   { to: "/", labelKey: "nav.home", icon: Home },
   { to: "/browse", labelKey: "nav.browse", icon: Compass },
   { to: "/bookings", labelKey: "nav.bookings", icon: Heart },
@@ -13,6 +14,11 @@ const items: { to: string; labelKey: TranslationKey; icon: typeof Compass }[] = 
 
 export function BottomNav() {
   const t = useT();
+  const isPrelaunch = usePrelaunch();
+
+  const items = isPrelaunch
+    ? ALL_ITEMS.filter(({ to }) => to === "/" || to === "/browse")
+    : ALL_ITEMS;
 
   return (
     <nav

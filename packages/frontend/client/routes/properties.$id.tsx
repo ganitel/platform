@@ -5,9 +5,11 @@ import type { Route } from "./+types/properties.$id";
 import { HostCard } from "@/features/properties/components/host-card";
 import { PropertyGallery } from "@/features/properties/components/property-gallery";
 import { BookingPanel } from "@/features/properties/components/booking-panel";
+import { WaitlistPanel } from "@/features/waitlist/components/waitlist-panel";
 import { ErrorState } from "@/shared/components/error-state";
 import { serverFetch, ServerApiError } from "@/shared/api/server";
 import { useT } from "@/shared/lib/i18n";
+import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 import type { PropertyDetail } from "@/features/properties/types";
 
 export const meta: Route.MetaFunction = ({ data }) => {
@@ -51,6 +53,7 @@ export default function PropertyDetailRoute({
 }: Route.ComponentProps) {
   const { property } = loaderData;
   const t = useT();
+  const isPrelaunch = usePrelaunch();
 
   return (
     <article className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8 md:py-12">
@@ -107,7 +110,17 @@ export default function PropertyDetailRoute({
         </section>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <BookingPanel property={property} />
+          {isPrelaunch ? (
+            <WaitlistPanel
+              itemId={property.id}
+              kind="property"
+              title={property.title}
+              price={property.base_price}
+              priceLabel={t("property.per_night")}
+            />
+          ) : (
+            <BookingPanel property={property} />
+          )}
         </aside>
       </div>
     </article>

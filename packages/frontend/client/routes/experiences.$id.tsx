@@ -1,0 +1,122 @@
+import { data } from "react-router";
+
+import type { Route } from "./+types/experiences.$id";
+
+import { HostCard } from "@/features/properties/components/host-card";
+import { PropertyGallery } from "@/features/properties/components/property-gallery";
+import { WaitlistPanel } from "@/features/waitlist/components/waitlist-panel";
+import { ErrorState } from "@/shared/components/error-state";
+import { serverFetch, ServerApiError } from "@/shared/api/server";
+import { useT } from "@/shared/lib/i18n";
+import type { ExperienceDetail } from "@/features/experiences/types";
+
+export const meta: Route.MetaFunction = ({ data }: { data: { experience: ExperienceDetail } | null }) => {
+  if (!data?.experience) {
+    return [{ title: "Expérience introuvable — Ganitel" }];
+  }
+  const e = data.experience;
+  const title = `${e.title} — ${e.city} | Ganitel`;
+  const description = e.description.slice(0, 160) || `${e.experience_type} à ${e.city}`;
+  const ogImage = e.cover_photo?.url;
+  return [
+    { title },
+    { name: "description", content: description },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+    { property: "og:type", content: "website" },
+    ...(ogImage
+      ? [
+          { property: "og:image", content: ogImage },
+          { name: "twitter:card", content: "summary_large_image" },
+          { name: "twitter:image", content: ogImage },
+        ]
+      : []),
+  ];
+};
+
+export async function loader({ params }: Route.LoaderArgs) {
+  try {
+    const experience = await serverFetch<ExperienceDetail>(`/experiences/${params.id}`);
+    return { experience };
+  } catch (e) {
+    if (e instanceof ServerApiError && e.status === 404) {
+      throw data("Expérience introuvable", { status: 404 });
+    }
+    throw e;
+  }
+}
+
+function formatDuration(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h} h`;
+  return `${h} h ${m} min`;
+}
+
+export default function ExperienceDetailRoute({
+  loaderData,
+}: Route.ComponentProps) {
+  const { experience } = loaderData;
+  const t = useT();
+
+  return (
+    <article className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8 md:py-12">
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-ganitel-secondary">
+            {experience.experience_type}
+          </p>
+          <h1 className="mt-2 font-infoma text-3xl text-ganitel-text-title md:text-4xl">
+            {experience.title}
+          </h1>
+          <p className="mt-1 text-sm text-ganitel-text-subtitle">
+            {experience.city}, {experience.country_code}
+          </p>
+        </div>
+      </header>
+
+      <PropertyGallery photos={experience.photos} title={experience.title} />
+
+      <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
+        <section className="space-y-10">
+          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-ganitel-text-subtitle">
+            <li>{experience.capacity} {t("property.guests")}</li>
+            <li>{formatDuration(experience.duration_minutes)}</li>
+          </ul>
+
+          {experience.description ? (
+            <div>
+              <h2 className="mb-3 text-lg font-semibold text-ganitel-text-title">
+                {t("property.description")}
+              </h2>
+              <p className="whitespace-pre-line text-sm leading-relaxed text-ganitel-text-subtitle">
+                {experience.description}
+              </p>
+            </div>
+          ) : null}
+
+          <HostCard host={experience.host} />
+        </section>
+
+        <aside className="lg:sticky lg:top-24 lg:self-start">
+          <WaitlistPanel
+            itemId={experience.id}
+            kind="experience"
+            title={experience.title}
+            price={experience.base_price}
+            priceLabel={t("experience.per_person")}
+          />
+        </aside>
+      </div>
+    </article>
+  );
+}
+
+export function ErrorBoundary() {
+  return (
+    <div className="mx-auto w-full max-w-3xl px-4 py-12 md:px-8">
+      <ErrorState />
+    </div>
+  );
+}

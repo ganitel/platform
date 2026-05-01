@@ -1,4 +1,4 @@
-import type { GeoPoint, MediaPublic, Money } from "@/features/properties/types";
+import type { GeoPoint, HostPublic, MediaPublic, Money } from "@/features/properties/types";
 
 export type ExperienceCancellationPolicy = "flexible" | "moderate" | "strict";
 export type ExperienceStatus = "draft" | "published" | "unlisted" | "removed";
@@ -15,6 +15,17 @@ export interface ExperiencePublic {
   base_price: Money;
   cover_photo: MediaPublic | null;
   distance_km: number | null;
+}
+
+export interface ExperienceDetail extends ExperiencePublic {
+  description: string;
+  cancellation_policy: ExperienceCancellationPolicy;
+  content_language: string;
+  status: ExperienceStatus;
+  host: HostPublic;
+  photos: MediaPublic[];
+  created_at: string;
+  published_at: string | null;
 }
 
 export interface ExperienceSearchOut {

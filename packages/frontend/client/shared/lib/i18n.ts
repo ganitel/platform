@@ -128,6 +128,40 @@ const dict = {
 
   "experience.per_person": { fr: "par personne", en: "per person" },
   "experience.duration": { fr: "durée", en: "duration" },
+
+  "prelaunch.banner": {
+    fr: "Bientôt disponible — inscrivez-vous pour être parmi les premiers.",
+    en: "Launching soon — sign up to be among the first.",
+  },
+  "prelaunch.banner.cta": { fr: "En savoir plus", en: "Learn more" },
+
+  "waitlist.badge": { fr: "Bientôt disponible", en: "Launching soon" },
+  "waitlist.headline": { fr: "Soyez parmi les premiers", en: "Be among the first" },
+  "waitlist.sub": {
+    fr: "Laissez votre e-mail et nous vous contacterons dès l'ouverture des réservations.",
+    en: "Leave your email and we'll reach out as soon as bookings open.",
+  },
+  "waitlist.email": { fr: "Votre adresse e-mail", en: "Your email address" },
+  "waitlist.name": { fr: "Votre prénom (optionnel)", en: "Your first name (optional)" },
+  "waitlist.submit": { fr: "M'inscrire", en: "Join the list" },
+  "waitlist.submitting": { fr: "Inscription…", en: "Joining…" },
+  "waitlist.success.title": { fr: "Vous êtes inscrit !", en: "You're on the list!" },
+  "waitlist.success.detail": {
+    fr: "Nous vous contacterons en priorité pour ce logement dès l'ouverture.",
+    en: "We'll reach out to you first when this place opens for bookings.",
+  },
+  "waitlist.success.detail.experience": {
+    fr: "Nous vous contacterons en priorité pour cette expérience dès l'ouverture.",
+    en: "We'll reach out to you first when this experience opens.",
+  },
+  "waitlist.error": {
+    fr: "Une erreur s'est produite. Réessayez.",
+    en: "Something went wrong. Please try again.",
+  },
+  "waitlist.price_note": {
+    fr: "À partir de",
+    en: "Starting from",
+  },
 } satisfies Dict;
 
 export type TranslationKey = keyof typeof dict;

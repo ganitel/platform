@@ -13,6 +13,9 @@ export const meta: Route.MetaFunction = () => [
 ];
 
 export async function loader({ request }: Route.LoaderArgs) {
+  if (import.meta.env.VITE_PRELAUNCH_MODE === "true") {
+    return redirect("/");
+  }
   const token = await getServerToken(request);
   if (!token) {
     const url = new URL(request.url);

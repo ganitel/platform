@@ -4,9 +4,10 @@ import { authClient } from "@/lib/auth-client";
 import { UserMenu } from "@/features/auth/components/user-menu";
 import { cn } from "@/shared/lib/cn";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
+import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 import { PillLink } from "@/shared/ui/pill-link";
 
-const NAV_ITEMS: { to: string; labelKey: TranslationKey }[] = [
+const NAV_ITEMS: { to: string; labelKey: TranslationKey; prelaunchOnly?: boolean }[] = [
   { to: "/", labelKey: "nav.home" },
   { to: "/browse", labelKey: "nav.browse" },
   { to: "/bookings", labelKey: "nav.bookings" },
@@ -15,10 +16,20 @@ const NAV_ITEMS: { to: string; labelKey: TranslationKey }[] = [
 
 export function Header() {
   const t = useT();
+  const isPrelaunch = usePrelaunch();
   const { data: session, isPending } = authClient.useSession();
+
+  const visibleItems = isPrelaunch
+    ? NAV_ITEMS.filter(({ to }) => to === "/" || to === "/browse")
+    : NAV_ITEMS;
 
   return (
     <header className="sticky top-0 z-30 border-b border-ganitel-stroke-neutral bg-ganitel-paper/85 backdrop-blur supports-[backdrop-filter]:bg-ganitel-paper/70">
+      {isPrelaunch && (
+        <div className="border-b border-ganitel-secondary/20 bg-ganitel-secondary/10 px-4 py-2 text-center text-xs text-ganitel-text-subtitle">
+          {t("prelaunch.banner")}
+        </div>
+      )}
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-6 px-4 md:px-8">
         <Link
           to="/"
@@ -34,7 +45,7 @@ export function Header() {
         </Link>
 
         <nav className="hidden gap-9 md:inline-flex" aria-label="Primary">
-          {NAV_ITEMS.map(({ to, labelKey }) => (
+          {visibleItems.map(({ to, labelKey }) => (
             <HeaderNavItem key={to} to={to}>
               {t(labelKey)}
             </HeaderNavItem>
