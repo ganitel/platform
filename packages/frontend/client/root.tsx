@@ -34,6 +34,7 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="fr">
       <head>
+        <meta charSet="utf-8" />
         <Meta />
         <Links />
       </head>
