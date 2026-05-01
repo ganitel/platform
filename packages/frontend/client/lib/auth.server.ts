@@ -10,6 +10,10 @@ const pool = new pg.Pool({
 
 const prelude = new Prelude({ apiToken: process.env.PRELUDE_API_KEY! });
 
+// Demo bypass: set DEMO_PHONE_NUMBER in .env to skip OTP for that number.
+// Accepts any code. Never set this in production.
+const DEMO_PHONE = process.env.DEMO_PHONE_NUMBER ?? null;
+
 export const auth = betterAuth({
   database: pool,
   baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
@@ -21,14 +25,14 @@ export const auth = betterAuth({
   },
   plugins: [
     phoneNumber({
-      // Prelude generates and owns the OTP — no custom code needed.
       sendOTP: async ({ phoneNumber: phone }) => {
+        if (DEMO_PHONE && phone === DEMO_PHONE) return;
         await prelude.verification.create({
           target: { type: "phone_number", value: phone },
         });
       },
-      // Delegate validation to Prelude instead of the verification table.
       verifyOTP: async ({ phoneNumber: phone, code }) => {
+        if (DEMO_PHONE && phone === DEMO_PHONE) return true;
         const result = await prelude.verification.check({
           target: { type: "phone_number", value: phone },
           code,
