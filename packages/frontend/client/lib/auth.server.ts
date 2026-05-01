@@ -2,36 +2,13 @@ import { betterAuth } from "better-auth";
 import { phoneNumber } from "better-auth/plugins/phone-number";
 import { jwt } from "better-auth/plugins/jwt";
 import pg from "pg";
+import Prelude from "@prelude.so/sdk";
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-async function twilioSendOtp(phone: string, code: string) {
-  const sid = process.env.TWILIO_ACCOUNT_SID!;
-  const token = process.env.TWILIO_AUTH_TOKEN!;
-  const from = process.env.TWILIO_PHONE_NUMBER!;
-  const creds = Buffer.from(`${sid}:${token}`).toString("base64");
-  const res = await fetch(
-    `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${creds}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        To: phone,
-        From: from,
-        Body: `Votre code Ganitel: ${code}`,
-      }).toString(),
-    },
-  );
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Twilio error ${res.status}: ${text}`);
-  }
-}
+const prelude = new Prelude({ apiToken: process.env.PRELUDE_API_KEY! });
 
 export const auth = betterAuth({
   database: pool,
@@ -44,8 +21,19 @@ export const auth = betterAuth({
   },
   plugins: [
     phoneNumber({
-      sendOTP: async ({ phoneNumber: phone, code }) => {
-        await twilioSendOtp(phone, code);
+      // Prelude generates and owns the OTP — no custom code needed.
+      sendOTP: async ({ phoneNumber: phone }) => {
+        await prelude.verification.create({
+          target: { type: "phone_number", value: phone },
+        });
+      },
+      // Delegate validation to Prelude instead of the verification table.
+      verifyOTP: async ({ phoneNumber: phone, code }) => {
+        const result = await prelude.verification.check({
+          target: { type: "phone_number", value: phone },
+          code,
+        });
+        return result.status === "success";
       },
       phoneNumberValidator: (phone) => /^\+\d{7,15}$/.test(phone),
       signUpOnVerification: {
