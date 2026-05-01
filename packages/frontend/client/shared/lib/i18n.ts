@@ -94,6 +94,21 @@ const dict = {
   "property.amenities": { fr: "Équipements", en: "Amenities" },
   "property.description": { fr: "À propos du logement", en: "About this place" },
 
+  "booking.nights": { fr: "nuits", en: "nights" },
+  "booking.check_in": { fr: "Arrivée", en: "Check-in" },
+  "booking.check_out": { fr: "Départ", en: "Check-out" },
+  "booking.select_dates": { fr: "Sélectionnez vos dates", en: "Select your dates" },
+  "booking.signin_to_book": { fr: "Connectez-vous pour réserver", en: "Sign in to book" },
+  "booking.confirmed": { fr: "Réservation confirmée !", en: "Booking confirmed!" },
+  "booking.confirmed.detail": {
+    fr: "Votre séjour est réservé. Consultez vos réservations pour les détails.",
+    en: "Your stay is booked. Check your bookings for details.",
+  },
+  "booking.conflict": {
+    fr: "Ces dates ne sont plus disponibles.",
+    en: "Those dates are no longer available.",
+  },
+
   "experience.per_person": { fr: "par personne", en: "per person" },
   "experience.duration": { fr: "durée", en: "duration" },
 } satisfies Dict;
