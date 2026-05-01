@@ -1,9 +1,9 @@
 import { redirect } from "react-router";
-import { getAuth } from "@clerk/react-router/server";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 
 import type { Route } from "./+types/bookings";
+import { getServerToken } from "@/shared/api/server";
 import { listMyBookings } from "@/features/bookings/api";
 import type { BookingPublic } from "@/features/bookings/types";
 import { formatMoney, formatDate } from "@/shared/lib/format";
@@ -14,10 +14,10 @@ export const meta: Route.MetaFunction = () => [
   { name: "robots", content: "noindex" },
 ];
 
-export async function loader(args: Route.LoaderArgs) {
-  const auth = await getAuth(args);
-  if (!auth.userId) {
-    const url = new URL(args.request.url);
+export async function loader({ request }: Route.LoaderArgs) {
+  const token = await getServerToken(request);
+  if (!token) {
+    const url = new URL(request.url);
     return redirect(`/sign-in?redirect_url=${encodeURIComponent(url.pathname + url.search)}`);
   }
   return null;

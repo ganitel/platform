@@ -55,11 +55,13 @@ def verify_jwt(token: str) -> AuthClaims:
         raise AuthError("token missing sub")
 
     # Phone users get a synthetic email (<digits>@phone.ganitel.local).
-    # Extract the real phone number from it; don't persist the synthetic address.
+    # Always strip it; if phoneNumber claim is present use that, otherwise
+    # extract the real number from the synthetic address.
     email: str | None = claims.get("email")
     phone: str | None = claims.get("phoneNumber")
-    if email and email.endswith("@phone.ganitel.local") and not phone:
-        phone = "+" + email.split("@")[0].lstrip("+")
+    if email and email.endswith("@phone.ganitel.local"):
+        if not phone:
+            phone = "+" + email.split("@")[0].lstrip("+")
         email = None
 
     return AuthClaims(

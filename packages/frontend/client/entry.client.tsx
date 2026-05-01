@@ -4,8 +4,16 @@ import { HydratedRouter } from "react-router/dom";
 
 import { setAuthTokenGetter } from "@/shared/api/client";
 
-// Hydrate on client. The Clerk session getter is bridged into the axios
-// client once Clerk has finished booting (it sets up `window.Clerk`).
+// Fetch the better-auth JWT from the /token endpoint on every request.
+// The endpoint validates the session cookie and returns a signed JWT; if the
+// user is not signed in it returns 401 and we return null.
+setAuthTokenGetter(async () => {
+  const res = await fetch("/api/auth/token", { credentials: "include" });
+  if (!res.ok) return null;
+  const { token } = (await res.json()) as { token?: string };
+  return token ?? null;
+});
+
 startTransition(() => {
   hydrateRoot(
     document,
@@ -14,11 +22,3 @@ startTransition(() => {
     </StrictMode>,
   );
 });
-
-if (typeof window !== "undefined") {
-  setAuthTokenGetter(async () => {
-    type ClerkLike = { session?: { getToken: () => Promise<string | null> } | null };
-    const clerk = (window as unknown as { Clerk?: ClerkLike }).Clerk;
-    return clerk?.session?.getToken() ?? null;
-  });
-}

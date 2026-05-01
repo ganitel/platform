@@ -1,24 +1,11 @@
-import { SignUp } from "@clerk/react-router";
+import { redirect } from "react-router";
 
-import type { Route } from "./+types/sign-up";
-
-import { AuthLayout } from "@/features/auth/components/auth-layout";
-import { clerkAppearance } from "@/features/auth/components/clerk-appearance";
-
-export const meta: Route.MetaFunction = () => [
-  { title: "Inscription — Ganitel" },
-  { name: "robots", content: "noindex" },
-];
+// better-auth's phone OTP and Google sign-in handle both new and existing
+// users in a single flow — there is no separate sign-up page.
+export function loader() {
+  return redirect("/sign-in");
+}
 
 export default function SignUpPage() {
-  return (
-    <AuthLayout title="Créer votre compte" subtitle="Inscription">
-      <SignUp
-        routing="path"
-        path="/sign-up"
-        signInUrl="/sign-in"
-        appearance={clerkAppearance}
-      />
-    </AuthLayout>
-  );
+  return null;
 }
