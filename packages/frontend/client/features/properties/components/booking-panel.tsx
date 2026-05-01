@@ -8,6 +8,7 @@ import { Calendar } from "@/shared/ui/calendar";
 import { Button } from "@/shared/ui/button";
 import { ApiError } from "@/shared/api/client";
 import { formatMoney, formatDate } from "@/shared/lib/format";
+import type { TranslationKey } from "@/shared/lib/i18n";
 import { useLocale, useT } from "@/shared/lib/i18n";
 import {
   createBooking,
@@ -37,7 +38,7 @@ export function BookingPanel({ property }: Props) {
   const [range, setRange] = useState<DateRange | undefined>();
   const [guests, setGuests] = useState(1);
   const [step, setStep] = useState<Step>("pick");
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<TranslationKey | null>(null);
 
   const checkin = range?.from;
   const checkout = range?.to;
@@ -52,7 +53,7 @@ export function BookingPanel({ property }: Props) {
   async function reserve() {
     if (!checkin || !checkout) return;
     setStep("booking");
-    setErrorMsg(null);
+    setErrorKey(null);
     try {
       const booking = await createBooking({
         property_id: property.id,
@@ -66,9 +67,13 @@ export function BookingPanel({ property }: Props) {
       }
       setStep("done");
     } catch (e) {
-      const msg =
-        e instanceof ApiError ? e.message : t("common.error.generic");
-      setErrorMsg(msg);
+      // Map known backend error patterns to localized strings rather than
+      // forwarding the raw English API message directly to the user.
+      const key: TranslationKey =
+        e instanceof ApiError && e.message.toLowerCase().includes("no longer available")
+          ? "booking.conflict"
+          : "common.error.generic";
+      setErrorKey(key);
       setStep("error");
     }
   }
@@ -124,7 +129,7 @@ export function BookingPanel({ property }: Props) {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            aria-label="Remove guest"
+            aria-label={t("booking.remove_guest")}
             onClick={() => setGuests((g) => Math.max(1, g - 1))}
             disabled={guests <= 1}
             className="flex h-8 w-8 items-center justify-center rounded-full border border-ganitel-stroke-neutral text-base disabled:opacity-40"
@@ -134,7 +139,7 @@ export function BookingPanel({ property }: Props) {
           <span className="w-4 text-center text-sm font-medium">{guests}</span>
           <button
             type="button"
-            aria-label="Add guest"
+            aria-label={t("booking.add_guest")}
             onClick={() => setGuests((g) => Math.min(property.capacity, g + 1))}
             disabled={guests >= property.capacity}
             className="flex h-8 w-8 items-center justify-center rounded-full border border-ganitel-stroke-neutral text-base disabled:opacity-40"
@@ -156,7 +161,7 @@ export function BookingPanel({ property }: Props) {
             </span>
           </div>
           <div className="flex justify-between font-semibold text-ganitel-text-title">
-            <span>Total</span>
+            <span>{t("booking.total")}</span>
             <span>
               {formatMoney({ amount: String(subtotal), currency }, locale)}
             </span>
@@ -164,8 +169,8 @@ export function BookingPanel({ property }: Props) {
         </div>
       )}
 
-      {step === "error" && errorMsg && (
-        <p className="text-xs text-red-500">{errorMsg}</p>
+      {step === "error" && errorKey && (
+        <p className="text-xs text-red-500">{t(errorKey)}</p>
       )}
 
       {isSignedIn ? (

@@ -7,7 +7,7 @@ import type { Route } from "./+types/bookings";
 import { listMyBookings } from "@/features/bookings/api";
 import type { BookingPublic } from "@/features/bookings/types";
 import { formatMoney, formatDate } from "@/shared/lib/format";
-import { useLocale, useT } from "@/shared/lib/i18n";
+import { useLocale, useT, type TranslationKey } from "@/shared/lib/i18n";
 
 export const meta: Route.MetaFunction = () => [
   { title: "Mes réservations — Ganitel" },
@@ -23,14 +23,14 @@ export async function loader(args: Route.LoaderArgs) {
   return null;
 }
 
-const STATUS_LABEL: Record<BookingPublic["status"], { fr: string; en: string }> = {
-  pending_payment: { fr: "En attente de paiement", en: "Pending payment" },
-  confirmed: { fr: "Confirmée", en: "Confirmed" },
-  cancelled_by_guest: { fr: "Annulée par vous", en: "Cancelled by you" },
-  cancelled_by_host: { fr: "Annulée par l'hôte", en: "Cancelled by host" },
-  cancelled_expired: { fr: "Expirée", en: "Expired" },
-  completed: { fr: "Terminée", en: "Completed" },
-  disputed: { fr: "En litige", en: "Disputed" },
+const STATUS_I18N_KEY: Record<BookingPublic["status"], TranslationKey> = {
+  pending_payment: "booking.status.pending_payment",
+  confirmed: "booking.status.confirmed",
+  cancelled_by_guest: "booking.status.cancelled_by_guest",
+  cancelled_by_host: "booking.status.cancelled_by_host",
+  cancelled_expired: "booking.status.cancelled_expired",
+  completed: "booking.status.completed",
+  disputed: "booking.status.disputed",
 };
 
 const STATUS_COLOR: Record<BookingPublic["status"], string> = {
@@ -45,8 +45,10 @@ const STATUS_COLOR: Record<BookingPublic["status"], string> = {
 
 function BookingCard({ booking }: { booking: BookingPublic }) {
   const locale = useLocale();
-  const label = STATUS_LABEL[booking.status][locale];
+  const t = useT();
   const color = STATUS_COLOR[booking.status];
+  const nightKey = booking.nights === 1 ? "booking.night" : "booking.nights";
+  const guestKey = booking.guest_count === 1 ? "booking.guest" : "property.guests";
 
   return (
     <li className="rounded-2xl border border-ganitel-stroke-neutral bg-ganitel-background-secondary p-5 space-y-3">
@@ -57,12 +59,11 @@ function BookingCard({ booking }: { booking: BookingPublic }) {
             {formatDate(booking.check_out_date, locale)}
           </p>
           <p className="text-xs text-ganitel-text-subtitle">
-            {booking.nights} {booking.nights === 1 ? "nuit" : "nuits"} ·{" "}
-            {booking.guest_count} voyageur{booking.guest_count > 1 ? "s" : ""}
+            {booking.nights} {t(nightKey)} · {booking.guest_count} {t(guestKey)}
           </p>
         </div>
         <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${color}`}>
-          {label}
+          {t(STATUS_I18N_KEY[booking.status])}
         </span>
       </div>
       <div className="flex items-center justify-between border-t border-ganitel-stroke-neutral pt-3">
@@ -73,7 +74,7 @@ function BookingCard({ booking }: { booking: BookingPublic }) {
           to={`/properties/${booking.property_id}`}
           className="text-xs text-ganitel-secondary hover:underline"
         >
-          Voir le logement →
+          {t("booking.view_property")} →
         </Link>
       </div>
     </li>
@@ -82,7 +83,6 @@ function BookingCard({ booking }: { booking: BookingPublic }) {
 
 export default function MyBookingsRoute() {
   const t = useT();
-  const locale = useLocale();
   const { data: bookings, isLoading, isError } = useQuery({
     queryKey: ["bookings", "me"],
     queryFn: listMyBookings,
@@ -104,11 +104,7 @@ export default function MyBookingsRoute() {
 
       {bookings && bookings.length === 0 && (
         <div className="mt-10 space-y-4 text-center">
-          <p className="text-sm text-ganitel-text-subtitle">
-            {locale === "fr"
-              ? "Vous n'avez pas encore de réservation."
-              : "You have no bookings yet."}
-          </p>
+          <p className="text-sm text-ganitel-text-subtitle">{t("booking.empty")}</p>
           <Link
             to="/browse"
             className="inline-block rounded-xl bg-ganitel-primary px-5 py-2.5 text-sm font-medium text-ganitel-text-button hover:bg-ganitel-primary/90"
