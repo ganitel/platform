@@ -94,6 +94,38 @@ const dict = {
   "property.amenities": { fr: "Équipements", en: "Amenities" },
   "property.description": { fr: "À propos du logement", en: "About this place" },
 
+  "booking.nights": { fr: "nuits", en: "nights" },
+  "booking.check_in": { fr: "Arrivée", en: "Check-in" },
+  "booking.check_out": { fr: "Départ", en: "Check-out" },
+  "booking.select_dates": { fr: "Sélectionnez vos dates", en: "Select your dates" },
+  "booking.signin_to_book": { fr: "Connectez-vous pour réserver", en: "Sign in to book" },
+  "booking.confirmed": { fr: "Réservation confirmée !", en: "Booking confirmed!" },
+  "booking.confirmed.detail": {
+    fr: "Votre séjour est réservé. Consultez vos réservations pour les détails.",
+    en: "Your stay is booked. Check your bookings for details.",
+  },
+  "booking.conflict": {
+    fr: "Ces dates ne sont plus disponibles.",
+    en: "Those dates are no longer available.",
+  },
+  "booking.status.pending_payment": { fr: "En attente de paiement", en: "Pending payment" },
+  "booking.status.confirmed": { fr: "Confirmée", en: "Confirmed" },
+  "booking.status.cancelled_by_guest": { fr: "Annulée par vous", en: "Cancelled by you" },
+  "booking.status.cancelled_by_host": { fr: "Annulée par l'hôte", en: "Cancelled by host" },
+  "booking.status.cancelled_expired": { fr: "Expirée", en: "Expired" },
+  "booking.status.completed": { fr: "Terminée", en: "Completed" },
+  "booking.status.disputed": { fr: "En litige", en: "Disputed" },
+  "booking.night": { fr: "nuit", en: "night" },
+  "booking.guest": { fr: "voyageur", en: "guest" },
+  "booking.view_property": { fr: "Voir le logement", en: "View property" },
+  "booking.empty": {
+    fr: "Vous n'avez pas encore de réservation.",
+    en: "You have no bookings yet.",
+  },
+  "booking.total": { fr: "Total", en: "Total" },
+  "booking.remove_guest": { fr: "Retirer un voyageur", en: "Remove guest" },
+  "booking.add_guest": { fr: "Ajouter un voyageur", en: "Add guest" },
+
   "experience.per_person": { fr: "par personne", en: "per person" },
   "experience.duration": { fr: "durée", en: "duration" },
 } satisfies Dict;

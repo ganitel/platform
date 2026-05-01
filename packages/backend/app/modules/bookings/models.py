@@ -40,6 +40,9 @@ ACTIVE_STATUSES = (BookingStatus.PENDING_PAYMENT, BookingStatus.CONFIRMED)
 
 class Booking(Base):
     __tablename__ = "bookings"
+    # DB-level date-overlap exclusion (GiST) is in migration 0003 as raw SQL
+    # (bookings_no_overlap) — btree_gist is required and SA can't declare it
+    # portably. service.create_booking catches the resulting IntegrityError.
     __table_args__ = (
         CheckConstraint("check_out_date > check_in_date", name="ck_bookings_dates_ordered"),
         CheckConstraint("guest_count >= 1", name="ck_bookings_guest_count_positive"),

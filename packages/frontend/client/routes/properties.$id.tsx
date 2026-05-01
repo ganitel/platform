@@ -4,11 +4,10 @@ import type { Route } from "./+types/properties.$id";
 
 import { HostCard } from "@/features/properties/components/host-card";
 import { PropertyGallery } from "@/features/properties/components/property-gallery";
-import { Button } from "@/shared/ui/button";
+import { BookingPanel } from "@/features/properties/components/booking-panel";
 import { ErrorState } from "@/shared/components/error-state";
-import { formatMoney } from "@/shared/lib/format";
 import { serverFetch, ServerApiError } from "@/shared/api/server";
-import { useLocale, useT } from "@/shared/lib/i18n";
+import { useT } from "@/shared/lib/i18n";
 import type { PropertyDetail } from "@/features/properties/types";
 
 export const meta: Route.MetaFunction = ({ data }) => {
@@ -51,9 +50,7 @@ export default function PropertyDetailRoute({
   loaderData,
 }: Route.ComponentProps) {
   const { property } = loaderData;
-  const locale = useLocale();
   const t = useT();
-  const price = formatMoney(property.base_price, locale);
 
   return (
     <article className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8 md:py-12">
@@ -110,20 +107,7 @@ export default function PropertyDetailRoute({
         </section>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-2xl border border-ganitel-stroke-neutral bg-ganitel-background-secondary p-6 shadow-sm">
-            <p className="text-sm text-ganitel-text-subtitle">
-              <span className="text-2xl font-semibold text-ganitel-text-title">
-                {price}
-              </span>
-              <span> · {t("property.per_night")}</span>
-            </p>
-            <Button
-              type="button"
-              className="mt-5 h-12 w-full rounded-xl bg-ganitel-primary text-ganitel-text-button hover:bg-ganitel-primary/90"
-            >
-              {t("property.book")}
-            </Button>
-          </div>
+          <BookingPanel property={property} />
         </aside>
       </div>
     </article>
