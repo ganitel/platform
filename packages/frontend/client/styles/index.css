@@ -168,7 +168,6 @@
     @apply bg-white text-ganitel-text-title font-sans;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Prevent overscroll bounce on iOS from creating dead zones */
     overscroll-behavior-y: contain;
   }
 
@@ -177,14 +176,11 @@
     word-break: break-word;
   }
 
-  /* Remove blue tap flash on mobile browsers */
   :where(a, button, [role="button"], input, select, textarea, label) {
     -webkit-tap-highlight-color: transparent;
-    /* Eliminate 300ms double-tap delay on interactive elements */
     touch-action: manipulation;
   }
 
-  /* Hide scrollbar on mobile carousels while keeping scroll behavior */
   .scrollbar-none {
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -221,7 +217,6 @@
     text-wrap: balance;
   }
 
-  /* Safe-area padding utilities for notched/gestures-bar devices */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }

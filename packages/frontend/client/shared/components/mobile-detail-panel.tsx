@@ -17,11 +17,6 @@ interface Props {
   children: ReactNode;
 }
 
-/**
- * Sticky bottom bar shown on mobile/tablet for property and experience detail
- * pages. Displays the price + a CTA that opens a bottom-sheet drawer with the
- * full booking or waitlist panel inside.
- */
 export function MobileDetailPanel({
   priceText,
   priceLabel,

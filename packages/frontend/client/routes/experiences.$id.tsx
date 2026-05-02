@@ -116,7 +116,6 @@ export default function ExperienceDetailRoute({
             <HostCard host={experience.host} />
           </section>
 
-          {/* Sidebar: only visible on large screens. Mobile users get the sticky bar below. */}
           <aside className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
             {panel}
           </aside>

@@ -20,10 +20,8 @@ export function PropertyGallery({ photos, title }: Props) {
 
   return (
     <>
-      {/* Mobile: horizontal snap carousel — all photos, swipeable */}
       <MobileGallery photos={photos} title={title} />
 
-      {/* Tablet / Desktop: masonry-style 4-column grid */}
       <div className="hidden overflow-hidden rounded-3xl sm:grid sm:grid-cols-4 sm:gap-2">
         <img
           src={hero.url}
@@ -75,7 +73,6 @@ function MobileGallery({ photos, title }: { photos: MediaPublic[]; title: string
         ))}
       </div>
 
-      {/* Photo counter badge */}
       {photos.length > 1 && (
         <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
           <Camera className="size-3" aria-hidden />
@@ -85,7 +82,6 @@ function MobileGallery({ photos, title }: { photos: MediaPublic[]; title: string
         </div>
       )}
 
-      {/* Scroll progress dots */}
       {photos.length > 1 && photos.length <= 8 && (
         <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1" aria-hidden>
           {photos.map((_, i) => (

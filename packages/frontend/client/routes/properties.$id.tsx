@@ -75,14 +75,6 @@ export default function PropertyDetailRoute({
 
   return (
     <>
-      {/*
-       * Extra bottom padding on mobile/tablet so the fixed MobileDetailPanel
-       * doesn't obscure the last section of content.
-       * pt-8 md:pt-12 — consistent vertical rhythm
-       * pb-8 md:pb-32 — on tablet the main element has no padding-bottom, so
-       *   we add enough here to clear the ~68px mobile panel.
-       * lg:pb-12 — no panel on desktop, normal padding.
-       */}
       <article className="mx-auto w-full max-w-6xl px-4 pt-8 pb-8 md:px-8 md:pt-12 md:pb-32 lg:pb-12">
         <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -136,7 +128,6 @@ export default function PropertyDetailRoute({
             <HostCard host={property.host} />
           </section>
 
-          {/* Sidebar: only visible on large screens. Mobile users get the sticky bar below. */}
           <aside className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
             {panel}
           </aside>

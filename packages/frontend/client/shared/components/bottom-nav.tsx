@@ -24,8 +24,6 @@ export function BottomNav() {
   const isPrelaunch = usePrelaunch();
   const { pathname } = useLocation();
 
-  // Detail pages have their own sticky CTA bar — bottom nav would clutter and
-  // compete with it, so we hide it there entirely.
   if (DETAIL_PAGE_RE.test(pathname)) return null;
 
   const items = isPrelaunch
