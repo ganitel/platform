@@ -60,7 +60,13 @@ export function Header() {
               <PillLink to="/sign-in" size="sm" variant="outline">
                 {t("common.signin")}
               </PillLink>
-              <PillLink to="/sign-in" size="sm" variant="solid">
+              {/* Second button hidden on very small screens to prevent overflow */}
+              <PillLink
+                to="/sign-in"
+                size="sm"
+                variant="solid"
+                className="hidden sm:inline-flex"
+              >
                 {t("common.signup")}
               </PillLink>
             </>

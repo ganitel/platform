@@ -5,9 +5,11 @@ import type { Route } from "./+types/experiences.$id";
 import { HostCard } from "@/features/properties/components/host-card";
 import { PropertyGallery } from "@/features/properties/components/property-gallery";
 import { WaitlistPanel } from "@/features/waitlist/components/waitlist-panel";
+import { MobileDetailPanel } from "@/shared/components/mobile-detail-panel";
 import { ErrorState } from "@/shared/components/error-state";
 import { serverFetch, ServerApiError } from "@/shared/api/server";
-import { useT } from "@/shared/lib/i18n";
+import { formatMoney } from "@/shared/lib/format";
+import { useLocale, useT } from "@/shared/lib/i18n";
 import type { ExperienceDetail } from "@/features/experiences/types";
 
 export const meta: Route.MetaFunction = ({ data }: { data: { experience: ExperienceDetail } | null | undefined }) => {
@@ -59,57 +61,78 @@ export default function ExperienceDetailRoute({
 }: Route.ComponentProps) {
   const { experience } = loaderData;
   const t = useT();
+  const locale = useLocale();
+
+  const priceText = formatMoney(experience.base_price, locale);
+  const priceLabel = t("experience.per_person");
+
+  const panel = (
+    <WaitlistPanel
+      itemId={experience.id}
+      kind="experience"
+      title={experience.title}
+      price={experience.base_price}
+      priceLabel={priceLabel}
+    />
+  );
 
   return (
-    <article className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8 md:py-12">
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-ganitel-secondary">
-            {experience.experience_type}
-          </p>
-          <h1 className="mt-2 font-infoma text-3xl text-ganitel-text-title md:text-4xl">
-            {experience.title}
-          </h1>
-          <p className="mt-1 text-sm text-ganitel-text-subtitle">
-            {experience.city}, {experience.country_code}
-          </p>
+    <>
+      <article className="mx-auto w-full max-w-6xl px-4 pt-8 pb-8 md:px-8 md:pt-12 md:pb-32 lg:pb-12">
+        <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-ganitel-secondary">
+              {experience.experience_type}
+            </p>
+            <h1 className="mt-2 font-infoma text-3xl text-ganitel-text-title md:text-4xl">
+              {experience.title}
+            </h1>
+            <p className="mt-1 text-sm text-ganitel-text-subtitle">
+              {experience.city}, {experience.country_code}
+            </p>
+          </div>
+        </header>
+
+        <PropertyGallery photos={experience.photos} title={experience.title} />
+
+        <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
+          <section className="space-y-10">
+            <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-ganitel-text-subtitle">
+              <li>{experience.capacity} {t("property.guests")}</li>
+              <li>{formatDuration(experience.duration_minutes)}</li>
+            </ul>
+
+            {experience.description ? (
+              <div>
+                <h2 className="mb-3 text-lg font-semibold text-ganitel-text-title">
+                  {t("property.description")}
+                </h2>
+                <p className="whitespace-pre-line text-sm leading-relaxed text-ganitel-text-subtitle">
+                  {experience.description}
+                </p>
+              </div>
+            ) : null}
+
+            <HostCard host={experience.host} />
+          </section>
+
+          {/* Sidebar: only visible on large screens. Mobile users get the sticky bar below. */}
+          <aside className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
+            {panel}
+          </aside>
         </div>
-      </header>
+      </article>
 
-      <PropertyGallery photos={experience.photos} title={experience.title} />
-
-      <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
-        <section className="space-y-10">
-          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-ganitel-text-subtitle">
-            <li>{experience.capacity} {t("property.guests")}</li>
-            <li>{formatDuration(experience.duration_minutes)}</li>
-          </ul>
-
-          {experience.description ? (
-            <div>
-              <h2 className="mb-3 text-lg font-semibold text-ganitel-text-title">
-                {t("property.description")}
-              </h2>
-              <p className="whitespace-pre-line text-sm leading-relaxed text-ganitel-text-subtitle">
-                {experience.description}
-              </p>
-            </div>
-          ) : null}
-
-          <HostCard host={experience.host} />
-        </section>
-
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <WaitlistPanel
-            itemId={experience.id}
-            kind="experience"
-            title={experience.title}
-            price={experience.base_price}
-            priceLabel={t("experience.per_person")}
-          />
-        </aside>
-      </div>
-    </article>
+      {/* Sticky bottom bar on mobile / tablet */}
+      <MobileDetailPanel
+        priceText={priceText}
+        priceLabel={priceLabel}
+        ctaLabel={t("waitlist.submit")}
+        drawerTitle={experience.title}
+      >
+        {panel}
+      </MobileDetailPanel>
+    </>
   );
 }
 
