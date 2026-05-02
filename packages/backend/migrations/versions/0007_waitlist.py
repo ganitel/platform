@@ -25,7 +25,6 @@ def upgrade() -> None:
         sa.Column("name", sa.String(120), nullable=True),
         sa.Column("property_id", sa.Uuid(), nullable=True),
         sa.Column("experience_id", sa.Uuid(), nullable=True),
-        sa.Column("context", sa.Text(), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),

@@ -5,11 +5,16 @@ import { cn } from "@/shared/lib/cn";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 
-const ALL_ITEMS: { to: string; labelKey: TranslationKey; icon: typeof Compass }[] = [
+const ALL_ITEMS: {
+  to: string;
+  labelKey: TranslationKey;
+  icon: typeof Compass;
+  hideInPrelaunch?: boolean;
+}[] = [
   { to: "/", labelKey: "nav.home", icon: Home },
   { to: "/browse", labelKey: "nav.browse", icon: Compass },
-  { to: "/bookings", labelKey: "nav.bookings", icon: Heart },
-  { to: "/profile", labelKey: "nav.profile", icon: UserIcon },
+  { to: "/bookings", labelKey: "nav.bookings", icon: Heart, hideInPrelaunch: true },
+  { to: "/profile", labelKey: "nav.profile", icon: UserIcon, hideInPrelaunch: true },
 ];
 
 export function BottomNav() {
@@ -17,7 +22,7 @@ export function BottomNav() {
   const isPrelaunch = usePrelaunch();
 
   const items = isPrelaunch
-    ? ALL_ITEMS.filter(({ to }) => to === "/" || to === "/browse")
+    ? ALL_ITEMS.filter(({ hideInPrelaunch }) => !hideInPrelaunch)
     : ALL_ITEMS;
 
   return (

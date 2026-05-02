@@ -10,13 +10,13 @@ import { serverFetch, ServerApiError } from "@/shared/api/server";
 import { useT } from "@/shared/lib/i18n";
 import type { ExperienceDetail } from "@/features/experiences/types";
 
-export const meta: Route.MetaFunction = ({ data }: { data: { experience: ExperienceDetail } | null }) => {
+export const meta: Route.MetaFunction = ({ data }: { data: { experience: ExperienceDetail } | null | undefined }) => {
   if (!data?.experience) {
     return [{ title: "Expérience introuvable — Ganitel" }];
   }
   const e = data.experience;
   const title = `${e.title} — ${e.city} | Ganitel`;
-  const description = e.description.slice(0, 160) || `${e.experience_type} à ${e.city}`;
+  const description = e.description?.slice(0, 160) || `${e.experience_type} à ${e.city}`;
   const ogImage = e.cover_photo?.url;
   return [
     { title },

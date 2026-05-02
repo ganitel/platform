@@ -27,15 +27,10 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> Waitlist
 async def _find_existing(
     session: AsyncSession, body: WaitlistEntryIn
 ) -> WaitlistEntry | None:
-    stmt = select(WaitlistEntry).where(WaitlistEntry.email == body.email)
-    if body.property_id is not None:
-        stmt = stmt.where(WaitlistEntry.property_id == body.property_id)
-    elif body.experience_id is not None:
-        stmt = stmt.where(WaitlistEntry.experience_id == body.experience_id)
-    else:
-        stmt = stmt.where(
-            WaitlistEntry.property_id.is_(None),
-            WaitlistEntry.experience_id.is_(None),
-        )
+    stmt = select(WaitlistEntry).where(
+        WaitlistEntry.email == body.email,
+        WaitlistEntry.property_id == body.property_id,
+        WaitlistEntry.experience_id == body.experience_id,
+    )
     result = await session.execute(stmt)
     return result.scalar_one_or_none()

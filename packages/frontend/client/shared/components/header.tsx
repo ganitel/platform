@@ -7,11 +7,11 @@ import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 import { PillLink } from "@/shared/ui/pill-link";
 
-const NAV_ITEMS: { to: string; labelKey: TranslationKey; prelaunchOnly?: boolean }[] = [
+const NAV_ITEMS: { to: string; labelKey: TranslationKey; hideInPrelaunch?: boolean }[] = [
   { to: "/", labelKey: "nav.home" },
   { to: "/browse", labelKey: "nav.browse" },
-  { to: "/bookings", labelKey: "nav.bookings" },
-  { to: "/profile", labelKey: "nav.profile" },
+  { to: "/bookings", labelKey: "nav.bookings", hideInPrelaunch: true },
+  { to: "/profile", labelKey: "nav.profile", hideInPrelaunch: true },
 ];
 
 export function Header() {
@@ -20,7 +20,7 @@ export function Header() {
   const { data: session, isPending } = authClient.useSession();
 
   const visibleItems = isPrelaunch
-    ? NAV_ITEMS.filter(({ to }) => to === "/" || to === "/browse")
+    ? NAV_ITEMS.filter(({ hideInPrelaunch }) => !hideInPrelaunch)
     : NAV_ITEMS;
 
   return (

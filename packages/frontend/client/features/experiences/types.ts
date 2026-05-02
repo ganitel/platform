@@ -18,7 +18,7 @@ export interface ExperiencePublic {
 }
 
 export interface ExperienceDetail extends ExperiencePublic {
-  description: string;
+  description: string | null;
   cancellation_policy: ExperienceCancellationPolicy;
   content_language: string;
   status: ExperienceStatus;
