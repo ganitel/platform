@@ -8,7 +8,19 @@ const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-const prelude = new Prelude({ apiToken: process.env.PRELUDE_API_KEY! });
+// Lazily instantiated so a missing key doesn't crash the server on startup —
+// only throws when phone OTP is actually attempted without the key configured.
+let _prelude: Prelude | null = null;
+function getPrelude(): Prelude {
+  if (!_prelude) {
+    const apiToken = process.env.PRELUDE_API_KEY;
+    if (!apiToken) {
+      throw new Error("PRELUDE_API_KEY is not set — cannot send phone OTP");
+    }
+    _prelude = new Prelude({ apiToken });
+  }
+  return _prelude;
+}
 
 // Demo bypass: set DEMO_PHONE_NUMBER in .env to skip OTP for that number.
 // Accepts any code. Never set this in production.
@@ -27,13 +39,13 @@ export const auth = betterAuth({
     phoneNumber({
       sendOTP: async ({ phoneNumber: phone }) => {
         if (DEMO_PHONE && phone === DEMO_PHONE) return;
-        await prelude.verification.create({
+        await getPrelude().verification.create({
           target: { type: "phone_number", value: phone },
         });
       },
       verifyOTP: async ({ phoneNumber: phone, code }) => {
         if (DEMO_PHONE && phone === DEMO_PHONE) return true;
-        const result = await prelude.verification.check({
+        const result = await getPrelude().verification.check({
           target: { type: "phone_number", value: phone },
           code,
         });
