@@ -23,4 +23,5 @@ export default [
   route("sign-in", "routes/sign-in.tsx"),
   route("sign-up", "routes/sign-up.tsx"),
   route("complete-profile", "routes/complete-profile.tsx"),
+  route("join", "routes/join.tsx"),
 ] satisfies RouteConfig;

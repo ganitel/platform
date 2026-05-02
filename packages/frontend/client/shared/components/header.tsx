@@ -55,12 +55,15 @@ export function Header() {
         <div className="flex items-center gap-2">
           {!isPending && session ? (
             <UserMenu session={session} />
+          ) : isPrelaunch ? (
+            <PillLink to="/join" size="sm" variant="solid">
+              {t("join.submit")}
+            </PillLink>
           ) : (
             <>
               <PillLink to="/sign-in" size="sm" variant="outline">
                 {t("common.signin")}
               </PillLink>
-              {/* Second button hidden on very small screens to prevent overflow */}
               <PillLink
                 to="/sign-in"
                 size="sm"

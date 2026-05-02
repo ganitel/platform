@@ -5,6 +5,10 @@ interface WaitlistPayload {
   name?: string;
   property_id?: string;
   experience_id?: string;
+  interest?: "renting" | "experiences" | "both";
+  headcount?: number;
+  budget_range?: string;
+  notes?: string;
 }
 
 export async function joinWaitlist(payload: WaitlistPayload): Promise<void> {

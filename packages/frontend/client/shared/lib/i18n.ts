@@ -162,6 +162,36 @@ const dict = {
     fr: "À partir de",
     en: "Starting from",
   },
+
+  "join.subtitle": { fr: "Liste d'attente", en: "Waitlist" },
+  "join.title": { fr: "Rejoignez Ganitel", en: "Join Ganitel" },
+  "join.email": { fr: "Votre adresse e-mail", en: "Your email address" },
+  "join.interest.label": { fr: "Je suis intéressé par", en: "I'm interested in" },
+  "join.interest.renting": { fr: "Locations", en: "Rentals" },
+  "join.interest.experiences": { fr: "Expériences", en: "Experiences" },
+  "join.headcount.label": { fr: "Pour combien de personnes ?", en: "For how many people?" },
+  "join.headcount.placeholder": { fr: "Ex. 2", en: "e.g. 2" },
+  "join.budget.label": { fr: "Budget estimé", en: "Estimated budget" },
+  "join.budget.placeholder": { fr: "Sélectionnez une tranche", en: "Select a range" },
+  "join.budget.under_50k": { fr: "Moins de 50 000 XAF", en: "Under 50,000 XAF" },
+  "join.budget.50k_150k": { fr: "50 000 – 150 000 XAF", en: "50,000 – 150,000 XAF" },
+  "join.budget.150k_300k": { fr: "150 000 – 300 000 XAF", en: "150,000 – 300,000 XAF" },
+  "join.budget.300k_500k": { fr: "300 000 – 500 000 XAF", en: "300,000 – 500,000 XAF" },
+  "join.budget.over_500k": { fr: "Plus de 500 000 XAF", en: "Over 500,000 XAF" },
+  "join.notes.label": { fr: "Informations complémentaires (optionnel)", en: "Anything else you'd like to share (optional)" },
+  "join.notes.placeholder": {
+    fr: "Dates souhaitées, type de logement, questions…",
+    en: "Preferred dates, type of stay, questions…",
+  },
+  "join.submit": { fr: "Rejoindre Ganitel", en: "Join Ganitel" },
+  "join.submitting": { fr: "Inscription…", en: "Joining…" },
+  "join.error": { fr: "Une erreur s'est produite. Réessayez.", en: "Something went wrong. Please try again." },
+  "join.success.title": { fr: "Vous êtes sur la liste !", en: "You're on the list!" },
+  "join.success.detail": {
+    fr: "Nous vous contacterons dès l'ouverture. Merci de votre confiance.",
+    en: "We'll reach out as soon as we launch. Thank you for your trust.",
+  },
+  "join.success.back": { fr: "Retour à l'accueil", en: "Back to home" },
 } satisfies Dict;
 
 export type TranslationKey = keyof typeof dict;
