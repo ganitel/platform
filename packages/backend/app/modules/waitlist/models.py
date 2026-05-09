@@ -17,6 +17,7 @@ class WaitlistEntry(Base):
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
     email: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
     name: Mapped[str | None] = mapped_column(String(120))
+    phone: Mapped[str | None] = mapped_column(String(32))
     property_id: Mapped[UUID | None] = mapped_column(
         Uuid(), ForeignKey("properties.id", ondelete="SET NULL"), nullable=True
     )
