@@ -15,7 +15,11 @@ function formatDuration(minutes: number): string {
   return `${h} h ${m.toString().padStart(2, "0")}`;
 }
 
-export function ExperienceCard({ experience }: { experience: ExperiencePublic }) {
+export function ExperienceCard({
+  experience,
+}: {
+  experience: ExperiencePublic;
+}) {
   const locale = useLocale();
   const t = useT();
 

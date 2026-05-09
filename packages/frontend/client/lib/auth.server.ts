@@ -53,7 +53,8 @@ export const auth = betterAuth({
       },
       phoneNumberValidator: (phone) => /^\+\d{7,15}$/.test(phone),
       signUpOnVerification: {
-        getTempEmail: (phone) => `${phone.replace("+", "")}@phone.ganitel.local`,
+        getTempEmail: (phone) =>
+          `${phone.replace("+", "")}@phone.ganitel.local`,
         getTempName: (phone) => phone,
       },
     }),

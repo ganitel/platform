@@ -7,7 +7,11 @@ import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 import { PillLink } from "@/shared/ui/pill-link";
 
-const NAV_ITEMS: { to: string; labelKey: TranslationKey; hideInPrelaunch?: boolean }[] = [
+const NAV_ITEMS: {
+  to: string;
+  labelKey: TranslationKey;
+  hideInPrelaunch?: boolean;
+}[] = [
   { to: "/", labelKey: "nav.home" },
   { to: "/browse", labelKey: "nav.browse" },
   { to: "/bookings", labelKey: "nav.bookings", hideInPrelaunch: true },

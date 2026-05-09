@@ -44,16 +44,10 @@ def upgrade() -> None:
             ondelete="SET NULL",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_waitlist_emails")),
-        sa.UniqueConstraint(
-            "email", "property_id", name="uq_waitlist_email_property"
-        ),
-        sa.UniqueConstraint(
-            "email", "experience_id", name="uq_waitlist_email_experience"
-        ),
+        sa.UniqueConstraint("email", "property_id", name="uq_waitlist_email_property"),
+        sa.UniqueConstraint("email", "experience_id", name="uq_waitlist_email_experience"),
     )
-    op.create_index(
-        op.f("ix_waitlist_emails_email"), "waitlist_emails", ["email"], unique=False
-    )
+    op.create_index(op.f("ix_waitlist_emails_email"), "waitlist_emails", ["email"], unique=False)
 
 
 def downgrade() -> None:

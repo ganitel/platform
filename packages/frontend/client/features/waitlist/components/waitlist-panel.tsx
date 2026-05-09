@@ -17,7 +17,13 @@ interface Props {
 
 type State = "idle" | "submitting" | "done" | "error";
 
-export function WaitlistPanel({ itemId, kind, title, price, priceLabel }: Props) {
+export function WaitlistPanel({
+  itemId,
+  kind,
+  title,
+  price,
+  priceLabel,
+}: Props) {
   const locale = useLocale();
   const t = useT();
   const [state, setState] = useState<State>("idle");
@@ -32,7 +38,9 @@ export function WaitlistPanel({ itemId, kind, title, price, priceLabel }: Props)
       await joinWaitlist({
         email,
         name: name || undefined,
-        ...(kind === "property" ? { property_id: itemId } : { experience_id: itemId }),
+        ...(kind === "property"
+          ? { property_id: itemId }
+          : { experience_id: itemId }),
       });
       setState("done");
     } catch {
@@ -120,7 +128,9 @@ export function WaitlistPanel({ itemId, kind, title, price, priceLabel }: Props)
                 disabled={state === "submitting" || !email}
                 className="w-full rounded-xl bg-ganitel-primary py-3.5 text-sm font-semibold text-white transition-all hover:bg-ganitel-primary/90 active:scale-[0.98] disabled:opacity-60"
               >
-                {state === "submitting" ? t("waitlist.submitting") : t("waitlist.submit")}
+                {state === "submitting"
+                  ? t("waitlist.submitting")
+                  : t("waitlist.submit")}
               </button>
 
               <p className="text-center text-xs text-ganitel-text-placeholder">

@@ -9,13 +9,7 @@ import vitest from "@vitest/eslint-plugin";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
-  globalIgnores([
-    "dist",
-    "build",
-    "node_modules",
-    "coverage",
-    ".react-router",
-  ]),
+  globalIgnores(["dist", "build", "node_modules", "coverage", ".react-router"]),
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -38,11 +32,22 @@ export default defineConfig(
       "react-refresh": reactRefresh,
     },
     rules: {
-      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      "react-refresh/only-export-components": [
+        "warn",
+        { allowConstantExport: true },
+      ],
       "react/prop-types": "off",
       "react/no-unknown-property": [
         "error",
-        { ignore: ["cmdk-input-wrapper", "cmdk-item", "cmdk-group", "cmdk-group-heading", "cmdk-input"] },
+        {
+          ignore: [
+            "cmdk-input-wrapper",
+            "cmdk-item",
+            "cmdk-group",
+            "cmdk-group-heading",
+            "cmdk-input",
+          ],
+        },
       ],
       "@typescript-eslint/no-unused-vars": [
         "error",

@@ -12,13 +12,18 @@ import { formatMoney } from "@/shared/lib/format";
 import { useLocale, useT } from "@/shared/lib/i18n";
 import type { ExperienceDetail } from "@/features/experiences/types";
 
-export const meta: Route.MetaFunction = ({ data }: { data: { experience: ExperienceDetail } | null | undefined }) => {
+export const meta: Route.MetaFunction = ({
+  data,
+}: {
+  data: { experience: ExperienceDetail } | null | undefined;
+}) => {
   if (!data?.experience) {
     return [{ title: "Expérience introuvable — Ganitel" }];
   }
   const e = data.experience;
   const title = `${e.title} — ${e.city} | Ganitel`;
-  const description = e.description?.slice(0, 160) || `${e.experience_type} à ${e.city}`;
+  const description =
+    e.description?.slice(0, 160) || `${e.experience_type} à ${e.city}`;
   const ogImage = e.cover_photo?.url;
   return [
     { title },
@@ -38,7 +43,9 @@ export const meta: Route.MetaFunction = ({ data }: { data: { experience: Experie
 
 export async function loader({ params }: Route.LoaderArgs) {
   try {
-    const experience = await serverFetch<ExperienceDetail>(`/experiences/${params.id}`);
+    const experience = await serverFetch<ExperienceDetail>(
+      `/experiences/${params.id}`,
+    );
     return { experience };
   } catch (e) {
     if (e instanceof ServerApiError && e.status === 404) {
@@ -98,7 +105,9 @@ export default function ExperienceDetailRoute({
         <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
           <section className="space-y-10">
             <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-ganitel-text-subtitle">
-              <li>{experience.capacity} {t("property.guests")}</li>
+              <li>
+                {experience.capacity} {t("property.guests")}
+              </li>
               <li>{formatDuration(experience.duration_minutes)}</li>
             </ul>
 

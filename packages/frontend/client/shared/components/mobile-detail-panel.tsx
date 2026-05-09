@@ -58,7 +58,9 @@ export function MobileDetailPanel({
             )}
             <div
               className="px-4 pb-8 pt-4"
-              style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 32px)" }}
+              style={{
+                paddingBottom: "max(env(safe-area-inset-bottom, 0px), 32px)",
+              }}
             >
               {children}
             </div>

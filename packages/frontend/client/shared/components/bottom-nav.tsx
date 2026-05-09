@@ -13,8 +13,18 @@ const ALL_ITEMS: {
 }[] = [
   { to: "/", labelKey: "nav.home", icon: Home },
   { to: "/browse", labelKey: "nav.browse", icon: Compass },
-  { to: "/bookings", labelKey: "nav.bookings", icon: Heart, hideInPrelaunch: true },
-  { to: "/profile", labelKey: "nav.profile", icon: UserIcon, hideInPrelaunch: true },
+  {
+    to: "/bookings",
+    labelKey: "nav.bookings",
+    icon: Heart,
+    hideInPrelaunch: true,
+  },
+  {
+    to: "/profile",
+    labelKey: "nav.profile",
+    icon: UserIcon,
+    hideInPrelaunch: true,
+  },
 ];
 
 const DETAIL_PAGE_RE = /^\/(properties|experiences)\//;
@@ -58,7 +68,9 @@ export function BottomNav() {
                   <Icon
                     className={cn(
                       "size-5 transition-colors duration-150",
-                      isActive ? "text-ganitel-text-title" : "text-ganitel-text-placeholder",
+                      isActive
+                        ? "text-ganitel-text-title"
+                        : "text-ganitel-text-placeholder",
                     )}
                     aria-hidden
                   />

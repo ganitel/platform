@@ -21,7 +21,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   const token = await getServerToken(request);
   if (!token) {
     const url = new URL(request.url);
-    return redirect(`/sign-in?redirect_url=${encodeURIComponent(url.pathname + url.search)}`);
+    return redirect(
+      `/sign-in?redirect_url=${encodeURIComponent(url.pathname + url.search)}`,
+    );
   }
   return null;
 }
@@ -39,9 +41,12 @@ const STATUS_I18N_KEY: Record<BookingPublic["status"], TranslationKey> = {
 const STATUS_COLOR: Record<BookingPublic["status"], string> = {
   pending_payment: "text-amber-600 bg-amber-50",
   confirmed: "text-green-700 bg-green-50",
-  cancelled_by_guest: "text-ganitel-text-subtitle bg-ganitel-background-secondary",
-  cancelled_by_host: "text-ganitel-text-subtitle bg-ganitel-background-secondary",
-  cancelled_expired: "text-ganitel-text-subtitle bg-ganitel-background-secondary",
+  cancelled_by_guest:
+    "text-ganitel-text-subtitle bg-ganitel-background-secondary",
+  cancelled_by_host:
+    "text-ganitel-text-subtitle bg-ganitel-background-secondary",
+  cancelled_expired:
+    "text-ganitel-text-subtitle bg-ganitel-background-secondary",
   completed: "text-ganitel-text-subtitle bg-ganitel-background-secondary",
   disputed: "text-red-600 bg-red-50",
 };
@@ -51,7 +56,8 @@ function BookingCard({ booking }: { booking: BookingPublic }) {
   const t = useT();
   const color = STATUS_COLOR[booking.status];
   const nightKey = booking.nights === 1 ? "booking.night" : "booking.nights";
-  const guestKey = booking.guest_count === 1 ? "booking.guest" : "property.guests";
+  const guestKey =
+    booking.guest_count === 1 ? "booking.guest" : "property.guests";
 
   return (
     <li className="rounded-2xl border border-ganitel-stroke-neutral bg-ganitel-background-secondary p-5 space-y-3">
@@ -65,7 +71,9 @@ function BookingCard({ booking }: { booking: BookingPublic }) {
             {booking.nights} {t(nightKey)} · {booking.guest_count} {t(guestKey)}
           </p>
         </div>
-        <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${color}`}>
+        <span
+          className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${color}`}
+        >
           {t(STATUS_I18N_KEY[booking.status])}
         </span>
       </div>
@@ -86,7 +94,11 @@ function BookingCard({ booking }: { booking: BookingPublic }) {
 
 export default function MyBookingsRoute() {
   const t = useT();
-  const { data: bookings, isLoading, isError } = useQuery({
+  const {
+    data: bookings,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["bookings", "me"],
     queryFn: listMyBookings,
   });
@@ -98,7 +110,9 @@ export default function MyBookingsRoute() {
       </h1>
 
       {isLoading && (
-        <p className="mt-6 text-sm text-ganitel-text-subtitle">{t("common.loading")}</p>
+        <p className="mt-6 text-sm text-ganitel-text-subtitle">
+          {t("common.loading")}
+        </p>
       )}
 
       {isError && (
@@ -107,7 +121,9 @@ export default function MyBookingsRoute() {
 
       {bookings && bookings.length === 0 && (
         <div className="mt-10 space-y-4 text-center">
-          <p className="text-sm text-ganitel-text-subtitle">{t("booking.empty")}</p>
+          <p className="text-sm text-ganitel-text-subtitle">
+            {t("booking.empty")}
+          </p>
           <Link
             to="/browse"
             className="inline-block rounded-xl bg-ganitel-primary px-5 py-2.5 text-sm font-medium text-ganitel-text-button hover:bg-ganitel-primary/90"

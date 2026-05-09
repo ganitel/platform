@@ -24,9 +24,7 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> Waitlist
     return entry
 
 
-async def _find_existing(
-    session: AsyncSession, body: WaitlistEntryIn
-) -> WaitlistEntry | None:
+async def _find_existing(session: AsyncSession, body: WaitlistEntryIn) -> WaitlistEntry | None:
     stmt = select(WaitlistEntry).where(
         WaitlistEntry.email == body.email,
         WaitlistEntry.property_id == body.property_id,

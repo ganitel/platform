@@ -20,12 +20,19 @@ import indexCss from "@/styles/index.css?url";
 export const links: Route.LinksFunction = () => [
   { rel: "stylesheet", href: indexCss },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+  {
+    rel: "preconnect",
+    href: "https://fonts.gstatic.com",
+    crossOrigin: "anonymous",
+  },
 ];
 
 export const meta: Route.MetaFunction = () => [
   { charSet: "utf-8" },
-  { name: "viewport", content: "width=device-width,initial-scale=1,viewport-fit=cover" },
+  {
+    name: "viewport",
+    content: "width=device-width,initial-scale=1,viewport-fit=cover",
+  },
   { name: "theme-color", content: "#18100C" },
   { title: "Ganitel — séjours et expériences" },
 ];
@@ -93,7 +100,9 @@ export function ErrorBoundary() {
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-6 text-center">
       <p className="font-infoma text-7xl text-ganitel-text-title">{status}</p>
-      <h1 className="mt-4 text-xl font-semibold text-ganitel-text-title">{heading}</h1>
+      <h1 className="mt-4 text-xl font-semibold text-ganitel-text-title">
+        {heading}
+      </h1>
       <p className="mt-2 text-sm text-ganitel-text-subtitle">{detail}</p>
     </main>
   );

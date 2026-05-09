@@ -32,9 +32,15 @@ export function SectionHeader({
   className,
   animate = true,
 }: SectionHeaderProps) {
-  const tagColor = inverted ? "text-ganitel-paper-warm" : "text-ganitel-text-title";
-  const titleColor = inverted ? "text-ganitel-paper" : "text-ganitel-text-title";
-  const ledeColor = inverted ? "text-ganitel-paper-warm/80" : "text-ganitel-text-subtitle";
+  const tagColor = inverted
+    ? "text-ganitel-paper-warm"
+    : "text-ganitel-text-title";
+  const titleColor = inverted
+    ? "text-ganitel-paper"
+    : "text-ganitel-text-title";
+  const ledeColor = inverted
+    ? "text-ganitel-paper-warm/80"
+    : "text-ganitel-text-subtitle";
 
   const Heading = level === "h1" ? "h1" : "h2";
 
@@ -62,13 +68,20 @@ export function SectionHeader({
           {emphasis ? (
             <>
               {" "}
-              <em className="font-italic-serif text-ganitel-secondary">{emphasis}</em>
+              <em className="font-italic-serif text-ganitel-secondary">
+                {emphasis}
+              </em>
             </>
           ) : null}
         </Heading>
       </div>
       {lede ? (
-        <p className={cn("m-0 max-w-prose text-sm leading-[1.6] md:text-[15px]", ledeColor)}>
+        <p
+          className={cn(
+            "m-0 max-w-prose text-sm leading-[1.6] md:text-[15px]",
+            ledeColor,
+          )}
+        >
           {lede}
         </p>
       ) : null}

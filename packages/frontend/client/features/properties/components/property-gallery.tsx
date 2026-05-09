@@ -42,7 +42,13 @@ export function PropertyGallery({ photos, title }: Props) {
   );
 }
 
-function MobileGallery({ photos, title }: { photos: MediaPublic[]; title: string }) {
+function MobileGallery({
+  photos,
+  title,
+}: {
+  photos: MediaPublic[];
+  title: string;
+}) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
 
@@ -83,7 +89,10 @@ function MobileGallery({ photos, title }: { photos: MediaPublic[]; title: string
       )}
 
       {photos.length > 1 && photos.length <= 8 && (
-        <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1" aria-hidden>
+        <div
+          className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1"
+          aria-hidden
+        >
           {photos.map((_, i) => (
             <span
               key={i}

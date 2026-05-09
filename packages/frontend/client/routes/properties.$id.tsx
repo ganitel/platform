@@ -20,7 +20,8 @@ export const meta: Route.MetaFunction = ({ data }) => {
   }
   const p = data.property;
   const title = `${p.title} — ${p.city} | Ganitel`;
-  const description = p.description.slice(0, 160) || `${p.property_type} à ${p.city}`;
+  const description =
+    p.description.slice(0, 160) || `${p.property_type} à ${p.city}`;
   const ogImage = p.cover_photo?.url;
   return [
     { title },
@@ -40,7 +41,9 @@ export const meta: Route.MetaFunction = ({ data }) => {
 
 export async function loader({ params }: Route.LoaderArgs) {
   try {
-    const property = await serverFetch<PropertyDetail>(`/properties/${params.id}`);
+    const property = await serverFetch<PropertyDetail>(
+      `/properties/${params.id}`,
+    );
     return { property };
   } catch (e) {
     if (e instanceof ServerApiError && e.status === 404) {
@@ -95,10 +98,18 @@ export default function PropertyDetailRoute({
         <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
           <section className="space-y-10">
             <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-ganitel-text-subtitle">
-              <li>{property.capacity} {t("property.guests")}</li>
-              <li>{property.bedrooms} {t("property.bedrooms")}</li>
-              <li>{property.beds} {t("property.beds")}</li>
-              <li>{property.bathrooms} {t("property.bathrooms")}</li>
+              <li>
+                {property.capacity} {t("property.guests")}
+              </li>
+              <li>
+                {property.bedrooms} {t("property.bedrooms")}
+              </li>
+              <li>
+                {property.beds} {t("property.beds")}
+              </li>
+              <li>
+                {property.bathrooms} {t("property.bathrooms")}
+              </li>
             </ul>
 
             <div>

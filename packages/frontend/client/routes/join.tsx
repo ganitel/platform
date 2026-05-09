@@ -15,7 +15,12 @@ export const meta: Route.MetaFunction = () => [
 ];
 
 type Interest = "renting" | "experiences";
-type BudgetRange = "under_50k" | "50k_150k" | "150k_300k" | "300k_500k" | "over_500k";
+type BudgetRange =
+  | "under_50k"
+  | "50k_150k"
+  | "150k_300k"
+  | "300k_500k"
+  | "over_500k";
 type State = "idle" | "submitting" | "done" | "error";
 
 const BUDGET_RANGES: BudgetRange[] = [
@@ -149,7 +154,11 @@ export default function JoinPage() {
                         : "border-ganitel-stroke-neutral bg-ganitel-neutral-1 text-ganitel-text-subtitle hover:border-ganitel-text-title hover:text-ganitel-text-title",
                     )}
                   >
-                    {t(val === "renting" ? "join.interest.renting" : "join.interest.experiences")}
+                    {t(
+                      val === "renting"
+                        ? "join.interest.renting"
+                        : "join.interest.experiences",
+                    )}
                   </button>
                 ))}
               </div>
@@ -180,7 +189,9 @@ export default function JoinPage() {
               <select
                 id="join-budget"
                 value={budgetRange}
-                onChange={(e) => setBudgetRange(e.target.value as BudgetRange | "")}
+                onChange={(e) =>
+                  setBudgetRange(e.target.value as BudgetRange | "")
+                }
                 className={cn(INPUT_CLASS, "appearance-none cursor-pointer")}
               >
                 <option value="">{t("join.budget.placeholder")}</option>

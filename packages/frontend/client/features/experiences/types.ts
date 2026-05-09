@@ -1,4 +1,9 @@
-import type { GeoPoint, HostPublic, MediaPublic, Money } from "@/features/properties/types";
+import type {
+  GeoPoint,
+  HostPublic,
+  MediaPublic,
+  Money,
+} from "@/features/properties/types";
 
 export type ExperienceCancellationPolicy = "flexible" | "moderate" | "strict";
 export type ExperienceStatus = "draft" | "published" | "unlisted" | "removed";

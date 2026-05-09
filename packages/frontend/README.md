@@ -57,13 +57,13 @@ client/
 
 Copy `.env.example` to `.env`. Keys (with what they're for):
 
-| Key                                  | Notes                                        |
-| ------------------------------------ | -------------------------------------------- |
-| `VITE_API_BASE_URL`                  | Client-side base, defaults to `/api`         |
-| `INTERNAL_API_URL`                   | Server-side base for SSR fetches             |
-| `VITE_CLERK_PUBLISHABLE_KEY`         | Public Clerk key, embedded in the bundle     |
-| `CLERK_SECRET_KEY`                   | **Server-only** — never prefix with `VITE_`  |
-| `VITE_GOOGLE_MAPS_KEY`               | Maps integration                             |
+| Key                          | Notes                                       |
+| ---------------------------- | ------------------------------------------- |
+| `VITE_API_BASE_URL`          | Client-side base, defaults to `/api`        |
+| `INTERNAL_API_URL`           | Server-side base for SSR fetches            |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Public Clerk key, embedded in the bundle    |
+| `CLERK_SECRET_KEY`           | **Server-only** — never prefix with `VITE_` |
+| `VITE_GOOGLE_MAPS_KEY`       | Maps integration                            |
 
 ## Running
 
