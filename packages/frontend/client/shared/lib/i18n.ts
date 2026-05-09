@@ -271,6 +271,25 @@ const dict = {
 
 export type TranslationKey = keyof typeof dict;
 
+/** Match fr/en from BCP 47 tags (e.g. Accept-Language or navigator.languages). */
+function localeFromLanguageTags(tags: Iterable<string>): Locale {
+  for (const raw of tags) {
+    const tag = raw.trim().split(";")[0]?.trim().toLowerCase() ?? "";
+    if (!tag) continue;
+    if (tag.startsWith("en")) return "en";
+    if (tag.startsWith("fr")) return "fr";
+  }
+  return "fr";
+}
+
+/** Parse `Accept-Language` (or null). Falls back to fr when nothing matches. */
+export function localeFromAcceptLanguage(
+  header: string | null | undefined,
+): Locale {
+  if (!header?.trim()) return "fr";
+  return localeFromLanguageTags(header.split(","));
+}
+
 export const LocaleContext = createContext<Locale>("fr");
 
 export function useLocale(): Locale {
