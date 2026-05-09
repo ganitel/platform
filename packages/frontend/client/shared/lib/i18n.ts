@@ -182,6 +182,10 @@ const dict = {
     fr: "Votre prénom (optionnel)",
     en: "Your first name (optional)",
   },
+  "waitlist.phone": {
+    fr: "Votre numéro WhatsApp (optionnel)",
+    en: "Your WhatsApp number (optional)",
+  },
   "waitlist.submit": { fr: "M'inscrire", en: "Join the list" },
   "waitlist.submitting": { fr: "Inscription…", en: "Joining…" },
   "waitlist.success.title": {
@@ -208,6 +212,10 @@ const dict = {
   "join.subtitle": { fr: "Liste d'attente", en: "Waitlist" },
   "join.title": { fr: "Rejoignez Ganitel", en: "Join Ganitel" },
   "join.email": { fr: "Votre adresse e-mail", en: "Your email address" },
+  "join.phone": {
+    fr: "Votre numéro WhatsApp (optionnel)",
+    en: "Your WhatsApp number (optional)",
+  },
   "join.interest.label": {
     fr: "Je suis intéressé par",
     en: "I'm interested in",
