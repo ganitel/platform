@@ -6,13 +6,18 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
   useRouteError,
+  useRouteLoaderData,
 } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 
 import type { Route } from "./+types/root";
 
-import { LocaleContext, type Locale } from "@/shared/lib/i18n";
+import {
+  LocaleContext,
+  localeFromAcceptLanguage,
+  type Locale,
+} from "@/shared/lib/i18n";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 import { Toaster } from "@/shared/ui/sonner";
 import indexCss from "@/styles/index.css?url";
@@ -37,9 +42,21 @@ export const meta: Route.MetaFunction = () => [
   { title: "Ganitel — séjours et expériences" },
 ];
 
+export async function loader({ request }: Route.LoaderArgs) {
+  const locale = localeFromAcceptLanguage(
+    request.headers.get("accept-language"),
+  );
+  return { locale };
+}
+
 export function Layout({ children }: { children: ReactNode }) {
+  const rootData = useRouteLoaderData("root") as
+    | { locale?: Locale }
+    | undefined;
+  const lang = rootData?.locale ?? "fr";
+
   return (
-    <html lang="fr">
+    <html lang={lang}>
       <head>
         <meta charSet="utf-8" />
         <Meta />
@@ -54,7 +71,7 @@ export function Layout({ children }: { children: ReactNode }) {
   );
 }
 
-export default function App() {
+export default function App({ loaderData }: Route.ComponentProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -69,11 +86,10 @@ export default function App() {
         },
       }),
   );
-  const [locale] = useState<Locale>("fr");
 
   return (
     <QueryClientProvider client={queryClient}>
-      <LocaleContext.Provider value={locale}>
+      <LocaleContext.Provider value={loaderData.locale}>
         <TooltipProvider delayDuration={200}>
           <Outlet />
           <Toaster />

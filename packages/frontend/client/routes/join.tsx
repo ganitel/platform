@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Mail } from "lucide-react";
+import { CheckCircle2, Mail, Phone } from "lucide-react";
 import type { Route } from "./+types/join";
 
 import { AuthLayout } from "@/features/auth/components/auth-layout";
@@ -43,6 +43,7 @@ export default function JoinPage() {
   const [interests, setInterests] = useState<Set<Interest>>(new Set());
   const [headcount, setHeadcount] = useState("");
   const [budgetRange, setBudgetRange] = useState<BudgetRange | "">("");
+  const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
 
   function toggleInterest(val: Interest) {
@@ -69,6 +70,7 @@ export default function JoinPage() {
     try {
       await joinWaitlist({
         email,
+        phone: phone || undefined,
         interest: resolveInterest(),
         headcount: headcount ? Number(headcount) : undefined,
         budget_range: budgetRange || undefined,
@@ -133,6 +135,27 @@ export default function JoinPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="vous@exemple.com"
+                  className={cn(INPUT_CLASS, "pl-10")}
+                />
+              </div>
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label htmlFor="join-phone" className={LABEL_CLASS}>
+                {t("join.phone")}
+              </label>
+              <div className="relative">
+                <Phone
+                  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ganitel-text-placeholder"
+                  aria-hidden
+                />
+                <input
+                  id="join-phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+237 6XX XXX XXX"
                   className={cn(INPUT_CLASS, "pl-10")}
                 />
               </div>

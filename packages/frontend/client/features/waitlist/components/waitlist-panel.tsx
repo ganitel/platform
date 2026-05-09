@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Mail, Sparkles } from "lucide-react";
+import { CheckCircle2, Mail, Phone, Sparkles } from "lucide-react";
 
 import { joinWaitlist } from "@/features/waitlist/api";
 import { useLocale, useT } from "@/shared/lib/i18n";
@@ -29,6 +29,7 @@ export function WaitlistPanel({
   const [state, setState] = useState<State>("idle");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,6 +39,7 @@ export function WaitlistPanel({
       await joinWaitlist({
         email,
         name: name || undefined,
+        phone: phone || undefined,
         ...(kind === "property"
           ? { property_id: itemId }
           : { experience_id: itemId }),
@@ -117,6 +119,20 @@ export function WaitlistPanel({
                   placeholder={t("waitlist.name")}
                   className="w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 px-4 py-3 text-sm text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all"
                 />
+
+                <div className="relative">
+                  <Phone
+                    className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ganitel-text-placeholder"
+                    aria-hidden
+                  />
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder={t("waitlist.phone")}
+                    className="w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 py-3 pl-10 pr-4 text-sm text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all"
+                  />
+                </div>
               </div>
 
               {state === "error" && (

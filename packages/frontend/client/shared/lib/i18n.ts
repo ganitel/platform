@@ -182,6 +182,10 @@ const dict = {
     fr: "Votre prénom (optionnel)",
     en: "Your first name (optional)",
   },
+  "waitlist.phone": {
+    fr: "Votre numéro WhatsApp (optionnel)",
+    en: "Your WhatsApp number (optional)",
+  },
   "waitlist.submit": { fr: "M'inscrire", en: "Join the list" },
   "waitlist.submitting": { fr: "Inscription…", en: "Joining…" },
   "waitlist.success.title": {
@@ -208,6 +212,10 @@ const dict = {
   "join.subtitle": { fr: "Liste d'attente", en: "Waitlist" },
   "join.title": { fr: "Rejoignez Ganitel", en: "Join Ganitel" },
   "join.email": { fr: "Votre adresse e-mail", en: "Your email address" },
+  "join.phone": {
+    fr: "Votre numéro WhatsApp (optionnel)",
+    en: "Your WhatsApp number (optional)",
+  },
   "join.interest.label": {
     fr: "Je suis intéressé par",
     en: "I'm interested in",
@@ -270,6 +278,25 @@ const dict = {
 } satisfies Dict;
 
 export type TranslationKey = keyof typeof dict;
+
+/** Match fr/en from BCP 47 tags (e.g. Accept-Language or navigator.languages). */
+function localeFromLanguageTags(tags: Iterable<string>): Locale {
+  for (const raw of tags) {
+    const tag = raw.trim().split(";")[0]?.trim().toLowerCase() ?? "";
+    if (!tag) continue;
+    if (tag.startsWith("en")) return "en";
+    if (tag.startsWith("fr")) return "fr";
+  }
+  return "fr";
+}
+
+/** Parse `Accept-Language` (or null). Falls back to fr when nothing matches. */
+export function localeFromAcceptLanguage(
+  header: string | null | undefined,
+): Locale {
+  if (!header?.trim()) return "fr";
+  return localeFromLanguageTags(header.split(","));
+}
 
 export const LocaleContext = createContext<Locale>("fr");
 

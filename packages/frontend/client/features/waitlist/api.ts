@@ -3,6 +3,7 @@ import { env } from "@/shared/lib/env";
 interface WaitlistPayload {
   email: string;
   name?: string;
+  phone?: string;
   property_id?: string;
   experience_id?: string;
   interest?: "renting" | "experiences" | "both";

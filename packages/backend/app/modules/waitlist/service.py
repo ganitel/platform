@@ -15,8 +15,13 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> Waitlist
     entry = WaitlistEntry(
         email=body.email,
         name=body.name,
+        phone=body.phone,
         property_id=body.property_id,
         experience_id=body.experience_id,
+        interest=body.interest,
+        headcount=body.headcount,
+        budget_range=body.budget_range,
+        notes=body.notes,
     )
     session.add(entry)
     await session.commit()

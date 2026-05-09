@@ -177,3 +177,34 @@ def test_media_upload_rejects_non_image_mime() -> None:
 def test_media_upload_rejects_oversize() -> None:
     with pytest.raises(ValidationError):
         MediaUploadIn(mime_type="image/jpeg", size_bytes=10**9)
+
+
+# -------------------- waitlist --------------------
+
+from app.modules.waitlist.schemas import WaitlistEntryIn
+
+
+def _waitlist(**overrides: Any) -> dict[str, Any]:
+    base: dict[str, Any] = {"email": "test@example.com"}
+    base.update(overrides)
+    return base
+
+
+def test_waitlist_accepts_email_only() -> None:
+    entry = WaitlistEntryIn.model_validate(_waitlist())
+    assert entry.phone is None
+
+
+def test_waitlist_accepts_phone() -> None:
+    entry = WaitlistEntryIn.model_validate(_waitlist(phone="+237611223344"))
+    assert entry.phone == "+237611223344"
+
+
+def test_waitlist_rejects_phone_over_32_chars() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(_waitlist(phone="+" + "1" * 32))
+
+
+def test_waitlist_rejects_unknown_field() -> None:
+    with pytest.raises(ValidationError, match="Extra inputs"):
+        WaitlistEntryIn.model_validate(_waitlist(foo="bar"))

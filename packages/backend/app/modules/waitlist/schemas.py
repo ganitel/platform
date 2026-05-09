@@ -12,6 +12,7 @@ class WaitlistEntryIn(BaseModel):
 
     email: EmailStr
     name: str | None = Field(default=None, max_length=120)
+    phone: str | None = Field(default=None, max_length=32)
     property_id: UUID | None = None
     experience_id: UUID | None = None
     interest: Interest | None = None
