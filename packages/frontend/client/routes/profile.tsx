@@ -13,10 +13,15 @@ export const meta: Route.MetaFunction = () => [
 ];
 
 export async function loader({ request }: Route.LoaderArgs) {
+  if (import.meta.env.VITE_PRELAUNCH_MODE === "true") {
+    return redirect("/");
+  }
   const token = await getServerToken(request);
   if (!token) {
     const url = new URL(request.url);
-    return redirect(`/sign-in?redirect_url=${encodeURIComponent(url.pathname + url.search)}`);
+    return redirect(
+      `/sign-in?redirect_url=${encodeURIComponent(url.pathname + url.search)}`,
+    );
   }
   const me = await serverFetch<UserMe>("/me", { token });
   return { me };
@@ -56,25 +61,33 @@ export default function ProfileRoute({ loaderData }: Route.ComponentProps) {
           <dt className="text-xs uppercase tracking-wide text-ganitel-text-subtitle">
             Statut
           </dt>
-          <dd className="mt-1 capitalize text-ganitel-text-title">{me.status}</dd>
+          <dd className="mt-1 capitalize text-ganitel-text-title">
+            {me.status}
+          </dd>
         </div>
         <div>
           <dt className="text-xs uppercase tracking-wide text-ganitel-text-subtitle">
             Langue
           </dt>
-          <dd className="mt-1 uppercase text-ganitel-text-title">{me.language}</dd>
+          <dd className="mt-1 uppercase text-ganitel-text-title">
+            {me.language}
+          </dd>
         </div>
         <div>
           <dt className="text-xs uppercase tracking-wide text-ganitel-text-subtitle">
             Hôte
           </dt>
-          <dd className="mt-1 text-ganitel-text-title">{me.is_host ? "Oui" : "Non"}</dd>
+          <dd className="mt-1 text-ganitel-text-title">
+            {me.is_host ? "Oui" : "Non"}
+          </dd>
         </div>
         <div>
           <dt className="text-xs uppercase tracking-wide text-ganitel-text-subtitle">
             Admin
           </dt>
-          <dd className="mt-1 text-ganitel-text-title">{me.is_admin ? "Oui" : "Non"}</dd>
+          <dd className="mt-1 text-ganitel-text-title">
+            {me.is_admin ? "Oui" : "Non"}
+          </dd>
         </div>
       </dl>
     </div>

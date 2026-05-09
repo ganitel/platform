@@ -45,7 +45,8 @@ export function PhoneLogin() {
     // Redirect to complete-profile if no display name set yet.
     const session = await authClient.getSession();
     const name = session.data?.user?.name ?? "";
-    const isPlaceholderName = name.startsWith("+") || /^\+?\d+$/.test(name.replace(/\s/g, ""));
+    const isPlaceholderName =
+      name.startsWith("+") || /^\+?\d+$/.test(name.replace(/\s/g, ""));
     navigate(isPlaceholderName ? "/complete-profile" : "/");
   }
 
@@ -78,7 +79,11 @@ export function PhoneLogin() {
 
         <button
           type="button"
-          onClick={() => { setStep("phone"); setOtp(""); setError(null); }}
+          onClick={() => {
+            setStep("phone");
+            setOtp("");
+            setError(null);
+          }}
           className="block w-full text-center text-xs text-ganitel-text-subtitle hover:underline"
         >
           Changer de numéro

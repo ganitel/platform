@@ -71,7 +71,8 @@ export function BookingPanel({ property }: Props) {
       // Map known backend error patterns to localized strings rather than
       // forwarding the raw English API message directly to the user.
       const key: TranslationKey =
-        e instanceof ApiError && e.message.toLowerCase().includes("no longer available")
+        e instanceof ApiError &&
+        e.message.toLowerCase().includes("no longer available")
           ? "booking.conflict"
           : "common.error.generic";
       setErrorKey(key);

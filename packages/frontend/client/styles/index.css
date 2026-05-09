@@ -4,19 +4,19 @@
 @plugin "tailwindcss-animate";
 
 .font-infoma {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
 .font-display {
-  font-family: 'Bricolage Grotesque', 'Helvetica Neue', sans-serif;
+  font-family: "Bricolage Grotesque", "Helvetica Neue", sans-serif;
   font-variation-settings: "wdth" 85;
   font-optical-sizing: auto;
 }
 
 .font-italic-serif {
-  font-family: 'Instrument Serif', Georgia, serif;
+  font-family: "Instrument Serif", Georgia, serif;
   font-style: italic;
   font-weight: 400;
 }
@@ -28,30 +28,32 @@
 }
 
 @theme {
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans:
+    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
 
-  --color-ganitel-primary: #18100C;
-  --color-ganitel-secondary: #D39E70;
-  --color-ganitel-neutral-1: #FAFAFA;
-  --color-ganitel-neutral-2: #F6F5F5;
-  --color-ganitel-neutral-3: #EDECEC;
-  --color-ganitel-text-title: #18100C;
-  --color-ganitel-text-subtitle: #4D4744;
-  --color-ganitel-text-placeholder: #67615F;
-  --color-ganitel-text-label: #67615F;
-  --color-ganitel-text-active: #18100C;
-  --color-ganitel-text-badge: #4D4744;
-  --color-ganitel-text-button: #FFFFFF;
-  --color-ganitel-stroke-neutral: #EDECEC;
-  --color-ganitel-background-primary: #18100C;
-  --color-ganitel-background-secondary: #FFFFFF;
-  --color-ganitel-background-neutral1: #FAFAFA;
-  --color-ganitel-background-neutral2: #F6F5F5;
-  --color-ganitel-accent-green: #EAEEE7;
-  --color-ganitel-accent-grey: #E1E0DF;
-  --color-ganitel-paper: #F6F3EA;
-  --color-ganitel-paper-warm: #EFE9D6;
-  --color-ganitel-moss: #2E3A25;
+  --color-ganitel-primary: #18100c;
+  --color-ganitel-secondary: #d39e70;
+  --color-ganitel-neutral-1: #fafafa;
+  --color-ganitel-neutral-2: #f6f5f5;
+  --color-ganitel-neutral-3: #edecec;
+  --color-ganitel-text-title: #18100c;
+  --color-ganitel-text-subtitle: #4d4744;
+  --color-ganitel-text-placeholder: #67615f;
+  --color-ganitel-text-label: #67615f;
+  --color-ganitel-text-active: #18100c;
+  --color-ganitel-text-badge: #4d4744;
+  --color-ganitel-text-button: #ffffff;
+  --color-ganitel-stroke-neutral: #edecec;
+  --color-ganitel-background-primary: #18100c;
+  --color-ganitel-background-secondary: #ffffff;
+  --color-ganitel-background-neutral1: #fafafa;
+  --color-ganitel-background-neutral2: #f6f5f5;
+  --color-ganitel-accent-green: #eaeee7;
+  --color-ganitel-accent-grey: #e1e0df;
+  --color-ganitel-paper: #f6f3ea;
+  --color-ganitel-paper-warm: #efe9d6;
+  --color-ganitel-moss: #2e3a25;
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -86,13 +88,21 @@
 @variant dark (&:is(.dark *));
 
 @keyframes accordion-down {
-  from { height: 0; }
-  to { height: var(--radix-accordion-content-height); }
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
 }
 
 @keyframes accordion-up {
-  from { height: var(--radix-accordion-content-height); }
-  to { height: 0; }
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
 }
 
 @layer base {
@@ -168,11 +178,25 @@
     @apply bg-white text-ganitel-text-title font-sans;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: contain;
   }
 
   :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
     overflow-wrap: anywhere;
     word-break: break-word;
+  }
+
+  :where(a, button, [role="button"], input, select, textarea, label) {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 
   pre,
@@ -201,6 +225,17 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .px-safe {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
   }
 }
 

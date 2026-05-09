@@ -81,7 +81,9 @@ type ExperiencesData = {
 
 type LoaderData = StaysData | ExperiencesData;
 
-export async function loader({ request }: Route.LoaderArgs): Promise<LoaderData> {
+export async function loader({
+  request,
+}: Route.LoaderArgs): Promise<LoaderData> {
   const url = new URL(request.url);
   const kind = parseKind(url.searchParams.get("kind"));
   const params = new URLSearchParams();
@@ -101,7 +103,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<LoaderData>
   }
 
   try {
-    const data = await serverFetch<SearchOut>(`/properties?${params.toString()}`);
+    const data = await serverFetch<SearchOut>(
+      `/properties?${params.toString()}`,
+    );
     return { kind, q, items: data.items, total: data.total };
   } catch {
     return { kind, q, items: [], total: 0 };

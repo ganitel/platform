@@ -15,12 +15,18 @@ export function HostCard({ host }: { host: HostPublic }) {
   return (
     <div className="flex items-center gap-4 rounded-2xl border border-ganitel-stroke-neutral bg-ganitel-background-neutral1 p-4">
       <Avatar className="size-14">
-        {host.avatar_url ? <AvatarImage src={host.avatar_url} alt={host.display_name} /> : null}
+        {host.avatar_url ? (
+          <AvatarImage src={host.avatar_url} alt={host.display_name} />
+        ) : null}
         <AvatarFallback>{initials || "?"}</AvatarFallback>
       </Avatar>
       <div>
-        <p className="text-xs uppercase tracking-wide text-ganitel-text-subtitle">{t("property.host")}</p>
-        <p className="text-base font-semibold text-ganitel-text-title">{host.display_name}</p>
+        <p className="text-xs uppercase tracking-wide text-ganitel-text-subtitle">
+          {t("property.host")}
+        </p>
+        <p className="text-base font-semibold text-ganitel-text-title">
+          {host.display_name}
+        </p>
       </div>
     </div>
   );

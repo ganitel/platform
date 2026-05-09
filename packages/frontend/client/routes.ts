@@ -14,6 +14,7 @@ export default [
     index("routes/_index.tsx"),
     route("browse", "routes/browse.tsx"),
     route("properties/:id", "routes/properties.$id.tsx"),
+    route("experiences/:id", "routes/experiences.$id.tsx"),
     route("bookings", "routes/bookings.tsx"),
     route("profile", "routes/profile.tsx"),
   ]),
@@ -22,4 +23,5 @@ export default [
   route("sign-in", "routes/sign-in.tsx"),
   route("sign-up", "routes/sign-up.tsx"),
   route("complete-profile", "routes/complete-profile.tsx"),
+  route("join", "routes/join.tsx"),
 ] satisfies RouteConfig;

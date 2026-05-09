@@ -2,10 +2,7 @@ import type { Route } from "./+types/_index";
 
 import { Landing } from "@/features/landing/landing";
 import { serverFetch } from "@/shared/api/server";
-import type {
-  PropertyPublic,
-  SearchOut,
-} from "@/features/properties/types";
+import type { PropertyPublic, SearchOut } from "@/features/properties/types";
 
 export const meta: Route.MetaFunction = () => {
   const title = "Ganitel — Là où la lumière prend son temps";

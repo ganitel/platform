@@ -1,7 +1,13 @@
 import { apiClient } from "@/shared/api/client";
-import type { PropertyDetail, SearchFilters, SearchOut } from "@/features/properties/types";
+import type {
+  PropertyDetail,
+  SearchFilters,
+  SearchOut,
+} from "@/features/properties/types";
 
-export async function searchProperties(filters: SearchFilters = {}): Promise<SearchOut> {
+export async function searchProperties(
+  filters: SearchFilters = {},
+): Promise<SearchOut> {
   const r = await apiClient.get<SearchOut>("/properties", { params: filters });
   return r.data;
 }

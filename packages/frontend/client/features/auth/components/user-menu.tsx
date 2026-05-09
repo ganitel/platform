@@ -44,7 +44,9 @@ export function UserMenu({ session }: UserMenuProps) {
           className="rounded-full ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ganitel-primary"
         >
           <Avatar className="size-8">
-            {user.image ? <AvatarImage src={user.image} alt={user.name} /> : null}
+            {user.image ? (
+              <AvatarImage src={user.image} alt={user.name} />
+            ) : null}
             <AvatarFallback className="text-xs">{initials}</AvatarFallback>
           </Avatar>
         </button>
@@ -58,7 +60,10 @@ export function UserMenu({ session }: UserMenuProps) {
           <Link to="/bookings">Mes réservations</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="text-red-600 focus:text-red-600">
+        <DropdownMenuItem
+          onClick={handleSignOut}
+          className="text-red-600 focus:text-red-600"
+        >
           {signingOut ? "Déconnexion…" : "Se déconnecter"}
         </DropdownMenuItem>
       </DropdownMenuContent>

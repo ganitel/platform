@@ -1,28 +1,30 @@
 import { data } from "react-router";
 
-import type { Route } from "./+types/properties.$id";
+import type { Route } from "./+types/experiences.$id";
 
 import { HostCard } from "@/features/properties/components/host-card";
 import { PropertyGallery } from "@/features/properties/components/property-gallery";
-import { BookingPanel } from "@/features/properties/components/booking-panel";
 import { WaitlistPanel } from "@/features/waitlist/components/waitlist-panel";
 import { MobileDetailPanel } from "@/shared/components/mobile-detail-panel";
 import { ErrorState } from "@/shared/components/error-state";
 import { serverFetch, ServerApiError } from "@/shared/api/server";
 import { formatMoney } from "@/shared/lib/format";
 import { useLocale, useT } from "@/shared/lib/i18n";
-import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
-import type { PropertyDetail } from "@/features/properties/types";
+import type { ExperienceDetail } from "@/features/experiences/types";
 
-export const meta: Route.MetaFunction = ({ data }) => {
-  if (!data?.property) {
-    return [{ title: "Logement introuvable — Ganitel" }];
+export const meta: Route.MetaFunction = ({
+  data,
+}: {
+  data: { experience: ExperienceDetail } | null | undefined;
+}) => {
+  if (!data?.experience) {
+    return [{ title: "Expérience introuvable — Ganitel" }];
   }
-  const p = data.property;
-  const title = `${p.title} — ${p.city} | Ganitel`;
+  const e = data.experience;
+  const title = `${e.title} — ${e.city} | Ganitel`;
   const description =
-    p.description.slice(0, 160) || `${p.property_type} à ${p.city}`;
-  const ogImage = p.cover_photo?.url;
+    e.description?.slice(0, 160) || `${e.experience_type} à ${e.city}`;
+  const ogImage = e.cover_photo?.url;
   return [
     { title },
     { name: "description", content: description },
@@ -41,39 +43,44 @@ export const meta: Route.MetaFunction = ({ data }) => {
 
 export async function loader({ params }: Route.LoaderArgs) {
   try {
-    const property = await serverFetch<PropertyDetail>(
-      `/properties/${params.id}`,
+    const experience = await serverFetch<ExperienceDetail>(
+      `/experiences/${params.id}`,
     );
-    return { property };
+    return { experience };
   } catch (e) {
     if (e instanceof ServerApiError && e.status === 404) {
-      throw data("Logement introuvable", { status: 404 });
+      throw data("Expérience introuvable", { status: 404 });
     }
     throw e;
   }
 }
 
-export default function PropertyDetailRoute({
+function formatDuration(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h} h`;
+  return `${h} h ${m} min`;
+}
+
+export default function ExperienceDetailRoute({
   loaderData,
 }: Route.ComponentProps) {
-  const { property } = loaderData;
+  const { experience } = loaderData;
   const t = useT();
   const locale = useLocale();
-  const isPrelaunch = usePrelaunch();
 
-  const priceText = formatMoney(property.base_price, locale);
-  const priceLabel = t("property.per_night");
+  const priceText = formatMoney(experience.base_price, locale);
+  const priceLabel = t("experience.per_person");
 
-  const panel = isPrelaunch ? (
+  const panel = (
     <WaitlistPanel
-      itemId={property.id}
-      kind="property"
-      title={property.title}
-      price={property.base_price}
+      itemId={experience.id}
+      kind="experience"
+      title={experience.title}
+      price={experience.base_price}
       priceLabel={priceLabel}
     />
-  ) : (
-    <BookingPanel property={property} />
   );
 
   return (
@@ -82,61 +89,40 @@ export default function PropertyDetailRoute({
         <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-ganitel-secondary">
-              {property.property_type}
+              {experience.experience_type}
             </p>
             <h1 className="mt-2 font-infoma text-3xl text-ganitel-text-title md:text-4xl">
-              {property.title}
+              {experience.title}
             </h1>
             <p className="mt-1 text-sm text-ganitel-text-subtitle">
-              {property.city}, {property.country_code}
+              {experience.city}, {experience.country_code}
             </p>
           </div>
         </header>
 
-        <PropertyGallery photos={property.photos} title={property.title} />
+        <PropertyGallery photos={experience.photos} title={experience.title} />
 
         <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
           <section className="space-y-10">
             <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-ganitel-text-subtitle">
               <li>
-                {property.capacity} {t("property.guests")}
+                {experience.capacity} {t("property.guests")}
               </li>
-              <li>
-                {property.bedrooms} {t("property.bedrooms")}
-              </li>
-              <li>
-                {property.beds} {t("property.beds")}
-              </li>
-              <li>
-                {property.bathrooms} {t("property.bathrooms")}
-              </li>
+              <li>{formatDuration(experience.duration_minutes)}</li>
             </ul>
 
-            <div>
-              <h2 className="mb-3 text-lg font-semibold text-ganitel-text-title">
-                {t("property.description")}
-              </h2>
-              <p className="whitespace-pre-line text-sm leading-relaxed text-ganitel-text-subtitle">
-                {property.description || "—"}
-              </p>
-            </div>
-
-            {property.amenities.length > 0 ? (
+            {experience.description ? (
               <div>
                 <h2 className="mb-3 text-lg font-semibold text-ganitel-text-title">
-                  {t("property.amenities")}
+                  {t("property.description")}
                 </h2>
-                <ul className="grid grid-cols-2 gap-y-2 text-sm text-ganitel-text-subtitle md:grid-cols-3">
-                  {property.amenities.map((a) => (
-                    <li key={a} className="capitalize">
-                      {a.replace(/_/g, " ")}
-                    </li>
-                  ))}
-                </ul>
+                <p className="whitespace-pre-line text-sm leading-relaxed text-ganitel-text-subtitle">
+                  {experience.description}
+                </p>
               </div>
             ) : null}
 
-            <HostCard host={property.host} />
+            <HostCard host={experience.host} />
           </section>
 
           <aside className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
@@ -149,8 +135,8 @@ export default function PropertyDetailRoute({
       <MobileDetailPanel
         priceText={priceText}
         priceLabel={priceLabel}
-        ctaLabel={isPrelaunch ? t("waitlist.submit") : t("property.book")}
-        drawerTitle={property.title}
+        ctaLabel={t("waitlist.submit")}
+        drawerTitle={experience.title}
       >
         {panel}
       </MobileDetailPanel>

@@ -42,7 +42,9 @@ export function AuthLayout({
           <p className="text-xs uppercase tracking-[0.3em] text-ganitel-secondary">
             {subtitle}
           </p>
-          <h1 className="mt-3 font-infoma text-4xl leading-tight md:text-5xl">{title}</h1>
+          <h1 className="mt-3 font-infoma text-4xl leading-tight md:text-5xl">
+            {title}
+          </h1>
           <p className="mt-4 text-sm text-ganitel-text-button/70">
             Séjours et expériences en Afrique centrale, choisis avec soin.
           </p>

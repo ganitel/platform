@@ -8,7 +8,9 @@ export interface CreateBookingPayload {
   guest_count: number;
 }
 
-export async function createBooking(payload: CreateBookingPayload): Promise<BookingPublic> {
+export async function createBooking(
+  payload: CreateBookingPayload,
+): Promise<BookingPublic> {
   const res = await apiClient.post<BookingPublic>("/bookings", payload);
   return res.data;
 }
@@ -25,7 +27,10 @@ export async function initiatePayment(
 }
 
 export async function confirmNoopPayment(intentId: string): Promise<void> {
-  await apiClient.post("/webhooks/noop", { intent_id: intentId, status: "captured" });
+  await apiClient.post("/webhooks/noop", {
+    intent_id: intentId,
+    status: "captured",
+  });
 }
 
 export async function listMyBookings(): Promise<BookingPublic[]> {

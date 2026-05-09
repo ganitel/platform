@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { authClient } from "@/lib/auth-client";
-import { fetchMe, patchMe, type UpdateMePayload, type UserMe } from "@/features/auth/api/me";
+import {
+  fetchMe,
+  patchMe,
+  type UpdateMePayload,
+  type UserMe,
+} from "@/features/auth/api/me";
 
 export const meKey = ["me"] as const;
 
