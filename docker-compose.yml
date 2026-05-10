@@ -15,7 +15,7 @@ services:
       - backend
 
   api:
-    image: ghcr.io/lvndry/ganitel-backend:latest
+    image: ghcr.io/ganitel/ganitel-backend:latest
     restart: unless-stopped
     env_file: .env
     environment:
