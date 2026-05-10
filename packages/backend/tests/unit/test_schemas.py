@@ -15,6 +15,7 @@ from app.modules.properties.schemas import (
     PropertyCreateIn,
 )
 from app.modules.users.schemas import UpdateMe
+from app.modules.waitlist.schemas import WaitlistEntryIn
 
 UUID_FIXTURE = "00000000-0000-0000-0000-000000000001"
 
@@ -180,8 +181,6 @@ def test_media_upload_rejects_oversize() -> None:
 
 
 # -------------------- waitlist --------------------
-
-from app.modules.waitlist.schemas import WaitlistEntryIn
 
 
 def _waitlist(**overrides: Any) -> dict[str, Any]:
