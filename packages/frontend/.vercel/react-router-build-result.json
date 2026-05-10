@@ -1,0 +1,284 @@
+{
+  "buildManifest": {
+    "serverBundles": {
+      "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0": {
+        "id": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+        "file": "build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/index.js",
+        "config": {
+          "runtime": "nodejs"
+        }
+      }
+    },
+    "routeIdToServerBundleId": {
+      "root": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.auth.$": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/_index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/browse": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/properties.$id": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/experiences.$id": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/bookings": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/profile": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/sign-in": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/sign-up": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/complete-profile": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/join": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0"
+    },
+    "routes": {
+      "root": {
+        "id": "root",
+        "file": "client/root.tsx",
+        "path": "",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.auth.$": {
+        "id": "routes/api.auth.$",
+        "parentId": "root",
+        "file": "client/routes/api.auth.$.ts",
+        "path": "api/auth/*",
+        "config": {}
+      },
+      "routes/_app": {
+        "id": "routes/_app",
+        "parentId": "root",
+        "file": "client/routes/_app.tsx",
+        "config": {}
+      },
+      "routes/_index": {
+        "id": "routes/_index",
+        "parentId": "routes/_app",
+        "file": "client/routes/_index.tsx",
+        "index": true,
+        "config": {}
+      },
+      "routes/browse": {
+        "id": "routes/browse",
+        "parentId": "routes/_app",
+        "file": "client/routes/browse.tsx",
+        "path": "browse",
+        "config": {}
+      },
+      "routes/properties.$id": {
+        "id": "routes/properties.$id",
+        "parentId": "routes/_app",
+        "file": "client/routes/properties.$id.tsx",
+        "path": "properties/:id",
+        "config": {}
+      },
+      "routes/experiences.$id": {
+        "id": "routes/experiences.$id",
+        "parentId": "routes/_app",
+        "file": "client/routes/experiences.$id.tsx",
+        "path": "experiences/:id",
+        "config": {}
+      },
+      "routes/bookings": {
+        "id": "routes/bookings",
+        "parentId": "routes/_app",
+        "file": "client/routes/bookings.tsx",
+        "path": "bookings",
+        "config": {}
+      },
+      "routes/profile": {
+        "id": "routes/profile",
+        "parentId": "routes/_app",
+        "file": "client/routes/profile.tsx",
+        "path": "profile",
+        "config": {}
+      },
+      "routes/sign-in": {
+        "id": "routes/sign-in",
+        "parentId": "root",
+        "file": "client/routes/sign-in.tsx",
+        "path": "sign-in",
+        "config": {}
+      },
+      "routes/sign-up": {
+        "id": "routes/sign-up",
+        "parentId": "root",
+        "file": "client/routes/sign-up.tsx",
+        "path": "sign-up",
+        "config": {}
+      },
+      "routes/complete-profile": {
+        "id": "routes/complete-profile",
+        "parentId": "root",
+        "file": "client/routes/complete-profile.tsx",
+        "path": "complete-profile",
+        "config": {}
+      },
+      "routes/join": {
+        "id": "routes/join",
+        "parentId": "root",
+        "file": "client/routes/join.tsx",
+        "path": "join",
+        "config": {}
+      }
+    }
+  },
+  "reactRouterConfig": {
+    "appDirectory": "/Users/lvndry/github/ganitel/packages/frontend/client",
+    "basename": "/",
+    "buildDirectory": "/Users/lvndry/github/ganitel/packages/frontend/build",
+    "future": {
+      "unstable_optimizeDeps": false,
+      "unstable_passThroughRequests": false,
+      "unstable_subResourceIntegrity": false,
+      "unstable_trailingSlashAwareDataRequests": false,
+      "unstable_previewServerPrerendering": false,
+      "v8_middleware": false,
+      "v8_splitRouteModules": false,
+      "v8_viteEnvironmentApi": false
+    },
+    "routes": {
+      "root": {
+        "id": "root",
+        "file": "root.tsx",
+        "path": ""
+      },
+      "routes/api.auth.$": {
+        "id": "routes/api.auth.$",
+        "parentId": "root",
+        "file": "routes/api.auth.$.ts",
+        "path": "api/auth/*"
+      },
+      "routes/_app": {
+        "id": "routes/_app",
+        "parentId": "root",
+        "file": "routes/_app.tsx"
+      },
+      "routes/_index": {
+        "id": "routes/_index",
+        "parentId": "routes/_app",
+        "file": "routes/_index.tsx",
+        "index": true
+      },
+      "routes/browse": {
+        "id": "routes/browse",
+        "parentId": "routes/_app",
+        "file": "routes/browse.tsx",
+        "path": "browse"
+      },
+      "routes/properties.$id": {
+        "id": "routes/properties.$id",
+        "parentId": "routes/_app",
+        "file": "routes/properties.$id.tsx",
+        "path": "properties/:id"
+      },
+      "routes/experiences.$id": {
+        "id": "routes/experiences.$id",
+        "parentId": "routes/_app",
+        "file": "routes/experiences.$id.tsx",
+        "path": "experiences/:id"
+      },
+      "routes/bookings": {
+        "id": "routes/bookings",
+        "parentId": "routes/_app",
+        "file": "routes/bookings.tsx",
+        "path": "bookings"
+      },
+      "routes/profile": {
+        "id": "routes/profile",
+        "parentId": "routes/_app",
+        "file": "routes/profile.tsx",
+        "path": "profile"
+      },
+      "routes/sign-in": {
+        "id": "routes/sign-in",
+        "parentId": "root",
+        "file": "routes/sign-in.tsx",
+        "path": "sign-in"
+      },
+      "routes/sign-up": {
+        "id": "routes/sign-up",
+        "parentId": "root",
+        "file": "routes/sign-up.tsx",
+        "path": "sign-up"
+      },
+      "routes/complete-profile": {
+        "id": "routes/complete-profile",
+        "parentId": "root",
+        "file": "routes/complete-profile.tsx",
+        "path": "complete-profile"
+      },
+      "routes/join": {
+        "id": "routes/join",
+        "parentId": "root",
+        "file": "routes/join.tsx",
+        "path": "join"
+      }
+    },
+    "routeDiscovery": {
+      "mode": "lazy",
+      "manifestPath": "/__manifest"
+    },
+    "serverBuildFile": "index.js",
+    "serverModuleFormat": "esm",
+    "ssr": true,
+    "allowedActionOrigins": false,
+    "unstable_routeConfig": [
+      {
+        "id": "root",
+        "path": "",
+        "file": "root.tsx",
+        "children": [
+          {
+            "file": "routes/api.auth.$.ts",
+            "path": "api/auth/*"
+          },
+          {
+            "file": "routes/_app.tsx",
+            "children": [
+              {
+                "file": "routes/_index.tsx",
+                "index": true
+              },
+              {
+                "file": "routes/browse.tsx",
+                "path": "browse"
+              },
+              {
+                "file": "routes/properties.$id.tsx",
+                "path": "properties/:id"
+              },
+              {
+                "file": "routes/experiences.$id.tsx",
+                "path": "experiences/:id"
+              },
+              {
+                "file": "routes/bookings.tsx",
+                "path": "bookings"
+              },
+              {
+                "file": "routes/profile.tsx",
+                "path": "profile"
+              }
+            ]
+          },
+          {
+            "file": "routes/sign-in.tsx",
+            "path": "sign-in"
+          },
+          {
+            "file": "routes/sign-up.tsx",
+            "path": "sign-up"
+          },
+          {
+            "file": "routes/complete-profile.tsx",
+            "path": "complete-profile"
+          },
+          {
+            "file": "routes/join.tsx",
+            "path": "join"
+          }
+        ]
+      }
+    ]
+  },
+  "viteConfig": {
+    "build": {
+      "assetsDir": "assets"
+    }
+  }
+}
