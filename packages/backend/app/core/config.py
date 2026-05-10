@@ -90,9 +90,10 @@ class Settings(PaymentSettings, ObjectStorageSettings, BaseSettings):
 
     CORS_ORIGINS: Annotated[list[str], NoDecode] = Field(default_factory=list)
 
-    # better-auth — backend only verifies tokens; JWKS exposed by the jwt plugin.
-    BETTER_AUTH_JWKS_URL: str | None = None
-    BETTER_AUTH_ISSUER: str | None = None  # e.g. http://localhost:3000
+    # Auth — backend only verifies session JWTs against the provider's JWKS.
+    # Provider-neutral so we can swap (Supabase Auth, better-auth, Clerk, ...).
+    JWT_JWKS_URL: str | None = None
+    JWT_ISSUER: str | None = None
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
