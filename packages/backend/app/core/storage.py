@@ -2,8 +2,7 @@
 
 Supabase expects path-style addressing and SigV4; we set ``addressing_style: path`` accordingly.
 We never proxy file bytes through the backend. Frontend gets a presigned PUT URL,
-uploads directly. On read we either embed a presigned GET URL (default) or a public base URL
-(``S3_PUBLIC_URL_BASE`` — e.g. Supabase ``.../storage/v1/object/public/<bucket>`` or a CDN).
+uploads directly. On read we return a presigned GET URL (keys that are already ``http(s)`` URLs are returned as-is).
 """
 
 from contextlib import asynccontextmanager
@@ -50,8 +49,7 @@ async def public_or_signed_url(key: str) -> str:
     if key.startswith(("http://", "https://")):
         return key
     s = get_settings()
-    if s.S3_PUBLIC_URL_BASE:
-        return f"{s.S3_PUBLIC_URL_BASE.rstrip('/')}/{key}"
+
     async with s3_client() as client:
         return await client.generate_presigned_url(
             "get_object",

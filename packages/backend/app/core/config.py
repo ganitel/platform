@@ -31,9 +31,7 @@ class ObjectStorageSettings(BaseModel):
     - ``S3_ACCESS_KEY_ID`` / ``S3_SECRET_ACCESS_KEY`` to the generated S3 protocol keys (server-side)
     - ``S3_BUCKET`` to your Storage bucket id
 
-    Public reads: set ``S3_PUBLIC_URL_BASE`` to
-    ``https://<project-ref>.supabase.co/storage/v1/object/public/<bucket>`` for public buckets,
-    or leave unset to use presigned GET URLs. The S3 client uses **path-style** addressing, which
+    Reads use presigned GET URLs from the S3 API. The client uses **path-style** addressing, which
     matches Supabase's S3 API requirements.
     """
 
@@ -56,14 +54,6 @@ class ObjectStorageSettings(BaseModel):
     S3_BUCKET: str = Field(
         default="ganitel-uploads",
         description="Bucket id / name (Supabase Storage bucket id).",
-    )
-    S3_PUBLIC_URL_BASE: str | None = Field(
-        default=None,
-        description=(
-            "Optional base URL for browser reads without presigning. "
-            "Supabase public bucket: https://<ref>.supabase.co/storage/v1/object/public/<bucket>. "
-            "None = presigned GET URLs via the S3 API."
-        ),
     )
     MEDIA_GET_URL_TTL_SECONDS: int = 3600
     MEDIA_PUT_URL_TTL_SECONDS: int = 600

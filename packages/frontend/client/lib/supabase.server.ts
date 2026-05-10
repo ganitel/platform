@@ -6,7 +6,11 @@
  * them back to the browser (token refresh, sign-out, etc.).
  */
 
-import { createServerClient, parseCookieHeader, serializeCookieHeader } from "@supabase/ssr";
+import {
+  createServerClient,
+  parseCookieHeader,
+  serializeCookieHeader,
+} from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export function createSupabaseServerClient(request: Request): {
@@ -26,7 +30,10 @@ export function createSupabaseServerClient(request: Request): {
       },
       setAll(cookies) {
         cookies.forEach(({ name, value, options }) => {
-          headers.append("Set-Cookie", serializeCookieHeader(name, value, options));
+          headers.append(
+            "Set-Cookie",
+            serializeCookieHeader(name, value, options),
+          );
         });
       },
     },

@@ -47,7 +47,9 @@ def test_verify_jwt_extracts_claims(rsa_keypair) -> None:
         patch("app.core.auth._client", return_value=mock_jwks),
         patch("app.core.auth.get_settings") as mock_settings,
     ):
-        mock_settings.return_value.JWT_JWKS_URL = "https://test.supabase.co/auth/v1/.well-known/jwks.json"
+        mock_settings.return_value.JWT_JWKS_URL = (
+            "https://test.supabase.co/auth/v1/.well-known/jwks.json"
+        )
         mock_settings.return_value.JWT_ISSUER = "https://test.supabase.co/auth/v1"
         claims = verify_jwt(token)
 
@@ -79,7 +81,9 @@ def test_verify_jwt_accepts_camelcase_phone_claim(rsa_keypair) -> None:
         patch("app.core.auth._client", return_value=mock_jwks),
         patch("app.core.auth.get_settings") as mock_settings,
     ):
-        mock_settings.return_value.JWT_JWKS_URL = "https://test.supabase.co/auth/v1/.well-known/jwks.json"
+        mock_settings.return_value.JWT_JWKS_URL = (
+            "https://test.supabase.co/auth/v1/.well-known/jwks.json"
+        )
         mock_settings.return_value.JWT_ISSUER = "https://test.supabase.co/auth/v1"
         claims = verify_jwt(token)
 
@@ -103,7 +107,9 @@ def test_verify_jwt_raises_on_missing_sub(rsa_keypair) -> None:
         patch("app.core.auth._client", return_value=mock_jwks),
         patch("app.core.auth.get_settings") as mock_settings,
     ):
-        mock_settings.return_value.JWT_JWKS_URL = "https://test.supabase.co/auth/v1/.well-known/jwks.json"
+        mock_settings.return_value.JWT_JWKS_URL = (
+            "https://test.supabase.co/auth/v1/.well-known/jwks.json"
+        )
         mock_settings.return_value.JWT_ISSUER = "https://test.supabase.co/auth/v1"
         with pytest.raises(AuthError, match="missing sub"):
             verify_jwt(token)
@@ -116,7 +122,9 @@ def test_verify_jwt_raises_on_invalid_token() -> None:
         patch("app.core.auth._client") as mock_client,
         patch("app.core.auth.get_settings") as mock_settings,
     ):
-        mock_settings.return_value.JWT_JWKS_URL = "https://test.supabase.co/auth/v1/.well-known/jwks.json"
+        mock_settings.return_value.JWT_JWKS_URL = (
+            "https://test.supabase.co/auth/v1/.well-known/jwks.json"
+        )
         mock_settings.return_value.JWT_ISSUER = "https://test.supabase.co/auth/v1"
         mock_client.return_value.get_signing_key_from_jwt.side_effect = jwt.InvalidTokenError("bad")
         with pytest.raises(AuthError, match="invalid token"):
