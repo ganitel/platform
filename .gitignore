@@ -48,8 +48,6 @@ Thumbs.db
 # Docker
 .docker/
 
-apps/backend/uploads/
-
 .worktrees/
 
 # AI tools

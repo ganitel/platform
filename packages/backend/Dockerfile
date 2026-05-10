@@ -33,7 +33,7 @@ COPY --from=builder --chown=app:app /app/migrations /app/migrations
 COPY --from=builder --chown=app:app /app/alembic.ini /app/alembic.ini
 COPY --chown=app:app entrypoint.sh /app/entrypoint.sh
 
-RUN chmod +x /app/entrypoint.sh && mkdir -p /app/uploads && chown app:app /app/uploads
+RUN chmod +x /app/entrypoint.sh
 
 USER app
 
