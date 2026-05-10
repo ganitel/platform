@@ -1,6 +1,6 @@
 import { Link, NavLink } from "react-router";
 
-import { authClient } from "@/lib/auth-client";
+import { useSession } from "@/lib/supabase";
 import { UserMenu } from "@/features/auth/components/user-menu";
 import { cn } from "@/shared/lib/cn";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
@@ -21,7 +21,7 @@ const NAV_ITEMS: {
 export function Header() {
   const t = useT();
   const isPrelaunch = usePrelaunch();
-  const { data: session, isPending } = authClient.useSession();
+  const { session, isPending } = useSession();
 
   const visibleItems = isPrelaunch
     ? NAV_ITEMS.filter(({ hideInPrelaunch }) => !hideInPrelaunch)

@@ -62,6 +62,11 @@ def create_app() -> FastAPI:
     app.add_middleware(RequestIdMiddleware)
 
     register_exception_handlers(app)
+
+    @app.get("/health", tags=["meta"])
+    async def health() -> dict[str, str]:
+        return {"status": "ok"}
+
     app.include_router(api_router, prefix="/api")
     return app
 

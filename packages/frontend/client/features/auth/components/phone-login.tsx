@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { authClient } from "@/lib/auth-client";
+
+import { getSupabase } from "@/lib/supabase";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/shared/ui/input-otp";
@@ -20,10 +21,13 @@ export function PhoneLogin() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const res = await authClient.phoneNumber.sendOtp({ phoneNumber: phone });
+    const { error: err } = await getSupabase().auth.signInWithOtp({
+      phone,
+      options: { channel: "sms" },
+    });
     setLoading(false);
-    if (res.error) {
-      setError(res.error.message ?? "Erreur lors de l'envoi du code.");
+    if (err) {
+      setError(err.message || "Erreur lors de l'envoi du code.");
       return;
     }
     setStep("otp");
@@ -33,21 +37,18 @@ export function PhoneLogin() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const res = await authClient.phoneNumber.verify({
-      phoneNumber: phone,
-      code: otp,
+    const { data, error: err } = await getSupabase().auth.verifyOtp({
+      phone,
+      token: otp,
+      type: "sms",
     });
     setLoading(false);
-    if (res.error) {
-      setError(res.error.message ?? "Code invalide.");
+    if (err) {
+      setError(err.message || "Code invalide.");
       return;
     }
-    // Redirect to complete-profile if no display name set yet.
-    const session = await authClient.getSession();
-    const name = session.data?.user?.name ?? "";
-    const isPlaceholderName =
-      name.startsWith("+") || /^\+?\d+$/.test(name.replace(/\s/g, ""));
-    navigate(isPlaceholderName ? "/complete-profile" : "/");
+    const name = data.user?.user_metadata?.name as string | undefined;
+    navigate(name ? "/" : "/complete-profile");
   }
 
   if (step === "otp") {

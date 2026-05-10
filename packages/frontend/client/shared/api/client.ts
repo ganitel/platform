@@ -1,7 +1,7 @@
 /**
  * Axios instance for the Ganitel backend.
  *
- * Auth: a better-auth JWT is attached per-request via setAuthTokenGetter().
+ * Auth: a Supabase session JWT is attached per-request via setAuthTokenGetter().
  * The getter is registered once at app boot from entry.client.tsx.
  */
 

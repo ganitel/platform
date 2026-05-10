@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { authClient } from "@/lib/auth-client";
+
+import { getSupabase, type Session } from "@/lib/supabase";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import {
   DropdownMenu,
@@ -9,7 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
-import type { Session } from "@/lib/auth-client";
 
 interface UserMenuProps {
   session: Session;
@@ -19,8 +19,16 @@ export function UserMenu({ session }: UserMenuProps) {
   const navigate = useNavigate();
   const [signingOut, setSigningOut] = useState(false);
 
-  const { user } = session;
-  const initials = (user.name || "?")
+  const meta = session.user.user_metadata as Record<string, unknown> | null;
+  const name =
+    (meta?.name as string | undefined) ??
+    (meta?.full_name as string | undefined) ??
+    session.user.email ??
+    session.user.phone ??
+    "?";
+  const avatar = meta?.avatar_url as string | undefined;
+
+  const initials = name
     .split(/\s+/)
     .map((s) => s[0])
     .filter(Boolean)
@@ -30,7 +38,7 @@ export function UserMenu({ session }: UserMenuProps) {
 
   async function handleSignOut() {
     setSigningOut(true);
-    await authClient.signOut();
+    await getSupabase().auth.signOut();
     navigate("/");
   }
 
@@ -44,9 +52,7 @@ export function UserMenu({ session }: UserMenuProps) {
           className="rounded-full ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ganitel-primary"
         >
           <Avatar className="size-8">
-            {user.image ? (
-              <AvatarImage src={user.image} alt={user.name} />
-            ) : null}
+            {avatar ? <AvatarImage src={avatar} alt={name} /> : null}
             <AvatarFallback className="text-xs">{initials}</AvatarFallback>
           </Avatar>
         </button>

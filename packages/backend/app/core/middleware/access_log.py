@@ -24,7 +24,7 @@ from typing import Any
 import structlog
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-DEFAULT_SKIP_PATHS: frozenset[str] = frozenset({"/api/health"})
+DEFAULT_SKIP_PATHS: frozenset[str] = frozenset({"/health", "/api/health"})
 
 log = structlog.stdlib.get_logger("http")
 

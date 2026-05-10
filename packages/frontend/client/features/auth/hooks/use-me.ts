@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { authClient } from "@/lib/auth-client";
+import { useSession } from "@/lib/supabase";
 import {
   fetchMe,
   patchMe,
@@ -11,7 +11,7 @@ import {
 export const meKey = ["me"] as const;
 
 export function useMe() {
-  const { data: session } = authClient.useSession();
+  const { session } = useSession();
   return useQuery({
     queryKey: meKey,
     queryFn: fetchMe,

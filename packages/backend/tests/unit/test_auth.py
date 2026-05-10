@@ -32,9 +32,9 @@ def test_verify_jwt_extracts_claims(rsa_keypair) -> None:
         {
             "sub": "abc123",
             "email": "x@y.com",
-            "phoneNumber": "+237600000000",
+            "phone_number": "+237600000000",
             "name": "Alice",
-            "iss": "http://localhost:3000",
+            "iss": "https://test.supabase.co/auth/v1",
         },
         private_key,
         algorithm="RS256",
@@ -47,8 +47,10 @@ def test_verify_jwt_extracts_claims(rsa_keypair) -> None:
         patch("app.core.auth._client", return_value=mock_jwks),
         patch("app.core.auth.get_settings") as mock_settings,
     ):
-        mock_settings.return_value.BETTER_AUTH_JWKS_URL = "http://localhost:3000/api/auth/jwks"
-        mock_settings.return_value.BETTER_AUTH_ISSUER = "http://localhost:3000"
+        mock_settings.return_value.JWT_JWKS_URL = (
+            "https://test.supabase.co/auth/v1/.well-known/jwks.json"
+        )
+        mock_settings.return_value.JWT_ISSUER = "https://test.supabase.co/auth/v1"
         claims = verify_jwt(token)
 
     assert claims.user_id == "abc123"
@@ -57,17 +59,16 @@ def test_verify_jwt_extracts_claims(rsa_keypair) -> None:
     assert claims.name == "Alice"
 
 
-def test_verify_jwt_phone_user_extracts_phone_from_email(rsa_keypair) -> None:
-    """Phone users get a synthetic email — backend extracts phone and drops the fake email."""
+def test_verify_jwt_accepts_camelcase_phone_claim(rsa_keypair) -> None:
+    """Some providers emit `phoneNumber` instead of `phone_number` — accept both."""
     from app.core.auth import verify_jwt
 
     private_key, public_key = rsa_keypair
     token = jwt.encode(
         {
-            "sub": "phone_user_1",
-            "email": "237600000000@phone.ganitel.local",
-            "name": "+237600000000",
-            "iss": "http://localhost:3000",
+            "sub": "u",
+            "phoneNumber": "+237600000000",
+            "iss": "https://test.supabase.co/auth/v1",
         },
         private_key,
         algorithm="RS256",
@@ -80,12 +81,13 @@ def test_verify_jwt_phone_user_extracts_phone_from_email(rsa_keypair) -> None:
         patch("app.core.auth._client", return_value=mock_jwks),
         patch("app.core.auth.get_settings") as mock_settings,
     ):
-        mock_settings.return_value.BETTER_AUTH_JWKS_URL = "http://localhost:3000/api/auth/jwks"
-        mock_settings.return_value.BETTER_AUTH_ISSUER = "http://localhost:3000"
+        mock_settings.return_value.JWT_JWKS_URL = (
+            "https://test.supabase.co/auth/v1/.well-known/jwks.json"
+        )
+        mock_settings.return_value.JWT_ISSUER = "https://test.supabase.co/auth/v1"
         claims = verify_jwt(token)
 
     assert claims.phone == "+237600000000"
-    assert claims.email is None
 
 
 def test_verify_jwt_raises_on_missing_sub(rsa_keypair) -> None:
@@ -93,7 +95,7 @@ def test_verify_jwt_raises_on_missing_sub(rsa_keypair) -> None:
 
     private_key, public_key = rsa_keypair
     token = jwt.encode(
-        {"email": "x@y.com", "iss": "http://localhost:3000"},
+        {"email": "x@y.com", "iss": "https://test.supabase.co/auth/v1"},
         private_key,
         algorithm="RS256",
     )
@@ -105,8 +107,10 @@ def test_verify_jwt_raises_on_missing_sub(rsa_keypair) -> None:
         patch("app.core.auth._client", return_value=mock_jwks),
         patch("app.core.auth.get_settings") as mock_settings,
     ):
-        mock_settings.return_value.BETTER_AUTH_JWKS_URL = "http://localhost:3000/api/auth/jwks"
-        mock_settings.return_value.BETTER_AUTH_ISSUER = "http://localhost:3000"
+        mock_settings.return_value.JWT_JWKS_URL = (
+            "https://test.supabase.co/auth/v1/.well-known/jwks.json"
+        )
+        mock_settings.return_value.JWT_ISSUER = "https://test.supabase.co/auth/v1"
         with pytest.raises(AuthError, match="missing sub"):
             verify_jwt(token)
 
@@ -118,8 +122,10 @@ def test_verify_jwt_raises_on_invalid_token() -> None:
         patch("app.core.auth._client") as mock_client,
         patch("app.core.auth.get_settings") as mock_settings,
     ):
-        mock_settings.return_value.BETTER_AUTH_JWKS_URL = "http://localhost:3000/api/auth/jwks"
-        mock_settings.return_value.BETTER_AUTH_ISSUER = "http://localhost:3000"
+        mock_settings.return_value.JWT_JWKS_URL = (
+            "https://test.supabase.co/auth/v1/.well-known/jwks.json"
+        )
+        mock_settings.return_value.JWT_ISSUER = "https://test.supabase.co/auth/v1"
         mock_client.return_value.get_signing_key_from_jwt.side_effect = jwt.InvalidTokenError("bad")
         with pytest.raises(AuthError, match="invalid token"):
             verify_jwt("not.a.jwt")

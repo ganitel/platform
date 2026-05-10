@@ -1,8 +1,8 @@
 """Application settings loaded from env via pydantic-settings.
 
 `get_settings()` is cached and is the single source of truth for
-config. Anything that varies by environment (DB URL, better-auth JWKS,
-CORS origins, payment provider keys, …) belongs here."""
+config. Anything that varies by environment (DB URL, JWT JWKS,
+CORS origins, payment/SMS provider keys, …) belongs here."""
 
 from functools import lru_cache
 from typing import Annotated, Literal, cast
@@ -31,9 +31,7 @@ class ObjectStorageSettings(BaseModel):
     - ``S3_ACCESS_KEY_ID`` / ``S3_SECRET_ACCESS_KEY`` to the generated S3 protocol keys (server-side)
     - ``S3_BUCKET`` to your Storage bucket id
 
-    Public reads: set ``S3_PUBLIC_URL_BASE`` to
-    ``https://<project-ref>.supabase.co/storage/v1/object/public/<bucket>`` for public buckets,
-    or leave unset to use presigned GET URLs. The S3 client uses **path-style** addressing, which
+    Reads use presigned GET URLs from the S3 API. The client uses **path-style** addressing, which
     matches Supabase's S3 API requirements.
     """
 
@@ -56,14 +54,6 @@ class ObjectStorageSettings(BaseModel):
     S3_BUCKET: str = Field(
         default="ganitel-uploads",
         description="Bucket id / name (Supabase Storage bucket id).",
-    )
-    S3_PUBLIC_URL_BASE: str | None = Field(
-        default=None,
-        description=(
-            "Optional base URL for browser reads without presigning. "
-            "Supabase public bucket: https://<ref>.supabase.co/storage/v1/object/public/<bucket>. "
-            "None = presigned GET URLs via the S3 API."
-        ),
     )
     MEDIA_GET_URL_TTL_SECONDS: int = 3600
     MEDIA_PUT_URL_TTL_SECONDS: int = 600
@@ -90,9 +80,30 @@ class Settings(PaymentSettings, ObjectStorageSettings, BaseSettings):
 
     CORS_ORIGINS: Annotated[list[str], NoDecode] = Field(default_factory=list)
 
-    # better-auth — backend only verifies tokens; JWKS exposed by the jwt plugin.
-    BETTER_AUTH_JWKS_URL: str | None = None
-    BETTER_AUTH_ISSUER: str | None = None  # e.g. http://localhost:3000
+    # Auth — backend only verifies session JWTs against the provider's JWKS.
+    # Provider-neutral so we can swap (Supabase Auth, better-auth, Clerk, ...).
+    JWT_JWKS_URL: str | None = None
+    JWT_ISSUER: str | None = None
+
+    # Africa's Talking (SMS) — outbound only, used for OTP delivery to African
+    # numbers via the Supabase Auth Send SMS Hook. AT_BASE_URL points at sandbox
+    # by default for safe local testing; flip to api.africastalking.com in prod.
+    AT_USERNAME: str = "sandbox"
+    AT_API_KEY: str | None = None
+    AT_SENDER_ID: str | None = None
+    AT_BASE_URL: str = "https://api.sandbox.africastalking.com"
+
+    # Twilio — outbound SMS for non-African numbers. The hook routes by country
+    # code: African → AT, everything else → Twilio. Configure either
+    # TWILIO_FROM_NUMBER (a Twilio-owned number) or TWILIO_MESSAGING_SERVICE_SID.
+    TWILIO_ACCOUNT_SID: str | None = None
+    TWILIO_AUTH_TOKEN: str | None = None
+    TWILIO_FROM_NUMBER: str | None = None
+    TWILIO_MESSAGING_SERVICE_SID: str | None = None
+
+    # Supabase Auth Send SMS Hook secret (Standard Webhooks).
+    # Format from Supabase: "v1,whsec_<base64>" — paste it as-is.
+    SUPABASE_AUTH_HOOK_SECRET: str | None = None
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod

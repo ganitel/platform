@@ -1,9 +1,8 @@
-"""better-auth JWT verification.
+"""JWT verification.
 
-The backend never issues tokens. It verifies better-auth JWTs against the
-app's own JWKS endpoint exposed by better-auth's jwt plugin at /api/auth/jwks.
-
-Configure BETTER_AUTH_JWKS_URL and BETTER_AUTH_ISSUER in .env.
+The backend never issues tokens. It verifies session JWTs against an
+external auth provider's JWKS endpoint (Supabase Auth, better-auth,
+Clerk, etc.). Configure JWT_JWKS_URL and JWT_ISSUER in .env.
 """
 
 from dataclasses import dataclass
@@ -30,10 +29,10 @@ class AuthClaims:
 def _client() -> PyJWKClient:
     global _jwks_client
     settings = get_settings()
-    if not settings.BETTER_AUTH_JWKS_URL:
-        raise AuthError("better-auth not configured")
+    if not settings.JWT_JWKS_URL:
+        raise AuthError("auth not configured")
     if _jwks_client is None:
-        _jwks_client = PyJWKClient(settings.BETTER_AUTH_JWKS_URL, cache_keys=True, lifespan=3600)
+        _jwks_client = PyJWKClient(settings.JWT_JWKS_URL, cache_keys=True, lifespan=3600)
     return _jwks_client
 
 
@@ -45,7 +44,7 @@ def verify_jwt(token: str) -> AuthClaims:
             token,
             signing_key,
             algorithms=["RS256"],
-            issuer=settings.BETTER_AUTH_ISSUER,
+            issuer=settings.JWT_ISSUER,
             options={"verify_aud": False},
         )
     except jwt.InvalidTokenError as e:
@@ -54,20 +53,14 @@ def verify_jwt(token: str) -> AuthClaims:
     if not sub:
         raise AuthError("token missing sub")
 
-    # Phone users get a synthetic email (<digits>@phone.ganitel.local).
-    # Always strip it; if phoneNumber claim is present use that, otherwise
-    # extract the real number from the synthetic address.
     email: str | None = claims.get("email")
-    phone: str | None = claims.get("phoneNumber")
-    if email and email.endswith("@phone.ganitel.local"):
-        if not phone:
-            phone = "+" + email.split("@")[0].lstrip("+")
-        email = None
+    phone: str | None = claims.get("phone_number") or claims.get("phoneNumber")
+    name: str | None = claims.get("name")
 
     return AuthClaims(
         user_id=str(sub),
         email=email,
         phone=phone,
-        name=claims.get("name"),
+        name=name,
         raw=claims,
     )
