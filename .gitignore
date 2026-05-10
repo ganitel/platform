@@ -48,10 +48,12 @@ Thumbs.db
 # Docker
 .docker/
 
-# Uploads (runtime)
 apps/backend/uploads/
+
 .worktrees/
 
 # AI tools
 superpowers/
 docs/superpowers/
+
+.vercel
