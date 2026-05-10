@@ -95,13 +95,21 @@ class Settings(PaymentSettings, ObjectStorageSettings, BaseSettings):
     JWT_JWKS_URL: str | None = None
     JWT_ISSUER: str | None = None
 
-    # Africa's Talking (SMS) — outbound only, used for OTP delivery via the
-    # Supabase Auth Send SMS Hook. AT_BASE_URL points at sandbox by default
-    # for safe local testing; flip to api.africastalking.com in prod.
+    # Africa's Talking (SMS) — outbound only, used for OTP delivery to African
+    # numbers via the Supabase Auth Send SMS Hook. AT_BASE_URL points at sandbox
+    # by default for safe local testing; flip to api.africastalking.com in prod.
     AT_USERNAME: str = "sandbox"
     AT_API_KEY: str | None = None
     AT_SENDER_ID: str | None = None
     AT_BASE_URL: str = "https://api.sandbox.africastalking.com"
+
+    # Twilio — outbound SMS for non-African numbers. The hook routes by country
+    # code: African → AT, everything else → Twilio. Configure either
+    # TWILIO_FROM_NUMBER (a Twilio-owned number) or TWILIO_MESSAGING_SERVICE_SID.
+    TWILIO_ACCOUNT_SID: str | None = None
+    TWILIO_AUTH_TOKEN: str | None = None
+    TWILIO_FROM_NUMBER: str | None = None
+    TWILIO_MESSAGING_SERVICE_SID: str | None = None
 
     # Supabase Auth Send SMS Hook secret (Standard Webhooks).
     # Format from Supabase: "v1,whsec_<base64>" — paste it as-is.

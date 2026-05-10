@@ -16,7 +16,7 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel
 
 from app.core.config import get_settings
-from app.modules.auth.africastalking import send_sms
+from app.modules.auth.sms_router import send_otp
 
 router = APIRouter(prefix="/webhooks/auth", tags=["webhooks"])
 
@@ -88,5 +88,5 @@ async def supabase_sms_hook(request: Request) -> dict:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user has no phone")
 
     message = f"Your ganitel code is {payload.sms.otp}"
-    await send_sms(to=payload.user.phone, message=message)
+    await send_otp(to=payload.user.phone, message=message)
     return {}
