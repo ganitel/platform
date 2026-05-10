@@ -3,15 +3,14 @@ import { hydrateRoot } from "react-dom/client";
 import { HydratedRouter } from "react-router/dom";
 
 import { setAuthTokenGetter } from "@/shared/api/client";
+import { getSupabase } from "@/lib/supabase";
 
-// Fetch the better-auth JWT from the /token endpoint on every request.
-// The endpoint validates the session cookie and returns a signed JWT; if the
-// user is not signed in it returns 401 and we return null.
+// Forward the current Supabase session's access token as a Bearer header
+// on every backend call. Supabase auto-refreshes in the background;
+// we just read whatever's current at request time.
 setAuthTokenGetter(async () => {
-  const res = await fetch("/api/auth/token", { credentials: "include" });
-  if (!res.ok) return null;
-  const { token } = (await res.json()) as { token?: string };
-  return token ?? null;
+  const { data } = await getSupabase().auth.getSession();
+  return data.session?.access_token ?? null;
 });
 
 startTransition(() => {

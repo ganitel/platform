@@ -12,6 +12,7 @@ import { getServerToken } from "@/shared/api/server";
 import { serverFetch } from "@/shared/api/server";
 import type { UserMe } from "@/features/auth/api/me";
 import { apiClient } from "@/shared/api/client";
+import { getSupabase } from "@/lib/supabase";
 
 export const meta: Route.MetaFunction = () => [
   { title: "Compléter votre profil — Ganitel" },
@@ -39,7 +40,9 @@ export default function CompleteProfilePage() {
     setLoading(true);
     setError(null);
     try {
-      await apiClient.patch("/me", { display_name: name.trim() });
+      const trimmed = name.trim();
+      await apiClient.patch("/me", { display_name: trimmed });
+      await getSupabase().auth.updateUser({ data: { name: trimmed } });
       navigate("/");
     } catch {
       setError("Une erreur s'est produite. Réessayez.");

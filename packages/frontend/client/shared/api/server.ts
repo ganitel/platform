@@ -11,29 +11,24 @@
  * backend port for local work.
  */
 
-import { auth } from "@/lib/auth.server";
+import { createSupabaseServerClient } from "@/lib/supabase.server";
 
 const baseUrl = (
   globalThis.process?.env?.INTERNAL_API_URL ?? "http://localhost:8000/api"
 ).replace(/\/+$/, "");
 
 /**
- * Retrieve a signed JWT for the current session without an HTTP round-trip.
- * Returns null if the request is unauthenticated.
+ * Retrieve the current Supabase session's access token from the request
+ * cookies. Returns null if unauthenticated.
  */
 export async function getServerToken(request: Request): Promise<string | null> {
-  const authUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
-  const tokenReq = new Request(`${authUrl}/api/auth/token`, {
-    headers: { cookie: request.headers.get("cookie") ?? "" },
-  });
-  const res = await auth.handler(tokenReq);
-  if (!res.ok) return null;
-  const body = (await res.json()) as { token?: string };
-  return body.token ?? null;
+  const { supabase } = createSupabaseServerClient(request);
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? null;
 }
 
 export interface ServerFetchOptions extends RequestInit {
-  /** Bearer token from `getAuth()` for routes that need an authenticated user. */
+  /** Bearer token from `getServerToken()` for routes that need an authenticated user. */
   token?: string | null;
 }
 
