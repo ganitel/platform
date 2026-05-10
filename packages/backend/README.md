@@ -32,7 +32,7 @@ From the **repo root**:
 
 ```bash
 cp packages/backend/.env.example packages/backend/.env
-# fill in CLERK_JWKS_URL, CLERK_ISSUER, S3_* if you need media uploads
+# S3_* if you need media uploads
 
 make install        # uv sync + bun install
 make db-upgrade     # apply migrations
@@ -56,12 +56,6 @@ for the full list. Common ones:
 | `make test`                                                   | unit tests, both halves                           |
 | `make lint` / `make format` / `make typecheck` / `make check` | code quality                                      |
 
-## Auth (Clerk)
-
-The backend never issues tokens. It verifies Clerk session JWTs against the
-configured JWKs (`CLERK_JWKS_URL`, `CLERK_ISSUER`) and mirrors the user into
-a local `users` row keyed by `clerk_user_id`. See `app/core/auth.py` and
-`app/core/deps.py` (`CurrentUser` / `OptionalUser`).
 
 ## Logging
 

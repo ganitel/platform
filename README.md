@@ -38,10 +38,9 @@ From the repo root:
 
 ```bash
 cp packages/backend/.env.example packages/backend/.env
-# fill in CLERK_JWKS_URL, CLERK_ISSUER, S3_* if you need media uploads
+# S3_* if you need media uploads
 
 cp packages/frontend/.env.example packages/frontend/.env
-# fill in VITE_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY, VITE_GOOGLE_MAPS_KEY
 
 make install        # uv sync (backend) + bun install (frontend)
 make db-upgrade     # apply Alembic migrations
