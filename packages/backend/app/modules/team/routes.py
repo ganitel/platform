@@ -10,7 +10,7 @@ from app.modules.team import emails, service, tokens
 from app.modules.team.models import TeamAdmin
 from app.modules.team.schemas import (
     AdminEmailOut,
-    ReviewLink,
+    SubmissionResult,
     TeamMemberOut,
     TeamMemberUpdate,
     TeamRole,
@@ -32,7 +32,7 @@ async def list_team_members(
 
 @router.post(
     "",
-    response_model=ReviewLink,
+    response_model=SubmissionResult,
     status_code=status.HTTP_201_CREATED,
 )
 async def submit_team_member(
@@ -43,7 +43,7 @@ async def submit_team_member(
     city: str = Form(..., min_length=1, max_length=120),
     country: str = Form(..., min_length=1, max_length=120),
     age: int = Form(..., ge=16, le=100),
-) -> ReviewLink:
+) -> SubmissionResult:
     body = await image.read()
     logger.info(
         "team.submit.received name=%s city=%s country=%s image_bytes=%d",
@@ -75,10 +75,20 @@ async def submit_team_member(
         token = tokens.mint(team_member_id=member.id, admin_email=admin)
         return f"{base}/team-members/{member.id}/review?token={token}"
 
-    notified = await emails.notify_admins(
+    sent, attempted = await emails.notify_admins(
         member, admin_emails=admin_emails, review_url_builder=build_review_url
     )
-    return ReviewLink(team_member_id=member.id, admins_notified=notified)
+    logger.info(
+        "team.submit.done team_member_id=%s admins_notified=%d/%d",
+        member.id,
+        sent,
+        attempted,
+    )
+    return SubmissionResult(
+        team_member_id=member.id,
+        admins_attempted=attempted,
+        admins_notified=sent,
+    )
 
 
 @router.get("/admins", response_model=list[AdminEmailOut])

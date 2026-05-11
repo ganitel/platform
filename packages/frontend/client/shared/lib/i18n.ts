@@ -209,6 +209,11 @@ const dict = {
     en: "Starting from",
   },
 
+  "auth.layout.tagline": {
+    fr: "Séjours et expériences en Afrique centrale, choisis avec soin.",
+    en: "Stays and experiences in Central Africa, chosen with care.",
+  },
+
   "join.subtitle": { fr: "Liste d'attente", en: "Waitlist" },
   "join.title": { fr: "Rejoignez Ganitel", en: "Join Ganitel" },
   "join.email": { fr: "Votre adresse e-mail", en: "Your email address" },
@@ -443,10 +448,11 @@ const dict = {
     fr: "Jean Mbarga",
     en: "Jean Mbarga",
   },
-  "add_team.city.label": { fr: "Ville", en: "City" },
-  "add_team.city.placeholder": { fr: "Douala", en: "Douala" },
-  "add_team.country.label": { fr: "Pays", en: "Country" },
-  "add_team.country.placeholder": { fr: "Cameroun", en: "Cameroon" },
+  "add_team.location.label": { fr: "Ville", en: "City" },
+  "add_team.location.placeholder": {
+    fr: "Commencez à taper, ex. Douala",
+    en: "Start typing, e.g. Douala",
+  },
   "add_team.age.label": { fr: "Âge", en: "Age" },
   "add_team.age.placeholder": { fr: "28", en: "28" },
   "add_team.bio.label": { fr: "À propos de vous", en: "About you" },
@@ -487,15 +493,20 @@ const dict = {
     fr: "Modifiez les informations si nécessaire, puis approuvez ou rejetez.",
     en: "Edit any field if needed, then approve or reject.",
   },
-  "review.title_fr.label": { fr: "Titre (fr)", en: "Title (fr)" },
-  "review.title_en.label": { fr: "Titre (en)", en: "Title (en)" },
+  "review.title.label": { fr: "Titre", en: "Title" },
   "review.approve": { fr: "Approuver", en: "Approve" },
   "review.reject": { fr: "Rejeter", en: "Reject" },
   "review.submitting": { fr: "Traitement…", en: "Processing…" },
-  "review.reject.confirm": {
-    fr: "Supprimer définitivement cette candidature ?",
-    en: "Permanently delete this submission?",
+  "review.reject.confirm.title": {
+    fr: "Rejeter cette candidature ?",
+    en: "Reject this submission?",
   },
+  "review.reject.confirm.detail": {
+    fr: "La candidature sera supprimée. Cette action est définitive.",
+    en: "The submission will be deleted. This cannot be undone.",
+  },
+  "review.reject.confirm.cancel": { fr: "Annuler", en: "Cancel" },
+  "review.reject.confirm.action": { fr: "Rejeter", en: "Reject" },
   "review.approved.title": { fr: "Approuvé !", en: "Approved!" },
   "review.approved.detail": {
     fr: "Le membre apparaît maintenant sur la page À propos.",

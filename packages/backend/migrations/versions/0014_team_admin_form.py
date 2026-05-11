@@ -46,7 +46,7 @@ def upgrade() -> None:
         [
             {
                 "id": "f1a2b3c4-d5e6-4a8b-9c0d-1e2f3a4b5c6d",
-                "email": "lvndry@proton.me",
+                "email": "lvndry@protonmail.com",
                 "name": "Landry Monga",
             },
         ],

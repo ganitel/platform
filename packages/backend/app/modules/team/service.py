@@ -8,7 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.errors import NotFoundError, ValidationError
 from app.core.storage import public_or_signed_url, upload_object
 from app.modules.team.models import TeamAdmin, TeamMember
-from app.modules.team.schemas import TeamMemberOut, TeamMemberUpdate, TeamRole
+from app.modules.team.schemas import (
+    TITLE_OPTIONS,
+    TeamMemberOut,
+    TeamMemberUpdate,
+    TeamRole,
+)
 
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 MAX_IMAGE_BYTES = 5 * 1024 * 1024
@@ -75,6 +80,13 @@ async def apply_review_update(
     session: AsyncSession, member: TeamMember, patch: TeamMemberUpdate
 ) -> TeamMember:
     data = patch.model_dump(exclude_unset=True)
+    # title_key fans out to the two locale columns so the form stays simple
+    # (pick one option) but the data model keeps separate fr/en strings.
+    title_key = data.pop("title_key", None)
+    if title_key is not None:
+        title_fr, title_en = TITLE_OPTIONS[title_key]
+        member.title_fr = title_fr
+        member.title_en = title_en
     for field, value in data.items():
         setattr(member, field, value)
     await session.commit()

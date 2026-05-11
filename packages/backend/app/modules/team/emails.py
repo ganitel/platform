@@ -60,7 +60,12 @@ def _build_html(member: TeamMember, review_url: str) -> str:
 """.strip()
 
 
-def _send_one(*, to: str, subject: str, html: str) -> None:
+def _send_one(*, to: str, subject: str, html: str) -> bool:
+    """Returns True if Resend accepted the send, False otherwise.
+
+    Caller is responsible for surfacing failure to the user — we deliberately
+    don't raise here so a single bad recipient doesn't kill notifications to
+    other admins, but we also don't pretend success."""
     s = get_settings()
     if not s.RESEND_API_KEY:
         logger.warning(
@@ -68,9 +73,14 @@ def _send_one(*, to: str, subject: str, html: str) -> None:
             to,
             subject,
         )
-        return
+        return False
     resend.api_key = s.RESEND_API_KEY
-    logger.info("team.email.sending to=%s from=%s subject=%s", to, s.RESEND_FROM_EMAIL, subject)
+    logger.info(
+        "team.email.sending to=%s from=%s subject=%s",
+        to,
+        s.RESEND_FROM_EMAIL,
+        subject,
+    )
     try:
         result = resend.Emails.send(
             {
@@ -81,25 +91,33 @@ def _send_one(*, to: str, subject: str, html: str) -> None:
             }
         )
     except Exception:
-        # Best-effort: never crash the submission because email failed.
         logger.exception("team.email.failed to=%s", to)
-        return
+        return False
     email_id = result.get("id") if isinstance(result, dict) else None
     logger.info("team.email.sent to=%s resend_id=%s", to, email_id)
+    return True
 
 
-async def notify_admins(member: TeamMember, *, admin_emails: list[str], review_url_builder) -> int:
-    """Fire-and-forget email to every admin. Returns the count attempted.
+async def notify_admins(
+    member: TeamMember, *, admin_emails: list[str], review_url_builder
+) -> tuple[int, int]:
+    """Email every admin. Returns (sent, attempted) — caller surfaces partial
+    failure to the user rather than letting a swallowed exception masquerade
+    as success.
 
     `review_url_builder(admin_email) -> str` lets the caller mint a per-admin
     tokenized link so each email contains the recipient's specific token."""
     subject = f"Ganitel — new team-member submission: {member.name}"
     loop = asyncio.get_running_loop()
+    sent = 0
     for admin in admin_emails:
         url = review_url_builder(admin)
         html = _build_html(member, url)
         # resend SDK is synchronous; offload so we don't block the event loop.
-        await loop.run_in_executor(
-            None, lambda to=admin, subj=subject, h=html: _send_one(to=to, subject=subj, html=h)
+        ok = await loop.run_in_executor(
+            None,
+            lambda to=admin, subj=subject, h=html: _send_one(to=to, subject=subj, html=h),
         )
-    return len(admin_emails)
+        if ok:
+            sent += 1
+    return sent, len(admin_emails)
