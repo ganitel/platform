@@ -28,7 +28,12 @@ dev: ## Start frontend + backend dev servers concurrently (hot reload)
 
 dev-backend: ## Backend FastAPI dev server (http://localhost:8000)
 	@echo "→ FastAPI dev server: http://localhost:8000"
-	cd packages/backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	# PYTHONUNBUFFERED=1: when `make dev` pipes our stdout through `sed`,
+	# Python switches to block-buffered output. For a long-running server,
+	# logs would sit in the buffer for minutes before becoming visible.
+	# Unbuffered flushes per line so `team.submit.*` / `team.email.*` logs
+	# show up in your terminal as requests fire.
+	cd packages/backend && PYTHONUNBUFFERED=1 uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 dev-frontend: ## Frontend Vite dev server (http://localhost:3000)
 	@echo "→ Vite dev server: http://localhost:3000"

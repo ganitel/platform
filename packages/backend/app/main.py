@@ -29,6 +29,11 @@ def _run_migrations() -> None:
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    # Configure logging HERE (in lifespan), not at module load. Uvicorn calls
+    # its own logging.config.dictConfig after importing this module and resets
+    # root logger to its defaults (WARNING level, stderr handler). Doing it in
+    # lifespan means our config wins because it runs last.
+    configure_logging(debug=get_settings().DEBUG)
     await asyncio.get_event_loop().run_in_executor(None, _run_migrations)
     yield
     await dispose_engine()
@@ -36,7 +41,6 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    configure_logging(debug=settings.DEBUG)
 
     app = FastAPI(
         title=settings.APP_NAME,
