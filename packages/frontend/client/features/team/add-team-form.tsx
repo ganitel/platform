@@ -110,164 +110,164 @@ export function AddTeamForm() {
             </Link>
           </motion.div>
         ) : (
-          <motion.form
+          <motion.div
             key="form"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            onSubmit={handleSubmit}
-            className="space-y-5"
           >
-            <div>
-              <label htmlFor="add-team-image" className={LABEL_CLASS}>
-                {t("add_team.image.label")}
-              </label>
-              <label
-                htmlFor="add-team-image"
-                className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-ganitel-stroke-neutral bg-ganitel-neutral-1 px-4 py-4 text-sm text-ganitel-text-subtitle hover:border-ganitel-secondary"
-              >
-                {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt=""
-                    className="size-14 rounded-full object-cover"
-                  />
-                ) : (
-                  <ImagePlus
-                    className="size-6 text-ganitel-text-placeholder"
-                    aria-hidden
-                  />
-                )}
-                <span className="truncate">
-                  {image ? image.name : t("add_team.image.placeholder")}
-                </span>
-              </label>
-              <input
-                id="add-team-image"
-                type="file"
-                accept={ACCEPTED_TYPES}
-                className="sr-only"
-                onChange={(event) =>
-                  onPickImage(event.target.files?.[0] ?? null)
-                }
-              />
-              <p className="mt-1.5 text-xs text-ganitel-text-placeholder">
-                {t("add_team.image.hint")}
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="add-team-name" className={LABEL_CLASS}>
-                {t("add_team.name.label")}
-              </label>
-              <div className="relative">
-                <User
-                  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ganitel-text-placeholder"
-                  aria-hidden
-                />
-                <input
-                  id="add-team-name"
-                  type="text"
-                  required
-                  maxLength={120}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  placeholder={t("add_team.name.placeholder")}
-                  className={cn(INPUT_CLASS, "pl-10")}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label htmlFor="add-team-city" className={LABEL_CLASS}>
-                  {t("add_team.city.label")}
+                <label htmlFor="add-team-image" className={LABEL_CLASS}>
+                  {t("add_team.image.label")}
+                </label>
+                <label
+                  htmlFor="add-team-image"
+                  className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-ganitel-stroke-neutral bg-ganitel-neutral-1 px-4 py-4 text-sm text-ganitel-text-subtitle hover:border-ganitel-secondary"
+                >
+                  {imagePreview ? (
+                    <img
+                      src={imagePreview}
+                      alt=""
+                      className="size-14 rounded-full object-cover"
+                    />
+                  ) : (
+                    <ImagePlus
+                      className="size-6 text-ganitel-text-placeholder"
+                      aria-hidden
+                    />
+                  )}
+                  <span className="truncate">
+                    {image ? image.name : t("add_team.image.placeholder")}
+                  </span>
+                </label>
+                <input
+                  id="add-team-image"
+                  type="file"
+                  accept={ACCEPTED_TYPES}
+                  className="sr-only"
+                  onChange={(event) =>
+                    onPickImage(event.target.files?.[0] ?? null)
+                  }
+                />
+                <p className="mt-1.5 text-xs text-ganitel-text-placeholder">
+                  {t("add_team.image.hint")}
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="add-team-name" className={LABEL_CLASS}>
+                  {t("add_team.name.label")}
                 </label>
                 <div className="relative">
-                  <MapPin
+                  <User
                     className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ganitel-text-placeholder"
                     aria-hidden
                   />
                   <input
-                    id="add-team-city"
+                    id="add-team-name"
                     type="text"
                     required
                     maxLength={120}
-                    value={city}
-                    onChange={(event) => setCity(event.target.value)}
-                    placeholder={t("add_team.city.placeholder")}
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    placeholder={t("add_team.name.placeholder")}
                     className={cn(INPUT_CLASS, "pl-10")}
                   />
                 </div>
               </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="add-team-city" className={LABEL_CLASS}>
+                    {t("add_team.city.label")}
+                  </label>
+                  <div className="relative">
+                    <MapPin
+                      className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ganitel-text-placeholder"
+                      aria-hidden
+                    />
+                    <input
+                      id="add-team-city"
+                      type="text"
+                      required
+                      maxLength={120}
+                      value={city}
+                      onChange={(event) => setCity(event.target.value)}
+                      placeholder={t("add_team.city.placeholder")}
+                      className={cn(INPUT_CLASS, "pl-10")}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="add-team-country" className={LABEL_CLASS}>
+                    {t("add_team.country.label")}
+                  </label>
+                  <input
+                    id="add-team-country"
+                    type="text"
+                    required
+                    maxLength={120}
+                    value={country}
+                    onChange={(event) => setCountry(event.target.value)}
+                    placeholder={t("add_team.country.placeholder")}
+                    className={INPUT_CLASS}
+                  />
+                </div>
+              </div>
+
               <div>
-                <label htmlFor="add-team-country" className={LABEL_CLASS}>
-                  {t("add_team.country.label")}
+                <label htmlFor="add-team-age" className={LABEL_CLASS}>
+                  {t("add_team.age.label")}
                 </label>
                 <input
-                  id="add-team-country"
-                  type="text"
+                  id="add-team-age"
+                  type="number"
+                  inputMode="numeric"
                   required
-                  maxLength={120}
-                  value={country}
-                  onChange={(event) => setCountry(event.target.value)}
-                  placeholder={t("add_team.country.placeholder")}
+                  min={16}
+                  max={100}
+                  value={age}
+                  onChange={(event) => setAge(event.target.value)}
+                  placeholder={t("add_team.age.placeholder")}
                   className={INPUT_CLASS}
                 />
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="add-team-age" className={LABEL_CLASS}>
-                {t("add_team.age.label")}
-              </label>
-              <input
-                id="add-team-age"
-                type="number"
-                inputMode="numeric"
-                required
-                min={16}
-                max={100}
-                value={age}
-                onChange={(event) => setAge(event.target.value)}
-                placeholder={t("add_team.age.placeholder")}
-                className={INPUT_CLASS}
-              />
-            </div>
+              <div>
+                <label htmlFor="add-team-bio" className={LABEL_CLASS}>
+                  {t("add_team.bio.label")}
+                </label>
+                <textarea
+                  id="add-team-bio"
+                  rows={5}
+                  required
+                  maxLength={2000}
+                  value={bio}
+                  onChange={(event) => setBio(event.target.value)}
+                  placeholder={t("add_team.bio.placeholder")}
+                  className={cn(INPUT_CLASS, "resize-none")}
+                />
+                <p className="mt-1.5 text-xs text-ganitel-text-placeholder">
+                  {t("add_team.bio.hint")}
+                </p>
+              </div>
 
-            <div>
-              <label htmlFor="add-team-bio" className={LABEL_CLASS}>
-                {t("add_team.bio.label")}
-              </label>
-              <textarea
-                id="add-team-bio"
-                rows={5}
-                required
-                maxLength={2000}
-                value={bio}
-                onChange={(event) => setBio(event.target.value)}
-                placeholder={t("add_team.bio.placeholder")}
-                className={cn(INPUT_CLASS, "resize-none")}
-              />
-              <p className="mt-1.5 text-xs text-ganitel-text-placeholder">
-                {t("add_team.bio.hint")}
-              </p>
-            </div>
+              {errorMessage && (
+                <p className="text-xs text-red-500">{errorMessage}</p>
+              )}
 
-            {errorMessage && (
-              <p className="text-xs text-red-500">{errorMessage}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={submitDisabled}
-              className="w-full rounded-xl bg-ganitel-primary py-3.5 text-sm font-semibold text-white transition-all hover:bg-ganitel-primary/90 active:scale-[0.98] disabled:opacity-60"
-            >
-              {state === "submitting"
-                ? t("add_team.submitting")
-                : t("add_team.submit")}
-            </button>
-          </motion.form>
+              <button
+                type="submit"
+                disabled={submitDisabled}
+                className="w-full rounded-xl bg-ganitel-primary py-3.5 text-sm font-semibold text-white transition-all hover:bg-ganitel-primary/90 active:scale-[0.98] disabled:opacity-60"
+              >
+                {state === "submitting"
+                  ? t("add_team.submitting")
+                  : t("add_team.submit")}
+              </button>
+            </form>
+          </motion.div>
         )}
       </AnimatePresence>
     </AuthLayout>

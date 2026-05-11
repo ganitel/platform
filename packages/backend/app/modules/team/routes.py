@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, File, Form, Query, UploadFile, status
@@ -14,6 +15,8 @@ from app.modules.team.schemas import (
     TeamMemberUpdate,
     TeamRole,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/team-members", tags=["team"])
 
@@ -42,6 +45,13 @@ async def submit_team_member(
     age: int = Form(..., ge=16, le=100),
 ) -> ReviewLink:
     body = await image.read()
+    logger.info(
+        "team.submit.received name=%s city=%s country=%s image_bytes=%d",
+        name,
+        city,
+        country,
+        len(body),
+    )
     member = await service.create_submission(
         session,
         name=name,
@@ -52,7 +62,13 @@ async def submit_team_member(
         image_bytes=body,
         image_content_type=image.content_type or "application/octet-stream",
     )
+    logger.info(
+        "team.submit.created team_member_id=%s avatar_key=%s",
+        member.id,
+        member.avatar_url,
+    )
     admin_emails = await service.list_admin_emails(session)
+    logger.info("team.submit.admins count=%d", len(admin_emails))
     base = get_settings().APP_BASE_URL.rstrip("/")
 
     def build_review_url(admin: str) -> str:

@@ -64,14 +64,15 @@ def _send_one(*, to: str, subject: str, html: str) -> None:
     s = get_settings()
     if not s.RESEND_API_KEY:
         logger.warning(
-            "RESEND_API_KEY unset — skipping team-admin email to %s. Subject: %s",
+            "team.email.skipped reason=no_api_key to=%s subject=%s",
             to,
             subject,
         )
         return
     resend.api_key = s.RESEND_API_KEY
+    logger.info("team.email.sending to=%s from=%s subject=%s", to, s.RESEND_FROM_EMAIL, subject)
     try:
-        resend.Emails.send(
+        result = resend.Emails.send(
             {
                 "from": s.RESEND_FROM_EMAIL,
                 "to": [to],
@@ -81,7 +82,10 @@ def _send_one(*, to: str, subject: str, html: str) -> None:
         )
     except Exception:
         # Best-effort: never crash the submission because email failed.
-        logger.exception("Failed to send team-admin email to %s", to)
+        logger.exception("team.email.failed to=%s", to)
+        return
+    email_id = result.get("id") if isinstance(result, dict) else None
+    logger.info("team.email.sent to=%s resend_id=%s", to, email_id)
 
 
 async def notify_admins(member: TeamMember, *, admin_emails: list[str], review_url_builder) -> int:
