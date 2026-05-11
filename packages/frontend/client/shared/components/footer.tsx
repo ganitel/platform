@@ -20,7 +20,12 @@ export function Footer() {
           </span>
           <span className="text-ganitel-text-placeholder">· 2026</span>
         </Link>
-        <span className="tracking-tight">{t("footer.regions")}</span>
+        <nav className="flex items-center gap-6 tracking-tight" aria-label="Footer">
+          <Link to="/about" className="hover:text-ganitel-text-title">
+            {t("nav.about")}
+          </Link>
+          <span>{t("footer.regions")}</span>
+        </nav>
       </div>
     </footer>
   );

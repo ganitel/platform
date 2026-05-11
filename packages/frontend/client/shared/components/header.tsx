@@ -14,6 +14,7 @@ const NAV_ITEMS: {
 }[] = [
   { to: "/", labelKey: "nav.home" },
   { to: "/browse", labelKey: "nav.browse" },
+  { to: "/about", labelKey: "nav.about" },
   { to: "/bookings", labelKey: "nav.bookings", hideInPrelaunch: true },
   { to: "/profile", labelKey: "nav.profile", hideInPrelaunch: true },
 ];
