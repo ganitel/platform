@@ -14,6 +14,7 @@ export default [
     route("experiences/:id", "routes/experiences.$id.tsx"),
     route("bookings", "routes/bookings.tsx"),
     route("profile", "routes/profile.tsx"),
+    route("about", "routes/about.tsx"),
   ]),
 
   // Auth pages — no app shell.

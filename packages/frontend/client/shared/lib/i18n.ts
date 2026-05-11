@@ -275,6 +275,46 @@ const dict = {
     en: "We'll reach out as soon as we launch. Thank you for your trust.",
   },
   "join.success.back": { fr: "Retour à l'accueil", en: "Back to home" },
+
+  "nav.about": { fr: "À propos", en: "About" },
+  "about.tag": { fr: "Notre histoire", en: "Our story" },
+  "about.title": {
+    fr: "Nous aimons le Cameroun —",
+    en: "We love Cameroon —",
+  },
+  "about.title_em": { fr: "chaque recoin.", en: "every corner of it." },
+  "about.lede": {
+    fr: "De la côte volcanique du Sud-Ouest aux plateaux de l'Adamaoua, des forêts de l'Est à l'agitation de Douala — le Cameroun, c'est des dizaines de pays sous un même drapeau, et nous voulons que vous le ressentiez.",
+    en: "From the volcanic coast of the South-West to the highlands of the Adamawa, the rainforests of the East to the bustle of Douala — Cameroon is dozens of countries living under one flag, and we want you to feel it.",
+  },
+  "about.body.diversity": {
+    fr: "Dix régions, plus de deux cent cinquante langues, un littoral, un désert, des montagnes, des savanes, des forêts. La diversité est vertigineuse, et elle vit dans la cuisine, la musique, l'architecture, la manière dont on vous salue le matin.",
+    en: "Ten regions, more than two hundred and fifty languages, a coastline, a desert, mountains, savannahs, forests. The diversity is staggering, and it lives in the food, the music, the architecture, the way people greet you in the morning.",
+  },
+  "about.body.proud": {
+    fr: "Nous en sommes fiers — et un peu obsédés à l'idée de bien la partager. Pas la version highlight reel, mais la version plus lente, plus profonde, celle qui demande du temps.",
+    en: "We're proud of all of it — and a little obsessed with sharing it the right way. Not the highlight-reel version, but the slower, deeper one that takes time to find.",
+  },
+  "about.body.craft": {
+    fr: "C'est pourquoi nous concevons des séjours et des expériences sur mesure — choisis à la main, vérifiés en personne, pensés autour de ce que vous voulez vraiment. Aucun voyage ne se ressemble, parce qu'aucun recoin du Cameroun ne se ressemble non plus.",
+    en: "That's why we craft custom experiences and stays — handpicked, personally vetted, designed around what you actually want. No two journeys look alike, because no two corners of Cameroon look alike either.",
+  },
+  "about.team.tag": { fr: "L'équipe", en: "The team" },
+  "about.team.title": {
+    fr: "Les visages derrière",
+    en: "The people behind",
+  },
+  "about.team.title_em": { fr: "Ganitel.", en: "Ganitel." },
+  "about.team.lede": {
+    fr: "Une petite équipe basée entre le Cameroun et l'Europe, rejointe par des guides locaux qui connaissent leur région mieux que personne.",
+    en: "A small team between Cameroon and Europe, joined by local guides who know their region better than anyone.",
+  },
+  "about.closing.tag": { fr: "Prêt à partir ?", en: "Ready to go?" },
+  "about.closing": {
+    fr: "Venez pour un séjour. Repartez avec une histoire.",
+    en: "Come for a stay. Leave with a story.",
+  },
+  "about.cta": { fr: "Découvrir les séjours", en: "Browse stays" },
 } satisfies Dict;
 
 export type TranslationKey = keyof typeof dict;

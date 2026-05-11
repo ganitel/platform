@@ -17,6 +17,7 @@ from app.modules.media import models as _media_models  # noqa: F401
 from app.modules.outbox import models as _outbox_models  # noqa: F401
 from app.modules.payments import models as _payments_models  # noqa: F401
 from app.modules.properties import models as _properties_models  # noqa: F401
+from app.modules.team import models as _team_models  # noqa: F401
 from app.modules.users import models as _users_models  # noqa: F401
 
 config = context.config
