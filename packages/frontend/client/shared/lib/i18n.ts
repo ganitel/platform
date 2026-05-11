@@ -216,6 +216,66 @@ const dict = {
     fr: "Votre numéro WhatsApp (optionnel)",
     en: "Your WhatsApp number (optional)",
   },
+  "join.role.label": {
+    fr: "Vous êtes…",
+    en: "You are…",
+  },
+  "join.role.traveler": {
+    fr: "En tant que voyageur",
+    en: "As a traveler",
+  },
+  "join.role.host": {
+    fr: "En tant qu'hôte",
+    en: "As a host",
+  },
+  "join.host.interest.label": {
+    fr: "Que voulez-vous proposer ?",
+    en: "What do you want to host?",
+  },
+  "join.host.city.label": {
+    fr: "Ville",
+    en: "City",
+  },
+  "join.host.city.placeholder": {
+    fr: "Ex. Douala, Yaoundé, Limbe",
+    en: "e.g. Douala, Yaoundé, Limbe",
+  },
+  "join.host.inventory.label": {
+    fr: "Combien de biens ou d'expériences ?",
+    en: "How many properties or experiences?",
+  },
+  "join.host.inventory.placeholder": {
+    fr: "Sélectionnez",
+    en: "Select one",
+  },
+  "join.host.inventory.1": { fr: "1", en: "1" },
+  "join.host.inventory.2_5": { fr: "2 à 5", en: "2 to 5" },
+  "join.host.inventory.6_10": { fr: "6 à 10", en: "6 to 10" },
+  "join.host.inventory.10_plus": { fr: "Plus de 10", en: "More than 10" },
+  "join.host.status.label": {
+    fr: "Où en êtes-vous ?",
+    en: "Where are you in your project?",
+  },
+  "join.host.status.placeholder": {
+    fr: "Sélectionnez",
+    en: "Select one",
+  },
+  "join.host.status.ready": {
+    fr: "Déjà prêt à recevoir",
+    en: "Ready to host",
+  },
+  "join.host.status.under_construction": {
+    fr: "En construction",
+    en: "Under construction",
+  },
+  "join.host.status.planning": {
+    fr: "En projet",
+    en: "Planning",
+  },
+  "join.host.status.just_exploring": {
+    fr: "Je me renseigne",
+    en: "Just exploring",
+  },
   "join.interest.label": {
     fr: "Je suis intéressé par",
     en: "I'm interested in",
