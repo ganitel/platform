@@ -1,8 +1,8 @@
-import { isAxiosError } from "axios";
 import { redirect } from "react-router";
 
 import type { Route } from "./+types/team-members.$id.review";
 
+import { ApiError } from "@/shared/api/client";
 import { getForReviewServer } from "@/features/team/api.server";
 import { ReviewForm } from "@/features/team/review-form";
 
@@ -21,7 +21,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     const member = await getForReviewServer(params.id, token);
     return { member, token };
   } catch (error) {
-    if (isAxiosError(error) && error.response?.status === 401) {
+    if (error instanceof ApiError && error.status === 401) {
       throw new Response("Invalid or expired token", { status: 401 });
     }
     throw error;

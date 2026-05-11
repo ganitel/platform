@@ -1,5 +1,4 @@
-import { apiClient, ApiError } from "@/shared/api/client";
-import { env } from "@/shared/lib/env";
+import { apiClient } from "@/shared/api/client";
 import type { TeamMember } from "@/features/about/types";
 
 export interface SubmissionInput {
@@ -26,28 +25,11 @@ export async function submitTeamMember(
   data.append("city", input.city);
   data.append("country", input.country);
   data.append("age", String(input.age));
-
-  // Skip axios for this single multipart call: the shared apiClient defaults
-  // Content-Type to application/json, which fights with FormData. fetch lets
-  // the browser set `multipart/form-data; boundary=...` directly.
-  const response = await fetch(`${env.apiBaseUrl}/team-members`, {
-    method: "POST",
-    body: data,
-  });
-  if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as {
-      detail?: string;
-      message?: string;
-    } | null;
-    throw new ApiError(
-      payload?.detail ??
-        payload?.message ??
-        `Request failed: ${response.status}`,
-      response.status,
-      payload,
-    );
-  }
-  return (await response.json()) as SubmissionResult;
+  const response = await apiClient.post<SubmissionResult>(
+    "/team-members",
+    data,
+  );
+  return response.data;
 }
 
 export interface ReviewPatch {

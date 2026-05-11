@@ -8,7 +8,9 @@ import type {
 export async function searchProperties(
   filters: SearchFilters = {},
 ): Promise<SearchOut> {
-  const r = await apiClient.get<SearchOut>("/properties", { params: filters });
+  const r = await apiClient.get<SearchOut>("/properties", {
+    params: filters as Record<string, unknown>,
+  });
   return r.data;
 }
 
