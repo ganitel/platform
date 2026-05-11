@@ -12,7 +12,7 @@ export function Footer() {
           className="inline-flex items-center gap-2 text-ganitel-text-title"
           aria-label="Ganitel"
         >
-          <span className="grid size-5 -rotate-[4deg] place-items-center rounded-md bg-ganitel-text-title text-[10px] font-extrabold leading-none text-ganitel-paper">
+          <span className="grid size-5 rotate-[-4deg] place-items-center rounded-md bg-ganitel-text-title text-[10px] font-extrabold leading-none text-ganitel-paper">
             G
           </span>
           <span className="font-display text-[14px] font-extrabold tracking-[-0.04em]">
@@ -20,7 +20,10 @@ export function Footer() {
           </span>
           <span className="text-ganitel-text-placeholder">· 2026</span>
         </Link>
-        <nav className="flex items-center gap-6 tracking-tight" aria-label="Footer">
+        <nav
+          className="flex items-center gap-6 tracking-tight"
+          aria-label="Footer"
+        >
           <Link to="/about" className="hover:text-ganitel-text-title">
             {t("nav.about")}
           </Link>

@@ -105,6 +105,20 @@ class Settings(PaymentSettings, ObjectStorageSettings, BaseSettings):
     # Format from Supabase: "v1,whsec_<base64>" — paste it as-is.
     SUPABASE_AUTH_HOOK_SECRET: str | None = None
 
+    # Resend (transactional email) — used to notify admins when a team member
+    # submits the /add-team form. Submissions still succeed if these are unset;
+    # we just log a warning instead of sending the review email.
+    RESEND_API_KEY: str | None = None
+    RESEND_FROM_EMAIL: str = "Ganitel <noreply@ganitel.com>"
+
+    # Public base URL used to build links in outbound email (e.g., review pages).
+    APP_BASE_URL: str = "http://localhost:3000"
+
+    # Secret used to sign short-lived review tokens for admin approval links.
+    # Falls back to an unsafe dev default if unset; production must override.
+    TEAM_REVIEW_SECRET: str = "dev-only-change-me"
+    TEAM_REVIEW_TOKEN_TTL_SECONDS: int = 60 * 60 * 24 * 7
+
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def _split_csv(cls, v: object) -> object:

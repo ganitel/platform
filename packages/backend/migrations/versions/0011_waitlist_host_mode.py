@@ -34,9 +34,7 @@ def upgrade() -> None:
     )
 
     op.drop_constraint("uq_waitlist_email_property", "waitlist_emails", type_="unique")
-    op.drop_constraint(
-        "uq_waitlist_email_experience", "waitlist_emails", type_="unique"
-    )
+    op.drop_constraint("uq_waitlist_email_experience", "waitlist_emails", type_="unique")
     op.create_unique_constraint(
         "uq_waitlist_email_property",
         "waitlist_emails",
@@ -50,9 +48,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_constraint(
-        "uq_waitlist_email_experience", "waitlist_emails", type_="unique"
-    )
+    op.drop_constraint("uq_waitlist_email_experience", "waitlist_emails", type_="unique")
     op.drop_constraint("uq_waitlist_email_property", "waitlist_emails", type_="unique")
     op.create_unique_constraint(
         "uq_waitlist_email_property",

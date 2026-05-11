@@ -33,10 +33,24 @@ class TeamMember(Base):
     bio_fr: Mapped[str | None] = mapped_column(Text())
     bio_en: Mapped[str | None] = mapped_column(Text())
     avatar_url: Mapped[str | None] = mapped_column(String(500))
+    city: Mapped[str | None] = mapped_column(String(120))
+    country: Mapped[str | None] = mapped_column(String(120))
+    age: Mapped[int | None] = mapped_column(Integer())
     display_order: Mapped[int] = mapped_column(Integer(), nullable=False, server_default="0")
     is_active: Mapped[bool] = mapped_column(
         Boolean(), nullable=False, default=True, server_default="true"
     )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class TeamAdmin(Base):
+    __tablename__ = "team_admins"
+
+    id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
+    email: Mapped[str] = mapped_column(String(320), nullable=False, unique=True)
+    name: Mapped[str | None] = mapped_column(String(120))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

@@ -10,12 +10,8 @@ from app.core.db import Base
 class WaitlistEntry(Base):
     __tablename__ = "waitlist_emails"
     __table_args__ = (
-        UniqueConstraint(
-            "email", "property_id", "role", name="uq_waitlist_email_property"
-        ),
-        UniqueConstraint(
-            "email", "experience_id", "role", name="uq_waitlist_email_experience"
-        ),
+        UniqueConstraint("email", "property_id", "role", name="uq_waitlist_email_property"),
+        UniqueConstraint("email", "experience_id", "role", name="uq_waitlist_email_experience"),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)

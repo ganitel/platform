@@ -1,10 +1,17 @@
 from collections.abc import Sequence
+from typing import cast
+from uuid import UUID, uuid4
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.team.models import TeamMember
-from app.modules.team.schemas import TeamRole
+from app.core.errors import NotFoundError, ValidationError
+from app.core.storage import public_or_signed_url, upload_object
+from app.modules.team.models import TeamAdmin, TeamMember
+from app.modules.team.schemas import TeamMemberOut, TeamMemberUpdate, TeamRole
+
+ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
+MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
 
 async def list_active(session: AsyncSession, role: TeamRole | None = None) -> Sequence[TeamMember]:
@@ -14,3 +21,105 @@ async def list_active(session: AsyncSession, role: TeamRole | None = None) -> Se
     stmt = stmt.order_by(TeamMember.display_order, TeamMember.created_at)
     result = await session.execute(stmt)
     return result.scalars().all()
+
+
+async def get_by_id(session: AsyncSession, team_member_id: UUID) -> TeamMember:
+    member = await session.get(TeamMember, team_member_id)
+    if member is None:
+        raise NotFoundError("Team member not found")
+    return member
+
+
+async def create_submission(
+    session: AsyncSession,
+    *,
+    name: str,
+    bio_fr: str,
+    city: str,
+    country: str,
+    age: int,
+    image_bytes: bytes,
+    image_content_type: str,
+) -> TeamMember:
+    if image_content_type not in ALLOWED_IMAGE_TYPES:
+        raise ValidationError(f"Unsupported image type: {image_content_type}")
+    if len(image_bytes) > MAX_IMAGE_BYTES:
+        raise ValidationError("Image is larger than 5MB")
+    if len(image_bytes) == 0:
+        raise ValidationError("Image is empty")
+
+    extension = _extension_for(image_content_type)
+    key = f"team/{uuid4().hex}.{extension}"
+    await upload_object(key=key, body=image_bytes, content_type=image_content_type)
+
+    member = TeamMember(
+        name=name,
+        role="tour_guide",
+        title_fr="Guide touristique",
+        title_en="Tour guide",
+        bio_fr=bio_fr,
+        avatar_url=key,
+        city=city,
+        country=country,
+        age=age,
+        display_order=1000,
+        is_active=False,
+    )
+    session.add(member)
+    await session.commit()
+    await session.refresh(member)
+    return member
+
+
+async def apply_review_update(
+    session: AsyncSession, member: TeamMember, patch: TeamMemberUpdate
+) -> TeamMember:
+    data = patch.model_dump(exclude_unset=True)
+    for field, value in data.items():
+        setattr(member, field, value)
+    await session.commit()
+    await session.refresh(member)
+    return member
+
+
+async def approve(session: AsyncSession, member: TeamMember) -> TeamMember:
+    member.is_active = True
+    await session.commit()
+    await session.refresh(member)
+    return member
+
+
+async def reject(session: AsyncSession, member: TeamMember) -> None:
+    await session.delete(member)
+    await session.commit()
+
+
+async def list_admin_emails(session: AsyncSession) -> list[str]:
+    stmt = select(TeamAdmin.email)
+    result = await session.execute(stmt)
+    return [email for (email,) in result.all()]
+
+
+async def to_public(member: TeamMember) -> TeamMemberOut:
+    avatar = await public_or_signed_url(member.avatar_url) if member.avatar_url else None
+    return TeamMemberOut(
+        id=member.id,
+        name=member.name,
+        role=cast(TeamRole, member.role),
+        title_fr=member.title_fr,
+        title_en=member.title_en,
+        bio_fr=member.bio_fr,
+        bio_en=member.bio_en,
+        avatar_url=avatar,
+        city=member.city,
+        country=member.country,
+        age=member.age,
+    )
+
+
+def _extension_for(content_type: str) -> str:
+    return {
+        "image/jpeg": "jpg",
+        "image/png": "png",
+        "image/webp": "webp",
+    }[content_type]

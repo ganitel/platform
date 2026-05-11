@@ -366,7 +366,10 @@ export default function JoinPage() {
                     onChange={(e) =>
                       setHostInventory(e.target.value as HostInventory | "")
                     }
-                    className={cn(INPUT_CLASS, "appearance-none cursor-pointer")}
+                    className={cn(
+                      INPUT_CLASS,
+                      "appearance-none cursor-pointer",
+                    )}
                   >
                     <option value="">
                       {t("join.host.inventory.placeholder")}
@@ -390,7 +393,10 @@ export default function JoinPage() {
                     onChange={(e) =>
                       setHostStatus(e.target.value as HostStatus | "")
                     }
-                    className={cn(INPUT_CLASS, "appearance-none cursor-pointer")}
+                    className={cn(
+                      INPUT_CLASS,
+                      "appearance-none cursor-pointer",
+                    )}
                   >
                     <option value="">
                       {t("join.host.status.placeholder")}
@@ -453,7 +459,10 @@ export default function JoinPage() {
                     onChange={(e) =>
                       setBudgetRange(e.target.value as BudgetRange | "")
                     }
-                    className={cn(INPUT_CLASS, "appearance-none cursor-pointer")}
+                    className={cn(
+                      INPUT_CLASS,
+                      "appearance-none cursor-pointer",
+                    )}
                   >
                     <option value="">{t("join.budget.placeholder")}</option>
                     {BUDGET_RANGES.map((r) => (

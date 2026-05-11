@@ -30,7 +30,9 @@ export const meta: Route.MetaFunction = ({ data }) => {
 };
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const locale = localeFromAcceptLanguage(request.headers.get("Accept-Language"));
+  const locale = localeFromAcceptLanguage(
+    request.headers.get("Accept-Language"),
+  );
   try {
     const team = await listTeamMembersServer();
     return { team, locale };
