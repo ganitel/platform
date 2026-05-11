@@ -50,6 +50,11 @@ Thumbs.db
 
 .worktrees/
 
+# Tool caches
+.eslintcache
+.prettiercache
+*.tsbuildinfo
+
 # AI tools
 superpowers/
 docs/superpowers/

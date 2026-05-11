@@ -1,0 +1,52 @@
+# Hooks call into the workspace toolchains (uv for backend, node_modules
+# binaries for frontend) so versions track the lockfiles.
+# Install with `make install-hooks`.
+
+default_install_hook_types: [pre-commit]
+default_stages: [pre-commit]
+fail_fast: false
+
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: ruff format (backend)
+        language: system
+        entry: uv --project packages/backend run ruff format --force-exclude
+        types_or: [python, pyi]
+        files: ^packages/backend/
+
+      - id: ruff-check
+        name: ruff check (backend)
+        language: system
+        entry: uv --project packages/backend run ruff check --fix --force-exclude
+        types_or: [python, pyi]
+        files: ^packages/backend/
+
+      - id: ty
+        name: ty check (backend)
+        language: system
+        entry: uv --project packages/backend run ty check packages/backend/app
+        files: ^packages/backend/.*\.py$
+        pass_filenames: false
+
+      - id: prettier
+        name: prettier (frontend)
+        language: system
+        entry: packages/frontend/node_modules/.bin/prettier --write --ignore-unknown --cache --cache-location packages/frontend/.prettiercache
+        files: ^packages/frontend/
+        exclude: ^packages/frontend/(build|node_modules)/
+
+      - id: eslint
+        name: eslint (frontend)
+        language: system
+        entry: bash -c 'cd packages/frontend && exec bun run eslint . --cache --cache-location .eslintcache'
+        files: ^packages/frontend/.*\.(ts|tsx|js|jsx|mjs|cjs)$
+        pass_filenames: false
+
+      - id: tsc
+        name: tsc (frontend)
+        language: system
+        entry: bash -c 'cd packages/frontend && exec bun run typecheck'
+        files: ^packages/frontend/.*\.(ts|tsx)$
+        pass_filenames: false

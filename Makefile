@@ -1,15 +1,19 @@
 .DEFAULT_GOAL := help
 
-.PHONY: install dev dev-backend dev-frontend \
+.PHONY: install install-hooks dev dev-backend dev-frontend \
         db-revision db-upgrade db-downgrade seed \
         test test-backend test-frontend \
-        lint format typecheck check build help
-		
+        lint format typecheck check precommit build help
+
 # ── Bootstrap ─────────────────────────────────────────────────────────────────
 
-install: ## Install all deps (backend uv sync + frontend bun install)
+install: ## Install all deps + git hooks (backend uv sync + frontend bun install + pre-commit install)
 	cd packages/backend && uv sync --frozen --all-groups
 	cd packages/frontend && bun install
+	$(MAKE) -s install-hooks
+
+install-hooks: ## Install git pre-commit hook into .git/hooks/
+	cd packages/backend && uv run pre-commit install --install-hooks
 
 # ── Dev ───────────────────────────────────────────────────────────────────────
 # Requires PostgreSQL (with PostGIS) on the standard port (5432).
@@ -70,6 +74,9 @@ typecheck: ## Type-check everything (ty + tsc)
 	cd packages/frontend && bun run typecheck
 
 check: lint typecheck ## Lint + typecheck
+
+precommit: ## Run all pre-commit hooks against every tracked file
+	cd packages/backend && uv run pre-commit run --all-files --show-diff-on-failure
 
 # ── Build ─────────────────────────────────────────────────────────────────────
 
