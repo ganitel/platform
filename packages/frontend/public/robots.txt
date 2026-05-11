@@ -12,3 +12,13 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /complete-profile
+Disallow: /profile
+Disallow: /bookings
+Disallow: /join
+Disallow: /add-team
+Disallow: /team-members/
+
+Sitemap: https://ganitel.com/sitemap.xml

@@ -14,6 +14,7 @@ import { ErrorState } from "@/shared/components/error-state";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { cn } from "@/shared/lib/cn";
 import { serverFetch } from "@/shared/api/server";
+import { seo } from "@/shared/lib/seo";
 import { SectionHeader } from "@/shared/ui/section-header";
 import type { PropertyPublic, SearchOut } from "@/features/properties/types";
 import type {
@@ -47,7 +48,6 @@ export const meta: Route.MetaFunction = ({ location }) => {
   const kind = parseKind(params.get("kind"));
   const q = params.get("q");
   const sectionFR = kind === "experiences" ? "Expériences" : "Logements";
-  const sectionEN = kind === "experiences" ? "Experiences" : "Stays";
   const title = q
     ? `${sectionFR} pour « ${q} » — Ganitel`
     : `${sectionFR} — Ganitel`;
@@ -55,14 +55,15 @@ export const meta: Route.MetaFunction = ({ location }) => {
     kind === "experiences"
       ? "Expériences à vivre au Cameroun, au Sénégal et en Côte d'Ivoire autour de nos logements ou en escapade."
       : "Logements soigneusement sélectionnés à Douala, Yaoundé, Dakar, Abidjan et plus.";
-  return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-    { property: "og:type", content: "website" },
-    { name: "x-section-en", content: sectionEN },
-  ];
+  const ogPath =
+    kind === "experiences" ? "/og/experiences.png" : "/og/stays.png";
+  const pathname = `/browse${kind === "experiences" ? "?kind=experiences" : ""}`;
+  return seo({
+    title,
+    description,
+    pathname,
+    ogImage: { url: ogPath, alt: title },
+  });
 };
 
 type StaysData = {

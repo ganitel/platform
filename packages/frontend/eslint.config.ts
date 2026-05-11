@@ -94,4 +94,10 @@ export default defineConfig(
       "jsx-a11y/anchor-has-content": "off",
     },
   },
+  {
+    files: ["scripts/**/*.{mjs,js,ts}"],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 );

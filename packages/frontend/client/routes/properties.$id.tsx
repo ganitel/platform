@@ -12,31 +12,75 @@ import { serverFetch, ServerApiError } from "@/shared/api/server";
 import { formatMoney } from "@/shared/lib/format";
 import { useLocale, useT } from "@/shared/lib/i18n";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
+import { seo, absoluteUrl } from "@/shared/lib/seo";
 import type { PropertyDetail } from "@/features/properties/types";
 
-export const meta: Route.MetaFunction = ({ data }) => {
+export const meta: Route.MetaFunction = ({ data, params }) => {
   if (!data?.property) {
-    return [{ title: "Logement introuvable — Ganitel" }];
+    return seo({
+      title: "Logement introuvable — Ganitel",
+      description:
+        "Cette annonce n'est pas disponible. Découvrez nos autres logements sur Ganitel.",
+      pathname: `/properties/${params.id ?? ""}`,
+      noindex: true,
+    });
   }
   const p = data.property;
   const title = `${p.title} — ${p.city} | Ganitel`;
-  const description =
-    p.description.slice(0, 160) || `${p.property_type} à ${p.city}`;
-  const ogImage = p.cover_photo?.url;
-  return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-    { property: "og:type", content: "website" },
-    ...(ogImage
-      ? [
-          { property: "og:image", content: ogImage },
-          { name: "twitter:card", content: "summary_large_image" },
-          { name: "twitter:image", content: ogImage },
-        ]
-      : []),
-  ];
+  const description = (
+    p.description?.trim().slice(0, 160) ||
+    `${p.property_type} à ${p.city}, ${p.country_code}.`
+  ).replace(/\s+/g, " ");
+  const ogImage = p.cover_photo?.url
+    ? {
+        url: p.cover_photo.url,
+        alt: p.cover_photo.alt ?? p.title,
+        width: p.cover_photo.width ?? undefined,
+        height: p.cover_photo.height ?? undefined,
+      }
+    : { url: "/og/stays.png", alt: p.title };
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LodgingBusiness",
+    "@id": absoluteUrl(`/properties/${p.id}`),
+    name: p.title,
+    description: p.description || undefined,
+    url: absoluteUrl(`/properties/${p.id}`),
+    image: p.photos.map((m) => m.url),
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: p.city,
+      addressCountry: p.country_code,
+    },
+    geo:
+      p.location &&
+      Number.isFinite(p.location.lat) &&
+      Number.isFinite(p.location.lng)
+        ? {
+            "@type": "GeoCoordinates",
+            latitude: p.location.lat,
+            longitude: p.location.lng,
+          }
+        : undefined,
+    priceRange: `${p.base_price.amount} ${p.base_price.currency}`,
+    numberOfRooms: p.bedrooms,
+    petsAllowed: undefined,
+    amenityFeature: p.amenities.map((a) => ({
+      "@type": "LocationFeatureSpecification",
+      name: a.replace(/_/g, " "),
+    })),
+    additionalType: p.property_type,
+  };
+
+  return seo({
+    title,
+    description,
+    pathname: `/properties/${p.id}`,
+    ogImage,
+    ogType: "place",
+    jsonLd,
+  });
 };
 
 export async function loader({ params }: Route.LoaderArgs) {

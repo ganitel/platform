@@ -10,35 +10,82 @@ import { ErrorState } from "@/shared/components/error-state";
 import { serverFetch, ServerApiError } from "@/shared/api/server";
 import { formatMoney } from "@/shared/lib/format";
 import { useLocale, useT } from "@/shared/lib/i18n";
+import { seo, absoluteUrl } from "@/shared/lib/seo";
 import type { ExperienceDetail } from "@/features/experiences/types";
 
 export const meta: Route.MetaFunction = ({
   data,
+  params,
 }: {
   data: { experience: ExperienceDetail } | null | undefined;
+  params: { id?: string };
 }) => {
   if (!data?.experience) {
-    return [{ title: "Expérience introuvable — Ganitel" }];
+    return seo({
+      title: "Expérience introuvable — Ganitel",
+      description:
+        "Cette expérience n'est plus disponible. Découvrez nos autres expériences sur Ganitel.",
+      pathname: `/experiences/${params.id ?? ""}`,
+      noindex: true,
+    });
   }
   const e = data.experience;
   const title = `${e.title} — ${e.city} | Ganitel`;
-  const description =
-    e.description?.slice(0, 160) || `${e.experience_type} à ${e.city}`;
-  const ogImage = e.cover_photo?.url;
-  return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-    { property: "og:type", content: "website" },
-    ...(ogImage
-      ? [
-          { property: "og:image", content: ogImage },
-          { name: "twitter:card", content: "summary_large_image" },
-          { name: "twitter:image", content: ogImage },
-        ]
-      : []),
-  ];
+  const description = (
+    e.description?.slice(0, 160) ||
+    `${e.experience_type} à ${e.city}, ${e.country_code}.`
+  ).replace(/\s+/g, " ");
+  const ogImage = e.cover_photo?.url
+    ? {
+        url: e.cover_photo.url,
+        alt: e.cover_photo.alt ?? e.title,
+        width: e.cover_photo.width ?? undefined,
+        height: e.cover_photo.height ?? undefined,
+      }
+    : { url: "/og/experiences.png", alt: e.title };
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TouristAttraction",
+    "@id": absoluteUrl(`/experiences/${e.id}`),
+    name: e.title,
+    description: e.description || undefined,
+    url: absoluteUrl(`/experiences/${e.id}`),
+    image: e.photos.map((m) => m.url),
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: e.city,
+      addressCountry: e.country_code,
+    },
+    geo:
+      e.location &&
+      Number.isFinite(e.location.lat) &&
+      Number.isFinite(e.location.lng)
+        ? {
+            "@type": "GeoCoordinates",
+            latitude: e.location.lat,
+            longitude: e.location.lng,
+          }
+        : undefined,
+    offers: {
+      "@type": "Offer",
+      price: e.base_price.amount,
+      priceCurrency: e.base_price.currency,
+      url: absoluteUrl(`/experiences/${e.id}`),
+      availability: "https://schema.org/InStock",
+    },
+    duration: `PT${e.duration_minutes}M`,
+    additionalType: e.experience_type,
+  };
+
+  return seo({
+    title,
+    description,
+    pathname: `/experiences/${e.id}`,
+    ogImage,
+    ogType: "place",
+    jsonLd,
+  });
 };
 
 export async function loader({ params }: Route.LoaderArgs) {

@@ -26,4 +26,7 @@ export default [
   // Unlinked admin / self-serve forms — no app shell, no nav entry.
   route("add-team", "routes/add-team.tsx"),
   route("team-members/:id/review", "routes/team-members.$id.review.tsx"),
+
+  // Resource routes (no UI).
+  route("sitemap.xml", "routes/sitemap.tsx"),
 ] satisfies RouteConfig;
