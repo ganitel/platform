@@ -216,12 +216,73 @@ const dict = {
     fr: "Votre numéro WhatsApp (optionnel)",
     en: "Your WhatsApp number (optional)",
   },
+  "join.role.label": {
+    fr: "Vous êtes…",
+    en: "You are…",
+  },
+  "join.role.traveler": {
+    fr: "En tant que voyageur",
+    en: "As a traveler",
+  },
+  "join.role.host": {
+    fr: "En tant qu'hôte",
+    en: "As a host",
+  },
+  "join.host.interest.label": {
+    fr: "Que voulez-vous proposer ?",
+    en: "What do you want to host?",
+  },
+  "join.host.city.label": {
+    fr: "Ville",
+    en: "City",
+  },
+  "join.host.city.placeholder": {
+    fr: "Ex. Douala, Yaoundé, Limbe",
+    en: "e.g. Douala, Yaoundé, Limbe",
+  },
+  "join.host.inventory.label": {
+    fr: "Combien de biens ou d'expériences ?",
+    en: "How many properties or experiences?",
+  },
+  "join.host.inventory.placeholder": {
+    fr: "Sélectionnez",
+    en: "Select one",
+  },
+  "join.host.inventory.1": { fr: "1", en: "1" },
+  "join.host.inventory.2_5": { fr: "2 à 5", en: "2 to 5" },
+  "join.host.inventory.6_10": { fr: "6 à 10", en: "6 to 10" },
+  "join.host.inventory.10_plus": { fr: "Plus de 10", en: "More than 10" },
+  "join.host.status.label": {
+    fr: "Où en êtes-vous ?",
+    en: "Where are you in your project?",
+  },
+  "join.host.status.placeholder": {
+    fr: "Sélectionnez",
+    en: "Select one",
+  },
+  "join.host.status.ready": {
+    fr: "Déjà prêt à recevoir",
+    en: "Ready to host",
+  },
+  "join.host.status.under_construction": {
+    fr: "En construction",
+    en: "Under construction",
+  },
+  "join.host.status.planning": {
+    fr: "En projet",
+    en: "Planning",
+  },
+  "join.host.status.just_exploring": {
+    fr: "Je me renseigne",
+    en: "Just exploring",
+  },
   "join.interest.label": {
     fr: "Je suis intéressé par",
     en: "I'm interested in",
   },
   "join.interest.renting": { fr: "Locations", en: "Rentals" },
   "join.interest.experiences": { fr: "Expériences", en: "Experiences" },
+  "join.interest.both": { fr: "Les deux", en: "Both" },
   "join.headcount.label": {
     fr: "Pour combien de personnes ?",
     en: "For how many people?",
@@ -232,25 +293,69 @@ const dict = {
     fr: "Sélectionnez une tranche",
     en: "Select a range",
   },
-  "join.budget.under_50k": {
+  "join.budget.currency.label": { fr: "Devise", en: "Currency" },
+  "join.budget.currency.xaf": { fr: "XAF (FCFA)", en: "XAF (FCFA)" },
+  "join.budget.currency.eur": { fr: "Euros (€)", en: "Euros (€)" },
+  "join.budget.currency.usd": { fr: "Dollars ($)", en: "US dollars ($)" },
+  "join.budget.xaf.under_50k": {
     fr: "Moins de 50 000 XAF",
     en: "Under 50,000 XAF",
   },
-  "join.budget.50k_150k": {
-    fr: "50 000 – 150 000 XAF",
-    en: "50,000 – 150,000 XAF",
+  "join.budget.xaf.50k_150k": {
+    fr: "50 000 - 150 000 XAF",
+    en: "50,000 - 150,000 XAF",
   },
-  "join.budget.150k_300k": {
-    fr: "150 000 – 300 000 XAF",
-    en: "150,000 – 300,000 XAF",
+  "join.budget.xaf.150k_300k": {
+    fr: "150 000 - 300 000 XAF",
+    en: "150,000 - 300,000 XAF",
   },
-  "join.budget.300k_500k": {
-    fr: "300 000 – 500 000 XAF",
-    en: "300,000 – 500,000 XAF",
+  "join.budget.xaf.300k_500k": {
+    fr: "300 000 - 500 000 XAF",
+    en: "300,000 - 500,000 XAF",
   },
-  "join.budget.over_500k": {
+  "join.budget.xaf.over_500k": {
     fr: "Plus de 500 000 XAF",
     en: "Over 500,000 XAF",
+  },
+  "join.budget.eur.under_50k": {
+    fr: "Moins de 100 €",
+    en: "Under €100",
+  },
+  "join.budget.eur.50k_150k": {
+    fr: "100 € - 300 €",
+    en: "€100 - €300",
+  },
+  "join.budget.eur.150k_300k": {
+    fr: "300 € - 500 €",
+    en: "€300 - €500",
+  },
+  "join.budget.eur.300k_500k": {
+    fr: "500 € - 1 000 €",
+    en: "€500 - €1,000",
+  },
+  "join.budget.eur.over_500k": {
+    fr: "Plus de 1 000 €",
+    en: "Over €1,000",
+  },
+  "join.budget.usd.under_50k": {
+    fr: "Moins de 100 $",
+    en: "Under $100",
+  },
+  "join.budget.usd.50k_150k": {
+    fr: "100 $ - 300 $",
+    en: "$100 - $300",
+  },
+  "join.budget.usd.150k_300k": {
+    fr: "300 $ - 500 $",
+    en: "$300 - $500",
+  },
+  "join.budget.usd.300k_500k": {
+    fr: "500 $ - 1 000 $",
+    en: "$500 - $1,000",
+  },
+  "join.budget.usd.over_500k": {
+    fr: "Plus de 1 000 $",
+    en: "Over $1,000",
   },
   "join.notes.label": {
     fr: "Informations complémentaires (optionnel)",
