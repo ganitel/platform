@@ -21,7 +21,7 @@ export function About({ team }: { team: TeamMember[] }) {
 function Hero() {
   const t = useT();
   return (
-    <section className="px-6 pb-12 pt-24 md:px-12 md:pb-20 md:pt-32">
+    <section className="px-6 pb-8 pt-16 md:px-12 md:pb-12 md:pt-20">
       <div className="mx-auto max-w-7xl">
         <SectionHeader
           level="h1"
@@ -39,17 +39,19 @@ function Hero() {
 function Body() {
   const t = useT();
   return (
-    <section className="px-6 pb-20 md:px-12 md:pb-28">
+    <section className="px-6 pb-12 md:px-12 md:pb-16">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-10%" }}
         transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
-        className="mx-auto grid max-w-3xl gap-8 text-[15px] leading-[1.7] text-ganitel-text-subtitle md:text-base"
+        className="mx-auto max-w-7xl"
       >
-        <p className="m-0">{t("about.body.diversity")}</p>
-        <p className="m-0">{t("about.body.proud")}</p>
-        <p className="m-0">{t("about.body.craft")}</p>
+        <div className="grid max-w-prose gap-8 text-[15px] leading-[1.7] text-ganitel-text-subtitle md:text-base">
+          <p className="m-0">{t("about.body.diversity")}</p>
+          <p className="m-0">{t("about.body.proud")}</p>
+          <p className="m-0">{t("about.body.craft")}</p>
+        </div>
       </motion.div>
     </section>
   );
@@ -59,7 +61,7 @@ function Team({ members }: { members: TeamMember[] }) {
   const t = useT();
   if (members.length === 0) return null;
   return (
-    <section className="px-6 pb-20 md:px-12 md:pb-28">
+    <section className="px-6 pb-12 md:px-12 md:pb-16">
       <div className="mx-auto max-w-7xl">
         <SectionHeader
           tag={t("about.team.tag")}
@@ -72,7 +74,7 @@ function Team({ members }: { members: TeamMember[] }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-10%" }}
           transition={{ duration: 0.8, delay: 0.1, ease: ENTRANCE_EASE }}
-          className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
           {members.map((member) => (
             <TeamMemberCard key={member.id} member={member} />
@@ -129,13 +131,13 @@ function TeamMemberCard({ member }: { member: TeamMember }) {
 function Closing() {
   const t = useT();
   return (
-    <section className="px-6 pb-24 md:px-12 md:pb-32">
+    <section className="px-6 pb-16 md:px-12 md:pb-20">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-10%" }}
         transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
-        className="mx-auto max-w-7xl rounded-[28px] bg-ganitel-text-title px-8 py-20 md:px-16 md:py-28"
+        className="mx-auto max-w-7xl rounded-[28px] bg-ganitel-text-title px-8 py-12 md:px-16 md:py-16"
       >
         <div className="grid gap-12 md:grid-cols-[1fr_auto] md:items-end">
           <SectionHeader
