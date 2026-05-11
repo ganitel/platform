@@ -10,8 +10,12 @@ from app.core.db import Base
 class WaitlistEntry(Base):
     __tablename__ = "waitlist_emails"
     __table_args__ = (
-        UniqueConstraint("email", "property_id", name="uq_waitlist_email_property"),
-        UniqueConstraint("email", "experience_id", name="uq_waitlist_email_experience"),
+        UniqueConstraint(
+            "email", "property_id", "role", name="uq_waitlist_email_property"
+        ),
+        UniqueConstraint(
+            "email", "experience_id", "role", name="uq_waitlist_email_experience"
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
@@ -27,6 +31,11 @@ class WaitlistEntry(Base):
     interest: Mapped[str | None] = mapped_column(String(32))
     headcount: Mapped[int | None] = mapped_column(Integer())
     budget_range: Mapped[str | None] = mapped_column(String(32))
+    budget_currency: Mapped[str | None] = mapped_column(String(8))
+    role: Mapped[str | None] = mapped_column(String(16))
+    host_city: Mapped[str | None] = mapped_column(String(120))
+    host_inventory: Mapped[str | None] = mapped_column(String(16))
+    host_status: Mapped[str | None] = mapped_column(String(32))
     notes: Mapped[str | None] = mapped_column(Text())
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

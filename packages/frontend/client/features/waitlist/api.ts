@@ -9,6 +9,11 @@ interface WaitlistPayload {
   interest?: "renting" | "experiences" | "both";
   headcount?: number;
   budget_range?: string;
+  budget_currency?: "xaf" | "eur" | "usd";
+  role?: "traveler" | "host";
+  host_city?: string;
+  host_inventory?: "1" | "2_5" | "6_10" | "10_plus";
+  host_status?: "ready" | "under_construction" | "planning" | "just_exploring";
   notes?: string;
 }
 
