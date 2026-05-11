@@ -21,6 +21,7 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> Waitlist
         interest=body.interest,
         headcount=body.headcount,
         budget_range=body.budget_range,
+        budget_currency=body.budget_currency,
         notes=body.notes,
     )
     session.add(entry)

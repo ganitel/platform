@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 BudgetRange = Literal["under_50k", "50k_150k", "150k_300k", "300k_500k", "over_500k"]
+BudgetCurrency = Literal["xaf", "eur", "usd"]
 Interest = Literal["renting", "experiences", "both"]
 
 
@@ -18,6 +19,7 @@ class WaitlistEntryIn(BaseModel):
     interest: Interest | None = None
     headcount: int | None = Field(default=None, ge=1, le=500)
     budget_range: BudgetRange | None = None
+    budget_currency: BudgetCurrency | None = None
     notes: str | None = Field(default=None, max_length=1000)
 
 

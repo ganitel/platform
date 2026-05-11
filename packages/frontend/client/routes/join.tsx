@@ -6,7 +6,7 @@ import type { Route } from "./+types/join";
 
 import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { joinWaitlist } from "@/features/waitlist/api";
-import { useT } from "@/shared/lib/i18n";
+import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { cn } from "@/shared/lib/cn";
 
 export const meta: Route.MetaFunction = () => [
@@ -15,13 +15,58 @@ export const meta: Route.MetaFunction = () => [
 ];
 
 type Interest = "renting" | "experiences";
+type InterestOption = Interest | "both";
+
+const INTEREST_OPTIONS: InterestOption[] = ["renting", "experiences", "both"];
+
+const INTEREST_LABEL_KEY = {
+  renting: "join.interest.renting",
+  experiences: "join.interest.experiences",
+  both: "join.interest.both",
+} as const;
 type BudgetRange =
   | "under_50k"
   | "50k_150k"
   | "150k_300k"
   | "300k_500k"
   | "over_500k";
+type BudgetCurrency = "xaf" | "eur" | "usd";
 type State = "idle" | "submitting" | "done" | "error";
+
+const BUDGET_CURRENCIES: BudgetCurrency[] = ["xaf", "eur", "usd"];
+
+const BUDGET_CURRENCY_LABEL_KEY = {
+  xaf: "join.budget.currency.xaf",
+  eur: "join.budget.currency.eur",
+  usd: "join.budget.currency.usd",
+} as const;
+
+const BUDGET_LABEL_KEYS: Record<
+  BudgetCurrency,
+  Record<BudgetRange, TranslationKey>
+> = {
+  xaf: {
+    under_50k: "join.budget.xaf.under_50k",
+    "50k_150k": "join.budget.xaf.50k_150k",
+    "150k_300k": "join.budget.xaf.150k_300k",
+    "300k_500k": "join.budget.xaf.300k_500k",
+    over_500k: "join.budget.xaf.over_500k",
+  },
+  eur: {
+    under_50k: "join.budget.eur.under_50k",
+    "50k_150k": "join.budget.eur.50k_150k",
+    "150k_300k": "join.budget.eur.150k_300k",
+    "300k_500k": "join.budget.eur.300k_500k",
+    over_500k: "join.budget.eur.over_500k",
+  },
+  usd: {
+    under_50k: "join.budget.usd.under_50k",
+    "50k_150k": "join.budget.usd.50k_150k",
+    "150k_300k": "join.budget.usd.150k_300k",
+    "300k_500k": "join.budget.usd.300k_500k",
+    over_500k: "join.budget.usd.over_500k",
+  },
+};
 
 const BUDGET_RANGES: BudgetRange[] = [
   "under_50k",
@@ -42,6 +87,7 @@ export default function JoinPage() {
   const [email, setEmail] = useState("");
   const [interests, setInterests] = useState<Set<Interest>>(new Set());
   const [headcount, setHeadcount] = useState("");
+  const [budgetCurrency, setBudgetCurrency] = useState<BudgetCurrency>("xaf");
   const [budgetRange, setBudgetRange] = useState<BudgetRange | "">("");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
@@ -53,6 +99,26 @@ export default function JoinPage() {
       else next.add(val);
       return next;
     });
+  }
+
+  function toggleBothShortcut() {
+    setInterests((prev) => {
+      const hasBoth = prev.has("renting") && prev.has("experiences");
+      if (hasBoth) return new Set();
+      return new Set<Interest>(["renting", "experiences"]);
+    });
+  }
+
+  function interestOptionActive(val: InterestOption) {
+    if (val === "both") {
+      return interests.has("renting") && interests.has("experiences");
+    }
+    return interests.has(val);
+  }
+
+  function onInterestOptionClick(val: InterestOption) {
+    if (val === "both") toggleBothShortcut();
+    else toggleInterest(val);
   }
 
   function resolveInterest(): "renting" | "experiences" | "both" | undefined {
@@ -74,6 +140,7 @@ export default function JoinPage() {
         interest: resolveInterest(),
         headcount: headcount ? Number(headcount) : undefined,
         budget_range: budgetRange || undefined,
+        budget_currency: budgetRange ? budgetCurrency : undefined,
         notes: notes || undefined,
       });
       setState("done");
@@ -134,7 +201,7 @@ export default function JoinPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="vous@exemple.com"
+                  placeholder="exemple@gmail.com"
                   className={cn(INPUT_CLASS, "pl-10")}
                 />
               </div>
@@ -165,23 +232,19 @@ export default function JoinPage() {
             <div>
               <p className={LABEL_CLASS}>{t("join.interest.label")}</p>
               <div className="flex gap-3">
-                {(["renting", "experiences"] as Interest[]).map((val) => (
+                {INTEREST_OPTIONS.map((val) => (
                   <button
                     key={val}
                     type="button"
-                    onClick={() => toggleInterest(val)}
+                    onClick={() => onInterestOptionClick(val)}
                     className={cn(
                       "flex-1 rounded-xl border py-3 text-sm font-medium transition-all",
-                      interests.has(val)
+                      interestOptionActive(val)
                         ? "border-ganitel-secondary bg-ganitel-secondary/10 text-ganitel-secondary"
                         : "border-ganitel-stroke-neutral bg-ganitel-neutral-1 text-ganitel-text-subtitle hover:border-ganitel-text-title hover:text-ganitel-text-title",
                     )}
                   >
-                    {t(
-                      val === "renting"
-                        ? "join.interest.renting"
-                        : "join.interest.experiences",
-                    )}
+                    {t(INTEREST_LABEL_KEY[val])}
                   </button>
                 ))}
               </div>
@@ -209,6 +272,26 @@ export default function JoinPage() {
               <label htmlFor="join-budget" className={LABEL_CLASS}>
                 {t("join.budget.label")}
               </label>
+              <p className="mb-2 text-xs text-ganitel-text-subtitle">
+                {t("join.budget.currency.label")}
+              </p>
+              <div className="mb-3 flex gap-2">
+                {BUDGET_CURRENCIES.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setBudgetCurrency(c)}
+                    className={cn(
+                      "flex-1 rounded-xl border py-2.5 text-xs font-medium transition-all",
+                      budgetCurrency === c
+                        ? "border-ganitel-secondary bg-ganitel-secondary/10 text-ganitel-secondary"
+                        : "border-ganitel-stroke-neutral bg-ganitel-neutral-1 text-ganitel-text-subtitle hover:border-ganitel-text-title hover:text-ganitel-text-title",
+                    )}
+                  >
+                    {t(BUDGET_CURRENCY_LABEL_KEY[c])}
+                  </button>
+                ))}
+              </div>
               <select
                 id="join-budget"
                 value={budgetRange}
@@ -220,7 +303,7 @@ export default function JoinPage() {
                 <option value="">{t("join.budget.placeholder")}</option>
                 {BUDGET_RANGES.map((r) => (
                   <option key={r} value={r}>
-                    {t(`join.budget.${r}` as Parameters<typeof t>[0])}
+                    {t(BUDGET_LABEL_KEYS[budgetCurrency][r])}
                   </option>
                 ))}
               </select>

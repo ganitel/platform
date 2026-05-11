@@ -207,3 +207,18 @@ def test_waitlist_rejects_phone_over_32_chars() -> None:
 def test_waitlist_rejects_unknown_field() -> None:
     with pytest.raises(ValidationError, match="Extra inputs"):
         WaitlistEntryIn.model_validate(_waitlist(foo="bar"))
+
+
+def test_waitlist_accepts_budget_currency() -> None:
+    entry = WaitlistEntryIn.model_validate(
+        _waitlist(budget_range="under_50k", budget_currency="eur"),
+    )
+    assert entry.budget_range == "under_50k"
+    assert entry.budget_currency == "eur"
+
+
+def test_waitlist_rejects_invalid_budget_currency() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(
+            _waitlist(budget_range="under_50k", budget_currency="gbp"),
+        )

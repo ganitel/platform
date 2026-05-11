@@ -27,6 +27,7 @@ class WaitlistEntry(Base):
     interest: Mapped[str | None] = mapped_column(String(32))
     headcount: Mapped[int | None] = mapped_column(Integer())
     budget_range: Mapped[str | None] = mapped_column(String(32))
+    budget_currency: Mapped[str | None] = mapped_column(String(8))
     notes: Mapped[str | None] = mapped_column(Text())
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

@@ -222,6 +222,7 @@ const dict = {
   },
   "join.interest.renting": { fr: "Locations", en: "Rentals" },
   "join.interest.experiences": { fr: "Expériences", en: "Experiences" },
+  "join.interest.both": { fr: "Les deux", en: "Both" },
   "join.headcount.label": {
     fr: "Pour combien de personnes ?",
     en: "For how many people?",
@@ -232,25 +233,69 @@ const dict = {
     fr: "Sélectionnez une tranche",
     en: "Select a range",
   },
-  "join.budget.under_50k": {
+  "join.budget.currency.label": { fr: "Devise", en: "Currency" },
+  "join.budget.currency.xaf": { fr: "XAF (FCFA)", en: "XAF (FCFA)" },
+  "join.budget.currency.eur": { fr: "Euros (€)", en: "Euros (€)" },
+  "join.budget.currency.usd": { fr: "Dollars ($)", en: "US dollars ($)" },
+  "join.budget.xaf.under_50k": {
     fr: "Moins de 50 000 XAF",
     en: "Under 50,000 XAF",
   },
-  "join.budget.50k_150k": {
-    fr: "50 000 – 150 000 XAF",
-    en: "50,000 – 150,000 XAF",
+  "join.budget.xaf.50k_150k": {
+    fr: "50 000 - 150 000 XAF",
+    en: "50,000 - 150,000 XAF",
   },
-  "join.budget.150k_300k": {
-    fr: "150 000 – 300 000 XAF",
-    en: "150,000 – 300,000 XAF",
+  "join.budget.xaf.150k_300k": {
+    fr: "150 000 - 300 000 XAF",
+    en: "150,000 - 300,000 XAF",
   },
-  "join.budget.300k_500k": {
-    fr: "300 000 – 500 000 XAF",
-    en: "300,000 – 500,000 XAF",
+  "join.budget.xaf.300k_500k": {
+    fr: "300 000 - 500 000 XAF",
+    en: "300,000 - 500,000 XAF",
   },
-  "join.budget.over_500k": {
+  "join.budget.xaf.over_500k": {
     fr: "Plus de 500 000 XAF",
     en: "Over 500,000 XAF",
+  },
+  "join.budget.eur.under_50k": {
+    fr: "Moins de 100 €",
+    en: "Under €100",
+  },
+  "join.budget.eur.50k_150k": {
+    fr: "100 € - 300 €",
+    en: "€100 - €300",
+  },
+  "join.budget.eur.150k_300k": {
+    fr: "300 € - 500 €",
+    en: "€300 - €500",
+  },
+  "join.budget.eur.300k_500k": {
+    fr: "500 € - 1 000 €",
+    en: "€500 - €1,000",
+  },
+  "join.budget.eur.over_500k": {
+    fr: "Plus de 1 000 €",
+    en: "Over €1,000",
+  },
+  "join.budget.usd.under_50k": {
+    fr: "Moins de 100 $",
+    en: "Under $100",
+  },
+  "join.budget.usd.50k_150k": {
+    fr: "100 $ - 300 $",
+    en: "$100 - $300",
+  },
+  "join.budget.usd.150k_300k": {
+    fr: "300 $ - 500 $",
+    en: "$300 - $500",
+  },
+  "join.budget.usd.300k_500k": {
+    fr: "500 $ - 1 000 $",
+    en: "$500 - $1,000",
+  },
+  "join.budget.usd.over_500k": {
+    fr: "Plus de 1 000 $",
+    en: "Over $1,000",
   },
   "join.notes.label": {
     fr: "Informations complémentaires (optionnel)",

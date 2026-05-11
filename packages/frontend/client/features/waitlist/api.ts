@@ -9,6 +9,7 @@ interface WaitlistPayload {
   interest?: "renting" | "experiences" | "both";
   headcount?: number;
   budget_range?: string;
+  budget_currency?: "xaf" | "eur" | "usd";
   notes?: string;
 }
 
