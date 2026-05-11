@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router";
 import { CheckCircle2, ImagePlus, User } from "lucide-react";
 
@@ -38,19 +38,38 @@ export function AddTeamForm() {
   const [age, setAge] = useState("");
   const [bio, setBio] = useState("");
 
+  // Ref-tracked so revocation is explicit and not tangled with React state.
+  // The previous version used a useEffect with [imagePreview] dep, which made
+  // the cleanup run on every change — including the change that produced the
+  // URL we were about to render. Worked by happy accident; this is clearer.
+  const previousObjectUrl = useRef<string | null>(null);
+  function setPreview(next: string | null) {
+    if (previousObjectUrl.current) {
+      URL.revokeObjectURL(previousObjectUrl.current);
+    }
+    previousObjectUrl.current = next;
+    setImagePreview(next);
+  }
+  // Final cleanup on unmount: free whatever URL is still parked in the ref.
+  useEffect(() => {
+    return () => {
+      if (previousObjectUrl.current) {
+        URL.revokeObjectURL(previousObjectUrl.current);
+        previousObjectUrl.current = null;
+      }
+    };
+  }, []);
+
   function onPickImage(file: File | null) {
-    // Free the previous blob URL so we don't accumulate one per re-pick.
-    // Browsers keep blob: URLs alive until the document unloads otherwise.
-    if (imagePreview) URL.revokeObjectURL(imagePreview);
     if (!file) {
       setImage(null);
-      setImagePreview(null);
+      setPreview(null);
       return;
     }
     if (file.size > MAX_BYTES) {
       setErrorMessage(t("add_team.error.image_too_big"));
       setImage(null);
-      setImagePreview(null);
+      setPreview(null);
       return;
     }
     if (!ACCEPTED_TYPES.split(",").includes(file.type)) {
@@ -58,21 +77,13 @@ export function AddTeamForm() {
         `${t("add_team.error.image_type")} (got: ${file.type || "unknown"})`,
       );
       setImage(null);
-      setImagePreview(null);
+      setPreview(null);
       return;
     }
     setErrorMessage("");
     setImage(file);
-    setImagePreview(URL.createObjectURL(file));
+    setPreview(URL.createObjectURL(file));
   }
-
-  // Revoke the lingering blob URL on unmount (e.g., user navigates away
-  // after picking a file but before submitting).
-  useEffect(() => {
-    return () => {
-      if (imagePreview) URL.revokeObjectURL(imagePreview);
-    };
-  }, [imagePreview]);
 
   const ageNumber = Number(age);
   const submitDisabled =

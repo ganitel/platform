@@ -22,7 +22,11 @@ def mint(*, team_member_id: UUID, admin_email: str) -> str:
     now = int(time.time())
     payload = {
         "sub": str(team_member_id),
-        "admin": admin_email,
+        # Normalize the admin claim so the token is byte-identical regardless
+        # of casing on the way in. assert_admin_active also lower-cases on
+        # lookup, but stamping the canonical form here means the JWT itself
+        # never carries case-sensitive surprise.
+        "admin": admin_email.strip().lower(),
         "aud": AUDIENCE,
         "iat": now,
         "exp": now + s.TEAM_REVIEW_TOKEN_TTL_SECONDS,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router";
 import { CheckCircle2, Trash2 } from "lucide-react";
 
@@ -16,6 +16,7 @@ import {
 import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { approveTeamMember, rejectTeamMember } from "@/features/team/api";
 import { LocationAutocomplete } from "@/features/team/location-autocomplete";
+import { ApiError } from "@/shared/api/client";
 import {
   TITLE_KEYS,
   TITLE_LABELS,
@@ -89,15 +90,28 @@ export function ReviewForm({
     }
   }
 
+  // Tracks "user clicked Reject inside the dialog and we're now waiting for
+  // the close animation to finish before kicking off the API call". Without
+  // this, calling setState("rejected") in handleReject races Radix's portal
+  // cleanup and produces the React 19 "removeChild on <link>" error.
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const pendingReject = useRef(false);
+
   async function handleReject() {
     setState("submitting");
     setErrorMessage("");
     try {
       await rejectTeamMember(member.id, token);
       setState("rejected");
-    } catch {
+    } catch (error) {
       setState("error");
-      setErrorMessage(t("review.error.generic"));
+      // 409 from the backend = member is already active. Surface a useful
+      // message rather than the generic error.
+      if (error instanceof ApiError && error.status === 409) {
+        setErrorMessage(t("review.error.already_active"));
+      } else {
+        setErrorMessage(t("review.error.generic"));
+      }
     }
   }
 
@@ -232,7 +246,20 @@ export function ReviewForm({
         {errorMessage && <p className="text-xs text-red-500">{errorMessage}</p>}
 
         <div className="flex gap-3 pt-2">
-          <AlertDialog>
+          <AlertDialog
+            open={rejectOpen}
+            onOpenChange={(open) => {
+              setRejectOpen(open);
+              // onOpenChange fires AFTER Radix's close animation. By the time
+              // it ticks to `false`, the portal has cleanly unmounted — safe
+              // to swap the parent tree (state → "rejected") without React 19
+              // racing Radix's <link> / portal cleanup.
+              if (!open && pendingReject.current) {
+                pendingReject.current = false;
+                void handleReject();
+              }
+            }}
+          >
             <AlertDialogTrigger asChild>
               <button
                 type="button"
@@ -256,7 +283,11 @@ export function ReviewForm({
                   {t("review.reject.confirm.cancel")}
                 </AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={handleReject}
+                  onClick={() => {
+                    // Mark the intent; the actual reject fires from
+                    // onOpenChange once Radix has fully closed.
+                    pendingReject.current = true;
+                  }}
                   className="bg-red-500 text-white hover:bg-red-600"
                 >
                   {t("review.reject.confirm.action")}

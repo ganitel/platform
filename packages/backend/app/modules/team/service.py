@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from typing import cast
 from uuid import UUID, uuid4
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ConflictError, ForbiddenError, NotFoundError, ValidationError
@@ -116,14 +116,22 @@ async def reject(session: AsyncSession, member: TeamMember) -> None:
 async def list_admin_emails(session: AsyncSession) -> list[str]:
     stmt = select(TeamAdmin.email)
     result = await session.execute(stmt)
-    return [email for (email,) in result.all()]
+    # Always emit normalized emails — Resend, JWT claims, and lookups all
+    # compare case-insensitively; storing lowercase keeps them consistent.
+    return [email.lower() for (email,) in result.all()]
 
 
 async def assert_admin_active(session: AsyncSession, admin_email: str) -> None:
     """The review token is signed, but admins can be removed from
     team_admins after a token is minted. Re-check on every gated request
     so a revoked admin's lingering link can't act on submissions."""
-    stmt = select(TeamAdmin.id).where(TeamAdmin.email == admin_email)
+    # Case-insensitive match: an admin row "lvndry@protonmail.com" must
+    # match a token claim "Lvndry@protonmail.com". Email RFC 5321 says
+    # the local-part is technically case-sensitive, but every mainstream
+    # provider treats it case-insensitively in practice and our seed
+    # uses lowercase.
+    normalized = admin_email.strip().lower()
+    stmt = select(TeamAdmin.id).where(func.lower(TeamAdmin.email) == normalized)
     result = await session.execute(stmt)
     if result.first() is None:
         raise ForbiddenError("Reviewer is no longer an active admin")

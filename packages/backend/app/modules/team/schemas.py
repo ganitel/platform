@@ -9,6 +9,14 @@ TeamRole = Literal["cofounder", "tour_guide"]
 # list, the public submission form locks it via the backend default. Pair
 # stays (fr_label, en_label) so admins see both languages at once and
 # changes always update both sides.
+#
+# IMPORTANT: if you add a key here, mirror it in the frontend's
+# `packages/frontend/client/features/team/types.ts` (TITLE_KEYS + TITLE_LABELS).
+# `tests/unit/test_team_title_options.py` enforces that this dict's keys equal
+# the TitlePair Literal so the two type/data sources can't drift on the
+# backend side; the cross-language contract is covered by the README note in
+# the frontend file plus the schema validator (extra="forbid" rejects keys
+# unknown to TitlePair).
 TitlePair = Literal["guide_touristique"]
 TITLE_OPTIONS: dict[str, tuple[str, str]] = {
     "guide_touristique": ("Guide touristique", "Tour guide"),

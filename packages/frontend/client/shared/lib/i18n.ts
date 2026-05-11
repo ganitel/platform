@@ -533,6 +533,10 @@ const dict = {
     fr: "Une erreur s'est produite. Veuillez réessayer.",
     en: "Something went wrong. Please try again.",
   },
+  "review.error.already_active": {
+    fr: "Ce membre est déjà approuvé et visible sur la page À propos. Pour le désactiver, utilisez l'outil d'administration.",
+    en: "This member is already approved and visible on the About page. Use admin tooling to deactivate.",
+  },
 } satisfies Dict;
 
 export type TranslationKey = keyof typeof dict;
