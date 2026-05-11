@@ -184,21 +184,21 @@ export default function JoinPage() {
         role,
         notes: notes || undefined,
       };
-      const payload = isHost
-        ? {
-            ...base,
-            interest: resolveInterest(),
-            host_city: hostCity || undefined,
-            host_inventory: hostInventory || undefined,
-            host_status: hostStatus || undefined,
-          }
-        : {
-            ...base,
-            interest: resolveInterest(),
-            headcount: headcount ? Number(headcount) : undefined,
-            budget_range: budgetRange || undefined,
-            budget_currency: budgetRange ? budgetCurrency : undefined,
-          };
+      const payload = {
+        ...base,
+        interest: resolveInterest(),
+        ...(isHost
+          ? {
+              host_city: hostCity || undefined,
+              host_inventory: hostInventory || undefined,
+              host_status: hostStatus || undefined,
+            }
+          : {
+              headcount: headcount ? Number(headcount) : undefined,
+              budget_range: budgetRange || undefined,
+              budget_currency: budgetRange ? budgetCurrency : undefined,
+            }),
+      };
       await joinWaitlist(payload);
       setState("done");
     } catch {

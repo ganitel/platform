@@ -33,8 +33,38 @@ def upgrade() -> None:
         sa.Column("host_status", sa.String(32), nullable=True),
     )
 
+    op.drop_constraint("uq_waitlist_email_property", "waitlist_emails", type_="unique")
+    op.drop_constraint(
+        "uq_waitlist_email_experience", "waitlist_emails", type_="unique"
+    )
+    op.create_unique_constraint(
+        "uq_waitlist_email_property",
+        "waitlist_emails",
+        ["email", "property_id", "role"],
+    )
+    op.create_unique_constraint(
+        "uq_waitlist_email_experience",
+        "waitlist_emails",
+        ["email", "experience_id", "role"],
+    )
+
 
 def downgrade() -> None:
+    op.drop_constraint(
+        "uq_waitlist_email_experience", "waitlist_emails", type_="unique"
+    )
+    op.drop_constraint("uq_waitlist_email_property", "waitlist_emails", type_="unique")
+    op.create_unique_constraint(
+        "uq_waitlist_email_property",
+        "waitlist_emails",
+        ["email", "property_id"],
+    )
+    op.create_unique_constraint(
+        "uq_waitlist_email_experience",
+        "waitlist_emails",
+        ["email", "experience_id"],
+    )
+
     op.drop_column("waitlist_emails", "host_status")
     op.drop_column("waitlist_emails", "host_inventory")
     op.drop_column("waitlist_emails", "host_city")

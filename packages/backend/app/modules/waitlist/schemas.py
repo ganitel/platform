@@ -1,7 +1,7 @@
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 BudgetRange = Literal["under_50k", "50k_150k", "150k_300k", "300k_500k", "over_500k"]
 BudgetCurrency = Literal["xaf", "eur", "usd"]
@@ -28,6 +28,18 @@ class WaitlistEntryIn(BaseModel):
     host_inventory: HostInventory | None = None
     host_status: HostStatus | None = None
     notes: str | None = Field(default=None, max_length=1000)
+
+    @model_validator(mode="after")
+    def _require_host_fields(self) -> "WaitlistEntryIn":
+        if self.role == "host":
+            missing = [
+                f
+                for f in ("host_city", "host_inventory", "host_status")
+                if getattr(self, f) in (None, "")
+            ]
+            if missing:
+                raise ValueError(f"Missing host fields: {', '.join(missing)}")
+        return self
 
 
 class WaitlistEntryOut(BaseModel):
