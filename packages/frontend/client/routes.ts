@@ -22,4 +22,8 @@ export default [
   route("sign-up", "routes/sign-up.tsx"),
   route("complete-profile", "routes/complete-profile.tsx"),
   route("join", "routes/join.tsx"),
+
+  // Unlinked admin / self-serve forms — no app shell, no nav entry.
+  route("add-team", "routes/add-team.tsx"),
+  route("team-members/:id/review", "routes/team-members.$id.review.tsx"),
 ] satisfies RouteConfig;

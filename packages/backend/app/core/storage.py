@@ -43,6 +43,20 @@ async def presign_put(*, key: str, content_type: str) -> str:
         )
 
 
+async def upload_object(*, key: str, body: bytes, content_type: str) -> None:
+    """Server-side upload. Used when the client can't presign — e.g. an
+    unauthenticated form submission where the backend mints the key and
+    streams the file straight into the bucket."""
+    s = get_settings()
+    async with s3_client() as client:
+        await client.put_object(
+            Bucket=s.S3_BUCKET,
+            Key=key,
+            Body=body,
+            ContentType=content_type,
+        )
+
+
 async def public_or_signed_url(key: str) -> str:
     # Seed/demo escape hatch: if `key` is already a full URL, return it verbatim.
     # Real S3 keys never start with `http://` or `https://`, so this is safe in prod.

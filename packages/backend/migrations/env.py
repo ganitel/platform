@@ -1,5 +1,4 @@
 import asyncio
-from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import pool
@@ -22,9 +21,6 @@ from app.modules.users import models as _users_models  # noqa: F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", str(get_settings().DATABASE_URL))
-
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
 

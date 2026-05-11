@@ -1,6 +1,8 @@
 import { Link } from "react-router";
 import type { ReactNode } from "react";
 
+import { useT } from "@/shared/lib/i18n";
+
 /**
  * Two-pane layout shared by sign-in and sign-up.
  * Left pane: brand panel on the warm-dark primary.
@@ -15,6 +17,8 @@ export function AuthLayout({
   subtitle: string;
   children: ReactNode;
 }) {
+  const t = useT();
+
   return (
     <div className="flex min-h-screen flex-col bg-ganitel-background-neutral1 lg:flex-row">
       {/* Brand panel */}
@@ -46,7 +50,7 @@ export function AuthLayout({
             {title}
           </h1>
           <p className="mt-4 text-sm text-ganitel-text-button/70">
-            Séjours et expériences en Afrique centrale, choisis avec soin.
+            {t("auth.layout.tagline")}
           </p>
         </div>
 

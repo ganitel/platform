@@ -200,6 +200,10 @@ const dict = {
     fr: "Nous vous contacterons en priorité pour cette expérience dès l'ouverture.",
     en: "We'll reach out to you first when this experience opens.",
   },
+  "waitlist.success.email": {
+    fr: "Un e-mail de confirmation est en route — vérifiez votre boîte de réception.",
+    en: "A confirmation email is on its way — check your inbox.",
+  },
   "waitlist.error": {
     fr: "Une erreur s'est produite. Réessayez.",
     en: "Something went wrong. Please try again.",
@@ -207,6 +211,11 @@ const dict = {
   "waitlist.price_note": {
     fr: "À partir de",
     en: "Starting from",
+  },
+
+  "auth.layout.tagline": {
+    fr: "Séjours et expériences en Afrique centrale, choisis avec soin.",
+    en: "Stays and experiences in Central Africa, chosen with care.",
   },
 
   "join.subtitle": { fr: "Liste d'attente", en: "Waitlist" },
@@ -379,6 +388,10 @@ const dict = {
     fr: "Nous vous contacterons dès l'ouverture. Merci de votre confiance.",
     en: "We'll reach out as soon as we launch. Thank you for your trust.",
   },
+  "join.success.email": {
+    fr: "Un e-mail de confirmation est en route — vérifiez votre boîte de réception.",
+    en: "A confirmation email is on its way — check your inbox.",
+  },
   "join.success.back": { fr: "Retour à l'accueil", en: "Back to home" },
 
   "nav.about": { fr: "À propos", en: "About" },
@@ -420,6 +433,110 @@ const dict = {
     en: "Come for a stay. Leave with a story.",
   },
   "about.cta": { fr: "Découvrir les séjours", en: "Browse stays" },
+
+  "add_team.title": {
+    fr: "Rejoindre l'équipe Ganitel",
+    en: "Join the Ganitel team",
+  },
+  "add_team.subtitle": {
+    fr: "Présentez-vous. Un membre de l'équipe vérifiera votre profil avant de le publier.",
+    en: "Tell us about yourself. A team member will review your profile before it goes live.",
+  },
+  "add_team.image.label": { fr: "Photo de profil", en: "Profile photo" },
+  "add_team.image.placeholder": {
+    fr: "Choisir une photo",
+    en: "Choose a photo",
+  },
+  "add_team.image.hint": {
+    fr: "JPEG, PNG ou WebP — 5 Mo maximum",
+    en: "JPEG, PNG, or WebP — 5 MB max",
+  },
+  "add_team.name.label": { fr: "Nom complet", en: "Full name" },
+  "add_team.name.placeholder": {
+    fr: "Jean Mbarga",
+    en: "Jean Mbarga",
+  },
+  "add_team.location.label": { fr: "Ville", en: "City" },
+  "add_team.location.placeholder": {
+    fr: "Commencez à taper, ex. Douala",
+    en: "Start typing, e.g. Douala",
+  },
+  "add_team.age.label": { fr: "Âge", en: "Age" },
+  "add_team.age.placeholder": { fr: "28", en: "28" },
+  "add_team.bio.label": { fr: "À propos de vous", en: "About you" },
+  "add_team.bio.placeholder": {
+    fr: "Racontez votre parcours, votre région, ce que vous voulez partager avec les voyageurs.",
+    en: "Tell us about your background, your region, what you want to share with travelers.",
+  },
+  "add_team.bio.hint": {
+    fr: "Minimum 10 caractères. Cette description s'affichera sur la page À propos.",
+    en: "10 characters minimum. This will appear on the About page.",
+  },
+  "add_team.submit": { fr: "Envoyer ma candidature", en: "Submit my profile" },
+  "add_team.submitting": { fr: "Envoi…", en: "Sending…" },
+  "add_team.success.title": {
+    fr: "Candidature envoyée !",
+    en: "Submission received!",
+  },
+  "add_team.success.detail": {
+    fr: "Un administrateur va vérifier votre profil. Vous serez bientôt visible sur la page À propos.",
+    en: "An admin will review your profile. You'll appear on the About page shortly.",
+  },
+  "add_team.success.back": { fr: "Retour à l'accueil", en: "Back to home" },
+  "add_team.error.image_too_big": {
+    fr: "L'image dépasse 5 Mo. Choisissez un fichier plus léger.",
+    en: "Image is larger than 5 MB. Pick a smaller file.",
+  },
+  "add_team.error.image_type": {
+    fr: "Format d'image non pris en charge. JPEG, PNG ou WebP uniquement.",
+    en: "Unsupported image format. JPEG, PNG, or WebP only.",
+  },
+  "add_team.error.generic": {
+    fr: "Une erreur s'est produite. Veuillez réessayer.",
+    en: "Something went wrong. Please try again.",
+  },
+
+  "review.title": { fr: "Vérifier la candidature", en: "Review submission" },
+  "review.subtitle": {
+    fr: "Modifiez les informations si nécessaire, puis approuvez ou rejetez.",
+    en: "Edit any field if needed, then approve or reject.",
+  },
+  "review.title.label": { fr: "Titre", en: "Title" },
+  "review.approve": { fr: "Approuver", en: "Approve" },
+  "review.reject": { fr: "Rejeter", en: "Reject" },
+  "review.submitting": { fr: "Traitement…", en: "Processing…" },
+  "review.reject.confirm.title": {
+    fr: "Rejeter cette candidature ?",
+    en: "Reject this submission?",
+  },
+  "review.reject.confirm.detail": {
+    fr: "La candidature sera supprimée. Cette action est définitive.",
+    en: "The submission will be deleted. This cannot be undone.",
+  },
+  "review.reject.confirm.cancel": { fr: "Annuler", en: "Cancel" },
+  "review.reject.confirm.action": { fr: "Rejeter", en: "Reject" },
+  "review.approved.title": { fr: "Approuvé !", en: "Approved!" },
+  "review.approved.detail": {
+    fr: "Le membre apparaît maintenant sur la page À propos.",
+    en: "The member now appears on the About page.",
+  },
+  "review.rejected.title": {
+    fr: "Candidature rejetée",
+    en: "Submission rejected",
+  },
+  "review.rejected.detail": {
+    fr: "La candidature a été supprimée.",
+    en: "The submission has been deleted.",
+  },
+  "review.back": { fr: "Voir la page À propos", en: "Open the About page" },
+  "review.error.generic": {
+    fr: "Une erreur s'est produite. Veuillez réessayer.",
+    en: "Something went wrong. Please try again.",
+  },
+  "review.error.already_active": {
+    fr: "Ce membre est déjà approuvé et visible sur la page À propos. Pour le désactiver, utilisez l'outil d'administration.",
+    en: "This member is already approved and visible on the About page. Use admin tooling to deactivate.",
+  },
 } satisfies Dict;
 
 export type TranslationKey = keyof typeof dict;

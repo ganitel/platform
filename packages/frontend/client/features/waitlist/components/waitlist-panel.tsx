@@ -27,6 +27,7 @@ export function WaitlistPanel({
   const locale = useLocale();
   const t = useT();
   const [state, setState] = useState<State>("idle");
+  const [emailSent, setEmailSent] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -36,7 +37,7 @@ export function WaitlistPanel({
     if (!email) return;
     setState("submitting");
     try {
-      await joinWaitlist({
+      const result = await joinWaitlist({
         email,
         name: name || undefined,
         phone: phone || undefined,
@@ -44,6 +45,7 @@ export function WaitlistPanel({
           ? { property_id: itemId }
           : { experience_id: itemId }),
       });
+      setEmailSent(result.confirmation_email_sent);
       setState("done");
     } catch {
       setState("error");
@@ -77,7 +79,7 @@ export function WaitlistPanel({
       <div className="px-6 pb-6 pt-4">
         <AnimatePresence mode="wait">
           {state === "done" ? (
-            <SuccessState kind={kind} />
+            <SuccessState kind={kind} emailSent={emailSent} />
           ) : (
             <motion.form
               key="form"
@@ -160,7 +162,13 @@ export function WaitlistPanel({
   );
 }
 
-function SuccessState({ kind }: { kind: "property" | "experience" }) {
+function SuccessState({
+  kind,
+  emailSent,
+}: {
+  kind: "property" | "experience";
+  emailSent: boolean;
+}) {
   const t = useT();
   return (
     <motion.div
@@ -181,6 +189,11 @@ function SuccessState({ kind }: { kind: "property" | "experience" }) {
           ? t("waitlist.success.detail")
           : t("waitlist.success.detail.experience")}
       </p>
+      {emailSent && (
+        <p className="mt-3 text-xs text-ganitel-text-placeholder">
+          {t("waitlist.success.email")}
+        </p>
+      )}
     </motion.div>
   );
 }

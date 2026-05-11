@@ -17,7 +17,13 @@ interface WaitlistPayload {
   notes?: string;
 }
 
-export async function joinWaitlist(payload: WaitlistPayload): Promise<void> {
+export interface WaitlistResult {
+  confirmation_email_sent: boolean;
+}
+
+export async function joinWaitlist(
+  payload: WaitlistPayload,
+): Promise<WaitlistResult> {
   const res = await fetch(`${env.apiBaseUrl}/waitlist`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -26,4 +32,13 @@ export async function joinWaitlist(payload: WaitlistPayload): Promise<void> {
   if (!res.ok && res.status !== 409) {
     throw new Error("waitlist_error");
   }
+  if (res.status === 409) {
+    return { confirmation_email_sent: false };
+  }
+  const json = (await res.json().catch(() => null)) as {
+    confirmation_email_sent?: boolean;
+  } | null;
+  return {
+    confirmation_email_sent: json?.confirmation_email_sent ?? false,
+  };
 }

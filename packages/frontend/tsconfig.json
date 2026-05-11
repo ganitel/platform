@@ -19,6 +19,9 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
 
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
+
     "strict": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
