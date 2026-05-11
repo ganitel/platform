@@ -501,7 +501,10 @@ const dict = {
     fr: "Le membre apparaît maintenant sur la page À propos.",
     en: "The member now appears on the About page.",
   },
-  "review.rejected.title": { fr: "Candidature rejetée", en: "Submission rejected" },
+  "review.rejected.title": {
+    fr: "Candidature rejetée",
+    en: "Submission rejected",
+  },
   "review.rejected.detail": {
     fr: "La candidature a été supprimée.",
     en: "The submission has been deleted.",
