@@ -116,6 +116,7 @@ const LABEL_CLASS = "block text-sm font-medium text-ganitel-text-title mb-1.5";
 export default function JoinPage() {
   const t = useT();
   const [state, setState] = useState<State>("idle");
+  const [emailSent, setEmailSent] = useState(false);
   const [role, setRole] = useState<Role>("traveler");
   const [email, setEmail] = useState("");
   const [interests, setInterests] = useState<Set<Interest>>(new Set());
@@ -199,7 +200,8 @@ export default function JoinPage() {
               budget_currency: budgetRange ? budgetCurrency : undefined,
             }),
       };
-      await joinWaitlist(payload);
+      const result = await joinWaitlist(payload);
+      setEmailSent(result.confirmation_email_sent);
       setState("done");
     } catch {
       setState("error");
@@ -226,6 +228,11 @@ export default function JoinPage() {
             <p className="mt-3 text-sm leading-relaxed text-ganitel-text-subtitle">
               {t("join.success.detail")}
             </p>
+            {emailSent && (
+              <p className="mt-3 text-xs text-ganitel-text-placeholder">
+                {t("join.success.email")}
+              </p>
+            )}
             <Link
               to="/"
               className="mt-8 inline-flex items-center rounded-full bg-ganitel-text-title px-6 py-3 text-sm font-semibold text-ganitel-paper transition-all hover:bg-ganitel-moss"

@@ -2,14 +2,11 @@ import logging
 from uuid import UUID
 
 from fastapi import APIRouter, File, Form, Query, UploadFile, status
-from sqlalchemy import select
 
 from app.core.config import get_settings
 from app.core.deps import DbSession
 from app.modules.team import emails, service, tokens
-from app.modules.team.models import TeamAdmin
 from app.modules.team.schemas import (
-    AdminEmailOut,
     SubmissionResult,
     TeamMemberOut,
     TeamMemberUpdate,
@@ -91,16 +88,10 @@ async def submit_team_member(
     )
 
 
-@router.get("/admins", response_model=list[AdminEmailOut])
-async def list_admins(session: DbSession) -> list[AdminEmailOut]:
-    """Read-only debug view of who receives review-notification emails."""
-    result = await session.execute(select(TeamAdmin))
-    return [AdminEmailOut.model_validate(a) for a in result.scalars().all()]
-
-
 @router.get("/{team_member_id}/review", response_model=TeamMemberOut)
 async def get_for_review(team_member_id: UUID, token: str, session: DbSession) -> TeamMemberOut:
-    tokens.verify(token, team_member_id=team_member_id)
+    admin_email = tokens.verify(token, team_member_id=team_member_id)
+    await service.assert_admin_active(session, admin_email)
     member = await service.get_by_id(session, team_member_id)
     return await service.to_public(member)
 
@@ -112,7 +103,8 @@ async def update_via_review(
     body: TeamMemberUpdate,
     session: DbSession,
 ) -> TeamMemberOut:
-    tokens.verify(token, team_member_id=team_member_id)
+    admin_email = tokens.verify(token, team_member_id=team_member_id)
+    await service.assert_admin_active(session, admin_email)
     member = await service.get_by_id(session, team_member_id)
     await service.apply_review_update(session, member, body)
     return await service.to_public(member)
@@ -125,7 +117,8 @@ async def approve_member(
     session: DbSession,
     body: TeamMemberUpdate | None = None,
 ) -> TeamMemberOut:
-    tokens.verify(token, team_member_id=team_member_id)
+    admin_email = tokens.verify(token, team_member_id=team_member_id)
+    await service.assert_admin_active(session, admin_email)
     member = await service.get_by_id(session, team_member_id)
     if body is not None:
         await service.apply_review_update(session, member, body)
@@ -135,6 +128,7 @@ async def approve_member(
 
 @router.delete("/{team_member_id}/reject", status_code=status.HTTP_204_NO_CONTENT)
 async def reject_member(team_member_id: UUID, token: str, session: DbSession) -> None:
-    tokens.verify(token, team_member_id=team_member_id)
+    admin_email = tokens.verify(token, team_member_id=team_member_id)
+    await service.assert_admin_active(session, admin_email)
     member = await service.get_by_id(session, team_member_id)
     await service.reject(session, member)

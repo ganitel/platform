@@ -101,23 +101,26 @@ def _send_one(*, to: str, subject: str, html: str) -> bool:
 async def notify_admins(
     member: TeamMember, *, admin_emails: list[str], review_url_builder
 ) -> tuple[int, int]:
-    """Email every admin. Returns (sent, attempted) — caller surfaces partial
-    failure to the user rather than letting a swallowed exception masquerade
-    as success.
+    """Email every admin concurrently. Returns (sent, attempted) — caller
+    surfaces partial failure to the user rather than letting a swallowed
+    exception masquerade as success.
 
     `review_url_builder(admin_email) -> str` lets the caller mint a per-admin
     tokenized link so each email contains the recipient's specific token."""
+    if not admin_emails:
+        return 0, 0
     subject = f"Ganitel — new team-member submission: {member.name}"
     loop = asyncio.get_running_loop()
-    sent = 0
-    for admin in admin_emails:
+
+    async def send_one(admin: str) -> bool:
         url = review_url_builder(admin)
         html = _build_html(member, url)
         # resend SDK is synchronous; offload so we don't block the event loop.
-        ok = await loop.run_in_executor(
+        return await loop.run_in_executor(
             None,
-            lambda to=admin, subj=subject, h=html: _send_one(to=to, subject=subj, html=h),
+            lambda: _send_one(to=admin, subject=subject, html=html),
         )
-        if ok:
-            sent += 1
+
+    results = await asyncio.gather(*(send_one(a) for a in admin_emails))
+    sent = sum(1 for ok in results if ok)
     return sent, len(admin_emails)

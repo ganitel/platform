@@ -1,4 +1,4 @@
-import { useSyncExternalStore, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router";
 import { CheckCircle2, ImagePlus, User } from "lucide-react";
 
@@ -39,6 +39,9 @@ export function AddTeamForm() {
   const [bio, setBio] = useState("");
 
   function onPickImage(file: File | null) {
+    // Free the previous blob URL so we don't accumulate one per re-pick.
+    // Browsers keep blob: URLs alive until the document unloads otherwise.
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
     if (!file) {
       setImage(null);
       setImagePreview(null);
@@ -46,18 +49,30 @@ export function AddTeamForm() {
     }
     if (file.size > MAX_BYTES) {
       setErrorMessage(t("add_team.error.image_too_big"));
+      setImage(null);
+      setImagePreview(null);
       return;
     }
     if (!ACCEPTED_TYPES.split(",").includes(file.type)) {
       setErrorMessage(
         `${t("add_team.error.image_type")} (got: ${file.type || "unknown"})`,
       );
+      setImage(null);
+      setImagePreview(null);
       return;
     }
     setErrorMessage("");
     setImage(file);
     setImagePreview(URL.createObjectURL(file));
   }
+
+  // Revoke the lingering blob URL on unmount (e.g., user navigates away
+  // after picking a file but before submitting).
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
 
   const ageNumber = Number(age);
   const submitDisabled =

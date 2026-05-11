@@ -45,3 +45,7 @@ class WaitlistEntryIn(BaseModel):
 class WaitlistEntryOut(BaseModel):
     id: UUID
     email: str
+    # True if Resend accepted the confirmation send. False on duplicate
+    # signup (we don't re-send) or on any Resend / config failure. Frontend
+    # can branch its success copy on this.
+    confirmation_email_sent: bool = False

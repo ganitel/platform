@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import NotFoundError, ValidationError
+from app.core.errors import ConflictError, ForbiddenError, NotFoundError, ValidationError
 from app.core.storage import public_or_signed_url, upload_object
 from app.modules.team.models import TeamAdmin, TeamMember
 from app.modules.team.schemas import (
@@ -102,6 +102,13 @@ async def approve(session: AsyncSession, member: TeamMember) -> TeamMember:
 
 
 async def reject(session: AsyncSession, member: TeamMember) -> None:
+    # Once a member is active they're shown publicly on /about — a stale
+    # reject link from an old email mustn't quietly delete them. Use the
+    # admin UI / DB to deactivate active members instead.
+    if member.is_active:
+        raise ConflictError(
+            "Cannot reject an already-approved team member. Deactivate via admin tooling instead."
+        )
     await session.delete(member)
     await session.commit()
 
@@ -110,6 +117,16 @@ async def list_admin_emails(session: AsyncSession) -> list[str]:
     stmt = select(TeamAdmin.email)
     result = await session.execute(stmt)
     return [email for (email,) in result.all()]
+
+
+async def assert_admin_active(session: AsyncSession, admin_email: str) -> None:
+    """The review token is signed, but admins can be removed from
+    team_admins after a token is minted. Re-check on every gated request
+    so a revoked admin's lingering link can't act on submissions."""
+    stmt = select(TeamAdmin.id).where(TeamAdmin.email == admin_email)
+    result = await session.execute(stmt)
+    if result.first() is None:
+        raise ForbiddenError("Reviewer is no longer an active admin")
 
 
 async def to_public(member: TeamMember) -> TeamMemberOut:

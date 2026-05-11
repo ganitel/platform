@@ -200,6 +200,10 @@ const dict = {
     fr: "Nous vous contacterons en priorité pour cette expérience dès l'ouverture.",
     en: "We'll reach out to you first when this experience opens.",
   },
+  "waitlist.success.email": {
+    fr: "Un e-mail de confirmation est en route — vérifiez votre boîte de réception.",
+    en: "A confirmation email is on its way — check your inbox.",
+  },
   "waitlist.error": {
     fr: "Une erreur s'est produite. Réessayez.",
     en: "Something went wrong. Please try again.",
@@ -383,6 +387,10 @@ const dict = {
   "join.success.detail": {
     fr: "Nous vous contacterons dès l'ouverture. Merci de votre confiance.",
     en: "We'll reach out as soon as we launch. Thank you for your trust.",
+  },
+  "join.success.email": {
+    fr: "Un e-mail de confirmation est en route — vérifiez votre boîte de réception.",
+    en: "A confirmation email is on its way — check your inbox.",
   },
   "join.success.back": { fr: "Retour à l'accueil", en: "Back to home" },
 

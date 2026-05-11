@@ -1,16 +1,22 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.waitlist import emails
 from app.modules.waitlist.models import WaitlistEntry
 from app.modules.waitlist.schemas import WaitlistEntryIn
 
 
-async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> WaitlistEntry:
+async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> tuple[WaitlistEntry, bool]:
     """Insert a new waitlist entry, silently ignoring exact duplicates
-    (same email + same role + same property/experience pair)."""
+    (same email + same role + same property/experience pair).
+
+    Returns (entry, confirmation_sent). The caller surfaces
+    confirmation_sent to the frontend so the success UI can tell the
+    truth instead of pretending an email went out when it didn't.
+    Duplicates skip the resend — visitor already got an email last time."""
     existing = await _find_existing(session, body)
     if existing:
-        return existing
+        return existing, False
 
     entry = WaitlistEntry(
         email=body.email,
@@ -31,7 +37,9 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> Waitlist
     session.add(entry)
     await session.commit()
     await session.refresh(entry)
-    return entry
+
+    confirmation_sent = await emails.send_confirmation(entry)
+    return entry, confirmation_sent
 
 
 async def _find_existing(session: AsyncSession, body: WaitlistEntryIn) -> WaitlistEntry | None:
