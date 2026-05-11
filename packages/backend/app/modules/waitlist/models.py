@@ -28,6 +28,10 @@ class WaitlistEntry(Base):
     headcount: Mapped[int | None] = mapped_column(Integer())
     budget_range: Mapped[str | None] = mapped_column(String(32))
     budget_currency: Mapped[str | None] = mapped_column(String(8))
+    role: Mapped[str | None] = mapped_column(String(16))
+    host_city: Mapped[str | None] = mapped_column(String(120))
+    host_inventory: Mapped[str | None] = mapped_column(String(16))
+    host_status: Mapped[str | None] = mapped_column(String(32))
     notes: Mapped[str | None] = mapped_column(Text())
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

@@ -222,3 +222,44 @@ def test_waitlist_rejects_invalid_budget_currency() -> None:
         WaitlistEntryIn.model_validate(
             _waitlist(budget_range="under_50k", budget_currency="gbp"),
         )
+
+
+def test_waitlist_accepts_host_payload() -> None:
+    entry = WaitlistEntryIn.model_validate(
+        _waitlist(
+            role="host",
+            interest="renting",
+            host_city="Douala",
+            host_inventory="2_5",
+            host_status="ready",
+        ),
+    )
+    assert entry.role == "host"
+    assert entry.host_city == "Douala"
+    assert entry.host_inventory == "2_5"
+    assert entry.host_status == "ready"
+
+
+def test_waitlist_accepts_traveler_role() -> None:
+    entry = WaitlistEntryIn.model_validate(_waitlist(role="traveler"))
+    assert entry.role == "traveler"
+
+
+def test_waitlist_rejects_unknown_role() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(_waitlist(role="vendor"))
+
+
+def test_waitlist_rejects_unknown_host_inventory() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(_waitlist(host_inventory="50"))
+
+
+def test_waitlist_rejects_unknown_host_status() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(_waitlist(host_status="ghosted"))
+
+
+def test_waitlist_rejects_host_city_over_120_chars() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(_waitlist(host_city="x" * 121))

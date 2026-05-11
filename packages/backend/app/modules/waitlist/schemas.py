@@ -6,6 +6,9 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 BudgetRange = Literal["under_50k", "50k_150k", "150k_300k", "300k_500k", "over_500k"]
 BudgetCurrency = Literal["xaf", "eur", "usd"]
 Interest = Literal["renting", "experiences", "both"]
+Role = Literal["traveler", "host"]
+HostInventory = Literal["1", "2_5", "6_10", "10_plus"]
+HostStatus = Literal["ready", "under_construction", "planning", "just_exploring"]
 
 
 class WaitlistEntryIn(BaseModel):
@@ -20,6 +23,10 @@ class WaitlistEntryIn(BaseModel):
     headcount: int | None = Field(default=None, ge=1, le=500)
     budget_range: BudgetRange | None = None
     budget_currency: BudgetCurrency | None = None
+    role: Role | None = None
+    host_city: str | None = Field(default=None, max_length=120)
+    host_inventory: HostInventory | None = None
+    host_status: HostStatus | None = None
     notes: str | None = Field(default=None, max_length=1000)
 
 

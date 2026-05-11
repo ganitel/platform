@@ -7,7 +7,7 @@ from app.modules.waitlist.schemas import WaitlistEntryIn
 
 async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> WaitlistEntry:
     """Insert a new waitlist entry, silently ignoring exact duplicates
-    (same email + same property/experience pair)."""
+    (same email + same role + same property/experience pair)."""
     existing = await _find_existing(session, body)
     if existing:
         return existing
@@ -22,6 +22,10 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> Waitlist
         headcount=body.headcount,
         budget_range=body.budget_range,
         budget_currency=body.budget_currency,
+        role=body.role,
+        host_city=body.host_city,
+        host_inventory=body.host_inventory,
+        host_status=body.host_status,
         notes=body.notes,
     )
     session.add(entry)
@@ -33,6 +37,7 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> Waitlist
 async def _find_existing(session: AsyncSession, body: WaitlistEntryIn) -> WaitlistEntry | None:
     stmt = select(WaitlistEntry).where(
         WaitlistEntry.email == body.email,
+        WaitlistEntry.role == body.role,
         WaitlistEntry.property_id == body.property_id,
         WaitlistEntry.experience_id == body.experience_id,
     )
