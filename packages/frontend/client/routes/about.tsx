@@ -3,11 +3,23 @@ import type { Route } from "./+types/about";
 import { About } from "@/features/about/about";
 import { listTeamMembersServer } from "@/features/about/api";
 import type { TeamMember } from "@/features/about/types";
+import { localeFromAcceptLanguage } from "@/shared/lib/i18n";
 
-export const meta: Route.MetaFunction = () => {
-  const title = "À propos — Ganitel";
-  const description =
-    "Nous aimons le Cameroun et sa diversité. Des séjours et expériences sur mesure, conçus pour faire ressentir chaque recoin du pays.";
+const META = {
+  fr: {
+    title: "À propos — Ganitel",
+    description:
+      "Nous aimons le Cameroun et sa diversité. Des séjours et expériences sur mesure, conçus pour faire ressentir chaque recoin du pays.",
+  },
+  en: {
+    title: "About — Ganitel",
+    description:
+      "We love Cameroon and its diversity. Custom stays and experiences crafted to make you feel every corner of the country.",
+  },
+} as const;
+
+export const meta: Route.MetaFunction = ({ data }) => {
+  const { title, description } = META[data?.locale ?? "fr"];
   return [
     { title },
     { name: "description", content: description },
@@ -17,12 +29,13 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export async function loader() {
+export async function loader({ request }: Route.LoaderArgs) {
+  const locale = localeFromAcceptLanguage(request.headers.get("Accept-Language"));
   try {
     const team = await listTeamMembersServer();
-    return { team };
+    return { team, locale };
   } catch {
-    return { team: [] as TeamMember[] };
+    return { team: [] as TeamMember[], locale };
   }
 }
 

@@ -1,7 +1,7 @@
 """team_members table for the about page (cofounders + future tour guides)
 
-Revision ID: 0010_team_members
-Revises: 0009_waitlist_phone
+Revision ID: 0012_team_members
+Revises: 0011_waitlist_host_mode
 Create Date: 2026-05-11
 
 """
@@ -11,8 +11,8 @@ from collections.abc import Sequence
 import sqlalchemy as sa
 from alembic import op
 
-revision: str = "0010_team_members"
-down_revision: str | Sequence[str] | None = "0009_waitlist_phone"
+revision: str = "0012_team_members"
+down_revision: str | Sequence[str] | None = "0011_waitlist_host_mode"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
@@ -45,6 +45,10 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_team_members")),
+        sa.CheckConstraint(
+            "role IN ('cofounder', 'tour_guide')",
+            name=op.f("ck_team_members_role"),
+        ),
     )
     op.create_index(
         op.f("ix_team_members_role"), "team_members", ["role"], unique=False

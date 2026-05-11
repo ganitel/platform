@@ -1,7 +1,16 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, DateTime, Integer, String, Text, Uuid, func
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    Integer,
+    String,
+    Text,
+    Uuid,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -9,6 +18,12 @@ from app.core.db import Base
 
 class TeamMember(Base):
     __tablename__ = "team_members"
+    __table_args__ = (
+        CheckConstraint(
+            "role IN ('cofounder', 'tour_guide')",
+            name="ck_team_members_role",
+        ),
+    )
 
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
