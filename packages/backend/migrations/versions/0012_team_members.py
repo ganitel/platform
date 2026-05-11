@@ -32,12 +32,8 @@ def upgrade() -> None:
         sa.Column("bio_fr", sa.Text(), nullable=True),
         sa.Column("bio_en", sa.Text(), nullable=True),
         sa.Column("avatar_url", sa.String(500), nullable=True),
-        sa.Column(
-            "display_order", sa.Integer(), nullable=False, server_default="0"
-        ),
-        sa.Column(
-            "is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")
-        ),
+        sa.Column("display_order", sa.Integer(), nullable=False, server_default="0"),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -50,9 +46,7 @@ def upgrade() -> None:
             name=op.f("ck_team_members_role"),
         ),
     )
-    op.create_index(
-        op.f("ix_team_members_role"), "team_members", ["role"], unique=False
-    )
+    op.create_index(op.f("ix_team_members_role"), "team_members", ["role"], unique=False)
 
     op.bulk_insert(
         team_members,

@@ -7,9 +7,7 @@ from app.modules.team.models import TeamMember
 from app.modules.team.schemas import TeamRole
 
 
-async def list_active(
-    session: AsyncSession, role: TeamRole | None = None
-) -> Sequence[TeamMember]:
+async def list_active(session: AsyncSession, role: TeamRole | None = None) -> Sequence[TeamMember]:
     stmt = select(TeamMember).where(TeamMember.is_active.is_(True))
     if role is not None:
         stmt = stmt.where(TeamMember.role == role)

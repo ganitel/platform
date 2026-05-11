@@ -33,9 +33,7 @@ class TeamMember(Base):
     bio_fr: Mapped[str | None] = mapped_column(Text())
     bio_en: Mapped[str | None] = mapped_column(Text())
     avatar_url: Mapped[str | None] = mapped_column(String(500))
-    display_order: Mapped[int] = mapped_column(
-        Integer(), nullable=False, server_default="0"
-    )
+    display_order: Mapped[int] = mapped_column(Integer(), nullable=False, server_default="0")
     is_active: Mapped[bool] = mapped_column(
         Boolean(), nullable=False, default=True, server_default="true"
     )
