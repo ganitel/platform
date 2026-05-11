@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "lint": "eslint .",
     "typegen": "react-router typegen",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "og": "bun scripts/og/build.mjs"
   },
   "dependencies": {
     "@react-router/dev": "^7.14.2",
@@ -53,6 +54,7 @@
     "@radix-ui/react-toggle": "^1.1.9",
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.2.4",
     "@tanstack/react-query": "^5.84.2",

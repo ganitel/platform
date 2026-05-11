@@ -28,3 +28,5 @@ build
 .config/
 !.env
 .env
+
+scripts/og/.fonts/

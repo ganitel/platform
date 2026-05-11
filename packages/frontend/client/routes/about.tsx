@@ -4,6 +4,7 @@ import { About } from "@/features/about/about";
 import { listTeamMembersServer } from "@/features/about/api";
 import type { TeamMember } from "@/features/about/types";
 import { localeFromAcceptLanguage } from "@/shared/lib/i18n";
+import { seo } from "@/shared/lib/seo";
 
 const META = {
   fr: {
@@ -19,14 +20,16 @@ const META = {
 } as const;
 
 export const meta: Route.MetaFunction = ({ data }) => {
-  const { title, description } = META[data?.locale ?? "fr"];
-  return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-    { property: "og:type", content: "website" },
-  ];
+  const locale = data?.locale ?? "fr";
+  const { title, description } = META[locale];
+  return seo({
+    title,
+    description,
+    pathname: "/about",
+    locale,
+    ogImage: { url: "/og/about.png", alt: title },
+    alternates: { fr: "/about", en: "/about" },
+  });
 };
 
 export async function loader({ request }: Route.LoaderArgs) {

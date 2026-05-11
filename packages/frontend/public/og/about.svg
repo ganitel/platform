@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F6F3EA"/>
+      <stop offset="100%" stop-color="#EFE9D6"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#D39E70" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#D39E70" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" stitchTiles="stitch" seed="3"/>
+      <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.07 0"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#paper)"/>
+
+  <!-- Horizon arcs -->
+  <g opacity="0.85">
+    <circle cx="980" cy="560" r="320" fill="url(#sun)"/>
+    <path d="M 760 560 Q 980 460 1200 560" fill="none" stroke="#18100C" stroke-opacity="0.12" stroke-width="1.5"/>
+    <path d="M 720 590 Q 980 470 1240 590" fill="none" stroke="#18100C" stroke-opacity="0.10" stroke-width="1.5"/>
+    <path d="M 680 620 Q 980 480 1280 620" fill="none" stroke="#18100C" stroke-opacity="0.08" stroke-width="1.5"/>
+  </g>
+
+  <!-- Wordmark + rule -->
+  <g>
+    <text x="80" y="92" font-family="Inter" font-weight="700" font-size="26" letter-spacing="6" fill="#18100C">À PROPOS</text>
+    <rect x="80" y="108" width="44" height="2" fill="#D39E70"/>
+  </g>
+
+  <!-- Headline -->
+  <text x="80" y="260" font-family="Inter" font-weight="600" font-size="84" fill="#18100C" letter-spacing="-2">
+    <tspan x="80" dy="0"><tspan font-family="Inter" font-weight="600" fill="#18100C">Au plus près du</tspan></tspan><tspan x="80" dy="108"><tspan font-family="Inter" font-weight="600" fill="#18100C">Cameroun, Sénégal,</tspan></tspan><tspan x="80" dy="108"><tspan font-family="Instrument Serif" font-style="italic" font-weight="400" fill="#D39E70">Côte d&apos;Ivoire.</tspan></tspan>
+  </text>
+
+  <!-- Caption -->
+  <text x="80" y="538" font-family="Inter" font-weight="500" font-size="22" fill="#4D4744" letter-spacing="0">
+    L&apos;équipe qui visite, écoute et choisit chaque adresse.
+  </text>
+
+  <!-- URL -->
+  <text x="80" y="578" font-family="Inter" font-weight="600" font-size="20" fill="#18100C" letter-spacing="3">
+    GANITEL.COM/ABOUT
+  </text>
+
+  <!-- Hairline frame -->
+  <rect x="40" y="40" width="1120" height="550" fill="none" stroke="#18100C" stroke-opacity="0.18" stroke-width="1"/>
+
+  <!-- Grain overlay -->
+  <rect width="1200" height="630" filter="url(#grain)" opacity="0.55"/>
+</svg>

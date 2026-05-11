@@ -2,20 +2,21 @@ import type { Route } from "./+types/_index";
 
 import { Landing } from "@/features/landing/landing";
 import { serverFetch } from "@/shared/api/server";
+import { seo } from "@/shared/lib/seo";
 import type { PropertyPublic, SearchOut } from "@/features/properties/types";
 
-export const meta: Route.MetaFunction = () => {
-  const title = "Ganitel — Là où la lumière prend son temps";
-  const description =
-    "Logements et expériences soigneusement sélectionnés au Cameroun, au Sénégal et en Côte d'Ivoire.";
-  return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-    { property: "og:type", content: "website" },
-  ];
-};
+export const meta: Route.MetaFunction = () =>
+  seo({
+    title: "Ganitel — Là où la lumière prend son temps",
+    description:
+      "Logements et expériences soigneusement sélectionnés au Cameroun, au Sénégal et en Côte d'Ivoire.",
+    pathname: "/",
+    ogImage: {
+      url: "/og/default.png",
+      alt: "Ganitel — Là où la lumière prend son temps",
+    },
+    alternates: { fr: "/", en: "/" },
+  });
 
 export async function loader() {
   // Marketing page keeps rendering if the catalog API is unreachable; the

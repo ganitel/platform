@@ -18,6 +18,7 @@ import {
   localeFromAcceptLanguage,
   type Locale,
 } from "@/shared/lib/i18n";
+import { organizationJsonLd, websiteJsonLd } from "@/shared/lib/seo";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 import { Toaster } from "@/shared/ui/sonner";
 import indexCss from "@/styles/index.css?url";
@@ -30,15 +31,11 @@ export const links: Route.LinksFunction = () => [
     href: "https://fonts.gstatic.com",
     crossOrigin: "anonymous",
   },
+  { rel: "icon", href: "/favicon.ico", sizes: "any" },
+  { rel: "apple-touch-icon", href: "/og/default.png" },
 ];
 
 export const meta: Route.MetaFunction = () => [
-  { charSet: "utf-8" },
-  {
-    name: "viewport",
-    content: "width=device-width,initial-scale=1,viewport-fit=cover",
-  },
-  { name: "theme-color", content: "#18100C" },
   { title: "Ganitel — séjours et expériences" },
 ];
 
@@ -59,8 +56,23 @@ export function Layout({ children }: { children: ReactNode }) {
     <html lang={lang}>
       <head>
         <meta charSet="utf-8" />
+        <meta
+          name="viewport"
+          content="width=device-width,initial-scale=1,viewport-fit=cover"
+        />
+        <meta name="theme-color" content="#18100C" />
         <Meta />
         <Links />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
       </head>
       <body className="bg-ganitel-paper text-ganitel-text-title antialiased">
         {children}

@@ -8,11 +8,17 @@ import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { joinWaitlist } from "@/features/waitlist/api";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { cn } from "@/shared/lib/cn";
+import { seo } from "@/shared/lib/seo";
 
-export const meta: Route.MetaFunction = () => [
-  { title: "Rejoindre Ganitel" },
-  { name: "robots", content: "noindex" },
-];
+export const meta: Route.MetaFunction = () =>
+  seo({
+    title: "Rejoindre Ganitel — liste d'attente",
+    description:
+      "Rejoignez la liste d'attente de Ganitel. Soyez parmi les premiers à découvrir nos logements et expériences au Cameroun, Sénégal et Côte d'Ivoire.",
+    pathname: "/join",
+    ogImage: { url: "/og/default.png", alt: "Rejoindre Ganitel" },
+    noindex: true,
+  });
 
 type Role = "traveler" | "host";
 type Interest = "renting" | "experiences";
