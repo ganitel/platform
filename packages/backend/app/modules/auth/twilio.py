@@ -37,11 +37,20 @@ async def send_sms(*, to: str, message: str) -> dict[str, Any]:
         response = await client.post(url, auth=auth, data=data)
 
     if response.status_code >= 400:
-        raise AuthError(code="sms.twilio_http_error")
+        raise AuthError(
+            code="sms.twilio_http_error",
+            extra={"http_status": response.status_code, "body": response.text[:500]},
+        )
 
     body = response.json()
     twilio_status = body.get("status")
     # queued, accepted, sending, sent = success; failed/undelivered = error
     if twilio_status in ("failed", "undelivered"):
-        raise AuthError(code="sms.twilio_rejected")
+        raise AuthError(
+            code="sms.twilio_rejected",
+            extra={
+                "error_code": body.get("error_code"),
+                "error_message": body.get("error_message"),
+            },
+        )
     return body

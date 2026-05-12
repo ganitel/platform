@@ -21,6 +21,7 @@ import {
   extractErrorCode,
   extractFieldErrors,
 } from "@/shared/api/client";
+import { TEAM_FIELD_ERROR_KEYS } from "@/features/team/error-keys";
 import {
   TITLE_KEYS,
   TITLE_LABELS,
@@ -28,7 +29,6 @@ import {
   type TitleKey,
 } from "@/features/team/types";
 import { useT } from "@/shared/lib/i18n";
-import type { TranslationKey } from "@/shared/lib/i18n";
 import { cn } from "@/shared/lib/cn";
 import type { TeamMember } from "@/features/about/types";
 
@@ -59,6 +59,15 @@ export function ReviewForm({
   const [state, setState] = useState<State>("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  function clearFieldError(...fields: string[]) {
+    setFieldErrors((prev) => {
+      if (fields.every((f) => !(f in prev))) return prev;
+      const next = { ...prev };
+      for (const f of fields) delete next[f];
+      return next;
+    });
+  }
   const [name, setName] = useState(member.name);
   const [location, setLocation] = useState<LocationPick>({
     city: member.city ?? "",
@@ -84,22 +93,6 @@ export function ReviewForm({
     return patch;
   }
 
-  const FIELD_ERROR_KEYS: Record<string, TranslationKey> = {
-    "name.missing": "add_team.error.name_required",
-    "name.string_too_short": "add_team.error.name_required",
-    "name.string_too_long": "add_team.error.name_too_long",
-    "bio_fr.missing": "add_team.error.bio_required",
-    "bio_fr.string_too_short": "add_team.error.bio_required",
-    "bio_fr.string_too_long": "add_team.error.bio_too_long",
-    "city.missing": "add_team.error.city_required",
-    "city.string_too_short": "add_team.error.city_required",
-    "country.missing": "add_team.error.country_required",
-    "country.string_too_short": "add_team.error.country_required",
-    "age.missing": "add_team.error.age_invalid",
-    "age.greater_than_equal": "add_team.error.age_invalid",
-    "age.less_than_equal": "add_team.error.age_invalid",
-  };
-
   async function handleApprove() {
     setState("submitting");
     setErrorMessage("");
@@ -114,8 +107,8 @@ export function ReviewForm({
         const translated: Record<string, string> = {};
         for (const { field, type, msg } of fieldErrs) {
           const key =
-            FIELD_ERROR_KEYS[`${field}.${type}`] ??
-            FIELD_ERROR_KEYS[`${field}.missing`];
+            TEAM_FIELD_ERROR_KEYS[`${field}.${type}`] ??
+            TEAM_FIELD_ERROR_KEYS[`${field}.missing`];
           translated[field] = key ? t(key) : msg;
         }
         setFieldErrors(translated);
@@ -217,7 +210,10 @@ export function ReviewForm({
             id="rv-name"
             type="text"
             value={name}
-            onChange={(event) => setName(event.target.value)}
+            onChange={(event) => {
+              setName(event.target.value);
+              clearFieldError("name");
+            }}
             className={INPUT_CLASS}
           />
           {fieldErrors.name && (
@@ -231,7 +227,10 @@ export function ReviewForm({
           placeholder={t("add_team.location.placeholder")}
           initialCity={location.city}
           initialCountry={location.country}
-          onChange={(pick) => setLocation(pick ?? { city: "", country: "" })}
+          onChange={(pick) => {
+            setLocation(pick ?? { city: "", country: "" });
+            clearFieldError("city", "country");
+          }}
         />
         {(fieldErrors.city || fieldErrors.country) && (
           <p className="-mt-3 text-xs text-red-500">
@@ -250,7 +249,10 @@ export function ReviewForm({
               min={16}
               max={100}
               value={age}
-              onChange={(event) => setAge(event.target.value)}
+              onChange={(event) => {
+                setAge(event.target.value);
+                clearFieldError("age");
+              }}
               className={INPUT_CLASS}
             />
             {fieldErrors.age && (
@@ -288,7 +290,10 @@ export function ReviewForm({
             rows={6}
             maxLength={2000}
             value={bio}
-            onChange={(event) => setBio(event.target.value)}
+            onChange={(event) => {
+              setBio(event.target.value);
+              clearFieldError("bio_fr");
+            }}
             className={cn(INPUT_CLASS, "resize-none")}
           />
           {fieldErrors.bio_fr && (

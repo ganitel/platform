@@ -9,7 +9,7 @@ class StripeProvider:
     async def create_intent(
         self, *, payment: Payment, return_url: str | None = None
     ) -> PaymentIntent:
-        raise AppError(code="stripe.not_implemented")
+        raise AppError(code="stripe.not_implemented", extra={"status_code": 501})
 
     async def parse_webhook(self, *, headers: dict[str, str], body: bytes) -> PaymentEvent:
-        raise AppError(code="stripe.not_implemented")
+        raise AppError(code="stripe.not_implemented", extra={"status_code": 501})

@@ -95,11 +95,11 @@ async def publish(session: AsyncSession, property: Property, user: User) -> Prop
     _ensure_owner(user, property)
     issues: dict[str, str] = {}
     if not property.title.strip():
-        issues["title"] = "required"
+        issues["title"] = "missing"
     if property.base_price_amount is None or property.base_price_amount <= 0:
-        issues["base_price_amount"] = "must be positive"
+        issues["base_price_amount"] = "not_positive"
     if not property.photos:
-        issues["photos"] = "at least one photo is required"
+        issues["photos"] = "empty"
     if issues:
         raise ValidationError(code="property.not_ready", extra={"issues": issues})
     property.status = PropertyStatus.PUBLISHED

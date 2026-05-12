@@ -38,14 +38,23 @@ async def send_sms(*, to: str, message: str) -> dict[str, Any]:
         response = await client.post(url, headers=headers, data=payload)
 
     if response.status_code >= 400:
-        raise AuthError(code="sms.africastalking_http_error")
+        raise AuthError(
+            code="sms.africastalking_http_error",
+            extra={"http_status": response.status_code, "body": response.text[:500]},
+        )
 
     body = response.json()
     recipients = body.get("SMSMessageData", {}).get("Recipients", [])
     if not recipients:
-        raise AuthError(code="sms.africastalking_no_recipients")
+        raise AuthError(
+            code="sms.africastalking_no_recipients",
+            extra={"response": body},
+        )
     status_code = recipients[0].get("statusCode")
     # AT statusCode 100, 101, 102 = queued/sent (success). Anything else = failure.
     if status_code not in (100, 101, 102):
-        raise AuthError(code="sms.africastalking_rejected")
+        raise AuthError(
+            code="sms.africastalking_rejected",
+            extra={"recipient": recipients[0]},
+        )
     return body

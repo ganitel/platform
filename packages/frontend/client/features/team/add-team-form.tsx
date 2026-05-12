@@ -4,10 +4,13 @@ import { CheckCircle2, ImagePlus, User } from "lucide-react";
 
 import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { submitTeamMember } from "@/features/team/api";
+import {
+  TEAM_ERROR_CODE_KEYS,
+  TEAM_FIELD_ERROR_KEYS,
+} from "@/features/team/error-keys";
 import { LocationAutocomplete } from "@/features/team/location-autocomplete";
 import type { LocationPick } from "@/features/team/types";
 import { useT } from "@/shared/lib/i18n";
-import type { TranslationKey } from "@/shared/lib/i18n";
 import {
   ApiError,
   extractErrorCode,
@@ -38,6 +41,15 @@ export function AddTeamForm() {
   const [state, setState] = useState<State>("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  function clearFieldError(...fields: string[]) {
+    setFieldErrors((prev) => {
+      if (fields.every((f) => !(f in prev))) return prev;
+      const next = { ...prev };
+      for (const f of fields) delete next[f];
+      return next;
+    });
+  }
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -90,6 +102,7 @@ export function AddTeamForm() {
     setErrorMessage("");
     setImage(file);
     setPreview(URL.createObjectURL(file));
+    clearFieldError("image");
   }
 
   const ageNumber = Number(age);
@@ -103,29 +116,6 @@ export function AddTeamForm() {
     !Number.isFinite(ageNumber) ||
     ageNumber < 16 ||
     ageNumber > 100;
-
-  const ERROR_CODE_KEYS: Record<string, TranslationKey> = {
-    "image.too_large": "add_team.error.image_too_big",
-    "image.type_unsupported": "add_team.error.image_type",
-    "image.empty": "add_team.error.image_empty",
-  };
-
-  const FIELD_ERROR_KEYS: Record<string, TranslationKey> = {
-    "name.missing": "add_team.error.name_required",
-    "name.string_too_short": "add_team.error.name_required",
-    "name.string_too_long": "add_team.error.name_too_long",
-    "bio_fr.missing": "add_team.error.bio_required",
-    "bio_fr.string_too_short": "add_team.error.bio_required",
-    "bio_fr.string_too_long": "add_team.error.bio_too_long",
-    "city.missing": "add_team.error.city_required",
-    "city.string_too_short": "add_team.error.city_required",
-    "country.missing": "add_team.error.country_required",
-    "country.string_too_short": "add_team.error.country_required",
-    "age.missing": "add_team.error.age_invalid",
-    "age.greater_than_equal": "add_team.error.age_invalid",
-    "age.less_than_equal": "add_team.error.age_invalid",
-    "image.missing": "add_team.error.image_required",
-  };
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -150,14 +140,14 @@ export function AddTeamForm() {
         const translated: Record<string, string> = {};
         for (const { field, type, msg } of fieldErrs) {
           const key =
-            FIELD_ERROR_KEYS[`${field}.${type}`] ??
-            FIELD_ERROR_KEYS[`${field}.missing`];
+            TEAM_FIELD_ERROR_KEYS[`${field}.${type}`] ??
+            TEAM_FIELD_ERROR_KEYS[`${field}.missing`];
           translated[field] = key ? t(key) : msg;
         }
         setFieldErrors(translated);
       } else if (error instanceof ApiError && error.status === 422) {
         const code = extractErrorCode(error);
-        const key = code ? ERROR_CODE_KEYS[code] : undefined;
+        const key = code ? TEAM_ERROR_CODE_KEYS[code] : undefined;
         setErrorMessage(key ? t(key) : error.message);
       } else {
         setErrorMessage(t("add_team.error.generic"));
@@ -252,7 +242,10 @@ export function AddTeamForm() {
                   required
                   maxLength={120}
                   value={name}
-                  onChange={(event) => setName(event.target.value)}
+                  onChange={(event) => {
+                    setName(event.target.value);
+                    clearFieldError("name");
+                  }}
                   placeholder={t("add_team.name.placeholder")}
                   className={cn(INPUT_CLASS, "pl-10")}
                 />
@@ -268,7 +261,10 @@ export function AddTeamForm() {
               placeholder={t("add_team.location.placeholder")}
               initialCity=""
               initialCountry=""
-              onChange={setLocation}
+              onChange={(pick) => {
+                setLocation(pick);
+                clearFieldError("city", "country");
+              }}
             />
             {(fieldErrors.city || fieldErrors.country) && (
               <p className="-mt-3 text-xs text-red-500">
@@ -288,7 +284,10 @@ export function AddTeamForm() {
                 min={16}
                 max={100}
                 value={age}
-                onChange={(event) => setAge(event.target.value)}
+                onChange={(event) => {
+                  setAge(event.target.value);
+                  clearFieldError("age");
+                }}
                 placeholder={t("add_team.age.placeholder")}
                 className={INPUT_CLASS}
               />
@@ -307,7 +306,10 @@ export function AddTeamForm() {
                 required
                 maxLength={2000}
                 value={bio}
-                onChange={(event) => setBio(event.target.value)}
+                onChange={(event) => {
+                  setBio(event.target.value);
+                  clearFieldError("bio_fr");
+                }}
                 placeholder={t("add_team.bio.placeholder")}
                 className={cn(INPUT_CLASS, "resize-none")}
               />
