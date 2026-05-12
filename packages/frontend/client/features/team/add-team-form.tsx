@@ -7,6 +7,12 @@ import { submitTeamMember } from "@/features/team/api";
 import { LocationAutocomplete } from "@/features/team/location-autocomplete";
 import type { LocationPick } from "@/features/team/types";
 import { useT } from "@/shared/lib/i18n";
+import type { TranslationKey } from "@/shared/lib/i18n";
+import {
+  ApiError,
+  extractErrorCode,
+  extractFieldErrors,
+} from "@/shared/api/client";
 import { cn } from "@/shared/lib/cn";
 
 const INPUT_CLASS =
@@ -31,6 +37,7 @@ export function AddTeamForm() {
 
   const [state, setState] = useState<State>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -97,11 +104,27 @@ export function AddTeamForm() {
     ageNumber < 16 ||
     ageNumber > 100;
 
+  const ERROR_CODE_KEYS: Record<string, TranslationKey> = {
+    "image.too_large": "add_team.error.image_too_big",
+    "image.type_unsupported": "add_team.error.image_type",
+    "image.empty": "add_team.error.image_empty",
+  };
+
+  const FIELD_ERROR_KEYS: Record<string, TranslationKey> = {
+    name: "add_team.error.name_required",
+    bio_fr: "add_team.error.bio_required",
+    city: "add_team.error.city_required",
+    country: "add_team.error.country_required",
+    age: "add_team.error.age_invalid",
+    image: "add_team.error.image_required",
+  };
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!image || !location) return;
     setState("submitting");
     setErrorMessage("");
+    setFieldErrors({});
     try {
       await submitTeamMember({
         image,
@@ -112,9 +135,23 @@ export function AddTeamForm() {
         age: ageNumber,
       });
       setState("done");
-    } catch {
+    } catch (error) {
       setState("error");
-      setErrorMessage(t("add_team.error.generic"));
+      const fields = extractFieldErrors(error);
+      if (fields) {
+        const translated: Record<string, string> = {};
+        for (const [field, _msg] of Object.entries(fields)) {
+          const key = FIELD_ERROR_KEYS[field];
+          translated[field] = key ? t(key) : _msg;
+        }
+        setFieldErrors(translated);
+      } else if (error instanceof ApiError && error.status === 422) {
+        const code = extractErrorCode(error);
+        const key = code ? ERROR_CODE_KEYS[code] : undefined;
+        setErrorMessage(key ? t(key) : error.message);
+      } else {
+        setErrorMessage(t("add_team.error.generic"));
+      }
     }
   }
 
@@ -185,6 +222,9 @@ export function AddTeamForm() {
               <p className="mt-1.5 text-xs text-ganitel-text-placeholder">
                 {t("add_team.image.hint")}
               </p>
+              {fieldErrors.image && (
+                <p className="mt-1 text-xs text-red-500">{fieldErrors.image}</p>
+              )}
             </div>
 
             <div>
@@ -207,6 +247,9 @@ export function AddTeamForm() {
                   className={cn(INPUT_CLASS, "pl-10")}
                 />
               </div>
+              {fieldErrors.name && (
+                <p className="mt-1 text-xs text-red-500">{fieldErrors.name}</p>
+              )}
             </div>
 
             <LocationAutocomplete
@@ -217,6 +260,11 @@ export function AddTeamForm() {
               initialCountry=""
               onChange={setLocation}
             />
+            {(fieldErrors.city || fieldErrors.country) && (
+              <p className="-mt-3 text-xs text-red-500">
+                {fieldErrors.city || fieldErrors.country}
+              </p>
+            )}
 
             <div>
               <label htmlFor="add-team-age" className={LABEL_CLASS}>
@@ -234,6 +282,9 @@ export function AddTeamForm() {
                 placeholder={t("add_team.age.placeholder")}
                 className={INPUT_CLASS}
               />
+              {fieldErrors.age && (
+                <p className="mt-1 text-xs text-red-500">{fieldErrors.age}</p>
+              )}
             </div>
 
             <div>
@@ -253,6 +304,11 @@ export function AddTeamForm() {
               <p className="mt-1.5 text-xs text-ganitel-text-placeholder">
                 {t("add_team.bio.hint")}
               </p>
+              {fieldErrors.bio_fr && (
+                <p className="mt-1 text-xs text-red-500">
+                  {fieldErrors.bio_fr}
+                </p>
+              )}
             </div>
 
             {errorMessage && (

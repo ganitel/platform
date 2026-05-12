@@ -124,13 +124,13 @@ async function request<T>(
   }
 
   if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as {
-      detail?: string;
-      message?: string;
-    } | null;
+    const payload = (await response.json().catch(() => null)) as Record<
+      string,
+      unknown
+    > | null;
     const message =
-      payload?.detail ??
-      payload?.message ??
+      (typeof payload?.detail === "string" ? payload.detail : undefined) ??
+      (typeof payload?.message === "string" ? payload.message : undefined) ??
       response.statusText ??
       `Request failed with status ${response.status}`;
     throw new ApiError(message, response.status, payload);
@@ -149,6 +149,52 @@ async function request<T>(
     : ((await response.text()) as unknown as T);
 
   return { data, status: response.status };
+}
+
+/**
+ * Extract the RFC 7807 `title` (error code) from an ApiError.
+ * Backend responses look like `{ title: "image.too_large", status: 422, … }`.
+ * Returns `null` for non-ApiError or missing title.
+ */
+export function extractErrorCode(error: unknown): string | null {
+  if (!(error instanceof ApiError)) return null;
+  const payload = error.data as { title?: unknown } | null;
+  if (typeof payload?.title === "string" && payload.title) return payload.title;
+  return null;
+}
+
+/**
+ * The backend wraps FastAPI/Pydantic validation errors into RFC 7807:
+ * `{ detail: "request validation failed", extra: { errors: [{ loc, msg, type }] } }`.
+ * This extracts a `{ field: message }` map from an ApiError when
+ * the status is 422. Returns `null` for any other error shape.
+ */
+export function extractFieldErrors(
+  error: unknown,
+): Record<string, string> | null {
+  if (!(error instanceof ApiError) || error.status !== 422) return null;
+  const payload = error.data as {
+    extra?: { errors?: unknown };
+    detail?: unknown;
+  } | null;
+  if (!payload) return null;
+
+  const items = payload.extra?.errors ?? payload.detail;
+  if (!Array.isArray(items)) return null;
+
+  const out: Record<string, string> = {};
+  for (const entry of items) {
+    if (
+      typeof entry !== "object" ||
+      entry === null ||
+      !Array.isArray(entry.loc) ||
+      typeof entry.msg !== "string"
+    )
+      continue;
+    const field = entry.loc[entry.loc.length - 1];
+    if (typeof field === "string") out[field] = entry.msg;
+  }
+  return Object.keys(out).length > 0 ? out : null;
 }
 
 export const apiClient = {
