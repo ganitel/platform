@@ -17,7 +17,7 @@ async def send_sms(*, to: str, message: str) -> dict[str, Any]:
     """
     settings = get_settings()
     if not settings.AT_API_KEY:
-        raise AuthError("africastalking not configured")
+        raise AuthError(code="sms.africastalking_not_configured")
 
     payload = {
         "username": settings.AT_USERNAME,
@@ -38,14 +38,14 @@ async def send_sms(*, to: str, message: str) -> dict[str, Any]:
         response = await client.post(url, headers=headers, data=payload)
 
     if response.status_code >= 400:
-        raise AuthError(f"africastalking http {response.status_code}: {response.text}")
+        raise AuthError(code="sms.africastalking_http_error")
 
     body = response.json()
     recipients = body.get("SMSMessageData", {}).get("Recipients", [])
     if not recipients:
-        raise AuthError(f"africastalking no recipients: {body}")
+        raise AuthError(code="sms.africastalking_no_recipients")
     status_code = recipients[0].get("statusCode")
     # AT statusCode 100, 101, 102 = queued/sent (success). Anything else = failure.
     if status_code not in (100, 101, 102):
-        raise AuthError(f"africastalking rejected: {recipients[0]}")
+        raise AuthError(code="sms.africastalking_rejected")
     return body

@@ -44,9 +44,9 @@ async def current_user(
 ) -> User:
     user = await _resolve(authorization, session)
     if user is None:
-        raise AuthError("authentication required")
+        raise AuthError(code="auth.required")
     if user.status != "active":
-        raise ForbiddenError(f"account is {user.status}")
+        raise ForbiddenError(code="account.inactive")
     return user
 
 

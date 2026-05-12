@@ -30,7 +30,7 @@ def _client() -> PyJWKClient:
     global _jwks_client
     settings = get_settings()
     if not settings.JWT_JWKS_URL:
-        raise AuthError("auth not configured")
+        raise AuthError(code="auth.not_configured")
     if _jwks_client is None:
         _jwks_client = PyJWKClient(settings.JWT_JWKS_URL, cache_keys=True, lifespan=3600)
     return _jwks_client
@@ -48,10 +48,10 @@ def verify_jwt(token: str) -> AuthClaims:
             options={"verify_aud": False},
         )
     except jwt.InvalidTokenError as e:
-        raise AuthError("invalid token") from e
+        raise AuthError(code="token.invalid") from e
     sub = claims.get("sub")
     if not sub:
-        raise AuthError("token missing sub")
+        raise AuthError(code="token.missing_sub")
 
     email: str | None = claims.get("email")
     phone: str | None = claims.get("phone_number") or claims.get("phoneNumber")

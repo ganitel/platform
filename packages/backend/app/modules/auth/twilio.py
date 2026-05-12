@@ -20,7 +20,7 @@ async def send_sms(*, to: str, message: str) -> dict[str, Any]:
     """
     settings = get_settings()
     if not settings.TWILIO_ACCOUNT_SID or not settings.TWILIO_AUTH_TOKEN:
-        raise AuthError("twilio not configured")
+        raise AuthError(code="sms.twilio_not_configured")
 
     data: dict[str, str] = {"To": to, "Body": message}
     if settings.TWILIO_MESSAGING_SERVICE_SID:
@@ -28,7 +28,7 @@ async def send_sms(*, to: str, message: str) -> dict[str, Any]:
     elif settings.TWILIO_FROM_NUMBER:
         data["From"] = settings.TWILIO_FROM_NUMBER
     else:
-        raise AuthError("twilio sender (MessagingServiceSid or From) not configured")
+        raise AuthError(code="sms.twilio_no_sender")
 
     url = f"https://api.twilio.com/2010-04-01/Accounts/{settings.TWILIO_ACCOUNT_SID}/Messages.json"
     auth = httpx.BasicAuth(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
@@ -37,11 +37,11 @@ async def send_sms(*, to: str, message: str) -> dict[str, Any]:
         response = await client.post(url, auth=auth, data=data)
 
     if response.status_code >= 400:
-        raise AuthError(f"twilio http {response.status_code}: {response.text}")
+        raise AuthError(code="sms.twilio_http_error")
 
     body = response.json()
     twilio_status = body.get("status")
     # queued, accepted, sending, sent = success; failed/undelivered = error
     if twilio_status in ("failed", "undelivered"):
-        raise AuthError(f"twilio rejected: {body.get('error_code')} {body.get('error_message')}")
+        raise AuthError(code="sms.twilio_rejected")
     return body

@@ -19,7 +19,7 @@ async def initiate_payment(
 ) -> InitiatePaymentOut:
     if booking.status != BookingStatus.PENDING_PAYMENT:
         raise ConflictError(
-            f"booking is in status {booking.status.value}, cannot initiate payment",
+            code="payment.booking_not_pending",
             extra={"current_status": booking.status.value},
         )
     provider = get_provider(provider_name)

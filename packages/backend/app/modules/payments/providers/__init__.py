@@ -13,7 +13,7 @@ def get_provider(name: str) -> PaymentProvider:
         return TranzakProvider()
     if name == "stripe":
         return StripeProvider()
-    raise ValidationError(f"unknown payment provider: {name}", extra={"field": "provider"})
+    raise ValidationError(code="payment.unknown_provider", extra={"field": "provider"})
 
 
 __all__ = ["PaymentProvider", "get_provider"]

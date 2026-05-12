@@ -43,7 +43,7 @@ async def get(session: AsyncSession, experience_id: UUID) -> Experience:
     )
     exp = (await session.execute(stmt)).scalar_one_or_none()
     if exp is None:
-        raise NotFoundError("experience not found")
+        raise NotFoundError(code="experience.not_found")
     return exp
 
 

@@ -44,10 +44,10 @@ async def expire_old_holds(session: AsyncSession, *, property_id: UUID | None = 
 async def create_booking(session: AsyncSession, guest: User, payload: BookingCreateIn) -> Booking:
     today = date.today()
     if payload.check_in_date < today:
-        raise ValidationError("check_in_date is in the past", extra={"field": "check_in_date"})
+        raise ValidationError(code="booking.check_in_past", extra={"field": "check_in_date"})
     if payload.check_out_date <= payload.check_in_date:
         raise ValidationError(
-            "check_out_date must be after check_in_date",
+            code="booking.check_out_before_check_in",
             extra={"field": "check_out_date"},
         )
 
@@ -55,12 +55,12 @@ async def create_booking(session: AsyncSession, guest: User, payload: BookingCre
 
     prop = await session.get(Property, payload.property_id)
     if prop is None or prop.status != PropertyStatus.PUBLISHED:
-        raise NotFoundError("property not found or not published")
+        raise NotFoundError(code="property.not_found")
     if prop.host_id == guest.id:
-        raise ForbiddenError("hosts cannot book their own property")
+        raise ForbiddenError(code="booking.self_booking")
     if payload.guest_count > prop.capacity:
         raise ValidationError(
-            "guest_count exceeds property capacity",
+            code="booking.capacity_exceeded",
             extra={"field": "guest_count", "max": prop.capacity},
         )
 
@@ -107,7 +107,7 @@ async def create_booking(session: AsyncSession, guest: User, payload: BookingCre
         await session.rollback()
         if "no_overlap" in str(e.orig).lower() or "exclude" in str(e.orig).lower():
             raise ConflictError(
-                "those dates are no longer available",
+                code="booking.dates_unavailable",
                 extra={"field": "check_in_date"},
             ) from e
         raise
@@ -119,7 +119,7 @@ async def create_booking(session: AsyncSession, guest: User, payload: BookingCre
 async def get_booking(session: AsyncSession, booking_id: UUID, *, viewer: User) -> Booking:
     booking = await session.get(Booking, booking_id)
     if booking is None:
-        raise NotFoundError("booking not found")
+        raise NotFoundError(code="booking.not_found")
 
     # Refresh expiry lazily so frontend sees correct status without a worker.
     if (
@@ -141,15 +141,15 @@ async def get_booking(session: AsyncSession, booking_id: UUID, *, viewer: User) 
     prop = await session.get(Property, booking.property_id)
     if prop is not None and prop.host_id == viewer.id:
         return booking
-    raise ForbiddenError("you do not have access to this booking")
+    raise ForbiddenError(code="booking.access_denied")
 
 
 async def cancel_as_guest(session: AsyncSession, booking: Booking, guest: User) -> Booking:
     if booking.guest_id != guest.id and not guest.is_admin:
-        raise ForbiddenError("only the guest can cancel as guest")
+        raise ForbiddenError(code="booking.not_guest")
     if booking.status not in ACTIVE_STATUSES:
         raise ConflictError(
-            f"cannot cancel a booking in status {booking.status.value}",
+            code="booking.not_cancellable",
             extra={"current_status": booking.status.value},
         )
     booking.status = BookingStatus.CANCELLED_BY_GUEST
@@ -170,10 +170,10 @@ async def cancel_as_guest(session: AsyncSession, booking: Booking, guest: User) 
 async def cancel_as_host(session: AsyncSession, booking: Booking, host: User) -> Booking:
     prop = await session.get(Property, booking.property_id)
     if prop is None or (prop.host_id != host.id and not host.is_admin):
-        raise ForbiddenError("only the host can cancel as host")
+        raise ForbiddenError(code="booking.not_host")
     if booking.status not in ACTIVE_STATUSES:
         raise ConflictError(
-            f"cannot cancel a booking in status {booking.status.value}",
+            code="booking.not_cancellable",
             extra={"current_status": booking.status.value},
         )
     booking.status = BookingStatus.CANCELLED_BY_HOST

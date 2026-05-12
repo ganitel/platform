@@ -31,7 +31,7 @@ async def list_active(session: AsyncSession, role: TeamRole | None = None) -> Se
 async def get_by_id(session: AsyncSession, team_member_id: UUID) -> TeamMember:
     member = await session.get(TeamMember, team_member_id)
     if member is None:
-        raise NotFoundError("Team member not found")
+        raise NotFoundError(code="team_member.not_found")
     return member
 
 
@@ -47,11 +47,11 @@ async def create_submission(
     image_content_type: str,
 ) -> TeamMember:
     if image_content_type not in ALLOWED_IMAGE_TYPES:
-        raise ValidationError(f"Unsupported image type: {image_content_type}")
+        raise ValidationError(code="image.type_unsupported")
     if len(image_bytes) > MAX_IMAGE_BYTES:
-        raise ValidationError("Image is larger than 5MB")
+        raise ValidationError(code="image.too_large")
     if len(image_bytes) == 0:
-        raise ValidationError("Image is empty")
+        raise ValidationError(code="image.empty")
 
     extension = _extension_for(image_content_type)
     key = f"team/{uuid4().hex}.{extension}"
@@ -106,9 +106,7 @@ async def reject(session: AsyncSession, member: TeamMember) -> None:
     # reject link from an old email mustn't quietly delete them. Use the
     # admin UI / DB to deactivate active members instead.
     if member.is_active:
-        raise ConflictError(
-            "Cannot reject an already-approved team member. Deactivate via admin tooling instead."
-        )
+        raise ConflictError(code="team_member.already_active")
     await session.delete(member)
     await session.commit()
 
@@ -134,7 +132,7 @@ async def assert_admin_active(session: AsyncSession, admin_email: str) -> None:
     stmt = select(TeamAdmin.id).where(func.lower(TeamAdmin.email) == normalized)
     result = await session.execute(stmt)
     if result.first() is None:
-        raise ForbiddenError("Reviewer is no longer an active admin")
+        raise ForbiddenError(code="admin.revoked")
 
 
 async def to_public(member: TeamMember) -> TeamMemberOut:
