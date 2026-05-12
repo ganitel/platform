@@ -170,36 +170,55 @@ export interface FieldError {
 }
 
 /**
- * The backend wraps FastAPI/Pydantic validation errors into RFC 7807:
- * `{ detail: "request validation failed", extra: { errors: [{ loc, msg, type }] } }`.
- * Returns structured field errors with type info so callers can map
- * composite keys like `"name.string_too_short"` to specific i18n messages.
- * Returns `null` for any non-422 or non-field-level error.
+ * Extract structured field-level errors from an ApiError.
+ *
+ * Handles two backend patterns:
+ * 1. **Pydantic array** — `extra: { errors: [{ loc, msg, type }] }`
+ *    (FastAPI RequestValidationError).
+ * 2. **Manual field error** — `extra: { field: "check_in_date" }` with a
+ *    domain `code` in the RFC 7807 `title` (e.g. bookings, payments).
+ *
+ * Returns `null` for non-422 or errors that don't carry field info.
  */
 export function extractFieldErrors(error: unknown): FieldError[] | null {
   if (!(error instanceof ApiError) || error.status !== 422) return null;
   const payload = error.data as {
-    extra?: { errors?: unknown };
+    extra?: { errors?: unknown; field?: unknown };
+    title?: unknown;
     detail?: unknown;
   } | null;
   if (!payload) return null;
 
-  const items = payload.extra?.errors ?? payload.detail;
-  if (!Array.isArray(items)) return null;
-
   const out: FieldError[] = [];
-  for (const entry of items) {
-    if (
-      typeof entry !== "object" ||
-      entry === null ||
-      !Array.isArray(entry.loc) ||
-      typeof entry.msg !== "string"
-    )
-      continue;
-    const field = entry.loc[entry.loc.length - 1];
-    const type = typeof entry.type === "string" ? entry.type : "unknown";
-    if (typeof field === "string") out.push({ field, type, msg: entry.msg });
+
+  const items = payload.extra?.errors ?? payload.detail;
+  if (Array.isArray(items)) {
+    for (const entry of items) {
+      if (
+        typeof entry !== "object" ||
+        entry === null ||
+        !Array.isArray(entry.loc) ||
+        typeof entry.msg !== "string"
+      )
+        continue;
+      const field = entry.loc[entry.loc.length - 1];
+      const type = typeof entry.type === "string" ? entry.type : "unknown";
+      if (typeof field === "string") out.push({ field, type, msg: entry.msg });
+    }
   }
+
+  if (
+    out.length === 0 &&
+    typeof payload.extra?.field === "string" &&
+    typeof payload.title === "string"
+  ) {
+    out.push({
+      field: payload.extra.field,
+      type: payload.title,
+      msg: typeof payload.detail === "string" ? payload.detail : payload.title,
+    });
+  }
+
   return out.length > 0 ? out : null;
 }
 
