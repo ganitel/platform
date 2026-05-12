@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Response
 
 from app.core.deps import DbSession
 from app.core.errors import NotFoundError
@@ -19,6 +19,7 @@ router = APIRouter(prefix="/experiences", tags=["experiences"])
 
 @router.get("", response_model=SearchOut)
 async def search_experiences(
+    response: Response,
     session: DbSession,
     q: str | None = None,
     lat: float | None = None,
@@ -52,13 +53,17 @@ async def search_experiences(
     rows = await search_mod.search(session, f)
     total = await search_mod.count(session, f)
     items = [await service.to_public(e, distance_km=d) for e, d in rows]
+    response.headers["Cache-Control"] = "public, s-maxage=60, stale-while-revalidate=300"
     return SearchOut(items=items, total=total, limit=limit, offset=offset)
 
 
 @router.get("/{experience_id}", response_model=ExperienceDetail)
-async def get_experience(experience_id: UUID, session: DbSession) -> ExperienceDetail:
+async def get_experience(
+    experience_id: UUID, response: Response, session: DbSession
+) -> ExperienceDetail:
     exp = await service.get(session, experience_id)
     host = await session.get(User, exp.host_id)
     if host is None:
         raise NotFoundError("host not found")
+    response.headers["Cache-Control"] = "public, s-maxage=60, stale-while-revalidate=300"
     return await service.to_detail(exp, host)
