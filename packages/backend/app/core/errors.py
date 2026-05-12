@@ -20,10 +20,10 @@ class AppError(Exception):
         code: str | None = None,
         extra: dict[str, Any] | None = None,
     ) -> None:
-        super().__init__(detail)
         if code is not None:
             self.code = code
         self.detail = detail or self.code
+        super().__init__(self.detail)
         self.extra = extra or {}
 
 
