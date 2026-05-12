@@ -3,6 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, File, Form, Query, Response, UploadFile, status
 
+from app.core.cache import PUBLIC_CDN_CACHE_LONG
 from app.core.config import get_settings
 from app.core.deps import DbSession
 from app.modules.team import emails, service, tokens
@@ -25,7 +26,7 @@ async def list_team_members(
     role: TeamRole | None = Query(default=None),
 ) -> list[TeamMemberOut]:
     members = await service.list_active(session, role=role)
-    response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
+    response.headers["Cache-Control"] = PUBLIC_CDN_CACHE_LONG
     return [await service.to_public(m) for m in members]
 
 

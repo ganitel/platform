@@ -7,6 +7,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Query, Response
 
+from app.core.cache import PUBLIC_CDN_CACHE
 from app.core.deps import DbSession
 from app.core.errors import NotFoundError
 from app.modules.experiences import search as search_mod
@@ -53,7 +54,7 @@ async def search_experiences(
     rows = await search_mod.search(session, f)
     total = await search_mod.count(session, f)
     items = [await service.to_public(e, distance_km=d) for e, d in rows]
-    response.headers["Cache-Control"] = "public, s-maxage=60, stale-while-revalidate=300"
+    response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
     return SearchOut(items=items, total=total, limit=limit, offset=offset)
 
 
@@ -65,5 +66,5 @@ async def get_experience(
     host = await session.get(User, exp.host_id)
     if host is None:
         raise NotFoundError("host not found")
-    response.headers["Cache-Control"] = "public, s-maxage=60, stale-while-revalidate=300"
+    response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
     return await service.to_detail(exp, host)
