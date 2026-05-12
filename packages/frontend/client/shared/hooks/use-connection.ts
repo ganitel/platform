@@ -27,14 +27,8 @@ function getNavigatorConnection(): ConnectionLike | undefined {
   return nav.connection ?? nav.mozConnection ?? nav.webkitConnection;
 }
 
-function readSnapshot(): {
-  calm: boolean;
-  saveData: boolean;
-  reducedMotion: boolean;
-} {
-  if (typeof window === "undefined") {
-    return { calm: true, saveData: true, reducedMotion: true };
-  }
+/** Recomputes the calm signal from the live browser; only safe in an effect. */
+function readBrowserCalm(): boolean {
   const reducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches;
@@ -44,27 +38,27 @@ function readSnapshot(): {
     conn?.effectiveType === "slow-2g" ||
     conn?.effectiveType === "2g" ||
     conn?.effectiveType === "3g";
-  return {
-    calm: reducedMotion || saveData || slow,
-    saveData,
-    reducedMotion,
-  };
+  return reducedMotion || saveData || slow;
 }
 
 export function useCalmMode(): boolean {
-  const [snap, setSnap] = useState(readSnapshot);
+  // Hydration safety: SSR renders with calm=true (no animation). The client's
+  // first render must match that, then we upgrade to the real browser state
+  // inside an effect.
+  const [calm, setCalm] = useState(true);
 
   useEffect(() => {
-    const onChange = () => setSnap(readSnapshot());
+    const sync = () => setCalm(readBrowserCalm());
+    sync();
     const motionMql = window.matchMedia("(prefers-reduced-motion: reduce)");
-    motionMql.addEventListener("change", onChange);
+    motionMql.addEventListener("change", sync);
     const conn = getNavigatorConnection();
-    conn?.addEventListener?.("change", onChange);
+    conn?.addEventListener?.("change", sync);
     return () => {
-      motionMql.removeEventListener("change", onChange);
-      conn?.removeEventListener?.("change", onChange);
+      motionMql.removeEventListener("change", sync);
+      conn?.removeEventListener?.("change", sync);
     };
   }, []);
 
-  return snap.calm;
+  return calm;
 }
