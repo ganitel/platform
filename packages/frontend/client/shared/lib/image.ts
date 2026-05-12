@@ -47,13 +47,13 @@ export function transformImage(
 
   if (isPicsum(url)) {
     return url.replace(
-      /\/(\d+)\/(\d+)(?:\?.*)?$/,
-      (_match, _w: string, h: string) => {
-        const ratio = Number(h) / Number(_w);
+      /\/(\d+)\/(\d+)(\?.*)?$/,
+      (_match, w: string, h: string, query: string | undefined) => {
+        const ratio = Number(h) / Number(w);
         const newH = Math.round(
           opts.width * (Number.isFinite(ratio) ? ratio : 0.66),
         );
-        return `/${opts.width}/${newH}`;
+        return `/${opts.width}/${newH}${query ?? ""}`;
       },
     );
   }
