@@ -111,12 +111,20 @@ export function AddTeamForm() {
   };
 
   const FIELD_ERROR_KEYS: Record<string, TranslationKey> = {
-    name: "add_team.error.name_required",
-    bio_fr: "add_team.error.bio_required",
-    city: "add_team.error.city_required",
-    country: "add_team.error.country_required",
-    age: "add_team.error.age_invalid",
-    image: "add_team.error.image_required",
+    "name.missing": "add_team.error.name_required",
+    "name.string_too_short": "add_team.error.name_required",
+    "name.string_too_long": "add_team.error.name_too_long",
+    "bio_fr.missing": "add_team.error.bio_required",
+    "bio_fr.string_too_short": "add_team.error.bio_required",
+    "bio_fr.string_too_long": "add_team.error.bio_too_long",
+    "city.missing": "add_team.error.city_required",
+    "city.string_too_short": "add_team.error.city_required",
+    "country.missing": "add_team.error.country_required",
+    "country.string_too_short": "add_team.error.country_required",
+    "age.missing": "add_team.error.age_invalid",
+    "age.greater_than_equal": "add_team.error.age_invalid",
+    "age.less_than_equal": "add_team.error.age_invalid",
+    "image.missing": "add_team.error.image_required",
   };
 
   async function handleSubmit(event: React.FormEvent) {
@@ -137,12 +145,14 @@ export function AddTeamForm() {
       setState("done");
     } catch (error) {
       setState("error");
-      const fields = extractFieldErrors(error);
-      if (fields) {
+      const fieldErrs = extractFieldErrors(error);
+      if (fieldErrs) {
         const translated: Record<string, string> = {};
-        for (const [field, _msg] of Object.entries(fields)) {
-          const key = FIELD_ERROR_KEYS[field];
-          translated[field] = key ? t(key) : _msg;
+        for (const { field, type, msg } of fieldErrs) {
+          const key =
+            FIELD_ERROR_KEYS[`${field}.${type}`] ??
+            FIELD_ERROR_KEYS[`${field}.missing`];
+          translated[field] = key ? t(key) : msg;
         }
         setFieldErrors(translated);
       } else if (error instanceof ApiError && error.status === 422) {

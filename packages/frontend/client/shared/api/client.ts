@@ -163,15 +163,20 @@ export function extractErrorCode(error: unknown): string | null {
   return null;
 }
 
+export interface FieldError {
+  field: string;
+  type: string;
+  msg: string;
+}
+
 /**
  * The backend wraps FastAPI/Pydantic validation errors into RFC 7807:
  * `{ detail: "request validation failed", extra: { errors: [{ loc, msg, type }] } }`.
- * This extracts a `{ field: message }` map from an ApiError when
- * the status is 422. Returns `null` for any other error shape.
+ * Returns structured field errors with type info so callers can map
+ * composite keys like `"name.string_too_short"` to specific i18n messages.
+ * Returns `null` for any non-422 or non-field-level error.
  */
-export function extractFieldErrors(
-  error: unknown,
-): Record<string, string> | null {
+export function extractFieldErrors(error: unknown): FieldError[] | null {
   if (!(error instanceof ApiError) || error.status !== 422) return null;
   const payload = error.data as {
     extra?: { errors?: unknown };
@@ -182,7 +187,7 @@ export function extractFieldErrors(
   const items = payload.extra?.errors ?? payload.detail;
   if (!Array.isArray(items)) return null;
 
-  const out: Record<string, string> = {};
+  const out: FieldError[] = [];
   for (const entry of items) {
     if (
       typeof entry !== "object" ||
@@ -192,9 +197,10 @@ export function extractFieldErrors(
     )
       continue;
     const field = entry.loc[entry.loc.length - 1];
-    if (typeof field === "string") out[field] = entry.msg;
+    const type = typeof entry.type === "string" ? entry.type : "unknown";
+    if (typeof field === "string") out.push({ field, type, msg: entry.msg });
   }
-  return Object.keys(out).length > 0 ? out : null;
+  return out.length > 0 ? out : null;
 }
 
 export const apiClient = {
