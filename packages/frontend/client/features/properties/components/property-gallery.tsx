@@ -2,11 +2,15 @@ import { useCallback, useRef, useState } from "react";
 import { Camera } from "lucide-react";
 
 import type { MediaPublic } from "@/features/properties/types";
+import { buildSrcSet, transformImage } from "@/shared/lib/image";
 
 interface Props {
   photos: MediaPublic[];
   title: string;
 }
+
+const DESKTOP_HERO_WIDTHS = [600, 900, 1200] as const;
+const DESKTOP_TILE_WIDTHS = [300, 450, 600] as const;
 
 export function PropertyGallery({ photos, title }: Props) {
   if (photos.length === 0) {
@@ -24,16 +28,28 @@ export function PropertyGallery({ photos, title }: Props) {
 
       <div className="hidden overflow-hidden rounded-3xl sm:grid sm:grid-cols-4 sm:gap-2">
         <img
-          src={hero.url}
+          src={transformImage(hero.url, { width: 1200, quality: 78 })}
+          srcSet={buildSrcSet(hero.url, DESKTOP_HERO_WIDTHS, 78)}
+          sizes="(min-width: 1024px) 600px, 50vw"
           alt={hero.alt ?? title}
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+          width={hero.width ?? 1200}
+          height={hero.height ?? 800}
           className="col-span-2 row-span-2 aspect-auto w-full object-cover"
         />
         {grid.map((m) => (
           <img
             key={m.id}
-            src={m.url}
+            src={transformImage(m.url, { width: 600, quality: 75 })}
+            srcSet={buildSrcSet(m.url, DESKTOP_TILE_WIDTHS, 75)}
+            sizes="(min-width: 1024px) 300px, 25vw"
             alt={m.alt ?? title}
             loading="lazy"
+            decoding="async"
+            width={m.width ?? 600}
+            height={m.height ?? 600}
             className="aspect-square w-full object-cover"
           />
         ))}
@@ -60,19 +76,24 @@ function MobileGallery({
   }, [photos.length]);
 
   return (
-    <div className="relative sm:hidden">
+    <div className="relative -mx-4 sm:hidden">
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="scrollbar-none flex snap-x snap-mandatory overflow-x-auto rounded-3xl"
+        className="scrollbar-none flex snap-x snap-mandatory overflow-x-auto"
       >
         {photos.map((m, i) => (
           <div key={m.id ?? i} className="w-full shrink-0 snap-start">
             <img
-              src={m.url}
+              src={transformImage(m.url, { width: 800, quality: 75 })}
+              srcSet={buildSrcSet(m.url, [480, 720, 960], 75)}
+              sizes="100vw"
               alt={m.alt ?? title}
               loading={i === 0 ? "eager" : "lazy"}
+              fetchPriority={i === 0 ? "high" : "auto"}
               decoding="async"
+              width={m.width ?? 800}
+              height={m.height ?? 600}
               className="aspect-[4/3] w-full object-cover"
             />
           </div>

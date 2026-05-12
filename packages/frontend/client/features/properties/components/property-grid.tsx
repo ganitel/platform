@@ -4,9 +4,9 @@ import { PropertyCard } from "@/features/properties/components/property-card";
 export function PropertyGrid({ items }: { items: PropertyPublic[] }) {
   return (
     <ul className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((p) => (
+      {items.map((p, i) => (
         <li key={p.id}>
-          <PropertyCard property={p} />
+          <PropertyCard property={p} priority={i < 3} />
         </li>
       ))}
     </ul>

@@ -4,9 +4,9 @@ import { ExperienceCard } from "@/features/experiences/components/experience-car
 export function ExperienceGrid({ items }: { items: ExperiencePublic[] }) {
   return (
     <ul className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((e) => (
+      {items.map((e, i) => (
         <li key={e.id}>
-          <ExperienceCard experience={e} />
+          <ExperienceCard experience={e} priority={i < 3} />
         </li>
       ))}
     </ul>

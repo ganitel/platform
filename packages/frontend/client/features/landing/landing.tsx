@@ -7,13 +7,20 @@ import type { PropertyPublic } from "@/features/properties/types";
 import { PropertyGrid } from "@/features/properties/components/property-grid";
 import { PillLink } from "@/shared/ui/pill-link";
 import { SectionHeader } from "@/shared/ui/section-header";
+import { useCalmMode } from "@/shared/hooks/use-connection";
+import {
+  buildSrcSet,
+  transformImage,
+  HERO_WIDTHS,
+  HERO_SIZES,
+} from "@/shared/lib/image";
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=2600&q=85&auto=format&fit=crop";
-const HERO_FALLBACK = "https://picsum.photos/seed/ganitelhero/2400/1600";
-const FEATURE_IMAGE =
-  "https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?w=900&q=85&auto=format&fit=crop";
-const FEATURE_FALLBACK = "https://picsum.photos/seed/ganitelfeat/900/700";
+const HERO_SOURCE =
+  "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=2000&q=80&auto=format&fit=crop";
+const HERO_FALLBACK = "https://picsum.photos/seed/ganitelhero/1600/1067";
+const FEATURE_SOURCE =
+  "https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?w=900&q=80&auto=format&fit=crop";
+const FEATURE_FALLBACK = "https://picsum.photos/seed/ganitelfeat/720/560";
 
 const ENTRANCE_EASE = [0.2, 0.7, 0.2, 1] as const;
 
@@ -29,7 +36,7 @@ export function Landing({ items }: { items: PropertyPublic[] }) {
 
 function Hero() {
   return (
-    <section className="relative h-[calc(100svh-4rem)] min-h-[600px] overflow-hidden p-5">
+    <section className="relative h-[calc(100svh-4rem)] min-h-[560px] overflow-hidden p-3 md:p-5">
       <Stage />
       <HeroPanel />
       <FeatureCard />
@@ -39,28 +46,46 @@ function Hero() {
 }
 
 function Stage() {
+  const calm = useCalmMode();
+  const heroSrcSet = buildSrcSet(HERO_SOURCE, HERO_WIDTHS, 78);
+  const mobileSrc = transformImage(HERO_SOURCE, { width: 720, quality: 70 });
+
   return (
-    <div className="absolute inset-5 isolate overflow-hidden rounded-[22px] bg-[#14180f]">
+    <div className="absolute inset-3 isolate overflow-hidden rounded-[18px] bg-[#14180f] md:inset-5 md:rounded-[22px]">
       <motion.img
-        src={HERO_IMAGE}
+        src={mobileSrc}
+        srcSet={heroSrcSet}
+        sizes={HERO_SIZES}
         alt=""
         loading="eager"
+        fetchPriority="high"
         decoding="async"
+        width={2000}
+        height={1333}
         onError={(event) => {
+          event.currentTarget.srcset = "";
           event.currentTarget.src = HERO_FALLBACK;
         }}
         className="absolute inset-[-3%] h-[106%] w-[106%] object-cover object-[50%_35%] saturate-[0.92] contrast-[1.05] brightness-[0.92]"
-        animate={{
-          scale: [1, 1.055],
-          x: ["0%", "-1%"],
-          y: ["0%", "-1.2%"],
-        }}
-        transition={{
-          duration: 16,
-          ease: [0.4, 0, 0.4, 1],
-          repeat: Infinity,
-          repeatType: "mirror",
-        }}
+        animate={
+          calm
+            ? undefined
+            : {
+                scale: [1, 1.055],
+                x: ["0%", "-1%"],
+                y: ["0%", "-1.2%"],
+              }
+        }
+        transition={
+          calm
+            ? undefined
+            : {
+                duration: 16,
+                ease: [0.4, 0, 0.4, 1],
+                repeat: Infinity,
+                repeatType: "mirror",
+              }
+        }
       />
       <div
         aria-hidden
@@ -79,7 +104,7 @@ function Stage() {
 }
 
 const HEADLINE_STYLE: CSSProperties = {
-  fontSize: "clamp(2.75rem, 5.6vw, 5.75rem)",
+  fontSize: "clamp(2.5rem, 5.6vw, 5.75rem)",
 };
 
 function HeroPanel() {
@@ -89,9 +114,9 @@ function HeroPanel() {
       initial={{ y: 40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 1, delay: 0.15, ease: ENTRANCE_EASE }}
-      className="absolute bottom-[38px] left-[38px] z-10 w-[min(720px,calc(100%-480px))] rounded-[22px] bg-ganitel-paper p-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_40px_80px_-40px_rgba(0,0,0,0.55)] max-md:inset-x-5 max-md:bottom-5 max-md:w-auto max-md:p-7"
+      className="absolute bottom-[38px] left-[38px] z-10 w-[min(720px,calc(100%-480px))] rounded-[22px] bg-ganitel-paper p-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_40px_80px_-40px_rgba(0,0,0,0.55)] max-md:inset-x-3 max-md:bottom-3 max-md:w-auto max-md:rounded-[18px] max-md:p-6"
     >
-      <div className="mb-7 grid grid-cols-[88px_1px_1fr] items-start gap-6 border-b border-dashed border-ganitel-stroke-neutral pb-7 max-sm:grid-cols-1 max-sm:gap-3">
+      <div className="mb-6 grid grid-cols-[88px_1px_1fr] items-start gap-6 border-b border-dashed border-ganitel-stroke-neutral pb-6 max-sm:grid-cols-1 max-sm:gap-2 max-sm:pb-5">
         <span className="font-display pt-1 text-[12px] font-semibold uppercase leading-snug tracking-[0.18em] text-ganitel-text-title">
           {t("landing.tag.line1")}
           <br />
@@ -108,7 +133,7 @@ function HeroPanel() {
 
       <h1
         style={HEADLINE_STYLE}
-        className="font-display mb-9 mt-0 font-bold leading-[0.96] tracking-[-0.045em] text-balance text-ganitel-text-title"
+        className="font-display mb-7 mt-0 font-bold leading-[0.96] tracking-[-0.045em] text-balance text-ganitel-text-title md:mb-9"
       >
         {t("landing.title.line1")}
         <br />
@@ -144,11 +169,16 @@ function FeatureCard() {
     >
       <div className="relative mb-4 aspect-[4/3.1] overflow-hidden rounded-[14px] bg-[#1c2218]">
         <img
-          src={FEATURE_IMAGE}
+          src={FEATURE_SOURCE}
+          srcSet={buildSrcSet(FEATURE_SOURCE, [400, 600, 900], 75)}
+          sizes="320px"
           alt=""
           loading="lazy"
           decoding="async"
+          width={900}
+          height={700}
           onError={(event) => {
+            event.currentTarget.srcset = "";
             event.currentTarget.src = FEATURE_FALLBACK;
           }}
           className="absolute inset-0 size-full object-cover saturate-[0.95] contrast-[1.05]"

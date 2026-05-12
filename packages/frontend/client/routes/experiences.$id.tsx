@@ -132,16 +132,16 @@ export default function ExperienceDetailRoute({
 
   return (
     <>
-      <article className="mx-auto w-full max-w-6xl px-4 pt-8 pb-8 md:px-8 md:pt-12 md:pb-32 lg:pb-12">
-        <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <article className="mx-auto w-full max-w-6xl px-4 pt-6 pb-32 md:px-8 md:pt-12 lg:pb-12">
+        <header className="mb-5 flex flex-wrap items-start justify-between gap-4 md:mb-6">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-ganitel-secondary">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-ganitel-secondary">
               {experience.experience_type}
             </p>
-            <h1 className="mt-2 font-infoma text-3xl text-ganitel-text-title md:text-4xl">
+            <h1 className="mt-2 font-infoma text-[28px] leading-[1.05] text-ganitel-text-title sm:text-3xl md:text-4xl">
               {experience.title}
             </h1>
-            <p className="mt-1 text-sm text-ganitel-text-subtitle">
+            <p className="mt-1.5 text-sm text-ganitel-text-subtitle">
               {experience.city}, {experience.country_code}
             </p>
           </div>
@@ -149,9 +149,9 @@ export default function ExperienceDetailRoute({
 
         <PropertyGallery photos={experience.photos} title={experience.title} />
 
-        <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
-          <section className="space-y-10">
-            <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-ganitel-text-subtitle">
+        <div className="mt-8 grid grid-cols-1 gap-8 md:mt-10 md:gap-10 lg:grid-cols-[1fr_360px]">
+          <section className="space-y-8 md:space-y-10">
+            <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-ganitel-text-subtitle">
               <li>
                 {experience.capacity} {t("property.guests")}
               </li>

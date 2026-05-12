@@ -110,7 +110,7 @@ export function WaitlistPanel({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t("waitlist.email")}
-                    className="w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 py-3 pl-10 pr-4 text-sm text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all"
+                    className="w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 py-3 pl-10 pr-4 text-base text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all md:text-sm"
                   />
                 </div>
 
@@ -119,7 +119,7 @@ export function WaitlistPanel({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={t("waitlist.name")}
-                  className="w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 px-4 py-3 text-sm text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all"
+                  className="w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 px-4 py-3 text-base text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all md:text-sm"
                 />
 
                 <div className="relative">
@@ -132,7 +132,7 @@ export function WaitlistPanel({
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder={t("waitlist.phone")}
-                    className="w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 py-3 pl-10 pr-4 text-sm text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all"
+                    className="w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 py-3 pl-10 pr-4 text-base text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all md:text-sm"
                   />
                 </div>
               </div>
