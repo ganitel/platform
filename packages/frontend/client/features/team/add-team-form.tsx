@@ -4,9 +4,18 @@ import { CheckCircle2, ImagePlus, User } from "lucide-react";
 
 import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { submitTeamMember } from "@/features/team/api";
+import {
+  TEAM_ERROR_CODE_KEYS,
+  TEAM_FIELD_ERROR_KEYS,
+} from "@/features/team/error-keys";
 import { LocationAutocomplete } from "@/features/team/location-autocomplete";
 import type { LocationPick } from "@/features/team/types";
 import { useT } from "@/shared/lib/i18n";
+import {
+  ApiError,
+  extractErrorCode,
+  extractFieldErrors,
+} from "@/shared/api/client";
 import { cn } from "@/shared/lib/cn";
 
 const INPUT_CLASS =
@@ -31,6 +40,16 @@ export function AddTeamForm() {
 
   const [state, setState] = useState<State>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  function clearFieldError(...fields: string[]) {
+    setFieldErrors((prev) => {
+      if (fields.every((f) => !(f in prev))) return prev;
+      const next = { ...prev };
+      for (const f of fields) delete next[f];
+      return next;
+    });
+  }
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -83,6 +102,7 @@ export function AddTeamForm() {
     setErrorMessage("");
     setImage(file);
     setPreview(URL.createObjectURL(file));
+    clearFieldError("image");
   }
 
   const ageNumber = Number(age);
@@ -102,6 +122,7 @@ export function AddTeamForm() {
     if (!image || !location) return;
     setState("submitting");
     setErrorMessage("");
+    setFieldErrors({});
     try {
       await submitTeamMember({
         image,
@@ -112,9 +133,25 @@ export function AddTeamForm() {
         age: ageNumber,
       });
       setState("done");
-    } catch {
+    } catch (error) {
       setState("error");
-      setErrorMessage(t("add_team.error.generic"));
+      const fieldErrs = extractFieldErrors(error);
+      if (fieldErrs) {
+        const translated: Record<string, string> = {};
+        for (const { field, type, msg } of fieldErrs) {
+          const key =
+            TEAM_FIELD_ERROR_KEYS[`${field}.${type}`] ??
+            TEAM_FIELD_ERROR_KEYS[`${field}.missing`];
+          translated[field] = key ? t(key) : msg;
+        }
+        setFieldErrors(translated);
+      } else if (error instanceof ApiError && error.status === 422) {
+        const code = extractErrorCode(error);
+        const key = code ? TEAM_ERROR_CODE_KEYS[code] : undefined;
+        setErrorMessage(key ? t(key) : error.message);
+      } else {
+        setErrorMessage(t("add_team.error.generic"));
+      }
     }
   }
 
@@ -185,6 +222,9 @@ export function AddTeamForm() {
               <p className="mt-1.5 text-xs text-ganitel-text-placeholder">
                 {t("add_team.image.hint")}
               </p>
+              {fieldErrors.image && (
+                <p className="mt-1 text-xs text-red-500">{fieldErrors.image}</p>
+              )}
             </div>
 
             <div>
@@ -202,11 +242,17 @@ export function AddTeamForm() {
                   required
                   maxLength={120}
                   value={name}
-                  onChange={(event) => setName(event.target.value)}
+                  onChange={(event) => {
+                    setName(event.target.value);
+                    clearFieldError("name");
+                  }}
                   placeholder={t("add_team.name.placeholder")}
                   className={cn(INPUT_CLASS, "pl-10")}
                 />
               </div>
+              {fieldErrors.name && (
+                <p className="mt-1 text-xs text-red-500">{fieldErrors.name}</p>
+              )}
             </div>
 
             <LocationAutocomplete
@@ -215,8 +261,16 @@ export function AddTeamForm() {
               placeholder={t("add_team.location.placeholder")}
               initialCity=""
               initialCountry=""
-              onChange={setLocation}
+              onChange={(pick) => {
+                setLocation(pick);
+                clearFieldError("city", "country");
+              }}
             />
+            {(fieldErrors.city || fieldErrors.country) && (
+              <p className="-mt-3 text-xs text-red-500">
+                {fieldErrors.city || fieldErrors.country}
+              </p>
+            )}
 
             <div>
               <label htmlFor="add-team-age" className={LABEL_CLASS}>
@@ -230,10 +284,16 @@ export function AddTeamForm() {
                 min={16}
                 max={100}
                 value={age}
-                onChange={(event) => setAge(event.target.value)}
+                onChange={(event) => {
+                  setAge(event.target.value);
+                  clearFieldError("age");
+                }}
                 placeholder={t("add_team.age.placeholder")}
                 className={INPUT_CLASS}
               />
+              {fieldErrors.age && (
+                <p className="mt-1 text-xs text-red-500">{fieldErrors.age}</p>
+              )}
             </div>
 
             <div>
@@ -246,13 +306,21 @@ export function AddTeamForm() {
                 required
                 maxLength={2000}
                 value={bio}
-                onChange={(event) => setBio(event.target.value)}
+                onChange={(event) => {
+                  setBio(event.target.value);
+                  clearFieldError("bio_fr");
+                }}
                 placeholder={t("add_team.bio.placeholder")}
                 className={cn(INPUT_CLASS, "resize-none")}
               />
               <p className="mt-1.5 text-xs text-ganitel-text-placeholder">
                 {t("add_team.bio.hint")}
               </p>
+              {fieldErrors.bio_fr && (
+                <p className="mt-1 text-xs text-red-500">
+                  {fieldErrors.bio_fr}
+                </p>
+              )}
             </div>
 
             {errorMessage && (

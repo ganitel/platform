@@ -46,12 +46,12 @@ def verify(token: str, *, team_member_id: UUID) -> str:
             audience=AUDIENCE,
         )
     except jwt.PyJWTError as exc:
-        raise AuthError("Invalid or expired review token") from exc
+        raise AuthError(code="review_token.invalid") from exc
 
     if payload.get("sub") != str(team_member_id):
-        raise AuthError("Review token does not match this team member")
+        raise AuthError(code="review_token.subject_mismatch")
 
     admin = payload.get("admin")
     if not isinstance(admin, str):
-        raise AuthError("Review token missing admin claim")
+        raise AuthError(code="review_token.missing_admin")
     return admin

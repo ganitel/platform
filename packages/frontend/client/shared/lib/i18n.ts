@@ -491,6 +491,42 @@ const dict = {
     fr: "Format d'image non pris en charge. JPEG, PNG ou WebP uniquement.",
     en: "Unsupported image format. JPEG, PNG, or WebP only.",
   },
+  "add_team.error.name_required": {
+    fr: "Le nom est requis.",
+    en: "Name is required.",
+  },
+  "add_team.error.name_too_long": {
+    fr: "Le nom ne doit pas dépasser 120 caractères.",
+    en: "Name must be 120 characters or fewer.",
+  },
+  "add_team.error.bio_required": {
+    fr: "La biographie est requise (10 caractères minimum).",
+    en: "Bio is required (10 characters minimum).",
+  },
+  "add_team.error.bio_too_long": {
+    fr: "La biographie ne doit pas dépasser 2 000 caractères.",
+    en: "Bio must be 2,000 characters or fewer.",
+  },
+  "add_team.error.city_required": {
+    fr: "La ville est requise.",
+    en: "City is required.",
+  },
+  "add_team.error.country_required": {
+    fr: "Le pays est requis.",
+    en: "Country is required.",
+  },
+  "add_team.error.age_invalid": {
+    fr: "L'âge doit être compris entre 16 et 100 ans.",
+    en: "Age must be between 16 and 100.",
+  },
+  "add_team.error.image_required": {
+    fr: "Une photo est requise.",
+    en: "A photo is required.",
+  },
+  "add_team.error.image_empty": {
+    fr: "Le fichier image est vide.",
+    en: "Image file is empty.",
+  },
   "add_team.error.generic": {
     fr: "Une erreur s'est produite. Veuillez réessayer.",
     en: "Something went wrong. Please try again.",

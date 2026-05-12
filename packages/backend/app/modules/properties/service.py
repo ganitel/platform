@@ -39,7 +39,7 @@ def _point_out(loc) -> GeoPoint:
 
 def _ensure_owner(user: User, property: Property) -> None:
     if property.host_id != user.id and not user.is_admin:
-        raise ForbiddenError("you do not own this property")
+        raise ForbiddenError(code="property.not_owner")
 
 
 async def create_draft(session: AsyncSession, host: User, payload: PropertyCreateIn) -> Property:
@@ -95,13 +95,13 @@ async def publish(session: AsyncSession, property: Property, user: User) -> Prop
     _ensure_owner(user, property)
     issues: dict[str, str] = {}
     if not property.title.strip():
-        issues["title"] = "required"
+        issues["title"] = "missing"
     if property.base_price_amount is None or property.base_price_amount <= 0:
-        issues["base_price_amount"] = "must be positive"
+        issues["base_price_amount"] = "not_positive"
     if not property.photos:
-        issues["photos"] = "at least one photo is required"
+        issues["photos"] = "empty"
     if issues:
-        raise ValidationError("property is not ready to publish", extra={"issues": issues})
+        raise ValidationError(code="property.not_ready", extra={"issues": issues})
     property.status = PropertyStatus.PUBLISHED
     property.published_at = datetime.now(UTC)
     await session.commit()
@@ -125,7 +125,7 @@ async def get(session: AsyncSession, property_id: UUID) -> Property:
     )
     prop = (await session.execute(stmt)).scalar_one_or_none()
     if prop is None:
-        raise NotFoundError("property not found")
+        raise NotFoundError(code="property.not_found")
     return prop
 
 
@@ -135,9 +135,9 @@ async def attach_photo(
     _ensure_owner(user, property)
     media = await session.get(Media, media_id)
     if media is None:
-        raise NotFoundError("media not found")
+        raise NotFoundError(code="media.not_found")
     if media.owner_user_id != user.id and not user.is_admin:
-        raise ForbiddenError("media belongs to a different user")
+        raise ForbiddenError(code="media.not_owner")
     photo = PropertyPhoto(property_id=property.id, media_id=media_id, position=position)
     session.add(photo)
     await session.commit()
@@ -151,7 +151,7 @@ async def detach_photo(
     _ensure_owner(user, property)
     photo = await session.get(PropertyPhoto, photo_id)
     if photo is None or photo.property_id != property.id:
-        raise NotFoundError("photo not found")
+        raise NotFoundError(code="photo.not_found")
     await session.delete(photo)
     await session.commit()
 

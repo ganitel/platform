@@ -124,13 +124,13 @@ async function request<T>(
   }
 
   if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as {
-      detail?: string;
-      message?: string;
-    } | null;
+    const payload = (await response.json().catch(() => null)) as Record<
+      string,
+      unknown
+    > | null;
     const message =
-      payload?.detail ??
-      payload?.message ??
+      (typeof payload?.detail === "string" ? payload.detail : undefined) ??
+      (typeof payload?.message === "string" ? payload.message : undefined) ??
       response.statusText ??
       `Request failed with status ${response.status}`;
     throw new ApiError(message, response.status, payload);
@@ -149,6 +149,77 @@ async function request<T>(
     : ((await response.text()) as unknown as T);
 
   return { data, status: response.status };
+}
+
+/**
+ * Extract the RFC 7807 `title` (error code) from an ApiError.
+ * Backend responses look like `{ title: "image.too_large", status: 422, … }`.
+ * Returns `null` for non-ApiError or missing title.
+ */
+export function extractErrorCode(error: unknown): string | null {
+  if (!(error instanceof ApiError)) return null;
+  const payload = error.data as { title?: unknown } | null;
+  if (typeof payload?.title === "string" && payload.title) return payload.title;
+  return null;
+}
+
+export interface FieldError {
+  field: string;
+  type: string;
+  msg: string;
+}
+
+/**
+ * Extract structured field-level errors from an ApiError.
+ *
+ * Handles two backend patterns:
+ * 1. **Pydantic array** — `extra: { errors: [{ loc, msg, type }] }`
+ *    (FastAPI RequestValidationError).
+ * 2. **Manual field error** — `extra: { field: "check_in_date" }` with a
+ *    domain `code` in the RFC 7807 `title` (e.g. bookings, payments).
+ *
+ * Returns `null` for non-422 or errors that don't carry field info.
+ */
+export function extractFieldErrors(error: unknown): FieldError[] | null {
+  if (!(error instanceof ApiError) || error.status !== 422) return null;
+  const payload = error.data as {
+    extra?: { errors?: unknown; field?: unknown };
+    title?: unknown;
+    detail?: unknown;
+  } | null;
+  if (!payload) return null;
+
+  const out: FieldError[] = [];
+
+  const items = payload.extra?.errors ?? payload.detail;
+  if (Array.isArray(items)) {
+    for (const entry of items) {
+      if (
+        typeof entry !== "object" ||
+        entry === null ||
+        !Array.isArray(entry.loc) ||
+        typeof entry.msg !== "string"
+      )
+        continue;
+      const field = entry.loc[entry.loc.length - 1];
+      const type = typeof entry.type === "string" ? entry.type : "unknown";
+      if (typeof field === "string") out.push({ field, type, msg: entry.msg });
+    }
+  }
+
+  if (
+    out.length === 0 &&
+    typeof payload.extra?.field === "string" &&
+    typeof payload.title === "string"
+  ) {
+    out.push({
+      field: payload.extra.field,
+      type: payload.title,
+      msg: typeof payload.detail === "string" ? payload.detail : payload.title,
+    });
+  }
+
+  return out.length > 0 ? out : null;
 }
 
 export const apiClient = {

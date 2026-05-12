@@ -13,9 +13,17 @@ class AppError(Exception):
     status_code: int = 500
     code: str = "internal"
 
-    def __init__(self, detail: str = "", *, extra: dict[str, Any] | None = None) -> None:
-        super().__init__(detail)
+    def __init__(
+        self,
+        detail: str = "",
+        *,
+        code: str | None = None,
+        extra: dict[str, Any] | None = None,
+    ) -> None:
+        if code is not None:
+            self.code = code
         self.detail = detail or self.code
+        super().__init__(self.detail)
         self.extra = extra or {}
 
 

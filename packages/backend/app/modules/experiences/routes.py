@@ -65,6 +65,6 @@ async def get_experience(
     exp = await service.get(session, experience_id)
     host = await session.get(User, exp.host_id)
     if host is None:
-        raise NotFoundError("host not found")
+        raise NotFoundError(code="host.not_found")
     response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
     return await service.to_detail(exp, host)

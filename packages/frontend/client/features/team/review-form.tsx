@@ -16,7 +16,12 @@ import {
 import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { approveTeamMember, rejectTeamMember } from "@/features/team/api";
 import { LocationAutocomplete } from "@/features/team/location-autocomplete";
-import { ApiError } from "@/shared/api/client";
+import {
+  ApiError,
+  extractErrorCode,
+  extractFieldErrors,
+} from "@/shared/api/client";
+import { TEAM_FIELD_ERROR_KEYS } from "@/features/team/error-keys";
 import {
   TITLE_KEYS,
   TITLE_LABELS,
@@ -53,6 +58,16 @@ export function ReviewForm({
   const t = useT();
   const [state, setState] = useState<State>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  function clearFieldError(...fields: string[]) {
+    setFieldErrors((prev) => {
+      if (fields.every((f) => !(f in prev))) return prev;
+      const next = { ...prev };
+      for (const f of fields) delete next[f];
+      return next;
+    });
+  }
   const [name, setName] = useState(member.name);
   const [location, setLocation] = useState<LocationPick>({
     city: member.city ?? "",
@@ -81,12 +96,27 @@ export function ReviewForm({
   async function handleApprove() {
     setState("submitting");
     setErrorMessage("");
+    setFieldErrors({});
     try {
       await approveTeamMember(member.id, token, diff());
       setState("approved");
-    } catch {
+    } catch (error) {
       setState("error");
-      setErrorMessage(t("review.error.generic"));
+      const fieldErrs = extractFieldErrors(error);
+      if (fieldErrs) {
+        const translated: Record<string, string> = {};
+        for (const { field, type, msg } of fieldErrs) {
+          const key =
+            TEAM_FIELD_ERROR_KEYS[`${field}.${type}`] ??
+            TEAM_FIELD_ERROR_KEYS[`${field}.missing`];
+          translated[field] = key ? t(key) : msg;
+        }
+        setFieldErrors(translated);
+      } else if (error instanceof ApiError && error.status === 422) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage(t("review.error.generic"));
+      }
     }
   }
 
@@ -105,9 +135,11 @@ export function ReviewForm({
       setState("rejected");
     } catch (error) {
       setState("error");
-      // 409 from the backend = member is already active. Surface a useful
-      // message rather than the generic error.
-      if (error instanceof ApiError && error.status === 409) {
+      if (
+        error instanceof ApiError &&
+        error.status === 409 &&
+        extractErrorCode(error) === "team_member.already_active"
+      ) {
         setErrorMessage(t("review.error.already_active"));
       } else {
         setErrorMessage(t("review.error.generic"));
@@ -178,9 +210,15 @@ export function ReviewForm({
             id="rv-name"
             type="text"
             value={name}
-            onChange={(event) => setName(event.target.value)}
+            onChange={(event) => {
+              setName(event.target.value);
+              clearFieldError("name");
+            }}
             className={INPUT_CLASS}
           />
+          {fieldErrors.name && (
+            <p className="mt-1 text-xs text-red-500">{fieldErrors.name}</p>
+          )}
         </div>
 
         <LocationAutocomplete
@@ -189,8 +227,16 @@ export function ReviewForm({
           placeholder={t("add_team.location.placeholder")}
           initialCity={location.city}
           initialCountry={location.country}
-          onChange={(pick) => setLocation(pick ?? { city: "", country: "" })}
+          onChange={(pick) => {
+            setLocation(pick ?? { city: "", country: "" });
+            clearFieldError("city", "country");
+          }}
         />
+        {(fieldErrors.city || fieldErrors.country) && (
+          <p className="-mt-3 text-xs text-red-500">
+            {fieldErrors.city || fieldErrors.country}
+          </p>
+        )}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -203,9 +249,15 @@ export function ReviewForm({
               min={16}
               max={100}
               value={age}
-              onChange={(event) => setAge(event.target.value)}
+              onChange={(event) => {
+                setAge(event.target.value);
+                clearFieldError("age");
+              }}
               className={INPUT_CLASS}
             />
+            {fieldErrors.age && (
+              <p className="mt-1 text-xs text-red-500">{fieldErrors.age}</p>
+            )}
           </div>
           <div>
             <label htmlFor="rv-title-key" className={LABEL_CLASS}>
@@ -238,9 +290,15 @@ export function ReviewForm({
             rows={6}
             maxLength={2000}
             value={bio}
-            onChange={(event) => setBio(event.target.value)}
+            onChange={(event) => {
+              setBio(event.target.value);
+              clearFieldError("bio_fr");
+            }}
             className={cn(INPUT_CLASS, "resize-none")}
           />
+          {fieldErrors.bio_fr && (
+            <p className="mt-1 text-xs text-red-500">{fieldErrors.bio_fr}</p>
+          )}
         </div>
 
         {errorMessage && <p className="text-xs text-red-500">{errorMessage}</p>}

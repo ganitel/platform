@@ -111,7 +111,7 @@ def test_verify_jwt_raises_on_missing_sub(rsa_keypair) -> None:
             "https://test.supabase.co/auth/v1/.well-known/jwks.json"
         )
         mock_settings.return_value.JWT_ISSUER = "https://test.supabase.co/auth/v1"
-        with pytest.raises(AuthError, match="missing sub"):
+        with pytest.raises(AuthError, match=r"token\.missing_sub"):
             verify_jwt(token)
 
 
@@ -127,5 +127,5 @@ def test_verify_jwt_raises_on_invalid_token() -> None:
         )
         mock_settings.return_value.JWT_ISSUER = "https://test.supabase.co/auth/v1"
         mock_client.return_value.get_signing_key_from_jwt.side_effect = jwt.InvalidTokenError("bad")
-        with pytest.raises(AuthError, match="invalid token"):
+        with pytest.raises(AuthError, match=r"token\.invalid"):
             verify_jwt("not.a.jwt")
