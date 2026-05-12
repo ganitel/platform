@@ -14,6 +14,7 @@ import { ErrorState } from "@/shared/components/error-state";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { cn } from "@/shared/lib/cn";
 import { serverFetch } from "@/shared/api/server";
+import { PUBLIC_CDN_CACHE } from "@/shared/lib/cache";
 import { seo } from "@/shared/lib/seo";
 import { SectionHeader } from "@/shared/ui/section-header";
 import type { PropertyPublic, SearchOut } from "@/features/properties/types";
@@ -21,6 +22,10 @@ import type {
   ExperiencePublic,
   ExperienceSearchOut,
 } from "@/features/experiences/types";
+
+export const headers: Route.HeadersFunction = () => ({
+  "Cache-Control": PUBLIC_CDN_CACHE,
+});
 
 type BrowseKind = "stays" | "experiences";
 

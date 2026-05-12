@@ -2,8 +2,13 @@ import type { Route } from "./+types/_index";
 
 import { Landing } from "@/features/landing/landing";
 import { serverFetch } from "@/shared/api/server";
+import { PUBLIC_CDN_CACHE } from "@/shared/lib/cache";
 import { seo } from "@/shared/lib/seo";
 import type { PropertyPublic, SearchOut } from "@/features/properties/types";
+
+export const headers: Route.HeadersFunction = () => ({
+  "Cache-Control": PUBLIC_CDN_CACHE,
+});
 
 export const meta: Route.MetaFunction = () =>
   seo({

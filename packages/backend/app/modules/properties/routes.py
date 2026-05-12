@@ -7,8 +7,9 @@ from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, Query, Response, status
 
+from app.core.cache import PUBLIC_CDN_CACHE
 from app.core.deps import CurrentUser, DbSession
 from app.core.errors import NotFoundError
 from app.modules.properties import search as search_mod
@@ -36,6 +37,7 @@ async def create_property(
 
 @router.get("", response_model=SearchOut)
 async def search_properties(
+    response: Response,
     session: DbSession,
     q: str | None = None,
     lat: float | None = None,
@@ -71,15 +73,17 @@ async def search_properties(
     rows = await search_mod.search(session, f)
     total = await search_mod.count(session, f)
     items = [await service.to_public(p, distance_km=d) for p, d in rows]
+    response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
     return SearchOut(items=items, total=total, limit=limit, offset=offset)
 
 
 @router.get("/{property_id}", response_model=PropertyDetail)
-async def get_property(property_id: UUID, session: DbSession) -> PropertyDetail:
+async def get_property(property_id: UUID, response: Response, session: DbSession) -> PropertyDetail:
     prop = await service.get(session, property_id)
     host = await session.get(User, prop.host_id)
     if host is None:
         raise NotFoundError("host not found")
+    response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
     return await service.to_detail(prop, host)
 
 

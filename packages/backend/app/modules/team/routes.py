@@ -1,8 +1,9 @@
 import logging
 from uuid import UUID
 
-from fastapi import APIRouter, File, Form, Query, UploadFile, status
+from fastapi import APIRouter, File, Form, Query, Response, UploadFile, status
 
+from app.core.cache import PUBLIC_CDN_CACHE_LONG
 from app.core.config import get_settings
 from app.core.deps import DbSession
 from app.modules.team import emails, service, tokens
@@ -20,10 +21,12 @@ router = APIRouter(prefix="/team-members", tags=["team"])
 
 @router.get("", response_model=list[TeamMemberOut])
 async def list_team_members(
+    response: Response,
     session: DbSession,
     role: TeamRole | None = Query(default=None),
 ) -> list[TeamMemberOut]:
     members = await service.list_active(session, role=role)
+    response.headers["Cache-Control"] = PUBLIC_CDN_CACHE_LONG
     return [await service.to_public(m) for m in members]
 
 

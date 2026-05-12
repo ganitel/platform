@@ -3,8 +3,13 @@ import type { Route } from "./+types/about";
 import { About } from "@/features/about/about";
 import { listTeamMembersServer } from "@/features/about/api";
 import type { TeamMember } from "@/features/about/types";
+import { PUBLIC_CDN_CACHE } from "@/shared/lib/cache";
 import { localeFromAcceptLanguage } from "@/shared/lib/i18n";
 import { seo } from "@/shared/lib/seo";
+
+export const headers: Route.HeadersFunction = () => ({
+  "Cache-Control": PUBLIC_CDN_CACHE,
+});
 
 const META = {
   fr: {
