@@ -237,6 +237,17 @@
     padding-left: env(safe-area-inset-left, 0px);
     padding-right: env(safe-area-inset-right, 0px);
   }
+
+  /* Mobile-only padding to keep the footer visible above the fixed
+     bottom-nav (~64–76px tall + iOS safe area). Desktop has no bottom-nav. */
+  .footer-mobile-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 7rem);
+  }
+  @media (min-width: 768px) {
+    .footer-mobile-safe {
+      padding-bottom: 2.5rem;
+    }
+  }
 }
 
 @utility container {

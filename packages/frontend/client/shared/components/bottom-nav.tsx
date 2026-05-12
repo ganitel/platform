@@ -1,29 +1,54 @@
-import { Compass, Heart, Home, User as UserIcon } from "lucide-react";
+import { motion } from "framer-motion";
+import { Compass, Heart, Home, Sparkles, User as UserIcon } from "lucide-react";
 import { NavLink, useLocation } from "react-router";
 
 import { cn } from "@/shared/lib/cn";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 
-const ALL_ITEMS: {
+interface NavItem {
   to: string;
   labelKey: TranslationKey;
   icon: typeof Compass;
-  hideInPrelaunch?: boolean;
-}[] = [
-  { to: "/", labelKey: "nav.home", icon: Home },
-  { to: "/browse", labelKey: "nav.browse", icon: Compass },
+  showInPrelaunch?: boolean;
+  showAfterLaunch?: boolean;
+}
+
+const ITEMS: NavItem[] = [
+  {
+    to: "/",
+    labelKey: "nav.home",
+    icon: Home,
+    showInPrelaunch: true,
+    showAfterLaunch: true,
+  },
+  {
+    to: "/browse",
+    labelKey: "nav.browse",
+    icon: Compass,
+    showInPrelaunch: true,
+    showAfterLaunch: true,
+  },
+  {
+    to: "/about",
+    labelKey: "nav.about",
+    icon: Sparkles,
+    showInPrelaunch: true,
+    showAfterLaunch: false,
+  },
   {
     to: "/bookings",
     labelKey: "nav.bookings",
     icon: Heart,
-    hideInPrelaunch: true,
+    showInPrelaunch: false,
+    showAfterLaunch: true,
   },
   {
     to: "/profile",
     labelKey: "nav.profile",
     icon: UserIcon,
-    hideInPrelaunch: true,
+    showInPrelaunch: false,
+    showAfterLaunch: true,
   },
 ];
 
@@ -36,17 +61,17 @@ export function BottomNav() {
 
   if (DETAIL_PAGE_RE.test(pathname)) return null;
 
-  const items = isPrelaunch
-    ? ALL_ITEMS.filter(({ hideInPrelaunch }) => !hideInPrelaunch)
-    : ALL_ITEMS;
+  const items = ITEMS.filter((it) =>
+    isPrelaunch ? it.showInPrelaunch : it.showAfterLaunch,
+  );
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-ganitel-stroke-neutral bg-ganitel-paper md:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-ganitel-stroke-neutral bg-ganitel-paper/95 backdrop-blur supports-[backdrop-filter]:bg-ganitel-paper/85 md:hidden"
       aria-label="Primary"
     >
       <ul
-        className="mx-auto flex max-w-md justify-around px-2 pt-2"
+        className="mx-auto flex max-w-md justify-around px-1 pt-1.5"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)" }}
       >
         {items.map(({ to, labelKey, icon: Icon }) => (
@@ -56,25 +81,38 @@ export function BottomNav() {
               end={to === "/"}
               className={({ isActive }) =>
                 cn(
-                  "flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs transition-colors duration-150",
+                  "relative flex min-h-[56px] flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-1.5 text-[11px] transition-colors duration-150",
                   isActive
-                    ? "bg-ganitel-primary/8 font-semibold text-ganitel-text-active"
-                    : "text-ganitel-text-subtitle",
+                    ? "font-semibold text-ganitel-text-title"
+                    : "font-medium text-ganitel-text-subtitle active:bg-ganitel-stroke-neutral/40",
                 )
               }
             >
               {({ isActive }) => (
                 <>
+                  {isActive && (
+                    <motion.span
+                      layoutId="bottom-nav-active"
+                      aria-hidden
+                      className="absolute inset-x-3 top-0 h-0.5 rounded-b-full bg-ganitel-text-title"
+                      transition={{
+                        type: "spring",
+                        stiffness: 420,
+                        damping: 36,
+                      }}
+                    />
+                  )}
                   <Icon
                     className={cn(
-                      "size-5 transition-colors duration-150",
+                      "size-[22px] transition-transform duration-150",
                       isActive
-                        ? "text-ganitel-text-title"
+                        ? "scale-[1.02] text-ganitel-text-title"
                         : "text-ganitel-text-placeholder",
                     )}
+                    strokeWidth={isActive ? 2.2 : 1.7}
                     aria-hidden
                   />
-                  <span>{t(labelKey)}</span>
+                  <span className="leading-tight">{t(labelKey)}</span>
                 </>
               )}
             </NavLink>

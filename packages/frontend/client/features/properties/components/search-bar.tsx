@@ -31,14 +31,16 @@ export function SearchBar({ initialQuery = "", onSubmit }: Props) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={t("common.search")}
-          className="h-12 rounded-full border-ganitel-stroke-neutral bg-ganitel-background-neutral1 pl-10 pr-4"
+          className="h-12 rounded-full border-ganitel-stroke-neutral bg-ganitel-background-neutral1 pl-10 pr-4 text-base md:text-sm"
         />
       </div>
       <Button
         type="submit"
-        className="h-12 rounded-full bg-ganitel-primary px-6 text-ganitel-text-button hover:bg-ganitel-primary/90"
+        aria-label={t("common.search")}
+        className="h-12 shrink-0 rounded-full bg-ganitel-primary px-4 text-ganitel-text-button hover:bg-ganitel-primary/90 sm:px-6"
       >
-        {t("common.search")}
+        <Search className="size-4 sm:hidden" aria-hidden />
+        <span className="hidden sm:inline">{t("common.search")}</span>
       </Button>
     </form>
   );

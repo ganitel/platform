@@ -3,6 +3,12 @@ import { Link } from "react-router";
 import type { ExperiencePublic } from "@/features/experiences/types";
 import { formatMoney } from "@/shared/lib/format";
 import { useLocale, useT } from "@/shared/lib/i18n";
+import {
+  buildSrcSet,
+  transformImage,
+  CARD_WIDTHS,
+  CARD_SIZES,
+} from "@/shared/lib/image";
 
 const PLACEHOLDER_COVER =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><rect fill='%23EDECEC' width='4' height='5'/></svg>";
@@ -15,15 +21,18 @@ function formatDuration(minutes: number): string {
   return `${h} h ${m.toString().padStart(2, "0")}`;
 }
 
-export function ExperienceCard({
-  experience,
-}: {
+interface Props {
   experience: ExperiencePublic;
-}) {
+  priority?: boolean;
+}
+
+export function ExperienceCard({ experience, priority }: Props) {
   const locale = useLocale();
   const t = useT();
 
-  const cover = experience.cover_photo?.url ?? PLACEHOLDER_COVER;
+  const rawCover = experience.cover_photo?.url ?? PLACEHOLDER_COVER;
+  const cover = transformImage(rawCover, { width: 600, quality: 75 });
+  const srcSet = buildSrcSet(rawCover, CARD_WIDTHS, 75);
   const price = formatMoney(experience.base_price, locale);
   const duration = formatDuration(experience.duration_minutes);
 
@@ -32,9 +41,14 @@ export function ExperienceCard({
       <div className="relative mb-5 aspect-[4/5] overflow-hidden rounded-[18px] bg-ganitel-background-neutral2">
         <img
           src={cover}
+          srcSet={srcSet}
+          sizes={CARD_SIZES}
           alt={experience.cover_photo?.alt ?? experience.title}
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
           decoding="async"
+          width={experience.cover_photo?.width ?? 600}
+          height={experience.cover_photo?.height ?? 750}
           className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
         <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-ganitel-paper/95 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-ganitel-text-title shadow-[0_2px_8px_rgba(0,0,0,0.15)] backdrop-blur">

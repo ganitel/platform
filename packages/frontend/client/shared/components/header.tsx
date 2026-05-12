@@ -29,13 +29,16 @@ export function Header() {
     : NAV_ITEMS;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-ganitel-stroke-neutral bg-ganitel-paper/85 backdrop-blur supports-[backdrop-filter]:bg-ganitel-paper/70">
+    <header
+      className="sticky top-0 z-30 border-b border-ganitel-stroke-neutral bg-ganitel-paper/85 backdrop-blur supports-[backdrop-filter]:bg-ganitel-paper/70"
+      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+    >
       {isPrelaunch && (
-        <div className="border-b border-ganitel-secondary/20 bg-ganitel-secondary/10 px-4 py-2 text-center text-xs text-ganitel-text-subtitle">
+        <div className="border-b border-ganitel-secondary/20 bg-ganitel-secondary/10 px-4 py-1.5 text-center text-[11px] leading-snug text-ganitel-text-subtitle md:py-2 md:text-xs">
           {t("prelaunch.banner")}
         </div>
       )}
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-6 px-4 md:px-8">
+      <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-3 px-4 md:h-16 md:gap-6 md:px-8">
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-ganitel-text-title"
