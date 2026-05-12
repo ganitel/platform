@@ -18,22 +18,42 @@ import {
   localeFromAcceptLanguage,
   type Locale,
 } from "@/shared/lib/i18n";
+import { NavigationProgress } from "@/shared/components/navigation-progress";
+import { env } from "@/shared/lib/env";
 import { organizationJsonLd, websiteJsonLd } from "@/shared/lib/seo";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 import { Toaster } from "@/shared/ui/sonner";
 import indexCss from "@/styles/index.css?url";
 
-export const links: Route.LinksFunction = () => [
-  { rel: "stylesheet", href: indexCss },
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
-  { rel: "icon", href: "/favicon.ico", sizes: "any" },
-  { rel: "apple-touch-icon", href: "/og/default.png" },
-];
+function apiOrigin(): string | null {
+  if (!/^https?:\/\//.test(env.apiBaseUrl)) return null;
+  try {
+    return new URL(env.apiBaseUrl).origin;
+  } catch {
+    return null;
+  }
+}
+
+export const links: Route.LinksFunction = () => {
+  const api = apiOrigin();
+  return [
+    { rel: "stylesheet", href: indexCss },
+    { rel: "preconnect", href: "https://fonts.googleapis.com" },
+    {
+      rel: "preconnect",
+      href: "https://fonts.gstatic.com",
+      crossOrigin: "anonymous",
+    },
+    ...(api
+      ? [
+          { rel: "preconnect", href: api, crossOrigin: "anonymous" as const },
+          { rel: "dns-prefetch", href: api },
+        ]
+      : []),
+    { rel: "icon", href: "/favicon.ico", sizes: "any" },
+    { rel: "apple-touch-icon", href: "/og/default.png" },
+  ];
+};
 
 export const meta: Route.MetaFunction = () => [
   { title: "Ganitel — séjours et expériences" },
@@ -75,6 +95,7 @@ export function Layout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className="bg-ganitel-paper text-ganitel-text-title antialiased">
+        <NavigationProgress />
         {children}
         <ScrollRestoration />
         <Scripts />

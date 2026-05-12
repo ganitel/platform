@@ -1,11 +1,17 @@
+import { lazy, Suspense } from "react";
 import { Link, NavLink } from "react-router";
 
-import { useSession } from "@/lib/supabase";
-import { UserMenu } from "@/features/auth/components/user-menu";
+import { useDeferredSession } from "@/features/auth/hooks/use-deferred-session";
 import { cn } from "@/shared/lib/cn";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 import { PillLink } from "@/shared/ui/pill-link";
+
+const UserMenu = lazy(() =>
+  import("@/features/auth/components/user-menu").then((m) => ({
+    default: m.UserMenu,
+  })),
+);
 
 const NAV_ITEMS: {
   to: string;
@@ -22,7 +28,7 @@ const NAV_ITEMS: {
 export function Header() {
   const t = useT();
   const isPrelaunch = usePrelaunch();
-  const { session, isPending } = useSession();
+  const { session, isPending } = useDeferredSession();
 
   const visibleItems = isPrelaunch
     ? NAV_ITEMS.filter(({ hideInPrelaunch }) => !hideInPrelaunch)
@@ -59,7 +65,9 @@ export function Header() {
 
         <div className="flex items-center gap-2">
           {!isPending && session ? (
-            <UserMenu session={session} />
+            <Suspense fallback={null}>
+              <UserMenu session={session} />
+            </Suspense>
           ) : isPrelaunch ? (
             <PillLink to="/join" size="sm" variant="solid">
               {t("join.submit")}
