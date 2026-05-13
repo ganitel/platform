@@ -177,9 +177,12 @@ export default function JoinPage() {
 
   const submitDisabled =
     state === "submitting" ||
-    !email ||
-    (isHost &&
-      (!resolveInterest() || !hostCity || !hostInventory || !hostStatus));
+    !email.trim() ||
+    !resolveInterest() ||
+    !notes.trim() ||
+    (isHost
+      ? !hostCity.trim() || !hostInventory || !hostStatus
+      : !headcount || !budgetRange);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
