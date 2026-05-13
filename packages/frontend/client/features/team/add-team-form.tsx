@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router";
-import { CheckCircle2, ImagePlus, User } from "lucide-react";
+import { ImagePlus, User } from "lucide-react";
 
 import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { submitTeamMember } from "@/features/team/api";
@@ -11,16 +11,14 @@ import {
 import { LocationAutocomplete } from "@/features/team/location-autocomplete";
 import type { LocationPick } from "@/features/team/types";
 import { useT } from "@/shared/lib/i18n";
-import {
-  ApiError,
-  extractErrorCode,
-  extractFieldErrors,
-} from "@/shared/api/client";
+import { FieldError } from "@/shared/components/field-error";
+import { FormErrorAlert } from "@/shared/components/form-error-alert";
+import { FormSubmitButton } from "@/shared/components/form-submit-button";
+import { FormSuccessIcon } from "@/shared/components/form-success-icon";
+import { IconInput } from "@/shared/components/icon-input";
 import { cn } from "@/shared/lib/cn";
-
-const INPUT_CLASS =
-  "w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 px-4 py-3 text-sm text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all";
-const LABEL_CLASS = "block text-sm font-medium text-ganitel-text-title mb-1.5";
+import { translateFormError } from "@/shared/lib/form-error";
+import { INPUT_CLASS, LABEL_CLASS } from "@/shared/lib/form-styles";
 
 type State = "idle" | "submitting" | "done" | "error";
 
@@ -137,32 +135,15 @@ export function AddTeamForm() {
       setState("done");
     } catch (error) {
       setState("error");
-      const fieldErrs = extractFieldErrors(error);
-      if (fieldErrs) {
-        const translated: Record<string, string> = {};
-        for (const { field, type, msg } of fieldErrs) {
-          const key =
-            TEAM_FIELD_ERROR_KEYS[`${field}.${type}`] ??
-            TEAM_FIELD_ERROR_KEYS[`${field}.missing`];
-          translated[field] = key ? t(key) : `${field}: ${msg}`;
-        }
-        setFieldErrors(translated);
-      } else if (error instanceof ApiError) {
-        if (error.status === 0) {
-          setErrorMessage(t("add_team.error.network"));
-          setErrorDetail(error.message);
-        } else {
-          const code = extractErrorCode(error);
-          const key = code ? TEAM_ERROR_CODE_KEYS[code] : undefined;
-          setErrorMessage(key ? t(key) : error.message);
-          setErrorDetail(
-            code ? `${error.status} · ${code}` : `${error.status}`,
-          );
-        }
-      } else {
-        setErrorMessage(t("add_team.error.generic"));
-        setErrorDetail(error instanceof Error ? error.message : String(error));
-      }
+      const translated = translateFormError(error, t, {
+        fieldKeys: TEAM_FIELD_ERROR_KEYS,
+        codeKeys: TEAM_ERROR_CODE_KEYS,
+        generic: "add_team.error.generic",
+        network: "add_team.error.network",
+      });
+      setFieldErrors(translated.fieldErrors);
+      setErrorMessage(translated.message);
+      setErrorDetail(translated.detail);
     }
   }
 
@@ -178,9 +159,7 @@ export function AddTeamForm() {
     <AuthLayout title={t("add_team.title")} subtitle={t("add_team.subtitle")}>
       {state === "done" ? (
         <div className="flex flex-col items-center py-8 text-center">
-          <div className="mb-5 grid size-16 place-items-center rounded-full bg-ganitel-accent-green">
-            <CheckCircle2 className="size-8 text-ganitel-moss" aria-hidden />
-          </div>
+          <FormSuccessIcon />
           <p className="font-display text-2xl font-bold text-ganitel-text-title">
             {t("add_team.success.title")}
           </p>
@@ -233,37 +212,27 @@ export function AddTeamForm() {
               <p className="mt-1.5 text-xs text-ganitel-text-placeholder">
                 {t("add_team.image.hint")}
               </p>
-              {fieldErrors.image && (
-                <p className="mt-1 text-xs text-red-500">{fieldErrors.image}</p>
-              )}
+              <FieldError message={fieldErrors.image} />
             </div>
 
             <div>
               <label htmlFor="add-team-name" className={LABEL_CLASS}>
                 {t("add_team.name.label")}
               </label>
-              <div className="relative">
-                <User
-                  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ganitel-text-placeholder"
-                  aria-hidden
-                />
-                <input
-                  id="add-team-name"
-                  type="text"
-                  required
-                  maxLength={120}
-                  value={name}
-                  onChange={(event) => {
-                    setName(event.target.value);
-                    clearFieldError("name");
-                  }}
-                  placeholder={t("add_team.name.placeholder")}
-                  className={cn(INPUT_CLASS, "pl-10")}
-                />
-              </div>
-              {fieldErrors.name && (
-                <p className="mt-1 text-xs text-red-500">{fieldErrors.name}</p>
-              )}
+              <IconInput
+                id="add-team-name"
+                icon={User}
+                type="text"
+                required
+                maxLength={120}
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value);
+                  clearFieldError("name");
+                }}
+                placeholder={t("add_team.name.placeholder")}
+              />
+              <FieldError message={fieldErrors.name} />
             </div>
 
             <LocationAutocomplete
@@ -277,11 +246,10 @@ export function AddTeamForm() {
                 clearFieldError("city", "country");
               }}
             />
-            {(fieldErrors.city || fieldErrors.country) && (
-              <p className="-mt-3 text-xs text-red-500">
-                {fieldErrors.city || fieldErrors.country}
-              </p>
-            )}
+            <FieldError
+              message={fieldErrors.city || fieldErrors.country}
+              className="-mt-3"
+            />
 
             <div>
               <label htmlFor="add-team-age" className={LABEL_CLASS}>
@@ -302,9 +270,7 @@ export function AddTeamForm() {
                 placeholder={t("add_team.age.placeholder")}
                 className={INPUT_CLASS}
               />
-              {fieldErrors.age && (
-                <p className="mt-1 text-xs text-red-500">{fieldErrors.age}</p>
-              )}
+              <FieldError message={fieldErrors.age} />
             </div>
 
             <div>
@@ -327,33 +293,18 @@ export function AddTeamForm() {
               <p className="mt-1.5 text-xs text-ganitel-text-placeholder">
                 {t("add_team.bio.hint")}
               </p>
-              {fieldErrors.bio_fr && (
-                <p className="mt-1 text-xs text-red-500">
-                  {fieldErrors.bio_fr}
-                </p>
-              )}
+              <FieldError message={fieldErrors.bio_fr} />
             </div>
 
-            {errorMessage && (
-              <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
-                <p>{errorMessage}</p>
-                {errorDetail && (
-                  <p className="mt-1 font-mono text-[11px] opacity-70">
-                    {errorDetail}
-                  </p>
-                )}
-              </div>
-            )}
+            <FormErrorAlert message={errorMessage} detail={errorDetail} />
 
-            <button
-              type="submit"
+            <FormSubmitButton
               disabled={submitDisabled}
-              className="w-full rounded-xl bg-ganitel-primary py-3.5 text-sm font-semibold text-white transition-all hover:bg-ganitel-primary/90 active:scale-[0.98] disabled:opacity-60"
+              isSubmitting={state === "submitting"}
+              submittingLabel={t("add_team.submitting")}
             >
-              {state === "submitting"
-                ? t("add_team.submitting")
-                : t("add_team.submit")}
-            </button>
+              {t("add_team.submit")}
+            </FormSubmitButton>
           </form>
         </>
       )}

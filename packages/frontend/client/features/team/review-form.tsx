@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router";
-import { CheckCircle2, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 import {
   AlertDialog,
@@ -16,11 +16,7 @@ import {
 import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { approveTeamMember, rejectTeamMember } from "@/features/team/api";
 import { LocationAutocomplete } from "@/features/team/location-autocomplete";
-import {
-  ApiError,
-  extractErrorCode,
-  extractFieldErrors,
-} from "@/shared/api/client";
+import { ApiError, extractErrorCode } from "@/shared/api/client";
 import { TEAM_FIELD_ERROR_KEYS } from "@/features/team/error-keys";
 import {
   TITLE_KEYS,
@@ -29,12 +25,13 @@ import {
   type TitleKey,
 } from "@/features/team/types";
 import { useT } from "@/shared/lib/i18n";
+import { FieldError } from "@/shared/components/field-error";
+import { FormSubmitButton } from "@/shared/components/form-submit-button";
+import { FormSuccessIcon } from "@/shared/components/form-success-icon";
 import { cn } from "@/shared/lib/cn";
+import { translateFormError } from "@/shared/lib/form-error";
+import { INPUT_CLASS, LABEL_CLASS } from "@/shared/lib/form-styles";
 import type { TeamMember } from "@/features/about/types";
-
-const INPUT_CLASS =
-  "w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 px-4 py-3 text-sm text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all";
-const LABEL_CLASS = "block text-sm font-medium text-ganitel-text-title mb-1.5";
 
 type State = "idle" | "submitting" | "approved" | "rejected" | "error";
 
@@ -102,20 +99,13 @@ export function ReviewForm({
       setState("approved");
     } catch (error) {
       setState("error");
-      const fieldErrs = extractFieldErrors(error);
-      if (fieldErrs) {
-        const translated: Record<string, string> = {};
-        for (const { field, type, msg } of fieldErrs) {
-          const key =
-            TEAM_FIELD_ERROR_KEYS[`${field}.${type}`] ??
-            TEAM_FIELD_ERROR_KEYS[`${field}.missing`];
-          translated[field] = key ? t(key) : msg;
-        }
-        setFieldErrors(translated);
-      } else if (error instanceof ApiError && error.status === 422) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage(t("review.error.generic"));
+      const translated = translateFormError(error, t, {
+        fieldKeys: TEAM_FIELD_ERROR_KEYS,
+        generic: "review.error.generic",
+      });
+      setFieldErrors(translated.fieldErrors);
+      if (Object.keys(translated.fieldErrors).length === 0) {
+        setErrorMessage(translated.message);
       }
     }
   }
@@ -152,18 +142,13 @@ export function ReviewForm({
     return (
       <AuthLayout title={t("review.title")} subtitle={t("review.subtitle")}>
         <div className="flex flex-col items-center py-8 text-center">
-          <div
-            className={cn(
-              "mb-5 grid size-16 place-items-center rounded-full",
-              isApproved ? "bg-ganitel-accent-green" : "bg-red-100",
-            )}
-          >
-            {isApproved ? (
-              <CheckCircle2 className="size-8 text-ganitel-moss" aria-hidden />
-            ) : (
+          {isApproved ? (
+            <FormSuccessIcon />
+          ) : (
+            <div className="mb-5 grid size-16 place-items-center rounded-full bg-red-100">
               <Trash2 className="size-8 text-red-600" aria-hidden />
-            )}
-          </div>
+            </div>
+          )}
           <p className="font-display text-2xl font-bold text-ganitel-text-title">
             {isApproved
               ? t("review.approved.title")
@@ -216,9 +201,7 @@ export function ReviewForm({
             }}
             className={INPUT_CLASS}
           />
-          {fieldErrors.name && (
-            <p className="mt-1 text-xs text-red-500">{fieldErrors.name}</p>
-          )}
+          <FieldError message={fieldErrors.name} />
         </div>
 
         <LocationAutocomplete
@@ -232,11 +215,10 @@ export function ReviewForm({
             clearFieldError("city", "country");
           }}
         />
-        {(fieldErrors.city || fieldErrors.country) && (
-          <p className="-mt-3 text-xs text-red-500">
-            {fieldErrors.city || fieldErrors.country}
-          </p>
-        )}
+        <FieldError
+          message={fieldErrors.city || fieldErrors.country}
+          className="-mt-3"
+        />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -255,9 +237,7 @@ export function ReviewForm({
               }}
               className={INPUT_CLASS}
             />
-            {fieldErrors.age && (
-              <p className="mt-1 text-xs text-red-500">{fieldErrors.age}</p>
-            )}
+            <FieldError message={fieldErrors.age} />
           </div>
           <div>
             <label htmlFor="rv-title-key" className={LABEL_CLASS}>
@@ -296,9 +276,7 @@ export function ReviewForm({
             }}
             className={cn(INPUT_CLASS, "resize-none")}
           />
-          {fieldErrors.bio_fr && (
-            <p className="mt-1 text-xs text-red-500">{fieldErrors.bio_fr}</p>
-          )}
+          <FieldError message={fieldErrors.bio_fr} />
         </div>
 
         {errorMessage && <p className="text-xs text-red-500">{errorMessage}</p>}
@@ -353,15 +331,14 @@ export function ReviewForm({
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          <button
-            type="submit"
+          <FormSubmitButton
             disabled={state === "submitting"}
-            className="flex-1 rounded-xl bg-ganitel-primary py-3.5 text-sm font-semibold text-white transition-all hover:bg-ganitel-primary/90 active:scale-[0.98] disabled:opacity-60"
+            isSubmitting={state === "submitting"}
+            submittingLabel={t("review.submitting")}
+            className="w-auto flex-1"
           >
-            {state === "submitting"
-              ? t("review.submitting")
-              : t("review.approve")}
-          </button>
+            {t("review.approve")}
+          </FormSubmitButton>
         </div>
       </form>
     </AuthLayout>
