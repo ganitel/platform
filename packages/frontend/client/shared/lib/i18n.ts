@@ -420,6 +420,38 @@ const dict = {
     fr: "Une erreur s'est produite. Réessayez.",
     en: "Something went wrong. Please try again.",
   },
+  "join.error.network": {
+    fr: "Connexion impossible. Vérifiez votre réseau et réessayez.",
+    en: "Could not reach the server. Check your connection and try again.",
+  },
+  "join.error.email_required": {
+    fr: "L'email est requis.",
+    en: "Email is required.",
+  },
+  "join.error.email_invalid": {
+    fr: "Cet email n'est pas valide.",
+    en: "This email is not valid.",
+  },
+  "join.error.phone_invalid": {
+    fr: "Le numéro de téléphone n'est pas valide. Format attendu : +237612345678.",
+    en: "Phone number is not valid. Expected format: +237612345678.",
+  },
+  "join.error.headcount_invalid": {
+    fr: "Le nombre de personnes doit être entre 1 et 500.",
+    en: "Number of people must be between 1 and 500.",
+  },
+  "join.error.notes_too_long": {
+    fr: "Le message est trop long (max 1000 caractères).",
+    en: "Your message is too long (max 1000 characters).",
+  },
+  "join.error.host_city_too_long": {
+    fr: "Le nom de ville est trop long.",
+    en: "City name is too long.",
+  },
+  "join.error.details": {
+    fr: "Détails techniques",
+    en: "Technical details",
+  },
   "join.success.title": {
     fr: "Vous êtes sur la liste !",
     en: "You're on the list!",
@@ -570,6 +602,10 @@ const dict = {
   "add_team.error.generic": {
     fr: "Une erreur s'est produite. Veuillez réessayer.",
     en: "Something went wrong. Please try again.",
+  },
+  "add_team.error.network": {
+    fr: "Connexion impossible. Vérifiez votre réseau et réessayez.",
+    en: "Could not reach the server. Check your connection and try again.",
   },
 
   "review.title": { fr: "Vérifier la candidature", en: "Review submission" },

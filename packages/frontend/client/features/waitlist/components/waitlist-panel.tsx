@@ -3,6 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Mail, Phone, Sparkles } from "lucide-react";
 
 import { joinWaitlist } from "@/features/waitlist/api";
+import { WAITLIST_FIELD_ERROR_KEYS } from "@/features/waitlist/error-keys";
+import {
+  ApiError,
+  extractErrorCode,
+  extractFieldErrors,
+} from "@/shared/api/client";
 import { useLocale, useT } from "@/shared/lib/i18n";
 import { formatMoney } from "@/shared/lib/format";
 import type { Money } from "@/features/properties/types";
@@ -31,11 +37,15 @@ export function WaitlistPanel({
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [errorDetail, setErrorDetail] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email) return;
     setState("submitting");
+    setErrorMessage("");
+    setErrorDetail("");
     try {
       const result = await joinWaitlist({
         email,
@@ -47,8 +57,30 @@ export function WaitlistPanel({
       });
       setEmailSent(result.confirmation_email_sent);
       setState("done");
-    } catch {
+    } catch (error) {
       setState("error");
+      const fieldErrs = extractFieldErrors(error);
+      if (fieldErrs && fieldErrs.length > 0) {
+        const first = fieldErrs[0];
+        const key =
+          WAITLIST_FIELD_ERROR_KEYS[`${first.field}.${first.type}`] ??
+          WAITLIST_FIELD_ERROR_KEYS[`${first.field}.missing`];
+        setErrorMessage(key ? t(key) : `${first.field}: ${first.msg}`);
+      } else if (error instanceof ApiError) {
+        if (error.status === 0) {
+          setErrorMessage(t("join.error.network"));
+          setErrorDetail(error.message);
+        } else {
+          const code = extractErrorCode(error);
+          setErrorMessage(error.message || t("waitlist.error"));
+          setErrorDetail(
+            code ? `${error.status} · ${code}` : `${error.status}`,
+          );
+        }
+      } else {
+        setErrorMessage(t("waitlist.error"));
+        setErrorDetail(error instanceof Error ? error.message : String(error));
+      }
     }
   }
 
@@ -137,8 +169,15 @@ export function WaitlistPanel({
                 </div>
               </div>
 
-              {state === "error" && (
-                <p className="text-xs text-red-500">{t("waitlist.error")}</p>
+              {state === "error" && errorMessage && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
+                  <p>{errorMessage}</p>
+                  {errorDetail && (
+                    <p className="mt-1 font-mono text-[11px] opacity-70">
+                      {errorDetail}
+                    </p>
+                  )}
+                </div>
               )}
 
               <button
