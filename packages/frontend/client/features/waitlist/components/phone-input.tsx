@@ -181,8 +181,8 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
                   </CommandPrimitive.Empty>
 
                   <CommandPrimitive.Group
-                    heading={t("join.phone.country.suggested")}
-                    className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-ganitel-text-placeholder"
+                    heading=""
+                    className="**:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-[11px] **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-wider **:[[cmdk-group-heading]]:text-ganitel-text-placeholder"
                   >
                     {sortedCountries.head.map((c) => (
                       <CountryItem
@@ -199,7 +199,7 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
 
                   <CommandPrimitive.Group
                     heading={t("join.phone.country.all")}
-                    className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-ganitel-text-placeholder"
+                    className="**:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-[11px] **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-wider **:[[cmdk-group-heading]]:text-ganitel-text-placeholder"
                   >
                     {sortedCountries.rest.map((c) => (
                       <CountryItem
