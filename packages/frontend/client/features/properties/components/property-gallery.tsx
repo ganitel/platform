@@ -37,8 +37,8 @@ export function PropertyGallery({ photos, title }: Props) {
           decoding="async"
           fetchPriority="high"
           width={1200}
-          height={800}
-          className="col-span-2 row-span-2 aspect-auto w-full object-cover"
+          height={1200}
+          className="col-span-2 row-span-2 aspect-square w-full object-cover"
         />
         {grid.map((m, i) => (
           <img
