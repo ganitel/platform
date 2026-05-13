@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { Command as CommandPrimitive } from "cmdk";
 import { Check, ChevronDown, Globe, Phone, Search } from "lucide-react";
@@ -55,10 +55,25 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
   const customCleaned = cleanCustom(custom);
   const customInvalid =
     isOther && customCleaned.length > 0 && !E164_RE.test(customCleaned);
+  const nationalInvalid =
+    !isOther &&
+    country !== undefined &&
+    national.length > 0 &&
+    !E164_RE.test(buildE164(country, national));
+  const phoneInvalid = customInvalid || nationalInvalid;
 
-  useEffect(() => {
-    if (isOther) {
-      const cleaned = cleanCustom(custom);
+  // Compute the E.164 value + validity from the current selection and emit
+  // it. Called directly from each event handler — avoids a useEffect that
+  // would re-fire on every parent render (the parent rarely memoises
+  // `onChange`). An empty national/custom is considered valid because phone
+  // is optional in the schema.
+  function emit(
+    nextIso2: string,
+    nextNational: string,
+    nextCustom: string,
+  ): void {
+    if (nextIso2 === OTHER_VALUE) {
+      const cleaned = cleanCustom(nextCustom);
       if (!cleaned) {
         onChange("", true);
         return;
@@ -66,9 +81,14 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
       onChange(cleaned, E164_RE.test(cleaned));
       return;
     }
-    if (!country) return;
-    onChange(buildE164(country, national), true);
-  }, [iso2, country, national, custom, isOther, onChange]);
+    const nextCountry = getPhoneCountry(nextIso2);
+    if (!nextCountry) {
+      onChange("", true);
+      return;
+    }
+    const e164 = buildE164(nextCountry, nextNational);
+    onChange(e164, e164 === "" || E164_RE.test(e164));
+  }
 
   const sortedCountries = useMemo(() => {
     const pinned = ["CM", "SN", "CI", "FR"];
@@ -85,10 +105,23 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
   function handleSelect(nextIso2: string) {
     setIso2(nextIso2);
     setOpen(false);
+    emit(nextIso2, national, custom);
     requestAnimationFrame(() => {
       if (nextIso2 === OTHER_VALUE) customInputRef.current?.focus();
       else nationalInputRef.current?.focus();
     });
+  }
+
+  function handleNationalChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const value = event.target.value;
+    setNational(value);
+    emit(iso2, value, custom);
+  }
+
+  function handleCustomChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const value = event.target.value;
+    setCustom(value);
+    emit(iso2, national, value);
   }
 
   return (
@@ -103,7 +136,7 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
       <div
         className={cn(
           "flex items-stretch rounded-xl border bg-ganitel-neutral-1 transition-all",
-          customInvalid
+          phoneInvalid
             ? "border-red-500/60 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/20"
             : "border-ganitel-stroke-neutral focus-within:border-ganitel-secondary focus-within:ring-2 focus-within:ring-ganitel-secondary/20",
         )}
@@ -252,7 +285,7 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
               inputMode="tel"
               autoComplete="tel"
               value={custom}
-              onChange={(e) => setCustom(e.target.value)}
+              onChange={handleCustomChange}
               placeholder="+44 7700 900123"
               className={cn(INPUT_CLASS, "rounded-r-xl py-3 pl-9 pr-3.5")}
             />
@@ -265,14 +298,14 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
             inputMode="tel"
             autoComplete="tel-national"
             value={national}
-            onChange={(e) => setNational(e.target.value)}
+            onChange={handleNationalChange}
             placeholder={t("join.phone.placeholder")}
             className={cn(INPUT_CLASS, "rounded-r-xl px-3.5 py-3")}
           />
         )}
       </div>
 
-      {isOther && (
+      {isOther ? (
         <p
           className={cn(
             "mt-1.5 text-xs",
@@ -283,6 +316,12 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
             ? t("join.phone.invalid")
             : t("join.phone.country.other_hint")}
         </p>
+      ) : (
+        nationalInvalid && (
+          <p className="mt-1.5 text-xs text-red-500">
+            {t("join.phone.invalid")}
+          </p>
+        )
       )}
     </div>
   );
