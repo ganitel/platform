@@ -41,12 +41,7 @@ export const meta: Route.MetaFunction = ({
     `${e.experience_type} à ${e.city}, ${e.country_code}.`
   ).replace(/\s+/g, " ");
   const ogImage = e.cover_photo?.url
-    ? {
-        url: e.cover_photo.url,
-        alt: e.cover_photo.alt ?? e.title,
-        width: e.cover_photo.width ?? undefined,
-        height: e.cover_photo.height ?? undefined,
-      }
+    ? { url: e.cover_photo.url, alt: e.title }
     : { url: "/og/experiences.png", alt: e.title };
 
   const jsonLd = {

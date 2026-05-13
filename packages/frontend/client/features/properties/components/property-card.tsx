@@ -35,12 +35,12 @@ export function PropertyCard({ property, priority }: Props) {
           src={cover}
           srcSet={srcSet}
           sizes={CARD_SIZES}
-          alt={property.cover_photo?.alt ?? property.title}
+          alt={property.title}
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}
           decoding="async"
-          width={property.cover_photo?.width ?? 600}
-          height={property.cover_photo?.height ?? 750}
+          width={600}
+          height={750}
           className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
         <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-ganitel-paper/95 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-ganitel-text-title shadow-[0_2px_8px_rgba(0,0,0,0.15)] backdrop-blur">
