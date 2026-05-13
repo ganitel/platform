@@ -225,6 +225,46 @@ const dict = {
     fr: "Votre numéro WhatsApp (optionnel)",
     en: "Your WhatsApp number (optional)",
   },
+  "join.phone.placeholder": {
+    fr: "6 12 34 56 78",
+    en: "6 12 34 56 78",
+  },
+  "join.phone.country.aria": {
+    fr: "Choisir le pays",
+    en: "Choose country",
+  },
+  "join.phone.country.search": {
+    fr: "Rechercher un pays…",
+    en: "Search a country…",
+  },
+  "join.phone.country.empty": {
+    fr: "Aucun pays trouvé. Choisissez « Autre » pour un autre indicatif.",
+    en: "No country found. Pick “Other” for another code.",
+  },
+  "join.phone.country.suggested": {
+    fr: "Suggérés",
+    en: "Suggested",
+  },
+  "join.phone.country.all": {
+    fr: "Tous les pays",
+    en: "All countries",
+  },
+  "join.phone.country.other": {
+    fr: "Autre pays (saisie manuelle)",
+    en: "Other country (manual entry)",
+  },
+  "join.phone.country.other_short": {
+    fr: "Autre",
+    en: "Other",
+  },
+  "join.phone.country.other_hint": {
+    fr: "Saisissez le numéro au format international, ex. +44 7700 900123",
+    en: "Enter the number in international format, e.g. +44 7700 900123",
+  },
+  "join.phone.invalid": {
+    fr: "Numéro invalide. Commencez par + suivi de l'indicatif pays.",
+    en: "Invalid number. Start with + followed by the country code.",
+  },
   "join.role.label": {
     fr: "Vous êtes…",
     en: "You are…",
@@ -380,6 +420,38 @@ const dict = {
     fr: "Une erreur s'est produite. Réessayez.",
     en: "Something went wrong. Please try again.",
   },
+  "join.error.network": {
+    fr: "Connexion impossible. Vérifiez votre réseau et réessayez.",
+    en: "Could not reach the server. Check your connection and try again.",
+  },
+  "join.error.email_required": {
+    fr: "L'email est requis.",
+    en: "Email is required.",
+  },
+  "join.error.email_invalid": {
+    fr: "Cet email n'est pas valide.",
+    en: "This email is not valid.",
+  },
+  "join.error.phone_invalid": {
+    fr: "Le numéro de téléphone n'est pas valide. Format attendu : +237612345678.",
+    en: "Phone number is not valid. Expected format: +237612345678.",
+  },
+  "join.error.headcount_invalid": {
+    fr: "Le nombre de personnes doit être entre 1 et 500.",
+    en: "Number of people must be between 1 and 500.",
+  },
+  "join.error.notes_too_long": {
+    fr: "Le message est trop long (max 1000 caractères).",
+    en: "Your message is too long (max 1000 characters).",
+  },
+  "join.error.host_city_too_long": {
+    fr: "Le nom de ville est trop long.",
+    en: "City name is too long.",
+  },
+  "join.error.details": {
+    fr: "Détails techniques",
+    en: "Technical details",
+  },
   "join.success.title": {
     fr: "Vous êtes sur la liste !",
     en: "You're on the list!",
@@ -530,6 +602,10 @@ const dict = {
   "add_team.error.generic": {
     fr: "Une erreur s'est produite. Veuillez réessayer.",
     en: "Something went wrong. Please try again.",
+  },
+  "add_team.error.network": {
+    fr: "Connexion impossible. Vérifiez votre réseau et réessayez.",
+    en: "Could not reach the server. Check your connection and try again.",
   },
 
   "review.title": { fr: "Vérifier la candidature", en: "Review submission" },

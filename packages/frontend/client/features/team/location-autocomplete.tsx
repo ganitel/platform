@@ -22,7 +22,6 @@ interface PhotonFeature {
 }
 
 interface Suggestion {
-  key: string;
   label: string;
   city: string;
   country: string;
@@ -36,7 +35,6 @@ function toSuggestion(feature: PhotonFeature): Suggestion | null {
   if (!city || !country) return null;
   const parts = [city, p.state, country].filter(Boolean);
   return {
-    key: `${p.osm_type ?? "X"}-${p.osm_id ?? Math.random()}`,
     label: parts.join(", "),
     city,
     country,
@@ -160,7 +158,7 @@ export function LocationAutocomplete({
       {open && suggestions.length > 0 && (
         <ul className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-xl border border-ganitel-stroke-neutral bg-ganitel-paper shadow-lg">
           {suggestions.map((s) => (
-            <li key={s.key}>
+            <li key={s.label}>
               <button
                 type="button"
                 onClick={() => pick(s)}

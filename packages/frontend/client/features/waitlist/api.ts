@@ -1,4 +1,4 @@
-import { env } from "@/shared/lib/env";
+import { apiClient } from "@/shared/api/client";
 
 interface WaitlistPayload {
   email: string;
@@ -24,21 +24,11 @@ export interface WaitlistResult {
 export async function joinWaitlist(
   payload: WaitlistPayload,
 ): Promise<WaitlistResult> {
-  const res = await fetch(`${env.apiBaseUrl}/waitlist`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok && res.status !== 409) {
-    throw new Error("waitlist_error");
-  }
-  if (res.status === 409) {
-    return { confirmation_email_sent: false };
-  }
-  const json = (await res.json().catch(() => null)) as {
-    confirmation_email_sent?: boolean;
-  } | null;
+  const response = await apiClient.post<{ confirmation_email_sent?: boolean }>(
+    "/waitlist",
+    payload,
+  );
   return {
-    confirmation_email_sent: json?.confirmation_email_sent ?? false,
+    confirmation_email_sent: response.data?.confirmation_email_sent ?? false,
   };
 }

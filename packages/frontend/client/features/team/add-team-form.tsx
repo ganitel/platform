@@ -40,6 +40,7 @@ export function AddTeamForm() {
 
   const [state, setState] = useState<State>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [errorDetail, setErrorDetail] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   function clearFieldError(...fields: string[]) {
@@ -122,6 +123,7 @@ export function AddTeamForm() {
     if (!image || !location) return;
     setState("submitting");
     setErrorMessage("");
+    setErrorDetail("");
     setFieldErrors({});
     try {
       await submitTeamMember({
@@ -142,15 +144,24 @@ export function AddTeamForm() {
           const key =
             TEAM_FIELD_ERROR_KEYS[`${field}.${type}`] ??
             TEAM_FIELD_ERROR_KEYS[`${field}.missing`];
-          translated[field] = key ? t(key) : msg;
+          translated[field] = key ? t(key) : `${field}: ${msg}`;
         }
         setFieldErrors(translated);
-      } else if (error instanceof ApiError && error.status === 422) {
-        const code = extractErrorCode(error);
-        const key = code ? TEAM_ERROR_CODE_KEYS[code] : undefined;
-        setErrorMessage(key ? t(key) : error.message);
+      } else if (error instanceof ApiError) {
+        if (error.status === 0) {
+          setErrorMessage(t("add_team.error.network"));
+          setErrorDetail(error.message);
+        } else {
+          const code = extractErrorCode(error);
+          const key = code ? TEAM_ERROR_CODE_KEYS[code] : undefined;
+          setErrorMessage(key ? t(key) : error.message);
+          setErrorDetail(
+            code ? `${error.status} · ${code}` : `${error.status}`,
+          );
+        }
       } else {
         setErrorMessage(t("add_team.error.generic"));
+        setErrorDetail(error instanceof Error ? error.message : String(error));
       }
     }
   }
@@ -324,7 +335,14 @@ export function AddTeamForm() {
             </div>
 
             {errorMessage && (
-              <p className="text-xs text-red-500">{errorMessage}</p>
+              <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
+                <p>{errorMessage}</p>
+                {errorDetail && (
+                  <p className="mt-1 font-mono text-[11px] opacity-70">
+                    {errorDetail}
+                  </p>
+                )}
+              </div>
             )}
 
             <button

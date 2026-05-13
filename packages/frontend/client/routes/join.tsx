@@ -1,12 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Mail, MapPin, Phone } from "lucide-react";
+import { CheckCircle2, Mail, MapPin } from "lucide-react";
 import type { Route } from "./+types/join";
 
 import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { joinWaitlist } from "@/features/waitlist/api";
+import { PhoneInput } from "@/features/waitlist/components/phone-input";
+import { WAITLIST_FIELD_ERROR_KEYS } from "@/features/waitlist/error-keys";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
+import {
+  ApiError,
+  extractErrorCode,
+  extractFieldErrors,
+} from "@/shared/api/client";
 import { cn } from "@/shared/lib/cn";
 import { seo } from "@/shared/lib/seo";
 
@@ -123,6 +130,9 @@ export default function JoinPage() {
   const t = useT();
   const [state, setState] = useState<State>("idle");
   const [emailSent, setEmailSent] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [errorDetail, setErrorDetail] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [role, setRole] = useState<Role>("traveler");
   const [email, setEmail] = useState("");
   const [interests, setInterests] = useState<Set<Interest>>(new Set());
@@ -130,6 +140,7 @@ export default function JoinPage() {
   const [budgetCurrency, setBudgetCurrency] = useState<BudgetCurrency>("xaf");
   const [budgetRange, setBudgetRange] = useState<BudgetRange | "">("");
   const [phone, setPhone] = useState("");
+  const [phoneValid, setPhoneValid] = useState(true);
   const [notes, setNotes] = useState("");
   const [hostCity, setHostCity] = useState("");
   const [hostInventory, setHostInventory] = useState<HostInventory | "">("");
@@ -180,6 +191,7 @@ export default function JoinPage() {
     !email.trim() ||
     !resolveInterest() ||
     !notes.trim() ||
+    !phoneValid ||
     (isHost
       ? !hostCity.trim() || !hostInventory || !hostStatus
       : !headcount || !budgetRange);
@@ -187,6 +199,9 @@ export default function JoinPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setState("submitting");
+    setErrorMessage("");
+    setErrorDetail("");
+    setFieldErrors({});
     try {
       const base = {
         email,
@@ -212,8 +227,34 @@ export default function JoinPage() {
       const result = await joinWaitlist(payload);
       setEmailSent(result.confirmation_email_sent);
       setState("done");
-    } catch {
+    } catch (error) {
       setState("error");
+      const fieldErrs = extractFieldErrors(error);
+      if (fieldErrs && fieldErrs.length > 0) {
+        const translated: Record<string, string> = {};
+        for (const { field, type, msg } of fieldErrs) {
+          const key =
+            WAITLIST_FIELD_ERROR_KEYS[`${field}.${type}`] ??
+            WAITLIST_FIELD_ERROR_KEYS[`${field}.missing`];
+          translated[field] = key ? t(key) : `${field}: ${msg}`;
+        }
+        setFieldErrors(translated);
+        setErrorMessage(t("join.error"));
+      } else if (error instanceof ApiError) {
+        if (error.status === 0) {
+          setErrorMessage(t("join.error.network"));
+          setErrorDetail(error.message);
+        } else {
+          const code = extractErrorCode(error);
+          setErrorMessage(error.message || t("join.error"));
+          setErrorDetail(
+            code ? `${error.status} · ${code}` : `${error.status}`,
+          );
+        }
+      } else {
+        setErrorMessage(t("join.error"));
+        setErrorDetail(error instanceof Error ? error.message : String(error));
+      }
     }
   }
 
@@ -300,27 +341,23 @@ export default function JoinPage() {
                   className={cn(INPUT_CLASS, "pl-10")}
                 />
               </div>
+              {fieldErrors.email && (
+                <p className="mt-1 text-xs text-red-500">{fieldErrors.email}</p>
+              )}
             </div>
 
-            {/* Phone */}
             <div>
-              <label htmlFor="join-phone" className={LABEL_CLASS}>
-                {t("join.phone")}
-              </label>
-              <div className="relative">
-                <Phone
-                  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ganitel-text-placeholder"
-                  aria-hidden
-                />
-                <input
-                  id="join-phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+237 6XX XXX XXX"
-                  className={cn(INPUT_CLASS, "pl-10")}
-                />
-              </div>
+              <PhoneInput
+                id="join-phone"
+                label={t("join.phone")}
+                onChange={(value, isValid) => {
+                  setPhone(value);
+                  setPhoneValid(isValid);
+                }}
+              />
+              {fieldErrors.phone && (
+                <p className="mt-1 text-xs text-red-500">{fieldErrors.phone}</p>
+              )}
             </div>
 
             {/* Interest toggle */}
@@ -369,6 +406,11 @@ export default function JoinPage() {
                       className={cn(INPUT_CLASS, "pl-10")}
                     />
                   </div>
+                  {fieldErrors.host_city && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {fieldErrors.host_city}
+                    </p>
+                  )}
                 </div>
 
                 {/* Host inventory */}
@@ -442,6 +484,11 @@ export default function JoinPage() {
                     placeholder={t("join.headcount.placeholder")}
                     className={INPUT_CLASS}
                   />
+                  {fieldErrors.headcount && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {fieldErrors.headcount}
+                    </p>
+                  )}
                 </div>
 
                 {/* Budget range */}
@@ -504,10 +551,20 @@ export default function JoinPage() {
                 placeholder={t("join.notes.placeholder")}
                 className={cn(INPUT_CLASS, "resize-none")}
               />
+              {fieldErrors.notes && (
+                <p className="mt-1 text-xs text-red-500">{fieldErrors.notes}</p>
+              )}
             </div>
 
-            {state === "error" && (
-              <p className="text-xs text-red-500">{t("join.error")}</p>
+            {state === "error" && errorMessage && (
+              <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
+                <p>{errorMessage}</p>
+                {errorDetail && (
+                  <p className="mt-1 font-mono text-[11px] opacity-70">
+                    {errorDetail}
+                  </p>
+                )}
+              </div>
             )}
 
             <button
