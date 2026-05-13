@@ -8,6 +8,7 @@ dist/
 build/
 .next/
 out/
+.react-router/
 
 # Environment files
 .env
@@ -54,9 +55,11 @@ Thumbs.db
 .eslintcache
 .prettiercache
 *.tsbuildinfo
+**/scripts/og/.fonts/
 
 # AI tools
 superpowers/
 docs/superpowers/
 
-.vercel
+**/.vercel/*
+!**/.vercel/project.json
