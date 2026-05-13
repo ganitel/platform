@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Mail, Phone, Sparkles } from "lucide-react";
+import { Mail, Phone, Sparkles } from "lucide-react";
 
 import { joinWaitlist } from "@/features/waitlist/api";
 import { WAITLIST_FIELD_ERROR_KEYS } from "@/features/waitlist/error-keys";
-import {
-  ApiError,
-  extractErrorCode,
-  extractFieldErrors,
-} from "@/shared/api/client";
+import { FormErrorAlert } from "@/shared/components/form-error-alert";
+import { FormSubmitButton } from "@/shared/components/form-submit-button";
+import { FormSuccessIcon } from "@/shared/components/form-success-icon";
+import { IconInput } from "@/shared/components/icon-input";
 import { useLocale, useT } from "@/shared/lib/i18n";
+import { translateFormError } from "@/shared/lib/form-error";
+import { INPUT_CLASS } from "@/shared/lib/form-styles";
 import { formatMoney } from "@/shared/lib/format";
 import type { Money } from "@/features/properties/types";
 
@@ -59,28 +60,14 @@ export function WaitlistPanel({
       setState("done");
     } catch (error) {
       setState("error");
-      const fieldErrs = extractFieldErrors(error);
-      if (fieldErrs && fieldErrs.length > 0) {
-        const first = fieldErrs[0];
-        const key =
-          WAITLIST_FIELD_ERROR_KEYS[`${first.field}.${first.type}`] ??
-          WAITLIST_FIELD_ERROR_KEYS[`${first.field}.missing`];
-        setErrorMessage(key ? t(key) : `${first.field}: ${first.msg}`);
-      } else if (error instanceof ApiError) {
-        if (error.status === 0) {
-          setErrorMessage(t("join.error.network"));
-          setErrorDetail(error.message);
-        } else {
-          const code = extractErrorCode(error);
-          setErrorMessage(error.message || t("waitlist.error"));
-          setErrorDetail(
-            code ? `${error.status} · ${code}` : `${error.status}`,
-          );
-        }
-      } else {
-        setErrorMessage(t("waitlist.error"));
-        setErrorDetail(error instanceof Error ? error.message : String(error));
-      }
+      const translated = translateFormError(error, t, {
+        fieldKeys: WAITLIST_FIELD_ERROR_KEYS,
+        generic: "waitlist.error",
+        network: "join.error.network",
+      });
+      const firstFieldError = Object.values(translated.fieldErrors)[0];
+      setErrorMessage(firstFieldError ?? translated.message);
+      setErrorDetail(firstFieldError ? "" : translated.detail);
     }
   }
 
@@ -131,64 +118,43 @@ export function WaitlistPanel({
               </div>
 
               <div className="space-y-2.5">
-                <div className="relative">
-                  <Mail
-                    className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ganitel-text-placeholder"
-                    aria-hidden
-                  />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t("waitlist.email")}
-                    className="w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 py-3 pl-10 pr-4 text-base text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all md:text-sm"
-                  />
-                </div>
+                <IconInput
+                  icon={Mail}
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t("waitlist.email")}
+                />
 
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={t("waitlist.name")}
-                  className="w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 px-4 py-3 text-base text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all md:text-sm"
+                  className={INPUT_CLASS}
                 />
 
-                <div className="relative">
-                  <Phone
-                    className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ganitel-text-placeholder"
-                    aria-hidden
-                  />
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder={t("waitlist.phone")}
-                    className="w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 py-3 pl-10 pr-4 text-base text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all md:text-sm"
-                  />
-                </div>
+                <IconInput
+                  icon={Phone}
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder={t("waitlist.phone")}
+                />
               </div>
 
-              {state === "error" && errorMessage && (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
-                  <p>{errorMessage}</p>
-                  {errorDetail && (
-                    <p className="mt-1 font-mono text-[11px] opacity-70">
-                      {errorDetail}
-                    </p>
-                  )}
-                </div>
+              {state === "error" && (
+                <FormErrorAlert message={errorMessage} detail={errorDetail} />
               )}
 
-              <button
-                type="submit"
-                disabled={state === "submitting" || !email}
-                className="w-full rounded-xl bg-ganitel-primary py-3.5 text-sm font-semibold text-white transition-all hover:bg-ganitel-primary/90 active:scale-[0.98] disabled:opacity-60"
+              <FormSubmitButton
+                disabled={!email}
+                isSubmitting={state === "submitting"}
+                submittingLabel={t("waitlist.submitting")}
               >
-                {state === "submitting"
-                  ? t("waitlist.submitting")
-                  : t("waitlist.submit")}
-              </button>
+                {t("waitlist.submit")}
+              </FormSubmitButton>
 
               <p className="text-center text-xs text-ganitel-text-placeholder">
                 {title}
@@ -217,9 +183,7 @@ function SuccessState({
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className="flex flex-col items-center py-6 text-center"
     >
-      <div className="mb-4 grid size-14 place-items-center rounded-full bg-ganitel-accent-green">
-        <CheckCircle2 className="size-7 text-ganitel-moss" aria-hidden />
-      </div>
+      <FormSuccessIcon size="md" />
       <p className="font-display text-xl font-bold text-ganitel-text-title">
         {t("waitlist.success.title")}
       </p>

@@ -4,6 +4,7 @@ import { Command as CommandPrimitive } from "cmdk";
 import { Check, ChevronDown, Globe, Phone, Search } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
+import { LABEL_CLASS } from "@/shared/lib/form-styles";
 import { useT, useLocale } from "@/shared/lib/i18n";
 import {
   DEFAULT_PHONE_COUNTRY_ISO2,
@@ -15,7 +16,9 @@ import {
 const OTHER_VALUE = "OTHER";
 const E164_RE = /^\+[1-9]\d{6,14}$/;
 
-const INPUT_CLASS =
+// Borderless variant: the wrapping flex container owns border/rounding/ring,
+// so the inner inputs only carry typography + background.
+const INNER_INPUT_CLASS =
   "w-full bg-ganitel-neutral-1 text-base text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:outline-none transition-all md:text-sm";
 
 interface PhoneInputProps {
@@ -93,10 +96,7 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
 
   return (
     <div>
-      <label
-        htmlFor={id}
-        className="block text-sm font-medium text-ganitel-text-title mb-1.5"
-      >
+      <label htmlFor={id} className={LABEL_CLASS}>
         {label}
       </label>
 
@@ -254,7 +254,7 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
               value={custom}
               onChange={(e) => setCustom(e.target.value)}
               placeholder="+44 7700 900123"
-              className={cn(INPUT_CLASS, "rounded-r-xl py-3 pl-9 pr-3.5")}
+              className={cn(INNER_INPUT_CLASS, "rounded-r-xl py-3 pl-9 pr-3.5")}
             />
           </div>
         ) : (
@@ -267,7 +267,7 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
             value={national}
             onChange={(e) => setNational(e.target.value)}
             placeholder={t("join.phone.placeholder")}
-            className={cn(INPUT_CLASS, "rounded-r-xl px-3.5 py-3")}
+            className={cn(INNER_INPUT_CLASS, "rounded-r-xl px-3.5 py-3")}
           />
         )}
       </div>

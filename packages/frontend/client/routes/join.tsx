@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Mail, MapPin } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 import type { Route } from "./+types/join";
 
 import { AuthLayout } from "@/features/auth/components/auth-layout";
@@ -9,12 +9,14 @@ import { joinWaitlist } from "@/features/waitlist/api";
 import { PhoneInput } from "@/features/waitlist/components/phone-input";
 import { WAITLIST_FIELD_ERROR_KEYS } from "@/features/waitlist/error-keys";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
-import {
-  ApiError,
-  extractErrorCode,
-  extractFieldErrors,
-} from "@/shared/api/client";
+import { FieldError } from "@/shared/components/field-error";
+import { FormErrorAlert } from "@/shared/components/form-error-alert";
+import { FormSubmitButton } from "@/shared/components/form-submit-button";
+import { FormSuccessIcon } from "@/shared/components/form-success-icon";
+import { IconInput } from "@/shared/components/icon-input";
 import { cn } from "@/shared/lib/cn";
+import { translateFormError } from "@/shared/lib/form-error";
+import { INPUT_CLASS, LABEL_CLASS } from "@/shared/lib/form-styles";
 import { seo } from "@/shared/lib/seo";
 
 export const meta: Route.MetaFunction = () =>
@@ -121,11 +123,6 @@ const HOST_STATUS_LABEL_KEY = {
   just_exploring: "join.host.status.just_exploring",
 } as const;
 
-const INPUT_CLASS =
-  "w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 px-4 py-3 text-base text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all md:text-sm";
-
-const LABEL_CLASS = "block text-sm font-medium text-ganitel-text-title mb-1.5";
-
 export default function JoinPage() {
   const t = useT();
   const [state, setState] = useState<State>("idle");
@@ -229,32 +226,15 @@ export default function JoinPage() {
       setState("done");
     } catch (error) {
       setState("error");
-      const fieldErrs = extractFieldErrors(error);
-      if (fieldErrs && fieldErrs.length > 0) {
-        const translated: Record<string, string> = {};
-        for (const { field, type, msg } of fieldErrs) {
-          const key =
-            WAITLIST_FIELD_ERROR_KEYS[`${field}.${type}`] ??
-            WAITLIST_FIELD_ERROR_KEYS[`${field}.missing`];
-          translated[field] = key ? t(key) : `${field}: ${msg}`;
-        }
-        setFieldErrors(translated);
-        setErrorMessage(t("join.error"));
-      } else if (error instanceof ApiError) {
-        if (error.status === 0) {
-          setErrorMessage(t("join.error.network"));
-          setErrorDetail(error.message);
-        } else {
-          const code = extractErrorCode(error);
-          setErrorMessage(error.message || t("join.error"));
-          setErrorDetail(
-            code ? `${error.status} · ${code}` : `${error.status}`,
-          );
-        }
-      } else {
-        setErrorMessage(t("join.error"));
-        setErrorDetail(error instanceof Error ? error.message : String(error));
-      }
+      const translated = translateFormError(error, t, {
+        fieldKeys: WAITLIST_FIELD_ERROR_KEYS,
+        generic: "join.error",
+        network: "join.error.network",
+      });
+      setFieldErrors(translated.fieldErrors);
+      const hasFieldErrors = Object.keys(translated.fieldErrors).length > 0;
+      setErrorMessage(hasFieldErrors ? t("join.error") : translated.message);
+      setErrorDetail(translated.detail);
     }
   }
 
@@ -269,9 +249,7 @@ export default function JoinPage() {
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col items-center py-8 text-center"
           >
-            <div className="mb-5 grid size-16 place-items-center rounded-full bg-ganitel-accent-green">
-              <CheckCircle2 className="size-8 text-ganitel-moss" aria-hidden />
-            </div>
+            <FormSuccessIcon />
             <p className="font-display text-2xl font-bold text-ganitel-text-title">
               {t("join.success.title")}
             </p>
@@ -326,24 +304,16 @@ export default function JoinPage() {
               <label htmlFor="join-email" className={LABEL_CLASS}>
                 {t("join.email")}
               </label>
-              <div className="relative">
-                <Mail
-                  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ganitel-text-placeholder"
-                  aria-hidden
-                />
-                <input
-                  id="join-email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="exemple@gmail.com"
-                  className={cn(INPUT_CLASS, "pl-10")}
-                />
-              </div>
-              {fieldErrors.email && (
-                <p className="mt-1 text-xs text-red-500">{fieldErrors.email}</p>
-              )}
+              <IconInput
+                id="join-email"
+                icon={Mail}
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="exemple@gmail.com"
+              />
+              <FieldError message={fieldErrors.email} />
             </div>
 
             <div>
@@ -355,9 +325,7 @@ export default function JoinPage() {
                   setPhoneValid(isValid);
                 }}
               />
-              {fieldErrors.phone && (
-                <p className="mt-1 text-xs text-red-500">{fieldErrors.phone}</p>
-              )}
+              <FieldError message={fieldErrors.phone} />
             </div>
 
             {/* Interest toggle */}
@@ -391,26 +359,16 @@ export default function JoinPage() {
                   <label htmlFor="join-host-city" className={LABEL_CLASS}>
                     {t("join.host.city.label")}
                   </label>
-                  <div className="relative">
-                    <MapPin
-                      className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ganitel-text-placeholder"
-                      aria-hidden
-                    />
-                    <input
-                      id="join-host-city"
-                      type="text"
-                      maxLength={120}
-                      value={hostCity}
-                      onChange={(e) => setHostCity(e.target.value)}
-                      placeholder={t("join.host.city.placeholder")}
-                      className={cn(INPUT_CLASS, "pl-10")}
-                    />
-                  </div>
-                  {fieldErrors.host_city && (
-                    <p className="mt-1 text-xs text-red-500">
-                      {fieldErrors.host_city}
-                    </p>
-                  )}
+                  <IconInput
+                    id="join-host-city"
+                    icon={MapPin}
+                    type="text"
+                    maxLength={120}
+                    value={hostCity}
+                    onChange={(e) => setHostCity(e.target.value)}
+                    placeholder={t("join.host.city.placeholder")}
+                  />
+                  <FieldError message={fieldErrors.host_city} />
                 </div>
 
                 {/* Host inventory */}
@@ -484,11 +442,7 @@ export default function JoinPage() {
                     placeholder={t("join.headcount.placeholder")}
                     className={INPUT_CLASS}
                   />
-                  {fieldErrors.headcount && (
-                    <p className="mt-1 text-xs text-red-500">
-                      {fieldErrors.headcount}
-                    </p>
-                  )}
+                  <FieldError message={fieldErrors.headcount} />
                 </div>
 
                 {/* Budget range */}
@@ -551,29 +505,20 @@ export default function JoinPage() {
                 placeholder={t("join.notes.placeholder")}
                 className={cn(INPUT_CLASS, "resize-none")}
               />
-              {fieldErrors.notes && (
-                <p className="mt-1 text-xs text-red-500">{fieldErrors.notes}</p>
-              )}
+              <FieldError message={fieldErrors.notes} />
             </div>
 
-            {state === "error" && errorMessage && (
-              <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
-                <p>{errorMessage}</p>
-                {errorDetail && (
-                  <p className="mt-1 font-mono text-[11px] opacity-70">
-                    {errorDetail}
-                  </p>
-                )}
-              </div>
+            {state === "error" && (
+              <FormErrorAlert message={errorMessage} detail={errorDetail} />
             )}
 
-            <button
-              type="submit"
+            <FormSubmitButton
               disabled={submitDisabled}
-              className="w-full rounded-xl bg-ganitel-primary py-3.5 text-sm font-semibold text-white transition-all hover:bg-ganitel-primary/90 active:scale-[0.98] disabled:opacity-60"
+              isSubmitting={state === "submitting"}
+              submittingLabel={t("join.submitting")}
             >
-              {state === "submitting" ? t("join.submitting") : t("join.submit")}
-            </button>
+              {t("join.submit")}
+            </FormSubmitButton>
           </motion.form>
         )}
       </AnimatePresence>

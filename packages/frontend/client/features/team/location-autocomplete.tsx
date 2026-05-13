@@ -2,10 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { MapPin } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
+import { INPUT_CLASS, LABEL_CLASS } from "@/shared/lib/form-styles";
 import type { LocationPick } from "@/features/team/types";
-
-const INPUT_CLASS =
-  "w-full rounded-xl border border-ganitel-stroke-neutral bg-ganitel-neutral-1 px-4 py-3 text-sm text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:border-ganitel-secondary focus:outline-none focus:ring-2 focus:ring-ganitel-secondary/20 transition-all";
 
 const PHOTON_URL = "https://photon.komoot.io/api/";
 const DEBOUNCE_MS = 300;
@@ -133,10 +131,7 @@ export function LocationAutocomplete({
 
   return (
     <div ref={wrapperRef} className="relative">
-      <label
-        htmlFor={inputId}
-        className="mb-1.5 block text-sm font-medium text-ganitel-text-title"
-      >
+      <label htmlFor={inputId} className={LABEL_CLASS}>
         {label}
       </label>
       <div className="relative">
