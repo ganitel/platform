@@ -225,6 +225,46 @@ const dict = {
     fr: "Votre numéro WhatsApp (optionnel)",
     en: "Your WhatsApp number (optional)",
   },
+  "join.phone.placeholder": {
+    fr: "6 12 34 56 78",
+    en: "6 12 34 56 78",
+  },
+  "join.phone.country.aria": {
+    fr: "Choisir le pays",
+    en: "Choose country",
+  },
+  "join.phone.country.search": {
+    fr: "Rechercher un pays…",
+    en: "Search a country…",
+  },
+  "join.phone.country.empty": {
+    fr: "Aucun pays trouvé. Choisissez « Autre » pour un autre indicatif.",
+    en: "No country found. Pick “Other” for another code.",
+  },
+  "join.phone.country.suggested": {
+    fr: "Suggérés",
+    en: "Suggested",
+  },
+  "join.phone.country.all": {
+    fr: "Tous les pays",
+    en: "All countries",
+  },
+  "join.phone.country.other": {
+    fr: "Autre pays (saisie manuelle)",
+    en: "Other country (manual entry)",
+  },
+  "join.phone.country.other_short": {
+    fr: "Autre",
+    en: "Other",
+  },
+  "join.phone.country.other_hint": {
+    fr: "Saisissez le numéro au format international, ex. +44 7700 900123",
+    en: "Enter the number in international format, e.g. +44 7700 900123",
+  },
+  "join.phone.invalid": {
+    fr: "Numéro invalide. Commencez par + suivi de l'indicatif pays.",
+    en: "Invalid number. Start with + followed by the country code.",
+  },
   "join.role.label": {
     fr: "Vous êtes…",
     en: "You are…",

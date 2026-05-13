@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Mail, MapPin, Phone } from "lucide-react";
+import { CheckCircle2, Mail, MapPin } from "lucide-react";
 import type { Route } from "./+types/join";
 
 import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { joinWaitlist } from "@/features/waitlist/api";
+import { PhoneInput } from "@/features/waitlist/components/phone-input";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { cn } from "@/shared/lib/cn";
 import { seo } from "@/shared/lib/seo";
@@ -130,6 +131,7 @@ export default function JoinPage() {
   const [budgetCurrency, setBudgetCurrency] = useState<BudgetCurrency>("xaf");
   const [budgetRange, setBudgetRange] = useState<BudgetRange | "">("");
   const [phone, setPhone] = useState("");
+  const [phoneValid, setPhoneValid] = useState(true);
   const [notes, setNotes] = useState("");
   const [hostCity, setHostCity] = useState("");
   const [hostInventory, setHostInventory] = useState<HostInventory | "">("");
@@ -180,6 +182,7 @@ export default function JoinPage() {
     !email.trim() ||
     !resolveInterest() ||
     !notes.trim() ||
+    !phoneValid ||
     (isHost
       ? !hostCity.trim() || !hostInventory || !hostStatus
       : !headcount || !budgetRange);
@@ -302,26 +305,14 @@ export default function JoinPage() {
               </div>
             </div>
 
-            {/* Phone */}
-            <div>
-              <label htmlFor="join-phone" className={LABEL_CLASS}>
-                {t("join.phone")}
-              </label>
-              <div className="relative">
-                <Phone
-                  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ganitel-text-placeholder"
-                  aria-hidden
-                />
-                <input
-                  id="join-phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+237 6XX XXX XXX"
-                  className={cn(INPUT_CLASS, "pl-10")}
-                />
-              </div>
-            </div>
+            <PhoneInput
+              id="join-phone"
+              label={t("join.phone")}
+              onChange={(value, isValid) => {
+                setPhone(value);
+                setPhoneValid(isValid);
+              }}
+            />
 
             {/* Interest toggle */}
             <div>

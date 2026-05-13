@@ -199,6 +199,31 @@ def test_waitlist_accepts_phone() -> None:
     assert entry.phone == "+237611223344"
 
 
+def test_waitlist_strips_phone_formatting() -> None:
+    entry = WaitlistEntryIn.model_validate(_waitlist(phone="+237 (6) 11-22.33 44"))
+    assert entry.phone == "+237611223344"
+
+
+def test_waitlist_treats_blank_phone_as_none() -> None:
+    entry = WaitlistEntryIn.model_validate(_waitlist(phone="   "))
+    assert entry.phone is None
+
+
+def test_waitlist_rejects_phone_without_plus() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(_waitlist(phone="237611223344"))
+
+
+def test_waitlist_rejects_phone_with_leading_zero_after_plus() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(_waitlist(phone="+0611223344"))
+
+
+def test_waitlist_rejects_phone_too_short() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(_waitlist(phone="+12345"))
+
+
 def test_waitlist_rejects_phone_over_32_chars() -> None:
     with pytest.raises(ValidationError):
         WaitlistEntryIn.model_validate(_waitlist(phone="+" + "1" * 32))
