@@ -64,6 +64,7 @@ export function WaitlistPanel({
         fieldKeys: WAITLIST_FIELD_ERROR_KEYS,
         generic: "waitlist.error",
         network: "join.error.network",
+        timeout: "join.error.timeout",
       });
       const firstFieldError = Object.values(translated.fieldErrors)[0];
       setErrorMessage(firstFieldError ?? translated.message);

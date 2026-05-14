@@ -230,6 +230,7 @@ export default function JoinPage() {
         fieldKeys: WAITLIST_FIELD_ERROR_KEYS,
         generic: "join.error",
         network: "join.error.network",
+        timeout: "join.error.timeout",
       });
       setFieldErrors(translated.fieldErrors);
       const hasFieldErrors = Object.keys(translated.fieldErrors).length > 0;

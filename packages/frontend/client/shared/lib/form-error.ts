@@ -16,12 +16,13 @@ interface Config {
   codeKeys?: Record<string, TranslationKey>;
   generic: TranslationKey;
   network?: TranslationKey;
+  timeout?: TranslationKey;
 }
 
 export function translateFormError(
   error: unknown,
   t: (key: TranslationKey) => string,
-  { fieldKeys, codeKeys, generic, network }: Config,
+  { fieldKeys, codeKeys, generic, network, timeout }: Config,
 ): FormErrorTranslated {
   const result: FormErrorTranslated = {
     fieldErrors: {},
@@ -40,7 +41,12 @@ export function translateFormError(
   }
 
   if (error instanceof ApiError) {
-    if (error.status === 0) {
+    if (error.kind === "timeout") {
+      result.message = timeout ? t(timeout) : network ? t(network) : t(generic);
+      result.detail = error.message;
+      return result;
+    }
+    if (error.kind === "network") {
       result.message = network ? t(network) : t(generic);
       result.detail = error.message;
       return result;
