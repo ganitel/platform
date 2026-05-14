@@ -21,6 +21,7 @@ export function PropertyGallery({ photos, title }: Props) {
 
   const [hero, ...rest] = photos;
   const grid = rest.slice(0, 4);
+  const total = photos.length;
 
   return (
     <>
@@ -31,25 +32,25 @@ export function PropertyGallery({ photos, title }: Props) {
           src={transformImage(hero.url, { width: 1200, quality: 78 })}
           srcSet={buildSrcSet(hero.url, DESKTOP_HERO_WIDTHS, 78)}
           sizes="(min-width: 1024px) 600px, 50vw"
-          alt={hero.alt ?? title}
+          alt={total > 1 ? `${title} — 1/${total}` : title}
           loading="eager"
           decoding="async"
           fetchPriority="high"
-          width={hero.width ?? 1200}
-          height={hero.height ?? 800}
-          className="col-span-2 row-span-2 aspect-auto w-full object-cover"
+          width={1200}
+          height={1200}
+          className="col-span-2 row-span-2 aspect-square w-full object-cover"
         />
-        {grid.map((m) => (
+        {grid.map((m, i) => (
           <img
             key={m.id}
             src={transformImage(m.url, { width: 600, quality: 75 })}
             srcSet={buildSrcSet(m.url, DESKTOP_TILE_WIDTHS, 75)}
             sizes="(min-width: 1024px) 300px, 25vw"
-            alt={m.alt ?? title}
+            alt={`${title} — ${i + 2}/${total}`}
             loading="lazy"
             decoding="async"
-            width={m.width ?? 600}
-            height={m.height ?? 600}
+            width={600}
+            height={600}
             className="aspect-square w-full object-cover"
           />
         ))}
@@ -88,12 +89,16 @@ function MobileGallery({
               src={transformImage(m.url, { width: 800, quality: 75 })}
               srcSet={buildSrcSet(m.url, [480, 720, 960], 75)}
               sizes="100vw"
-              alt={m.alt ?? title}
+              alt={
+                photos.length > 1
+                  ? `${title} — ${i + 1}/${photos.length}`
+                  : title
+              }
               loading={i === 0 ? "eager" : "lazy"}
               fetchPriority={i === 0 ? "high" : "auto"}
               decoding="async"
-              width={m.width ?? 800}
-              height={m.height ?? 600}
+              width={800}
+              height={600}
               className="aspect-[4/3] w-full object-cover"
             />
           </div>

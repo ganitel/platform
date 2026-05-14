@@ -12,9 +12,8 @@ export interface Money {
 export interface MediaPublic {
   id: string;
   url: string;
-  width: number | null;
-  height: number | null;
-  alt: string | null;
+  mime_type: string;
+  created_at: string;
 }
 
 export interface HostPublic {

@@ -37,12 +37,7 @@ export const meta: Route.MetaFunction = ({ data, params }) => {
     `${p.property_type} à ${p.city}, ${p.country_code}.`
   ).replace(/\s+/g, " ");
   const ogImage = p.cover_photo?.url
-    ? {
-        url: p.cover_photo.url,
-        alt: p.cover_photo.alt ?? p.title,
-        width: p.cover_photo.width ?? undefined,
-        height: p.cover_photo.height ?? undefined,
-      }
+    ? { url: p.cover_photo.url, alt: p.title }
     : { url: "/og/stays.png", alt: p.title };
 
   const jsonLd = {
