@@ -424,6 +424,10 @@ const dict = {
     fr: "Connexion impossible. Vérifiez votre réseau et réessayez.",
     en: "Could not reach the server. Check your connection and try again.",
   },
+  "join.error.timeout": {
+    fr: "Le serveur met plus de temps que d'habitude. Réessayez dans un instant.",
+    en: "The server is taking longer than usual. Please try again in a moment.",
+  },
   "join.error.email_required": {
     fr: "L'email est requis.",
     en: "Email is required.",
@@ -606,6 +610,10 @@ const dict = {
   "add_team.error.network": {
     fr: "Connexion impossible. Vérifiez votre réseau et réessayez.",
     en: "Could not reach the server. Check your connection and try again.",
+  },
+  "add_team.error.timeout": {
+    fr: "Le serveur met plus de temps que d'habitude. Réessayez dans un instant.",
+    en: "The server is taking longer than usual. Please try again in a moment.",
   },
 
   "review.title": { fr: "Vérifier la candidature", en: "Review submission" },

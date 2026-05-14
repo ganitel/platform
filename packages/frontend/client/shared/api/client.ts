@@ -22,11 +22,14 @@ export function setAuthTokenGetter(fn: TokenGetter): void {
   getToken = fn;
 }
 
+export type ApiErrorKind = "timeout" | "network" | "http";
+
 export class ApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
     readonly data: unknown,
+    readonly kind: ApiErrorKind = "http",
   ) {
     super(message);
     this.name = "ApiError";
@@ -67,7 +70,7 @@ function buildQueryString(params: QueryParams): string {
   return query ? `?${query}` : "";
 }
 
-const DEFAULT_TIMEOUT_MS = 15_000;
+const DEFAULT_TIMEOUT_MS = 30_000;
 
 async function request<T>(
   method: string,
@@ -115,10 +118,13 @@ async function request<T>(
     });
   } catch (cause) {
     if (cause instanceof Error && cause.name === "AbortError") {
-      throw new ApiError("Request timed out", 0, null);
+      if (timeoutId !== undefined) {
+        throw new ApiError("Request timed out", 0, null, "timeout");
+      }
+      throw cause;
     }
     const message = cause instanceof Error ? cause.message : String(cause);
-    throw new ApiError(message, 0, null);
+    throw new ApiError(message, 0, null, "network");
   } finally {
     if (timeoutId !== undefined) clearTimeout(timeoutId);
   }
