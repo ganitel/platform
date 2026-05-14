@@ -1,4 +1,17 @@
 api.ganitel.com {
 	encode gzip
-	reverse_proxy api:8000
+
+	log {
+		output stdout
+		format json
+	}
+
+	reverse_proxy api:8000 {
+		transport http {
+			dial_timeout 5s
+			response_header_timeout 15s
+			read_timeout 30s
+			write_timeout 30s
+		}
+	}
 }
