@@ -118,7 +118,10 @@ async function request<T>(
     });
   } catch (cause) {
     if (cause instanceof Error && cause.name === "AbortError") {
-      throw new ApiError("Request timed out", 0, null, "timeout");
+      if (timeoutId !== undefined) {
+        throw new ApiError("Request timed out", 0, null, "timeout");
+      }
+      throw cause;
     }
     const message = cause instanceof Error ? cause.message : String(cause);
     throw new ApiError(message, 0, null, "network");
