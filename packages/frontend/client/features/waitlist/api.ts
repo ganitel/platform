@@ -27,7 +27,6 @@ export async function joinWaitlist(
   const response = await apiClient.post<{ confirmation_email_sent?: boolean }>(
     "/waitlist",
     payload,
-    { timeoutMs: 45_000 },
   );
   return {
     confirmation_email_sent: response.data?.confirmation_email_sent ?? false,
