@@ -140,6 +140,7 @@ export function AddTeamForm() {
         codeKeys: TEAM_ERROR_CODE_KEYS,
         generic: "add_team.error.generic",
         network: "add_team.error.network",
+        timeout: "add_team.error.timeout",
       });
       setFieldErrors(translated.fieldErrors);
       setErrorMessage(translated.message);
