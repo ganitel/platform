@@ -16,6 +16,10 @@ api.ganitel.com {
 	}
 }
 
+http://api.ganitel.com {
+	redir https://{host}{uri} permanent
+}
+
 http:// {
 	abort
 }
