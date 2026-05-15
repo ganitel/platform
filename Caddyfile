@@ -16,10 +16,12 @@ api.ganitel.com {
 	}
 }
 
-http://api.ganitel.com {
-	redir https://{host}{uri} permanent
-}
-
-http:// {
-	abort
+:80 {
+	@ours host api.ganitel.com
+	handle @ours {
+		redir https://{host}{uri} 308
+	}
+	handle {
+		abort
+	}
 }
