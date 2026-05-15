@@ -337,7 +337,10 @@ const dict = {
     en: "For how many people?",
   },
   "join.headcount.placeholder": { fr: "Ex. 2", en: "e.g. 2" },
-  "join.budget.label": { fr: "Budget estimé", en: "Estimated budget" },
+  "join.budget.label": {
+    fr: "Budget estimé par personne",
+    en: "Estimated budget per person",
+  },
   "join.budget.placeholder": {
     fr: "Sélectionnez une tranche",
     en: "Select a range",
@@ -666,8 +669,8 @@ function localeFromLanguageTags(tags: Iterable<string>): Locale {
   for (const raw of tags) {
     const tag = raw.trim().split(";")[0]?.trim().toLowerCase() ?? "";
     if (!tag) continue;
-    if (tag.startsWith("en")) return "en";
     if (tag.startsWith("fr")) return "fr";
+    if (tag.startsWith("en")) return "en";
   }
   return "fr";
 }
