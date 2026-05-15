@@ -473,7 +473,7 @@ const dict = {
   },
   "join.success.back": { fr: "Retour à l'accueil", en: "Back to home" },
 
-  "nav.about": { fr: "À propos", en: "About" },
+  "nav.about": { fr: "Qui sommes-nous ?", en: "About us" },
   "about.tag": { fr: "Notre histoire", en: "Our story" },
   "about.title": {
     fr: "Nous aimons le Cameroun —",
