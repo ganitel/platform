@@ -187,7 +187,6 @@ export default function JoinPage() {
     state === "submitting" ||
     !email.trim() ||
     !resolveInterest() ||
-    !notes.trim() ||
     !phoneValid ||
     (isHost
       ? !hostCity.trim() || !hostInventory || !hostStatus
