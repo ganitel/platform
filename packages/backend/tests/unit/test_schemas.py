@@ -147,7 +147,9 @@ def test_property_update_accepts_empty_patch() -> None:
 def test_property_update_accepts_bool_partial_patch() -> None:
     patch = PropertyUpdateIn.model_validate({"pets_allowed": True})
     assert patch.pets_allowed is True
-    assert patch.smoking_allowed is None  # not in payload, still default
+    # `exclude_unset=True` is what the service uses to discriminate "field
+    # actually patched" from "field defaulted because omitted".
+    assert patch.model_dump(exclude_unset=True) == {"pets_allowed": True}
 
 
 @pytest.mark.parametrize(
@@ -164,7 +166,7 @@ def test_property_update_accepts_bool_partial_patch() -> None:
     ],
 )
 def test_property_update_rejects_explicit_null_bool(field: str) -> None:
-    with pytest.raises(ValidationError, match="must not be null"):
+    with pytest.raises(ValidationError, match="valid boolean"):
         PropertyUpdateIn.model_validate({field: None})
 
 

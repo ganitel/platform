@@ -7,7 +7,7 @@ from datetime import datetime, time
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.money import Money
 from app.modules.media.schemas import MediaPublic
@@ -75,42 +75,21 @@ class PropertyUpdateIn(BaseModel):
     bathrooms: int | None = Field(default=None, ge=0, le=32)
     amenities: list[str] | None = None
     parking_available: ParkingAvailability | None = None
-    elevator: bool | None = None
-    accessible: bool | None = None
-    private_bathroom: bool | None = None
+    elevator: bool = False
+    accessible: bool = False
+    private_bathroom: bool = False
     kitchen_type: KitchenType | None = None
-    events_allowed: bool | None = None
-    family_friendly: bool | None = None
-    child_friendly: bool | None = None
-    pets_allowed: bool | None = None
-    smoking_allowed: bool | None = None
+    events_allowed: bool = False
+    family_friendly: bool = False
+    child_friendly: bool = False
+    pets_allowed: bool = False
+    smoking_allowed: bool = False
     check_in_time: time | None = None
     check_out_time: time | None = None
     house_rules: str | None = None
     cancellation_policy: CancellationPolicy | None = None
     base_price: Money | None = None
     content_language: ContentLanguage | None = None
-
-    @field_validator(
-        "elevator",
-        "accessible",
-        "private_bathroom",
-        "events_allowed",
-        "family_friendly",
-        "child_friendly",
-        "pets_allowed",
-        "smoking_allowed",
-        mode="after",
-    )
-    @classmethod
-    def _reject_explicit_null_bool(cls, v: bool | None) -> bool | None:
-        # Pydantic v2: validate_default=False, so the default `None` never hits
-        # this validator. Only an explicit `null` in the payload does — which
-        # would translate to setting a NOT NULL column to NULL → 500. Omit the
-        # field instead for partial updates.
-        if v is None:
-            raise ValueError("must not be null; omit the field for a partial update")
-        return v
 
 
 class HostPublic(BaseModel):
