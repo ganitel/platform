@@ -19,7 +19,7 @@ def clear_settings_cache():
 def test_noop_payment_provider_is_disabled_in_production(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ENVIRONMENT", "production")
 
-    with pytest.raises(ValidationError, match="payment.provider_disabled"):
+    with pytest.raises(ValidationError, match=r"payment\.provider_disabled"):
         get_provider("noop")
 
 
@@ -37,7 +37,7 @@ def test_default_team_review_secret_is_rejected_in_production(
     monkeypatch.setenv("ENVIRONMENT", "production")
     monkeypatch.setenv("TEAM_REVIEW_SECRET", DEFAULT_TEAM_REVIEW_SECRET)
 
-    with pytest.raises(ConfigurationError, match="team_review_secret.unconfigured"):
+    with pytest.raises(ConfigurationError, match=r"team_review_secret\.unconfigured"):
         tokens.mint(team_member_id=uuid4(), admin_email="admin@example.com")
 
 
@@ -45,7 +45,7 @@ def test_configured_team_review_secret_works_in_production(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("ENVIRONMENT", "production")
-    monkeypatch.setenv("TEAM_REVIEW_SECRET", "test-review-secret")
+    monkeypatch.setenv("TEAM_REVIEW_SECRET", "test-review-secret-with-32-bytes")
     team_member_id = uuid4()
 
     token = tokens.mint(team_member_id=team_member_id, admin_email="Admin@Example.com")
