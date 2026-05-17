@@ -11,7 +11,12 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.money import Money
 from app.modules.media.schemas import MediaPublic
-from app.modules.properties.models import CancellationPolicy, PropertyStatus
+from app.modules.properties.models import (
+    CancellationPolicy,
+    KitchenType,
+    ParkingAvailability,
+    PropertyStatus,
+)
 
 # ISO 3166-1 alpha-2, uppercase. Clients normalize to uppercase before sending.
 CountryCode = Annotated[str, Field(min_length=2, max_length=2, pattern=r"^[A-Z]{2}$")]
@@ -37,6 +42,14 @@ class PropertyCreateIn(BaseModel):
     beds: int = Field(default=0, ge=0, le=64)
     bathrooms: int = Field(default=0, ge=0, le=32)
     amenities: list[str] = Field(default_factory=list, max_length=64)
+    parking_available: ParkingAvailability = ParkingAvailability.NONE
+    elevator: bool = False
+    accessible: bool = False
+    private_bathroom: bool = False
+    kitchen_type: KitchenType = KitchenType.NONE
+    events_allowed: bool = False
+    family_friendly: bool = False
+    child_friendly: bool = False
     house_rules: str | None = Field(default=None, max_length=4000)
     cancellation_policy: CancellationPolicy = CancellationPolicy.MODERATE
     base_price: Money
@@ -57,6 +70,14 @@ class PropertyUpdateIn(BaseModel):
     beds: int | None = Field(default=None, ge=0, le=64)
     bathrooms: int | None = Field(default=None, ge=0, le=32)
     amenities: list[str] | None = None
+    parking_available: ParkingAvailability | None = None
+    elevator: bool | None = None
+    accessible: bool | None = None
+    private_bathroom: bool | None = None
+    kitchen_type: KitchenType | None = None
+    events_allowed: bool | None = None
+    family_friendly: bool | None = None
+    child_friendly: bool | None = None
     house_rules: str | None = None
     cancellation_policy: CancellationPolicy | None = None
     base_price: Money | None = None
@@ -69,6 +90,28 @@ class HostPublic(BaseModel):
     id: UUID
     display_name: str
     avatar_url: str | None
+
+
+class PropertyShowcaseAmenities(BaseModel):
+    """Curated amenity flags for listing cards and quick filters."""
+
+    has_wifi: bool
+    has_ac: bool
+    has_gym: bool
+    smoking_allowed: bool | None
+    pets_allowed: bool | None
+    highlights: dict[str, bool]
+
+
+class PropertyListingMetadata(BaseModel):
+    parking_available: ParkingAvailability
+    elevator: bool
+    accessible: bool
+    private_bathroom: bool
+    kitchen_type: KitchenType
+    events_allowed: bool
+    family_friendly: bool
+    child_friendly: bool
 
 
 class PropertyPublic(BaseModel):
@@ -86,6 +129,8 @@ class PropertyPublic(BaseModel):
     bathrooms: int
     base_price: Money
     amenities: list[str]
+    showcase_amenities: PropertyShowcaseAmenities
+    listing_metadata: PropertyListingMetadata
     cover_photo: MediaPublic | None
     distance_km: float | None = None
 

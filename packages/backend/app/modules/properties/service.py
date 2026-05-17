@@ -22,7 +22,9 @@ from app.modules.properties.schemas import (
     HostPublic,
     PropertyCreateIn,
     PropertyDetail,
+    PropertyListingMetadata,
     PropertyPublic,
+    PropertyShowcaseAmenities,
     PropertyUpdateIn,
 )
 from app.modules.users.models import User
@@ -42,6 +44,74 @@ def _ensure_owner(user: User, property: Property) -> None:
         raise ForbiddenError(code="property.not_owner")
 
 
+def _contains_any(values: set[str], candidates: set[str]) -> bool:
+    return any(value in values for value in candidates)
+
+
+def _allow_state(values: set[str], allowed: set[str], disallowed: set[str]) -> bool | None:
+    if _contains_any(values, allowed):
+        return True
+    if _contains_any(values, disallowed):
+        return False
+    return None
+
+
+def _showcase_amenities(amenities: list[str]) -> PropertyShowcaseAmenities:
+    normalized = {a.strip().lower() for a in amenities if a and a.strip()}
+    has_wifi = _contains_any(normalized, {"wifi", "wi-fi", "wi_fi", "internet"})
+    has_ac = _contains_any(
+        normalized,
+        {"ac", "air_conditioning", "aircon", "airconditioning", "clim", "climatisation"},
+    )
+    has_gym = _contains_any(normalized, {"gym", "fitness", "fitness_center"})
+    smoking_allowed = _allow_state(
+        normalized,
+        {"smoking_allowed", "allows_smoking"},
+        {"no_smoking", "non_smoking", "smoke_free"},
+    )
+    pets_allowed = _allow_state(
+        normalized,
+        {"pets_allowed", "pet_friendly"},
+        {"no_pets", "pets_not_allowed"},
+    )
+    highlights = {
+        "wifi": has_wifi,
+        "ac": has_ac,
+        "gym": has_gym,
+        "pool": _contains_any(normalized, {"pool"}),
+        "kitchen": _contains_any(normalized, {"kitchen"}),
+        "workspace": _contains_any(normalized, {"workspace", "desk"}),
+        "parking": _contains_any(normalized, {"free_parking", "paid_parking", "parking"}),
+        "washer": _contains_any(normalized, {"washer"}),
+        "hot_water": _contains_any(normalized, {"hot_water"}),
+        "tv": _contains_any(normalized, {"tv"}),
+        "balcony": _contains_any(normalized, {"balcony"}),
+        "terrace": _contains_any(normalized, {"terrace"}),
+        "garden": _contains_any(normalized, {"garden"}),
+    }
+    return PropertyShowcaseAmenities(
+        has_wifi=has_wifi,
+        has_ac=has_ac,
+        has_gym=has_gym,
+        smoking_allowed=smoking_allowed,
+        pets_allowed=pets_allowed,
+        highlights=highlights,
+    )
+
+
+def _listing_metadata(property: Property) -> PropertyListingMetadata:
+    return PropertyListingMetadata(
+        parking_available=property.parking_available,
+        elevator=property.elevator,
+        accessible=property.accessible,
+        private_bathroom=property.private_bathroom,
+        kitchen_type=property.kitchen_type,
+        events_allowed=property.events_allowed,
+        family_friendly=property.family_friendly,
+        child_friendly=property.child_friendly,
+    )
+
+
 async def create_draft(session: AsyncSession, host: User, payload: PropertyCreateIn) -> Property:
     if not host.is_host:
         host.is_host = True  # auto-promote on first listing
@@ -58,6 +128,14 @@ async def create_draft(session: AsyncSession, host: User, payload: PropertyCreat
         beds=payload.beds,
         bathrooms=payload.bathrooms,
         amenities=payload.amenities,
+        parking_available=payload.parking_available,
+        elevator=payload.elevator,
+        accessible=payload.accessible,
+        private_bathroom=payload.private_bathroom,
+        kitchen_type=payload.kitchen_type,
+        events_allowed=payload.events_allowed,
+        family_friendly=payload.family_friendly,
+        child_friendly=payload.child_friendly,
         house_rules=payload.house_rules,
         cancellation_policy=payload.cancellation_policy,
         base_price_amount=payload.base_price.amount,
@@ -173,6 +251,8 @@ async def to_detail(property: Property, host: User) -> PropertyDetail:
             amount=property.base_price_amount, currency=Currency(property.base_price_currency)
         ),
         amenities=list(property.amenities),
+        showcase_amenities=_showcase_amenities(list(property.amenities)),
+        listing_metadata=_listing_metadata(property),
         cover_photo=photos[0] if photos else None,
         description=property.description,
         house_rules=property.house_rules,
@@ -203,6 +283,8 @@ async def to_public(property: Property, *, distance_km: float | None = None) -> 
             amount=property.base_price_amount, currency=Currency(property.base_price_currency)
         ),
         amenities=list(property.amenities),
+        showcase_amenities=_showcase_amenities(list(property.amenities)),
+        listing_metadata=_listing_metadata(property),
         cover_photo=await media_to_public(cover.media) if cover else None,
         distance_km=distance_km,
     )
