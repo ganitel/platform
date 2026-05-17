@@ -56,7 +56,8 @@ def _allow_state(values: set[str], allowed: set[str], disallowed: set[str]) -> b
     return None
 
 
-def _showcase_amenities(amenities: list[str]) -> PropertyShowcaseAmenities:
+def _showcase_amenities(property: Property) -> PropertyShowcaseAmenities:
+    amenities = list(property.amenities)
     normalized = {a.strip().lower() for a in amenities if a and a.strip()}
     has_wifi = _contains_any(normalized, {"wifi", "wi-fi", "wi_fi", "internet"})
     has_ac = _contains_any(
@@ -79,9 +80,10 @@ def _showcase_amenities(amenities: list[str]) -> PropertyShowcaseAmenities:
         "ac": has_ac,
         "gym": has_gym,
         "pool": _contains_any(normalized, {"pool"}),
-        "kitchen": _contains_any(normalized, {"kitchen"}),
+        "kitchen": property.kitchen_type != "none" or _contains_any(normalized, {"kitchen"}),
         "workspace": _contains_any(normalized, {"workspace", "desk"}),
-        "parking": _contains_any(normalized, {"free_parking", "paid_parking", "parking"}),
+        "parking": property.parking_available != "none"
+        or _contains_any(normalized, {"free_parking", "paid_parking", "parking"}),
         "washer": _contains_any(normalized, {"washer"}),
         "hot_water": _contains_any(normalized, {"hot_water"}),
         "tv": _contains_any(normalized, {"tv"}),
@@ -251,7 +253,7 @@ async def to_detail(property: Property, host: User) -> PropertyDetail:
             amount=property.base_price_amount, currency=Currency(property.base_price_currency)
         ),
         amenities=list(property.amenities),
-        showcase_amenities=_showcase_amenities(list(property.amenities)),
+        showcase_amenities=_showcase_amenities(property),
         listing_metadata=_listing_metadata(property),
         cover_photo=photos[0] if photos else None,
         description=property.description,
@@ -283,7 +285,7 @@ async def to_public(property: Property, *, distance_km: float | None = None) -> 
             amount=property.base_price_amount, currency=Currency(property.base_price_currency)
         ),
         amenities=list(property.amenities),
-        showcase_amenities=_showcase_amenities(list(property.amenities)),
+        showcase_amenities=_showcase_amenities(property),
         listing_metadata=_listing_metadata(property),
         cover_photo=await media_to_public(cover.media) if cover else None,
         distance_km=distance_km,
