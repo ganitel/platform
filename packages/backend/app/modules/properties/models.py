@@ -11,6 +11,7 @@ from uuid import UUID, uuid4
 
 from geoalchemy2 import Geography
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Computed,
     DateTime,
@@ -43,6 +44,18 @@ class CancellationPolicy(StrEnum):
     STRICT = "strict"
 
 
+class ParkingAvailability(StrEnum):
+    NONE = "none"
+    FREE = "free"
+    PAID = "paid"
+
+
+class KitchenType(StrEnum):
+    NONE = "none"
+    KITCHENETTE = "kitchenette"
+    FULL = "full"
+
+
 class Property(Base):
     __tablename__ = "properties"
     __table_args__ = (
@@ -73,6 +86,28 @@ class Property(Base):
     amenities: Mapped[list[str]] = mapped_column(
         ARRAY(String(40)), nullable=False, server_default="{}"
     )
+    parking_available: Mapped[ParkingAvailability] = mapped_column(
+        Enum(
+            ParkingAvailability,
+            name="parking_availability",
+            values_callable=lambda enum: [e.value for e in enum],
+        ),
+        nullable=False,
+        default=ParkingAvailability.NONE,
+    )
+    elevator: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    accessible: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    private_bathroom: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    kitchen_type: Mapped[KitchenType] = mapped_column(
+        Enum(
+            KitchenType, name="kitchen_type", values_callable=lambda enum: [e.value for e in enum]
+        ),
+        nullable=False,
+        default=KitchenType.NONE,
+    )
+    events_allowed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    family_friendly: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    child_friendly: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     house_rules: Mapped[str | None] = mapped_column(Text())
     cancellation_policy: Mapped[CancellationPolicy] = mapped_column(
