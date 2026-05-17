@@ -48,14 +48,6 @@ def _contains_any(values: set[str], candidates: set[str]) -> bool:
     return any(value in values for value in candidates)
 
 
-def _allow_state(values: set[str], allowed: set[str], disallowed: set[str]) -> bool | None:
-    if _contains_any(values, allowed):
-        return True
-    if _contains_any(values, disallowed):
-        return False
-    return None
-
-
 def _showcase_amenities(property: Property) -> PropertyShowcaseAmenities:
     amenities = list(property.amenities)
     normalized = {a.strip().lower() for a in amenities if a and a.strip()}
@@ -65,16 +57,6 @@ def _showcase_amenities(property: Property) -> PropertyShowcaseAmenities:
         {"ac", "air_conditioning", "aircon", "airconditioning", "clim", "climatisation"},
     )
     has_gym = _contains_any(normalized, {"gym", "fitness", "fitness_center"})
-    smoking_allowed = _allow_state(
-        normalized,
-        {"smoking_allowed", "allows_smoking"},
-        {"no_smoking", "non_smoking", "smoke_free"},
-    )
-    pets_allowed = _allow_state(
-        normalized,
-        {"pets_allowed", "pet_friendly"},
-        {"no_pets", "pets_not_allowed"},
-    )
     highlights = {
         "wifi": has_wifi,
         "ac": has_ac,
@@ -95,8 +77,8 @@ def _showcase_amenities(property: Property) -> PropertyShowcaseAmenities:
         has_wifi=has_wifi,
         has_ac=has_ac,
         has_gym=has_gym,
-        smoking_allowed=smoking_allowed,
-        pets_allowed=pets_allowed,
+        smoking_allowed=property.smoking_allowed,
+        pets_allowed=property.pets_allowed,
         highlights=highlights,
     )
 
@@ -111,6 +93,10 @@ def _listing_metadata(property: Property) -> PropertyListingMetadata:
         events_allowed=property.events_allowed,
         family_friendly=property.family_friendly,
         child_friendly=property.child_friendly,
+        pets_allowed=property.pets_allowed,
+        smoking_allowed=property.smoking_allowed,
+        check_in_time=property.check_in_time,
+        check_out_time=property.check_out_time,
     )
 
 
@@ -138,6 +124,10 @@ async def create_draft(session: AsyncSession, host: User, payload: PropertyCreat
         events_allowed=payload.events_allowed,
         family_friendly=payload.family_friendly,
         child_friendly=payload.child_friendly,
+        pets_allowed=payload.pets_allowed,
+        smoking_allowed=payload.smoking_allowed,
+        check_in_time=payload.check_in_time,
+        check_out_time=payload.check_out_time,
         house_rules=payload.house_rules,
         cancellation_policy=payload.cancellation_policy,
         base_price_amount=payload.base_price.amount,
