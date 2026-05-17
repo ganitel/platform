@@ -13,6 +13,7 @@ from app.modules.media.schemas import MediaUploadIn
 from app.modules.properties.schemas import (
     GeoPoint,
     PropertyCreateIn,
+    PropertyUpdateIn,
 )
 from app.modules.users.schemas import UpdateMe
 from app.modules.waitlist.schemas import WaitlistEntryIn
@@ -136,6 +137,35 @@ def test_property_rejects_unknown_content_language() -> None:
 def test_property_amenities_cap() -> None:
     with pytest.raises(ValidationError):
         PropertyCreateIn.model_validate(_property(amenities=[f"a{i}" for i in range(65)]))
+
+
+def test_property_update_accepts_empty_patch() -> None:
+    # Omitting every field is a valid partial update.
+    PropertyUpdateIn.model_validate({})
+
+
+def test_property_update_accepts_bool_partial_patch() -> None:
+    patch = PropertyUpdateIn.model_validate({"pets_allowed": True})
+    assert patch.pets_allowed is True
+    assert patch.smoking_allowed is None  # not in payload, still default
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "elevator",
+        "accessible",
+        "private_bathroom",
+        "events_allowed",
+        "family_friendly",
+        "child_friendly",
+        "pets_allowed",
+        "smoking_allowed",
+    ],
+)
+def test_property_update_rejects_explicit_null_bool(field: str) -> None:
+    with pytest.raises(ValidationError, match="must not be null"):
+        PropertyUpdateIn.model_validate({field: None})
 
 
 # -------------------- users --------------------

@@ -7,7 +7,7 @@ from datetime import datetime, time
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.core.money import Money
 from app.modules.media.schemas import MediaPublic
@@ -90,6 +90,27 @@ class PropertyUpdateIn(BaseModel):
     cancellation_policy: CancellationPolicy | None = None
     base_price: Money | None = None
     content_language: ContentLanguage | None = None
+
+    @field_validator(
+        "elevator",
+        "accessible",
+        "private_bathroom",
+        "events_allowed",
+        "family_friendly",
+        "child_friendly",
+        "pets_allowed",
+        "smoking_allowed",
+        mode="after",
+    )
+    @classmethod
+    def _reject_explicit_null_bool(cls, v: bool | None) -> bool | None:
+        # Pydantic v2: validate_default=False, so the default `None` never hits
+        # this validator. Only an explicit `null` in the payload does — which
+        # would translate to setting a NOT NULL column to NULL → 500. Omit the
+        # field instead for partial updates.
+        if v is None:
+            raise ValueError("must not be null; omit the field for a partial update")
+        return v
 
 
 class HostPublic(BaseModel):
