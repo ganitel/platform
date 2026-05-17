@@ -3,7 +3,7 @@ results, and full detail responses. Money is exposed via the shared
 `Money` value object so the wire shape is `{amount, currency}` even
 though storage splits it into two columns."""
 
-from datetime import datetime
+from datetime import datetime, time
 from typing import Annotated, Literal
 from uuid import UUID
 
@@ -50,6 +50,10 @@ class PropertyCreateIn(BaseModel):
     events_allowed: bool = False
     family_friendly: bool = False
     child_friendly: bool = False
+    pets_allowed: bool = False
+    smoking_allowed: bool = False
+    check_in_time: time | None = None
+    check_out_time: time | None = None
     house_rules: str | None = Field(default=None, max_length=4000)
     cancellation_policy: CancellationPolicy = CancellationPolicy.MODERATE
     base_price: Money
@@ -71,13 +75,17 @@ class PropertyUpdateIn(BaseModel):
     bathrooms: int | None = Field(default=None, ge=0, le=32)
     amenities: list[str] | None = None
     parking_available: ParkingAvailability | None = None
-    elevator: bool | None = None
-    accessible: bool | None = None
-    private_bathroom: bool | None = None
+    elevator: bool = False
+    accessible: bool = False
+    private_bathroom: bool = False
     kitchen_type: KitchenType | None = None
-    events_allowed: bool | None = None
-    family_friendly: bool | None = None
-    child_friendly: bool | None = None
+    events_allowed: bool = False
+    family_friendly: bool = False
+    child_friendly: bool = False
+    pets_allowed: bool = False
+    smoking_allowed: bool = False
+    check_in_time: time | None = None
+    check_out_time: time | None = None
     house_rules: str | None = None
     cancellation_policy: CancellationPolicy | None = None
     base_price: Money | None = None
@@ -98,8 +106,8 @@ class PropertyShowcaseAmenities(BaseModel):
     has_wifi: bool
     has_ac: bool
     has_gym: bool
-    smoking_allowed: bool | None
-    pets_allowed: bool | None
+    smoking_allowed: bool
+    pets_allowed: bool
     highlights: dict[str, bool]
 
 
@@ -112,6 +120,10 @@ class PropertyListingMetadata(BaseModel):
     events_allowed: bool
     family_friendly: bool
     child_friendly: bool
+    pets_allowed: bool
+    smoking_allowed: bool
+    check_in_time: time | None
+    check_out_time: time | None
 
 
 class PropertyPublic(BaseModel):

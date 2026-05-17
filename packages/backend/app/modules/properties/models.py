@@ -3,7 +3,7 @@ join table (`PropertyPhoto`), and enums (`PropertyStatus`,
 `CancellationPolicy`). Money is stored split into amount + currency
 columns; the API recomposes via `Money`."""
 
-from datetime import datetime
+from datetime import datetime, time
 from decimal import Decimal
 from enum import StrEnum
 from typing import Any
@@ -21,6 +21,7 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
+    Time,
     Uuid,
     func,
 )
@@ -108,7 +109,11 @@ class Property(Base):
     events_allowed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     family_friendly: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     child_friendly: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    pets_allowed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    smoking_allowed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
+    check_in_time: Mapped[time | None] = mapped_column(Time())
+    check_out_time: Mapped[time | None] = mapped_column(Time())
     house_rules: Mapped[str | None] = mapped_column(Text())
     cancellation_policy: Mapped[CancellationPolicy] = mapped_column(
         Enum(

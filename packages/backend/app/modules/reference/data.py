@@ -115,6 +115,7 @@ PROPERTY_TYPES: list[dict[str, str]] = [
     {"code": "room", "label_en": "Private room", "label_fr": "Chambre privée"},
     {"code": "studio", "label_en": "Studio", "label_fr": "Studio"},
     {"code": "guesthouse", "label_en": "Guesthouse", "label_fr": "Maison d'hôtes"},
+    {"code": "hotel", "label_en": "Hotel", "label_fr": "Hôtel"},
 ]
 
 CANCELLATION_POLICIES: list[dict[str, str]] = [
