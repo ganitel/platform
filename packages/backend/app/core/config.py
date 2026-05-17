@@ -10,6 +10,8 @@ from typing import Annotated, Literal, cast
 from pydantic import BaseModel, Field, PostgresDsn, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
+DEFAULT_TEAM_REVIEW_SECRET = "dev-only-change-me"
+
 
 class PaymentSettings(BaseModel):
     """Tranzak + booking payment flow (flat env: TRANZAK_*, PAYMENT_*, BOOKING_*)."""
@@ -116,7 +118,7 @@ class Settings(PaymentSettings, ObjectStorageSettings, BaseSettings):
 
     # Secret used to sign short-lived review tokens for admin approval links.
     # Falls back to an unsafe dev default if unset; production must override.
-    TEAM_REVIEW_SECRET: str = "dev-only-change-me"
+    TEAM_REVIEW_SECRET: str = DEFAULT_TEAM_REVIEW_SECRET
     TEAM_REVIEW_TOKEN_TTL_SECONDS: int = 60 * 60 * 24 * 7
 
     @field_validator("CORS_ORIGINS", mode="before")

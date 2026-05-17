@@ -47,6 +47,11 @@ class ValidationError(AppError):
     code = "validation_failed"
 
 
+class ConfigurationError(AppError):
+    status_code = 500
+    code = "configuration_error"
+
+
 class ForbiddenError(AppError):
     status_code = 403
     code = "forbidden"

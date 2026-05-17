@@ -10,11 +10,21 @@ from uuid import UUID
 
 import jwt
 
-from app.core.config import get_settings
-from app.core.errors import AuthError
+from app.core.config import DEFAULT_TEAM_REVIEW_SECRET, get_settings
+from app.core.errors import AuthError, ConfigurationError
 
 ALGORITHM = "HS256"
 AUDIENCE = "team-review"
+
+
+def _signing_secret() -> str:
+    s = get_settings()
+    if s.ENVIRONMENT == "production" and (
+        not s.TEAM_REVIEW_SECRET.strip()
+        or s.TEAM_REVIEW_SECRET == DEFAULT_TEAM_REVIEW_SECRET
+    ):
+        raise ConfigurationError(code="team_review_secret.unconfigured")
+    return s.TEAM_REVIEW_SECRET
 
 
 def mint(*, team_member_id: UUID, admin_email: str) -> str:
@@ -31,17 +41,16 @@ def mint(*, team_member_id: UUID, admin_email: str) -> str:
         "iat": now,
         "exp": now + s.TEAM_REVIEW_TOKEN_TTL_SECONDS,
     }
-    return jwt.encode(payload, s.TEAM_REVIEW_SECRET, algorithm=ALGORITHM)
+    return jwt.encode(payload, _signing_secret(), algorithm=ALGORITHM)
 
 
 def verify(token: str, *, team_member_id: UUID) -> str:
     """Returns the admin email encoded in the token. Raises AuthError on
     expiry / signature / audience / subject mismatch."""
-    s = get_settings()
     try:
         payload = jwt.decode(
             token,
-            s.TEAM_REVIEW_SECRET,
+            _signing_secret(),
             algorithms=[ALGORITHM],
             audience=AUDIENCE,
         )
