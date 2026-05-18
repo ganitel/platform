@@ -23,7 +23,9 @@ export interface HostPublic {
 }
 
 export type CancellationPolicy = "flexible" | "moderate" | "strict";
-export type PropertyStatus = "draft" | "published" | "archived";
+export type PropertyStatus = "draft" | "published" | "unlisted" | "removed";
+export type ParkingAvailability = "none" | "free" | "paid";
+export type KitchenType = "none" | "kitchenette" | "full";
 
 export interface PropertyPublic {
   id: string;
@@ -59,6 +61,54 @@ export interface SearchOut {
   total: number;
   limit: number;
   offset: number;
+}
+
+export interface PropertyCreateInput {
+  title: string;
+  description?: string;
+  property_type: string;
+  city: string;
+  country_code: string;
+  location: GeoPoint;
+  capacity: number;
+  bedrooms?: number;
+  beds?: number;
+  bathrooms?: number;
+  amenities?: string[];
+  parking_available?: ParkingAvailability;
+  elevator?: boolean;
+  accessible?: boolean;
+  private_bathroom?: boolean;
+  kitchen_type?: KitchenType;
+  events_allowed?: boolean;
+  family_friendly?: boolean;
+  child_friendly?: boolean;
+  pets_allowed?: boolean;
+  smoking_allowed?: boolean;
+  check_in_time?: string | null;
+  check_out_time?: string | null;
+  house_rules?: string | null;
+  cancellation_policy?: CancellationPolicy;
+  base_price: Money;
+  content_language?: "fr" | "en";
+}
+
+export interface PropertyAdminListItem {
+  id: string;
+  title: string;
+  property_type: string;
+  city: string;
+  country_code: string;
+  status: PropertyStatus;
+  base_price: Money;
+  cover_photo: MediaPublic | null;
+  created_at: string;
+  published_at: string | null;
+}
+
+export interface AdminListOut {
+  items: PropertyAdminListItem[];
+  total: number;
 }
 
 export interface SearchFilters {

@@ -171,3 +171,21 @@ class SearchOut(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+class PropertyAdminListItem(BaseModel):
+    id: UUID
+    title: str
+    property_type: str
+    city: str
+    country_code: CountryCode
+    status: PropertyStatus
+    base_price: Money
+    cover_photo: MediaPublic | None
+    created_at: datetime
+    published_at: datetime | None
+
+
+class AdminListOut(BaseModel):
+    items: list[PropertyAdminListItem]
+    total: int

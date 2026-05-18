@@ -11,10 +11,11 @@ from fastapi import APIRouter, Query, Response, status
 
 from app.core.cache import PUBLIC_CDN_CACHE
 from app.core.deps import CurrentUser, DbSession
-from app.core.errors import NotFoundError
+from app.core.errors import ForbiddenError, NotFoundError
 from app.modules.properties import search as search_mod
 from app.modules.properties import service
 from app.modules.properties.schemas import (
+    AdminListOut,
     AttachPhotoIn,
     PropertyCreateIn,
     PropertyDetail,
@@ -77,6 +78,15 @@ async def search_properties(
     return SearchOut(items=items, total=total, limit=limit, offset=offset)
 
 
+@router.get("/admin", response_model=AdminListOut)
+async def admin_list_properties(user: CurrentUser, session: DbSession) -> AdminListOut:
+    if not user.is_admin:
+        raise ForbiddenError(code="admin.required")
+    rows = await service.list_all_for_admin(session)
+    items = [await service.to_admin_list_item(p) for p in rows]
+    return AdminListOut(items=items, total=len(items))
+
+
 @router.get("/{property_id}", response_model=PropertyDetail)
 async def get_property(property_id: UUID, response: Response, session: DbSession) -> PropertyDetail:
     prop = await service.get(session, property_id)
@@ -113,6 +123,16 @@ async def unpublish_property(
 ) -> PropertyDetail:
     prop = await service.get(session, property_id)
     await service.unpublish(session, prop, user)
+    fresh = await service.get(session, property_id)
+    return await service.to_detail(fresh, user)
+
+
+@router.post("/{property_id}/remove", response_model=PropertyDetail)
+async def remove_property(
+    property_id: UUID, user: CurrentUser, session: DbSession
+) -> PropertyDetail:
+    prop = await service.get(session, property_id)
+    await service.remove(session, prop, user)
     fresh = await service.get(session, property_id)
     return await service.to_detail(fresh, user)
 
