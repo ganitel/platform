@@ -117,3 +117,8 @@ class AttachPhotoIn(BaseModel):
 
     media_id: UUID
     position: int = Field(default=0, ge=0, le=64)
+
+
+class PhotoAttachOut(BaseModel):
+    id: UUID
+    position: int

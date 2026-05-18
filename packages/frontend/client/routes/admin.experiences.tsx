@@ -80,7 +80,10 @@ function AdminExperiencesPage() {
         <p className="text-sm text-ganitel-text-body">Chargement…</p>
       ) : query.isError ? (
         <p className="text-sm text-red-600">
-          Erreur de chargement: {String(query.error)}
+          Erreur de chargement:{" "}
+          {query.error instanceof Error
+            ? query.error.message
+            : String(query.error)}
         </p>
       ) : query.data.items.length === 0 ? (
         <p className="text-sm text-ganitel-text-body">
@@ -196,7 +199,7 @@ function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
         </div>
         {lastError && (
           <p className="mt-1 text-right text-xs text-red-600">
-            {String(lastError)}
+            {lastError instanceof Error ? lastError.message : String(lastError)}
           </p>
         )}
       </td>

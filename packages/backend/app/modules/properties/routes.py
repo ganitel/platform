@@ -3,6 +3,7 @@ host-only create / update / publish / photo management. All search
 parameters are query-string based; see `search.py` for the filter and
 sort logic."""
 
+import asyncio
 from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
@@ -17,12 +18,24 @@ from app.modules.properties import service
 from app.modules.properties.schemas import (
     AdminListOut,
     AttachPhotoIn,
+    PhotoAttachOut,
     PropertyCreateIn,
     PropertyDetail,
     PropertyUpdateIn,
     SearchOut,
 )
 from app.modules.users.models import User
+
+
+async def _detail_with_host(session: DbSession, prop, user: User) -> PropertyDetail:
+    """Build a PropertyDetail using the property's actual host, not the
+    acting user. Matters when an admin acts on a property owned by someone
+    else — `to_detail(prop, user)` would mislabel the admin as the host."""
+    host = await session.get(User, prop.host_id)
+    if host is None:
+        raise NotFoundError(code="host.not_found")
+    return await service.to_detail(prop, host)
+
 
 router = APIRouter(prefix="/properties", tags=["properties"])
 
@@ -83,8 +96,8 @@ async def admin_list_properties(user: CurrentUser, session: DbSession) -> AdminL
     if not user.is_admin:
         raise ForbiddenError(code="admin.required")
     rows = await service.list_all_for_admin(session)
-    items = [await service.to_admin_list_item(p) for p in rows]
-    return AdminListOut(items=items, total=len(items))
+    items = await asyncio.gather(*(service.to_admin_list_item(p) for p in rows))
+    return AdminListOut(items=list(items), total=len(items))
 
 
 @router.get("/{property_id}", response_model=PropertyDetail)
@@ -103,8 +116,7 @@ async def update_property(
 ) -> PropertyDetail:
     prop = await service.get(session, property_id)
     await service.update(session, prop, user, body)
-    fresh = await service.get(session, property_id)
-    return await service.to_detail(fresh, user)
+    return await _detail_with_host(session, prop, user)
 
 
 @router.post("/{property_id}/publish", response_model=PropertyDetail)
@@ -113,8 +125,7 @@ async def publish_property(
 ) -> PropertyDetail:
     prop = await service.get(session, property_id)
     await service.publish(session, prop, user)
-    fresh = await service.get(session, property_id)
-    return await service.to_detail(fresh, user)
+    return await _detail_with_host(session, prop, user)
 
 
 @router.post("/{property_id}/unpublish", response_model=PropertyDetail)
@@ -123,8 +134,7 @@ async def unpublish_property(
 ) -> PropertyDetail:
     prop = await service.get(session, property_id)
     await service.unpublish(session, prop, user)
-    fresh = await service.get(session, property_id)
-    return await service.to_detail(fresh, user)
+    return await _detail_with_host(session, prop, user)
 
 
 @router.post("/{property_id}/remove", response_model=PropertyDetail)
@@ -133,19 +143,22 @@ async def remove_property(
 ) -> PropertyDetail:
     prop = await service.get(session, property_id)
     await service.remove(session, prop, user)
-    fresh = await service.get(session, property_id)
-    return await service.to_detail(fresh, user)
+    return await _detail_with_host(session, prop, user)
 
 
-@router.post("/{property_id}/photos", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{property_id}/photos",
+    response_model=PhotoAttachOut,
+    status_code=status.HTTP_201_CREATED,
+)
 async def attach_photo(
     property_id: UUID, body: AttachPhotoIn, user: CurrentUser, session: DbSession
-) -> dict:
+) -> PhotoAttachOut:
     prop = await service.get(session, property_id)
     photo = await service.attach_photo(
         session, prop, user, media_id=body.media_id, position=body.position
     )
-    return {"id": str(photo.id), "position": photo.position}
+    return PhotoAttachOut(id=photo.id, position=photo.position)
 
 
 @router.delete("/{property_id}/photos/{photo_id}", status_code=status.HTTP_204_NO_CONTENT)

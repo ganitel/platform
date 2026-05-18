@@ -166,6 +166,11 @@ class AttachPhotoIn(BaseModel):
     position: int = Field(default=0, ge=0, le=64)
 
 
+class PhotoAttachOut(BaseModel):
+    id: UUID
+    position: int
+
+
 class SearchOut(BaseModel):
     items: list[PropertyPublic]
     total: int

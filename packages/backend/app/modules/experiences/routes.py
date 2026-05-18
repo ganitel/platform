@@ -2,6 +2,7 @@
 host/admin create / update / publish / unpublish / remove / photo
 management, mirroring the properties module."""
 
+import asyncio
 from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
@@ -19,9 +20,21 @@ from app.modules.experiences.schemas import (
     ExperienceCreateIn,
     ExperienceDetail,
     ExperienceUpdateIn,
+    PhotoAttachOut,
     SearchOut,
 )
 from app.modules.users.models import User
+
+
+async def _detail_with_host(session: DbSession, exp, user: User) -> ExperienceDetail:
+    """Build an ExperienceDetail using the experience's actual host, not the
+    acting user. Matters when an admin acts on an experience owned by someone
+    else — `to_detail(exp, user)` would mislabel the admin as the host."""
+    host = await session.get(User, exp.host_id)
+    if host is None:
+        raise NotFoundError(code="host.not_found")
+    return await service.to_detail(exp, host)
+
 
 router = APIRouter(prefix="/experiences", tags=["experiences"])
 
@@ -80,8 +93,8 @@ async def admin_list_experiences(user: CurrentUser, session: DbSession) -> Admin
     if not user.is_admin:
         raise ForbiddenError(code="admin.required")
     rows = await service.list_all_for_admin(session)
-    items = [await service.to_admin_list_item(e) for e in rows]
-    return AdminListOut(items=items, total=len(items))
+    items = await asyncio.gather(*(service.to_admin_list_item(e) for e in rows))
+    return AdminListOut(items=list(items), total=len(items))
 
 
 @router.get("/{experience_id}", response_model=ExperienceDetail)
@@ -105,8 +118,7 @@ async def update_experience(
 ) -> ExperienceDetail:
     exp = await service.get(session, experience_id)
     await service.update(session, exp, user, body)
-    fresh = await service.get(session, experience_id)
-    return await service.to_detail(fresh, user)
+    return await _detail_with_host(session, exp, user)
 
 
 @router.post("/{experience_id}/publish", response_model=ExperienceDetail)
@@ -115,8 +127,7 @@ async def publish_experience(
 ) -> ExperienceDetail:
     exp = await service.get(session, experience_id)
     await service.publish(session, exp, user)
-    fresh = await service.get(session, experience_id)
-    return await service.to_detail(fresh, user)
+    return await _detail_with_host(session, exp, user)
 
 
 @router.post("/{experience_id}/unpublish", response_model=ExperienceDetail)
@@ -125,8 +136,7 @@ async def unpublish_experience(
 ) -> ExperienceDetail:
     exp = await service.get(session, experience_id)
     await service.unpublish(session, exp, user)
-    fresh = await service.get(session, experience_id)
-    return await service.to_detail(fresh, user)
+    return await _detail_with_host(session, exp, user)
 
 
 @router.post("/{experience_id}/remove", response_model=ExperienceDetail)
@@ -135,22 +145,25 @@ async def remove_experience(
 ) -> ExperienceDetail:
     exp = await service.get(session, experience_id)
     await service.remove(session, exp, user)
-    fresh = await service.get(session, experience_id)
-    return await service.to_detail(fresh, user)
+    return await _detail_with_host(session, exp, user)
 
 
-@router.post("/{experience_id}/photos", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{experience_id}/photos",
+    response_model=PhotoAttachOut,
+    status_code=status.HTTP_201_CREATED,
+)
 async def attach_photo(
     experience_id: UUID,
     body: AttachPhotoIn,
     user: CurrentUser,
     session: DbSession,
-) -> dict:
+) -> PhotoAttachOut:
     exp = await service.get(session, experience_id)
     photo = await service.attach_photo(
         session, exp, user, media_id=body.media_id, position=body.position
     )
-    return {"id": str(photo.id), "position": photo.position}
+    return PhotoAttachOut(id=photo.id, position=photo.position)
 
 
 @router.delete("/{experience_id}/photos/{photo_id}", status_code=status.HTTP_204_NO_CONTENT)
