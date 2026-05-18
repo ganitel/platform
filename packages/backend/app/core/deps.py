@@ -4,6 +4,7 @@ Exposes typed aliases (`DbSession`, `CurrentUser`, `OptionalUser`)
 so route signatures stay short and consistent. Authentication is
 sourced from a better-auth JWT in the `Authorization` header."""
 
+import logging
 from typing import Annotated
 
 from fastapi import Depends, Header
@@ -15,18 +16,23 @@ from app.core.errors import AppError, AuthError, ForbiddenError
 from app.modules.users.models import User
 from app.modules.users.service import get_or_create_from_jwt
 
+log = logging.getLogger(__name__)
+
 DbSession = Annotated[AsyncSession, Depends(get_session)]
 
 
 async def _resolve(authorization: str | None, session: AsyncSession) -> User | None:
     if not authorization:
+        log.warning("auth.reject reason=missing_authorization_header")
         return None
     scheme, _, token = authorization.partition(" ")
     if scheme.lower() != "bearer" or not token:
+        log.warning("auth.reject reason=malformed_authorization_header")
         return None
     try:
         claims = verify_jwt(token)
-    except AppError:
+    except AppError as e:
+        log.warning("auth.reject reason=jwt_invalid code=%s", e.code)
         return None
     return await get_or_create_from_jwt(session, claims)
 

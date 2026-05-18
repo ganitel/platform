@@ -47,6 +47,12 @@ def verify_jwt(token: str) -> AuthClaims:
             issuer=settings.JWT_ISSUER,
             options={"verify_aud": False},
         )
+    except jwt.ExpiredSignatureError as e:
+        raise AuthError(code="token.expired") from e
+    except jwt.InvalidIssuerError as e:
+        raise AuthError(code="token.invalid_issuer") from e
+    except jwt.InvalidSignatureError as e:
+        raise AuthError(code="token.invalid_signature") from e
     except jwt.InvalidTokenError as e:
         raise AuthError(code="token.invalid") from e
     sub = claims.get("sub")
