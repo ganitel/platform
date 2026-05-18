@@ -7,7 +7,7 @@ from app.modules.waitlist.schemas import WaitlistEntryIn
 
 
 async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> tuple[WaitlistEntry, bool]:
-    """Insert a new waitlist entry, silently ignoring exact duplicates
+    """Insert a new waitlist entry, merging exact duplicates
     (same email + same role + same property/experience pair).
 
     Returns (entry, confirmation_sent). The caller surfaces
@@ -16,6 +16,9 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> tuple[Wa
     Duplicates skip the resend — visitor already got an email last time."""
     existing = await _find_existing(session, body)
     if existing:
+        if _merge_duplicate(existing, body):
+            await session.commit()
+            await session.refresh(existing)
         return existing, False
 
     entry = WaitlistEntry(
@@ -40,6 +43,28 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> tuple[Wa
 
     confirmation_sent = await emails.send_confirmation(entry)
     return entry, confirmation_sent
+
+
+def _merge_duplicate(entry: WaitlistEntry, body: WaitlistEntryIn) -> bool:
+    """Apply newly submitted lead details without clearing omitted fields."""
+    changed = False
+    for field in (
+        "name",
+        "phone",
+        "interest",
+        "headcount",
+        "budget_range",
+        "budget_currency",
+        "host_city",
+        "host_inventory",
+        "host_status",
+        "notes",
+    ):
+        value = getattr(body, field)
+        if value is not None and getattr(entry, field) != value:
+            setattr(entry, field, value)
+            changed = True
+    return changed
 
 
 async def _find_existing(session: AsyncSession, body: WaitlistEntryIn) -> WaitlistEntry | None:
