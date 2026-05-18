@@ -123,3 +123,14 @@ CANCELLATION_POLICIES: list[dict[str, str]] = [
     {"code": "moderate", "label_en": "Moderate", "label_fr": "Modérée"},
     {"code": "strict", "label_en": "Strict", "label_fr": "Stricte"},
 ]
+
+EXPERIENCE_TYPES: list[dict[str, str]] = [
+    {"code": "tour", "label_en": "Guided tour", "label_fr": "Visite guidée"},
+    {"code": "food_tasting", "label_en": "Food & drink", "label_fr": "Gastronomie"},
+    {"code": "workshop", "label_en": "Workshop", "label_fr": "Atelier"},
+    {"code": "boat", "label_en": "Boat trip", "label_fr": "Sortie en bateau"},
+    {"code": "adventure", "label_en": "Adventure", "label_fr": "Aventure"},
+    {"code": "wellness", "label_en": "Wellness", "label_fr": "Bien-être"},
+    {"code": "music", "label_en": "Music & nightlife", "label_fr": "Musique & soirées"},
+    {"code": "nature", "label_en": "Nature & wildlife", "label_fr": "Nature & faune"},
+]

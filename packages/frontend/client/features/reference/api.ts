@@ -6,6 +6,12 @@ export interface PropertyTypeRef {
   label_fr: string;
 }
 
+export interface ExperienceTypeRef {
+  code: string;
+  label_en: string;
+  label_fr: string;
+}
+
 export interface AmenityRef {
   code: string;
   label_en: string;
@@ -21,6 +27,13 @@ export interface CancellationPolicyRef {
 
 export async function listPropertyTypes(): Promise<PropertyTypeRef[]> {
   const r = await apiClient.get<PropertyTypeRef[]>("/reference/property-types");
+  return r.data;
+}
+
+export async function listExperienceTypes(): Promise<ExperienceTypeRef[]> {
+  const r = await apiClient.get<ExperienceTypeRef[]>(
+    "/reference/experience-types",
+  );
   return r.data;
 }
 

@@ -2,51 +2,51 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router";
 
 import {
-  listAdminProperties,
-  publishProperty,
-  removeProperty,
-  unpublishProperty,
-} from "@/features/properties/api";
+  listAdminExperiences,
+  publishExperience,
+  removeExperience,
+  unpublishExperience,
+} from "@/features/experiences/api";
 import type {
-  PropertyAdminListItem,
-  PropertyStatus,
-} from "@/features/properties/types";
+  ExperienceAdminListItem,
+  ExperienceStatus,
+} from "@/features/experiences/types";
 import { AdminGuard } from "@/shared/components/admin-guard";
-import type { Route } from "./+types/admin.rentals";
+import type { Route } from "./+types/admin.experiences";
 
 export const meta: Route.MetaFunction = () => [
-  { title: "Admin — Hébergements" },
+  { title: "Admin — Expériences" },
   { name: "robots", content: "noindex" },
 ];
 
-const adminRentalsKey = ["admin", "rentals"] as const;
+const adminExperiencesKey = ["admin", "experiences"] as const;
 
-const STATUS_LABEL: Record<PropertyStatus, string> = {
+const STATUS_LABEL: Record<ExperienceStatus, string> = {
   draft: "Brouillon",
   published: "Publié",
   unlisted: "Masqué",
   removed: "Supprimé",
 };
 
-const STATUS_CLASS: Record<PropertyStatus, string> = {
+const STATUS_CLASS: Record<ExperienceStatus, string> = {
   draft: "bg-yellow-100 text-yellow-800",
   published: "bg-green-100 text-green-800",
   unlisted: "bg-gray-200 text-gray-700",
   removed: "bg-red-100 text-red-800",
 };
 
-export default function AdminRentalsRoute() {
+export default function AdminExperiencesRoute() {
   return (
     <AdminGuard>
-      <AdminRentalsPage />
+      <AdminExperiencesPage />
     </AdminGuard>
   );
 }
 
-function AdminRentalsPage() {
+function AdminExperiencesPage() {
   const query = useQuery({
-    queryKey: adminRentalsKey,
-    queryFn: listAdminProperties,
+    queryKey: adminExperiencesKey,
+    queryFn: listAdminExperiences,
   });
 
   return (
@@ -54,10 +54,10 @@ function AdminRentalsPage() {
       <header className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-ganitel-text-title">
-            Hébergements
+            Expériences
           </h1>
           <p className="mt-1 text-sm text-ganitel-text-body">
-            Backoffice Ganitel — tous les hébergements, tous statuts confondus.
+            Backoffice Ganitel — toutes les expériences, tous statuts confondus.
           </p>
         </div>
         <div className="flex gap-2">
@@ -68,10 +68,10 @@ function AdminRentalsPage() {
             ← Backoffice
           </Link>
           <Link
-            to="/admin/rentals/new"
+            to="/admin/experiences/new"
             className="rounded-xl bg-ganitel-secondary px-4 py-2 text-sm font-medium text-white hover:opacity-90"
           >
-            Ajouter un hébergement
+            Ajouter une expérience
           </Link>
         </div>
       </header>
@@ -84,16 +84,16 @@ function AdminRentalsPage() {
         </p>
       ) : query.data.items.length === 0 ? (
         <p className="text-sm text-ganitel-text-body">
-          Aucun hébergement pour le moment.
+          Aucune expérience pour le moment.
         </p>
       ) : (
-        <RentalTable items={query.data.items} />
+        <ExperienceTable items={query.data.items} />
       )}
     </div>
   );
 }
 
-function RentalTable({ items }: { items: PropertyAdminListItem[] }) {
+function ExperienceTable({ items }: { items: ExperienceAdminListItem[] }) {
   return (
     <div className="overflow-x-auto rounded-xl border border-ganitel-stroke-neutral">
       <table className="w-full text-sm">
@@ -102,6 +102,7 @@ function RentalTable({ items }: { items: PropertyAdminListItem[] }) {
             <th className="px-4 py-3">Titre</th>
             <th className="px-4 py-3">Ville</th>
             <th className="px-4 py-3">Type</th>
+            <th className="px-4 py-3">Durée</th>
             <th className="px-4 py-3">Prix</th>
             <th className="px-4 py-3">Statut</th>
             <th className="px-4 py-3 text-right">Actions</th>
@@ -109,7 +110,7 @@ function RentalTable({ items }: { items: PropertyAdminListItem[] }) {
         </thead>
         <tbody className="divide-y divide-ganitel-stroke-neutral">
           {items.map((item) => (
-            <RentalRow key={item.id} item={item} />
+            <ExperienceRow key={item.id} item={item} />
           ))}
         </tbody>
       </table>
@@ -117,25 +118,25 @@ function RentalTable({ items }: { items: PropertyAdminListItem[] }) {
   );
 }
 
-function RentalRow({ item }: { item: PropertyAdminListItem }) {
+function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
   const qc = useQueryClient();
-  const invalidate = () => qc.invalidateQueries({ queryKey: adminRentalsKey });
+  const invalidate = () =>
+    qc.invalidateQueries({ queryKey: adminExperiencesKey });
 
   const publish = useMutation({
-    mutationFn: () => publishProperty(item.id),
+    mutationFn: () => publishExperience(item.id),
     onSuccess: invalidate,
   });
   const unpublish = useMutation({
-    mutationFn: () => unpublishProperty(item.id),
+    mutationFn: () => unpublishExperience(item.id),
     onSuccess: invalidate,
   });
   const remove = useMutation({
-    mutationFn: () => removeProperty(item.id),
+    mutationFn: () => removeExperience(item.id),
     onSuccess: invalidate,
   });
 
   const isBusy = publish.isPending || unpublish.isPending || remove.isPending;
-
   const lastError = publish.error ?? unpublish.error ?? remove.error ?? null;
 
   return (
@@ -146,7 +147,8 @@ function RentalRow({ item }: { item: PropertyAdminListItem }) {
       <td className="px-4 py-3">
         {item.city}, {item.country_code}
       </td>
-      <td className="px-4 py-3">{item.property_type}</td>
+      <td className="px-4 py-3">{item.experience_type}</td>
+      <td className="px-4 py-3">{item.duration_minutes} min</td>
       <td className="px-4 py-3">
         {item.base_price.amount} {item.base_price.currency}
       </td>

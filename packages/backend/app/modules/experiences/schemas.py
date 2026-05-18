@@ -91,3 +91,29 @@ class SearchOut(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+class ExperienceAdminListItem(BaseModel):
+    id: UUID
+    title: str
+    experience_type: str
+    city: str
+    country_code: CountryCode
+    status: ExperienceStatus
+    duration_minutes: int
+    base_price: Money
+    cover_photo: MediaPublic | None
+    created_at: datetime
+    published_at: datetime | None
+
+
+class AdminListOut(BaseModel):
+    items: list[ExperienceAdminListItem]
+    total: int
+
+
+class AttachPhotoIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    media_id: UUID
+    position: int = Field(default=0, ge=0, le=64)
