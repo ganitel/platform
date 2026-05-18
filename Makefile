@@ -19,12 +19,22 @@ install-hooks: ## Install git pre-commit hook into .git/hooks/
 # Requires PostgreSQL (with PostGIS) on the standard port (5432).
 # Override via DATABASE_URL in .env.
 
-dev: ## Start frontend + backend dev servers concurrently (hot reload)
+dev: ## Start frontend + backend dev servers concurrently (hot reload, dies together)
 	@echo "Starting frontend + backend dev servers (Ctrl+C to stop)…"
-	@trap 'kill 0' INT TERM EXIT; \
-		($(MAKE) -s dev-backend 2>&1 | sed -e 's/^/[backend]  /') & \
-		($(MAKE) -s dev-frontend 2>&1 | sed -e 's/^/[frontend] /') & \
-		wait
+	@# `set -m` puts each background job in its own process group so we can
+	@# tear down the whole job (subshell + make + uvicorn/vite) with one kill.
+	@# We poll both PIDs; as soon as either dies, we kill the other so the
+	@# dev session never silently runs half-broken (e.g. backend bind failure
+	@# leaving the frontend running and serving 404s against a stale API).
+	@set -m; \
+	trap 'kill -- -$$B -$$F 2>/dev/null; exit 130' INT TERM; \
+	($(MAKE) -s dev-backend 2>&1 | sed -e 's/^/[backend]  /') & B=$$!; \
+	($(MAKE) -s dev-frontend 2>&1 | sed -e 's/^/[frontend] /') & F=$$!; \
+	while kill -0 $$B 2>/dev/null && kill -0 $$F 2>/dev/null; do sleep 1; done; \
+	echo "[make dev] one server exited — shutting the other down"; \
+	kill -- -$$B -$$F 2>/dev/null; \
+	wait 2>/dev/null; \
+	exit 1
 
 dev-backend: ## Backend FastAPI dev server (http://localhost:8000)
 	@echo "→ FastAPI dev server: http://localhost:8000"
