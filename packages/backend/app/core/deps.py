@@ -56,5 +56,12 @@ async def current_user(
     return user
 
 
+async def current_admin(user: Annotated[User, Depends(current_user)]) -> User:
+    if not user.is_admin:
+        raise ForbiddenError(code="admin.required")
+    return user
+
+
 CurrentUser = Annotated[User, Depends(current_user)]
+CurrentAdmin = Annotated[User, Depends(current_admin)]
 OptionalUser = Annotated[User | None, Depends(optional_user)]

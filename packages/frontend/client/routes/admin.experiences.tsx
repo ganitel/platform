@@ -21,8 +21,14 @@ export const meta: Route.MetaFunction = () => [
 ];
 
 const PAGE_SIZE = 50;
-const adminExperiencesKey = (offset: number) =>
-  ["admin", "experiences", { offset, limit: PAGE_SIZE }] as const;
+const ALL_STATUSES: ExperienceStatus[] = [
+  "draft",
+  "published",
+  "unlisted",
+  "removed",
+];
+const adminExperiencesKey = (offset: number, statuses: ExperienceStatus[]) =>
+  ["admin", "experiences", { offset, limit: PAGE_SIZE, statuses }] as const;
 
 const STATUS_LABEL: Record<ExperienceStatus, string> = {
   draft: "Brouillon",
@@ -48,10 +54,23 @@ export default function AdminExperiencesRoute() {
 
 function AdminExperiencesPage() {
   const [offset, setOffset] = useState(0);
+  const [statuses, setStatuses] = useState<ExperienceStatus[]>([]);
   const query = useQuery({
-    queryKey: adminExperiencesKey(offset),
-    queryFn: () => listAdminExperiences({ limit: PAGE_SIZE, offset }),
+    queryKey: adminExperiencesKey(offset, statuses),
+    queryFn: () =>
+      listAdminExperiences({
+        limit: PAGE_SIZE,
+        offset,
+        status: statuses.length > 0 ? statuses : undefined,
+      }),
   });
+
+  function toggleStatus(s: ExperienceStatus) {
+    setOffset(0);
+    setStatuses((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
+    );
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -80,6 +99,26 @@ function AdminExperiencesPage() {
         </div>
       </header>
 
+      <div className="mb-4 flex flex-wrap gap-2">
+        {ALL_STATUSES.map((s) => {
+          const active = statuses.includes(s);
+          return (
+            <button
+              key={s}
+              type="button"
+              onClick={() => toggleStatus(s)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                active
+                  ? `${STATUS_CLASS[s]} ring-2 ring-offset-1 ring-ganitel-secondary`
+                  : "bg-ganitel-neutral-1 text-ganitel-text-body hover:bg-ganitel-stroke-neutral"
+              }`}
+            >
+              {STATUS_LABEL[s]}
+            </button>
+          );
+        })}
+      </div>
+
       {query.isPending ? (
         <p className="text-sm text-ganitel-text-body">Chargement…</p>
       ) : query.isError ? (
@@ -95,7 +134,7 @@ function AdminExperiencesPage() {
         </p>
       ) : (
         <>
-          <ExperienceTable items={query.data.items} offset={offset} />
+          <ExperienceTable items={query.data.items} />
           <Pagination
             offset={offset}
             limit={query.data.limit}
@@ -153,13 +192,7 @@ function Pagination({
   );
 }
 
-function ExperienceTable({
-  items,
-  offset,
-}: {
-  items: ExperienceAdminListItem[];
-  offset: number;
-}) {
+function ExperienceTable({ items }: { items: ExperienceAdminListItem[] }) {
   return (
     <div className="overflow-x-auto rounded-xl border border-ganitel-stroke-neutral">
       <table className="w-full text-sm">
@@ -176,7 +209,7 @@ function ExperienceTable({
         </thead>
         <tbody className="divide-y divide-ganitel-stroke-neutral">
           {items.map((item) => (
-            <ExperienceRow key={item.id} item={item} offset={offset} />
+            <ExperienceRow key={item.id} item={item} />
           ))}
         </tbody>
       </table>
@@ -184,16 +217,11 @@ function ExperienceTable({
   );
 }
 
-function ExperienceRow({
-  item,
-  offset,
-}: {
-  item: ExperienceAdminListItem;
-  offset: number;
-}) {
+function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
   const qc = useQueryClient();
+  // Prefix-match invalidates every paginated/filtered variant of the list.
   const invalidate = () =>
-    qc.invalidateQueries({ queryKey: adminExperiencesKey(offset) });
+    qc.invalidateQueries({ queryKey: ["admin", "experiences"] });
 
   const publish = useMutation({
     mutationFn: () => publishExperience(item.id),

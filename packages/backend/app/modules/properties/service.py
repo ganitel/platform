@@ -196,7 +196,13 @@ async def remove(session: AsyncSession, property: Property, user: User) -> Prope
     return property
 
 
-async def list_all_for_admin(session: AsyncSession, *, limit: int, offset: int) -> list[Property]:
+async def list_all_for_admin(
+    session: AsyncSession,
+    *,
+    statuses: tuple[PropertyStatus, ...] = (),
+    limit: int,
+    offset: int,
+) -> list[Property]:
     stmt = (
         select(Property)
         .options(selectinload(Property.photos).selectinload(PropertyPhoto.media))
@@ -204,11 +210,17 @@ async def list_all_for_admin(session: AsyncSession, *, limit: int, offset: int) 
         .limit(limit)
         .offset(offset)
     )
+    if statuses:
+        stmt = stmt.where(Property.status.in_(statuses))
     return list((await session.execute(stmt)).scalars().all())
 
 
-async def count_all_for_admin(session: AsyncSession) -> int:
+async def count_all_for_admin(
+    session: AsyncSession, *, statuses: tuple[PropertyStatus, ...] = ()
+) -> int:
     stmt = select(func.count()).select_from(Property)
+    if statuses:
+        stmt = stmt.where(Property.status.in_(statuses))
     return int((await session.execute(stmt)).scalar_one())
 
 

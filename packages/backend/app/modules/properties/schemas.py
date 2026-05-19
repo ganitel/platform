@@ -7,7 +7,7 @@ from datetime import datetime, time
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.core.money import Money
 from app.modules.media.schemas import MediaPublic
@@ -63,33 +63,48 @@ class PropertyCreateIn(BaseModel):
 class PropertyUpdateIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    title: str | None = Field(default=None, min_length=3, max_length=180)
-    description: str | None = Field(default=None, max_length=10_000)
-    property_type: str | None = None
-    city: str | None = None
-    country_code: CountryCode | None = None
+    # Fields backed by NOT NULL DB columns use a typed default (not `T | None`)
+    # so Pydantic rejects explicit `null` natively. Defaults aren't validated
+    # (Pydantic v2 default) so the "always-omittable" partial-update semantics
+    # still work via the service's `exclude_unset=True`. Fields below that ARE
+    # `T | None`/`time | None` are nullable in the DB and accept null on the
+    # wire as a "clear this field" signal. The complex types (`location`,
+    # `base_price`) need `T | None = None` for omittability, so they have a
+    # validator below that rejects explicit null only.
+    title: str = Field(default="", min_length=3, max_length=180)
+    description: str = Field(default="", max_length=10_000)
+    property_type: str = ""
+    city: str = ""
+    country_code: CountryCode = "CM"
     location: GeoPoint | None = None
-    capacity: int | None = Field(default=None, ge=1, le=64)
-    bedrooms: int | None = Field(default=None, ge=0, le=32)
-    beds: int | None = Field(default=None, ge=0, le=64)
-    bathrooms: int | None = Field(default=None, ge=0, le=32)
-    amenities: list[str] | None = None
-    parking_available: ParkingAvailability | None = None
+    capacity: int = Field(default=0, ge=1, le=64)
+    bedrooms: int = Field(default=0, ge=0, le=32)
+    beds: int = Field(default=0, ge=0, le=64)
+    bathrooms: int = Field(default=0, ge=0, le=32)
+    amenities: list[str] = Field(default_factory=list)
+    parking_available: ParkingAvailability = ParkingAvailability.NONE
     elevator: bool = False
     accessible: bool = False
     private_bathroom: bool = False
-    kitchen_type: KitchenType | None = None
+    kitchen_type: KitchenType = KitchenType.NONE
     events_allowed: bool = False
     family_friendly: bool = False
     child_friendly: bool = False
     pets_allowed: bool = False
     smoking_allowed: bool = False
-    check_in_time: time | None = None
-    check_out_time: time | None = None
-    house_rules: str | None = None
-    cancellation_policy: CancellationPolicy | None = None
+    check_in_time: time | None = None  # DB column is nullable
+    check_out_time: time | None = None  # DB column is nullable
+    house_rules: str | None = None  # DB column is nullable
+    cancellation_policy: CancellationPolicy = CancellationPolicy.MODERATE
     base_price: Money | None = None
-    content_language: ContentLanguage | None = None
+    content_language: ContentLanguage = "fr"
+
+    @field_validator("location", "base_price", mode="after")
+    @classmethod
+    def _reject_explicit_null_complex(cls, v):
+        if v is None:
+            raise ValueError("must not be null; omit the field for a partial update")
+        return v
 
 
 class HostPublic(BaseModel):

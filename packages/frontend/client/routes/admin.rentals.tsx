@@ -21,8 +21,14 @@ export const meta: Route.MetaFunction = () => [
 ];
 
 const PAGE_SIZE = 50;
-const adminRentalsKey = (offset: number) =>
-  ["admin", "rentals", { offset, limit: PAGE_SIZE }] as const;
+const ALL_STATUSES: PropertyStatus[] = [
+  "draft",
+  "published",
+  "unlisted",
+  "removed",
+];
+const adminRentalsKey = (offset: number, statuses: PropertyStatus[]) =>
+  ["admin", "rentals", { offset, limit: PAGE_SIZE, statuses }] as const;
 
 const STATUS_LABEL: Record<PropertyStatus, string> = {
   draft: "Brouillon",
@@ -48,10 +54,23 @@ export default function AdminRentalsRoute() {
 
 function AdminRentalsPage() {
   const [offset, setOffset] = useState(0);
+  const [statuses, setStatuses] = useState<PropertyStatus[]>([]);
   const query = useQuery({
-    queryKey: adminRentalsKey(offset),
-    queryFn: () => listAdminProperties({ limit: PAGE_SIZE, offset }),
+    queryKey: adminRentalsKey(offset, statuses),
+    queryFn: () =>
+      listAdminProperties({
+        limit: PAGE_SIZE,
+        offset,
+        status: statuses.length > 0 ? statuses : undefined,
+      }),
   });
+
+  function toggleStatus(s: PropertyStatus) {
+    setOffset(0);
+    setStatuses((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
+    );
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -80,6 +99,26 @@ function AdminRentalsPage() {
         </div>
       </header>
 
+      <div className="mb-4 flex flex-wrap gap-2">
+        {ALL_STATUSES.map((s) => {
+          const active = statuses.includes(s);
+          return (
+            <button
+              key={s}
+              type="button"
+              onClick={() => toggleStatus(s)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                active
+                  ? `${STATUS_CLASS[s]} ring-2 ring-offset-1 ring-ganitel-secondary`
+                  : "bg-ganitel-neutral-1 text-ganitel-text-body hover:bg-ganitel-stroke-neutral"
+              }`}
+            >
+              {STATUS_LABEL[s]}
+            </button>
+          );
+        })}
+      </div>
+
       {query.isPending ? (
         <p className="text-sm text-ganitel-text-body">Chargement…</p>
       ) : query.isError ? (
@@ -95,7 +134,7 @@ function AdminRentalsPage() {
         </p>
       ) : (
         <>
-          <RentalTable items={query.data.items} offset={offset} />
+          <RentalTable items={query.data.items} />
           <Pagination
             offset={offset}
             limit={query.data.limit}
@@ -153,13 +192,7 @@ function Pagination({
   );
 }
 
-function RentalTable({
-  items,
-  offset,
-}: {
-  items: PropertyAdminListItem[];
-  offset: number;
-}) {
+function RentalTable({ items }: { items: PropertyAdminListItem[] }) {
   return (
     <div className="overflow-x-auto rounded-xl border border-ganitel-stroke-neutral">
       <table className="w-full text-sm">
@@ -175,7 +208,7 @@ function RentalTable({
         </thead>
         <tbody className="divide-y divide-ganitel-stroke-neutral">
           {items.map((item) => (
-            <RentalRow key={item.id} item={item} offset={offset} />
+            <RentalRow key={item.id} item={item} />
           ))}
         </tbody>
       </table>
@@ -183,16 +216,11 @@ function RentalTable({
   );
 }
 
-function RentalRow({
-  item,
-  offset,
-}: {
-  item: PropertyAdminListItem;
-  offset: number;
-}) {
+function RentalRow({ item }: { item: PropertyAdminListItem }) {
   const qc = useQueryClient();
+  // Prefix-match invalidates every paginated/filtered variant of the list.
   const invalidate = () =>
-    qc.invalidateQueries({ queryKey: adminRentalsKey(offset) });
+    qc.invalidateQueries({ queryKey: ["admin", "rentals"] });
 
   const publish = useMutation({
     mutationFn: () => publishProperty(item.id),

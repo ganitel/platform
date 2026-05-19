@@ -3,7 +3,6 @@ host-only create / update / publish / photo management. All search
 parameters are query-string based; see `search.py` for the filter and
 sort logic."""
 
-import asyncio
 from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
@@ -12,11 +11,10 @@ from fastapi import APIRouter, Query, Response, status
 
 from app.core.cache import PUBLIC_CDN_CACHE
 from app.core.deps import CurrentUser, DbSession
-from app.core.errors import ForbiddenError, NotFoundError
+from app.core.errors import NotFoundError
 from app.modules.properties import search as search_mod
 from app.modules.properties import service
 from app.modules.properties.schemas import (
-    AdminListOut,
     AttachPhotoIn,
     PhotoAttachOut,
     PropertyCreateIn,
@@ -89,21 +87,6 @@ async def search_properties(
     items = [await service.to_public(p, distance_km=d) for p, d in rows]
     response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
     return SearchOut(items=items, total=total, limit=limit, offset=offset)
-
-
-@router.get("/admin", response_model=AdminListOut)
-async def admin_list_properties(
-    user: CurrentUser,
-    session: DbSession,
-    limit: int = Query(default=50, ge=1, le=200),
-    offset: int = Query(default=0, ge=0),
-) -> AdminListOut:
-    if not user.is_admin:
-        raise ForbiddenError(code="admin.required")
-    rows = await service.list_all_for_admin(session, limit=limit, offset=offset)
-    total = await service.count_all_for_admin(session)
-    items = await asyncio.gather(*(service.to_admin_list_item(p) for p in rows))
-    return AdminListOut(items=list(items), total=total, limit=limit, offset=offset)
 
 
 @router.get("/{property_id}", response_model=PropertyDetail)

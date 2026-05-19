@@ -3,6 +3,7 @@ import type {
   AdminListOut,
   PropertyCreateInput,
   PropertyDetail,
+  PropertyStatus,
   PropertyUpdateInput,
   SearchFilters,
   SearchOut,
@@ -23,6 +24,7 @@ export async function getProperty(id: string): Promise<PropertyDetail> {
 }
 
 export interface AdminListParams {
+  status?: PropertyStatus[];
   limit?: number;
   offset?: number;
 }
@@ -30,7 +32,7 @@ export interface AdminListParams {
 export async function listAdminProperties(
   params: AdminListParams = {},
 ): Promise<AdminListOut> {
-  const r = await apiClient.get<AdminListOut>("/properties/admin", {
+  const r = await apiClient.get<AdminListOut>("/admin/properties", {
     params: params as Record<string, unknown>,
   });
   return r.data;

@@ -132,7 +132,13 @@ async def remove(session: AsyncSession, experience: Experience, user: User) -> E
     return experience
 
 
-async def list_all_for_admin(session: AsyncSession, *, limit: int, offset: int) -> list[Experience]:
+async def list_all_for_admin(
+    session: AsyncSession,
+    *,
+    statuses: tuple[ExperienceStatus, ...] = (),
+    limit: int,
+    offset: int,
+) -> list[Experience]:
     stmt = (
         select(Experience)
         .options(selectinload(Experience.photos).selectinload(ExperiencePhoto.media))
@@ -140,11 +146,17 @@ async def list_all_for_admin(session: AsyncSession, *, limit: int, offset: int) 
         .limit(limit)
         .offset(offset)
     )
+    if statuses:
+        stmt = stmt.where(Experience.status.in_(statuses))
     return list((await session.execute(stmt)).scalars().all())
 
 
-async def count_all_for_admin(session: AsyncSession) -> int:
+async def count_all_for_admin(
+    session: AsyncSession, *, statuses: tuple[ExperienceStatus, ...] = ()
+) -> int:
     stmt = select(func.count()).select_from(Experience)
+    if statuses:
+        stmt = stmt.where(Experience.status.in_(statuses))
     return int((await session.execute(stmt)).scalar_one())
 
 

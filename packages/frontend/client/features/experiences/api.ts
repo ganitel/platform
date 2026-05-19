@@ -3,10 +3,12 @@ import type {
   ExperienceAdminListOut,
   ExperienceCreateInput,
   ExperienceDetail,
+  ExperienceStatus,
   ExperienceUpdateInput,
 } from "@/features/experiences/types";
 
 export interface AdminListParams {
+  status?: ExperienceStatus[];
   limit?: number;
   offset?: number;
 }
@@ -14,7 +16,7 @@ export interface AdminListParams {
 export async function listAdminExperiences(
   params: AdminListParams = {},
 ): Promise<ExperienceAdminListOut> {
-  const r = await apiClient.get<ExperienceAdminListOut>("/experiences/admin", {
+  const r = await apiClient.get<ExperienceAdminListOut>("/admin/experiences", {
     params: params as Record<string, unknown>,
   });
   return r.data;

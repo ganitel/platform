@@ -2,7 +2,6 @@
 host/admin create / update / publish / unpublish / remove / photo
 management, mirroring the properties module."""
 
-import asyncio
 from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
@@ -11,11 +10,10 @@ from fastapi import APIRouter, Query, Response, status
 
 from app.core.cache import PUBLIC_CDN_CACHE
 from app.core.deps import CurrentUser, DbSession
-from app.core.errors import ForbiddenError, NotFoundError
+from app.core.errors import NotFoundError
 from app.modules.experiences import search as search_mod
 from app.modules.experiences import service
 from app.modules.experiences.schemas import (
-    AdminListOut,
     AttachPhotoIn,
     ExperienceCreateIn,
     ExperienceDetail,
@@ -86,21 +84,6 @@ async def search_experiences(
     items = [await service.to_public(e, distance_km=d) for e, d in rows]
     response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
     return SearchOut(items=items, total=total, limit=limit, offset=offset)
-
-
-@router.get("/admin", response_model=AdminListOut)
-async def admin_list_experiences(
-    user: CurrentUser,
-    session: DbSession,
-    limit: int = Query(default=50, ge=1, le=200),
-    offset: int = Query(default=0, ge=0),
-) -> AdminListOut:
-    if not user.is_admin:
-        raise ForbiddenError(code="admin.required")
-    rows = await service.list_all_for_admin(session, limit=limit, offset=offset)
-    total = await service.count_all_for_admin(session)
-    items = await asyncio.gather(*(service.to_admin_list_item(e) for e in rows))
-    return AdminListOut(items=list(items), total=total, limit=limit, offset=offset)
 
 
 @router.get("/{experience_id}", response_model=ExperienceDetail)
