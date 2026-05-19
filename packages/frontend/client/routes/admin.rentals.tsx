@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { Link } from "react-router";
 
 import {
@@ -19,7 +20,9 @@ export const meta: Route.MetaFunction = () => [
   { name: "robots", content: "noindex" },
 ];
 
-const adminRentalsKey = ["admin", "rentals"] as const;
+const PAGE_SIZE = 50;
+const adminRentalsKey = (offset: number) =>
+  ["admin", "rentals", { offset, limit: PAGE_SIZE }] as const;
 
 const STATUS_LABEL: Record<PropertyStatus, string> = {
   draft: "Brouillon",
@@ -44,9 +47,10 @@ export default function AdminRentalsRoute() {
 }
 
 function AdminRentalsPage() {
+  const [offset, setOffset] = useState(0);
   const query = useQuery({
-    queryKey: adminRentalsKey,
-    queryFn: listAdminProperties,
+    queryKey: adminRentalsKey(offset),
+    queryFn: () => listAdminProperties({ limit: PAGE_SIZE, offset }),
   });
 
   return (
@@ -85,18 +89,77 @@ function AdminRentalsPage() {
             ? query.error.message
             : String(query.error)}
         </p>
-      ) : query.data.items.length === 0 ? (
+      ) : query.data.total === 0 ? (
         <p className="text-sm text-ganitel-text-body">
           Aucun hébergement pour le moment.
         </p>
       ) : (
-        <RentalTable items={query.data.items} />
+        <>
+          <RentalTable items={query.data.items} offset={offset} />
+          <Pagination
+            offset={offset}
+            limit={query.data.limit}
+            total={query.data.total}
+            shown={query.data.items.length}
+            onOffsetChange={setOffset}
+          />
+        </>
       )}
     </div>
   );
 }
 
-function RentalTable({ items }: { items: PropertyAdminListItem[] }) {
+function Pagination({
+  offset,
+  limit,
+  total,
+  shown,
+  onOffsetChange,
+}: {
+  offset: number;
+  limit: number;
+  total: number;
+  shown: number;
+  onOffsetChange: (n: number) => void;
+}) {
+  const from = total === 0 ? 0 : offset + 1;
+  const to = offset + shown;
+  const hasPrev = offset > 0;
+  const hasNext = to < total;
+  return (
+    <div className="mt-4 flex items-center justify-between text-sm text-ganitel-text-body">
+      <span>
+        {from}–{to} sur {total}
+      </span>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          disabled={!hasPrev}
+          onClick={() => onOffsetChange(Math.max(0, offset - limit))}
+          className="rounded-lg border border-ganitel-stroke-neutral px-3 py-1 text-xs font-medium hover:bg-ganitel-neutral-1 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          ← Précédent
+        </button>
+        <button
+          type="button"
+          disabled={!hasNext}
+          onClick={() => onOffsetChange(offset + limit)}
+          className="rounded-lg border border-ganitel-stroke-neutral px-3 py-1 text-xs font-medium hover:bg-ganitel-neutral-1 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Suivant →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function RentalTable({
+  items,
+  offset,
+}: {
+  items: PropertyAdminListItem[];
+  offset: number;
+}) {
   return (
     <div className="overflow-x-auto rounded-xl border border-ganitel-stroke-neutral">
       <table className="w-full text-sm">
@@ -112,7 +175,7 @@ function RentalTable({ items }: { items: PropertyAdminListItem[] }) {
         </thead>
         <tbody className="divide-y divide-ganitel-stroke-neutral">
           {items.map((item) => (
-            <RentalRow key={item.id} item={item} />
+            <RentalRow key={item.id} item={item} offset={offset} />
           ))}
         </tbody>
       </table>
@@ -120,9 +183,16 @@ function RentalTable({ items }: { items: PropertyAdminListItem[] }) {
   );
 }
 
-function RentalRow({ item }: { item: PropertyAdminListItem }) {
+function RentalRow({
+  item,
+  offset,
+}: {
+  item: PropertyAdminListItem;
+  offset: number;
+}) {
   const qc = useQueryClient();
-  const invalidate = () => qc.invalidateQueries({ queryKey: adminRentalsKey });
+  const invalidate = () =>
+    qc.invalidateQueries({ queryKey: adminRentalsKey(offset) });
 
   const publish = useMutation({
     mutationFn: () => publishProperty(item.id),
@@ -138,7 +208,6 @@ function RentalRow({ item }: { item: PropertyAdminListItem }) {
   });
 
   const isBusy = publish.isPending || unpublish.isPending || remove.isPending;
-
   const lastError = publish.error ?? unpublish.error ?? remove.error ?? null;
 
   return (
@@ -162,6 +231,12 @@ function RentalRow({ item }: { item: PropertyAdminListItem }) {
       </td>
       <td className="px-4 py-3">
         <div className="flex justify-end gap-2">
+          <Link
+            to={`/admin/rentals/${item.id}/edit`}
+            className="rounded-lg border border-ganitel-stroke-neutral px-3 py-1 text-xs font-medium text-ganitel-text-body hover:bg-ganitel-neutral-1"
+          >
+            Modifier
+          </Link>
           {(item.status === "draft" || item.status === "unlisted") && (
             <button
               type="button"

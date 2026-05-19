@@ -3,10 +3,25 @@ import type {
   ExperienceAdminListOut,
   ExperienceCreateInput,
   ExperienceDetail,
+  ExperienceUpdateInput,
 } from "@/features/experiences/types";
 
-export async function listAdminExperiences(): Promise<ExperienceAdminListOut> {
-  const r = await apiClient.get<ExperienceAdminListOut>("/experiences/admin");
+export interface AdminListParams {
+  limit?: number;
+  offset?: number;
+}
+
+export async function listAdminExperiences(
+  params: AdminListParams = {},
+): Promise<ExperienceAdminListOut> {
+  const r = await apiClient.get<ExperienceAdminListOut>("/experiences/admin", {
+    params: params as Record<string, unknown>,
+  });
+  return r.data;
+}
+
+export async function getExperience(id: string): Promise<ExperienceDetail> {
+  const r = await apiClient.get<ExperienceDetail>(`/experiences/${id}`);
   return r.data;
 }
 
@@ -14,6 +29,14 @@ export async function createExperience(
   body: ExperienceCreateInput,
 ): Promise<ExperienceDetail> {
   const r = await apiClient.post<ExperienceDetail>("/experiences", body);
+  return r.data;
+}
+
+export async function updateExperience(
+  id: string,
+  body: ExperienceUpdateInput,
+): Promise<ExperienceDetail> {
+  const r = await apiClient.patch<ExperienceDetail>(`/experiences/${id}`, body);
   return r.data;
 }
 

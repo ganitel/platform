@@ -110,6 +110,8 @@ class ExperienceAdminListItem(BaseModel):
 class AdminListOut(BaseModel):
     items: list[ExperienceAdminListItem]
     total: int
+    limit: int
+    offset: int
 
 
 class AttachPhotoIn(BaseModel):

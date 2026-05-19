@@ -8,7 +8,7 @@ from uuid import UUID
 
 from geoalchemy2.shape import from_shape, to_shape
 from shapely.geometry import Point
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -196,13 +196,20 @@ async def remove(session: AsyncSession, property: Property, user: User) -> Prope
     return property
 
 
-async def list_all_for_admin(session: AsyncSession) -> list[Property]:
+async def list_all_for_admin(session: AsyncSession, *, limit: int, offset: int) -> list[Property]:
     stmt = (
         select(Property)
         .options(selectinload(Property.photos).selectinload(PropertyPhoto.media))
         .order_by(Property.created_at.desc())
+        .limit(limit)
+        .offset(offset)
     )
     return list((await session.execute(stmt)).scalars().all())
+
+
+async def count_all_for_admin(session: AsyncSession) -> int:
+    stmt = select(func.count()).select_from(Property)
+    return int((await session.execute(stmt)).scalar_one())
 
 
 async def get(session: AsyncSession, property_id: UUID) -> Property:

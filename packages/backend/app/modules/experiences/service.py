@@ -10,7 +10,7 @@ from uuid import UUID
 
 from geoalchemy2.shape import from_shape, to_shape
 from shapely.geometry import Point
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -132,13 +132,20 @@ async def remove(session: AsyncSession, experience: Experience, user: User) -> E
     return experience
 
 
-async def list_all_for_admin(session: AsyncSession) -> list[Experience]:
+async def list_all_for_admin(session: AsyncSession, *, limit: int, offset: int) -> list[Experience]:
     stmt = (
         select(Experience)
         .options(selectinload(Experience.photos).selectinload(ExperiencePhoto.media))
         .order_by(Experience.created_at.desc())
+        .limit(limit)
+        .offset(offset)
     )
     return list((await session.execute(stmt)).scalars().all())
+
+
+async def count_all_for_admin(session: AsyncSession) -> int:
+    stmt = select(func.count()).select_from(Experience)
+    return int((await session.execute(stmt)).scalar_one())
 
 
 async def get(session: AsyncSession, experience_id: UUID) -> Experience:

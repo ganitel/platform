@@ -29,8 +29,10 @@ export default [
   route("admin", "routes/admin._index.tsx"),
   route("admin/rentals", "routes/admin.rentals.tsx"),
   route("admin/rentals/new", "routes/admin.rentals.new.tsx"),
+  route("admin/rentals/:id/edit", "routes/admin.rentals.$id.edit.tsx"),
   route("admin/experiences", "routes/admin.experiences.tsx"),
   route("admin/experiences/new", "routes/admin.experiences.new.tsx"),
+  route("admin/experiences/:id/edit", "routes/admin.experiences.$id.edit.tsx"),
 
   // Resource routes (no UI).
   route("sitemap.xml", "routes/sitemap.tsx"),

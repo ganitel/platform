@@ -71,4 +71,8 @@ export interface ExperienceAdminListItem {
 export interface ExperienceAdminListOut {
   items: ExperienceAdminListItem[];
   total: number;
+  limit: number;
+  offset: number;
 }
+
+export type ExperienceUpdateInput = Partial<ExperienceCreateInput>;

@@ -3,6 +3,7 @@ import type {
   AdminListOut,
   PropertyCreateInput,
   PropertyDetail,
+  PropertyUpdateInput,
   SearchFilters,
   SearchOut,
 } from "@/features/properties/types";
@@ -21,8 +22,17 @@ export async function getProperty(id: string): Promise<PropertyDetail> {
   return r.data;
 }
 
-export async function listAdminProperties(): Promise<AdminListOut> {
-  const r = await apiClient.get<AdminListOut>("/properties/admin");
+export interface AdminListParams {
+  limit?: number;
+  offset?: number;
+}
+
+export async function listAdminProperties(
+  params: AdminListParams = {},
+): Promise<AdminListOut> {
+  const r = await apiClient.get<AdminListOut>("/properties/admin", {
+    params: params as Record<string, unknown>,
+  });
   return r.data;
 }
 
@@ -30,6 +40,14 @@ export async function createProperty(
   body: PropertyCreateInput,
 ): Promise<PropertyDetail> {
   const r = await apiClient.post<PropertyDetail>("/properties", body);
+  return r.data;
+}
+
+export async function updateProperty(
+  id: string,
+  body: PropertyUpdateInput,
+): Promise<PropertyDetail> {
+  const r = await apiClient.patch<PropertyDetail>(`/properties/${id}`, body);
   return r.data;
 }
 

@@ -27,6 +27,30 @@ export type PropertyStatus = "draft" | "published" | "unlisted" | "removed";
 export type ParkingAvailability = "none" | "free" | "paid";
 export type KitchenType = "none" | "kitchenette" | "full";
 
+export interface PropertyShowcaseAmenities {
+  has_wifi: boolean;
+  has_ac: boolean;
+  has_gym: boolean;
+  smoking_allowed: boolean;
+  pets_allowed: boolean;
+  highlights: Record<string, boolean>;
+}
+
+export interface PropertyListingMetadata {
+  parking_available: ParkingAvailability;
+  elevator: boolean;
+  accessible: boolean;
+  private_bathroom: boolean;
+  kitchen_type: KitchenType;
+  events_allowed: boolean;
+  family_friendly: boolean;
+  child_friendly: boolean;
+  pets_allowed: boolean;
+  smoking_allowed: boolean;
+  check_in_time: string | null;
+  check_out_time: string | null;
+}
+
 export interface PropertyPublic {
   id: string;
   title: string;
@@ -40,6 +64,8 @@ export interface PropertyPublic {
   bathrooms: number;
   base_price: Money;
   amenities: string[];
+  showcase_amenities: PropertyShowcaseAmenities;
+  listing_metadata: PropertyListingMetadata;
   cover_photo: MediaPublic | null;
   distance_km: number | null;
 }
@@ -109,7 +135,11 @@ export interface PropertyAdminListItem {
 export interface AdminListOut {
   items: PropertyAdminListItem[];
   total: number;
+  limit: number;
+  offset: number;
 }
+
+export type PropertyUpdateInput = Partial<PropertyCreateInput>;
 
 export interface SearchFilters {
   q?: string;

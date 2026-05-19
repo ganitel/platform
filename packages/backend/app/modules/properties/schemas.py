@@ -194,3 +194,5 @@ class PropertyAdminListItem(BaseModel):
 class AdminListOut(BaseModel):
     items: list[PropertyAdminListItem]
     total: int
+    limit: int
+    offset: int

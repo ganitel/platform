@@ -92,12 +92,18 @@ async def search_properties(
 
 
 @router.get("/admin", response_model=AdminListOut)
-async def admin_list_properties(user: CurrentUser, session: DbSession) -> AdminListOut:
+async def admin_list_properties(
+    user: CurrentUser,
+    session: DbSession,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+) -> AdminListOut:
     if not user.is_admin:
         raise ForbiddenError(code="admin.required")
-    rows = await service.list_all_for_admin(session)
+    rows = await service.list_all_for_admin(session, limit=limit, offset=offset)
+    total = await service.count_all_for_admin(session)
     items = await asyncio.gather(*(service.to_admin_list_item(p) for p in rows))
-    return AdminListOut(items=list(items), total=len(items))
+    return AdminListOut(items=list(items), total=total, limit=limit, offset=offset)
 
 
 @router.get("/{property_id}", response_model=PropertyDetail)

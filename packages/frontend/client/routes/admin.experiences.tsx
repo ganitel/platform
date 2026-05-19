@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { Link } from "react-router";
 
 import {
@@ -19,7 +20,9 @@ export const meta: Route.MetaFunction = () => [
   { name: "robots", content: "noindex" },
 ];
 
-const adminExperiencesKey = ["admin", "experiences"] as const;
+const PAGE_SIZE = 50;
+const adminExperiencesKey = (offset: number) =>
+  ["admin", "experiences", { offset, limit: PAGE_SIZE }] as const;
 
 const STATUS_LABEL: Record<ExperienceStatus, string> = {
   draft: "Brouillon",
@@ -44,9 +47,10 @@ export default function AdminExperiencesRoute() {
 }
 
 function AdminExperiencesPage() {
+  const [offset, setOffset] = useState(0);
   const query = useQuery({
-    queryKey: adminExperiencesKey,
-    queryFn: listAdminExperiences,
+    queryKey: adminExperiencesKey(offset),
+    queryFn: () => listAdminExperiences({ limit: PAGE_SIZE, offset }),
   });
 
   return (
@@ -85,18 +89,77 @@ function AdminExperiencesPage() {
             ? query.error.message
             : String(query.error)}
         </p>
-      ) : query.data.items.length === 0 ? (
+      ) : query.data.total === 0 ? (
         <p className="text-sm text-ganitel-text-body">
           Aucune expérience pour le moment.
         </p>
       ) : (
-        <ExperienceTable items={query.data.items} />
+        <>
+          <ExperienceTable items={query.data.items} offset={offset} />
+          <Pagination
+            offset={offset}
+            limit={query.data.limit}
+            total={query.data.total}
+            shown={query.data.items.length}
+            onOffsetChange={setOffset}
+          />
+        </>
       )}
     </div>
   );
 }
 
-function ExperienceTable({ items }: { items: ExperienceAdminListItem[] }) {
+function Pagination({
+  offset,
+  limit,
+  total,
+  shown,
+  onOffsetChange,
+}: {
+  offset: number;
+  limit: number;
+  total: number;
+  shown: number;
+  onOffsetChange: (n: number) => void;
+}) {
+  const from = total === 0 ? 0 : offset + 1;
+  const to = offset + shown;
+  const hasPrev = offset > 0;
+  const hasNext = to < total;
+  return (
+    <div className="mt-4 flex items-center justify-between text-sm text-ganitel-text-body">
+      <span>
+        {from}–{to} sur {total}
+      </span>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          disabled={!hasPrev}
+          onClick={() => onOffsetChange(Math.max(0, offset - limit))}
+          className="rounded-lg border border-ganitel-stroke-neutral px-3 py-1 text-xs font-medium hover:bg-ganitel-neutral-1 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          ← Précédent
+        </button>
+        <button
+          type="button"
+          disabled={!hasNext}
+          onClick={() => onOffsetChange(offset + limit)}
+          className="rounded-lg border border-ganitel-stroke-neutral px-3 py-1 text-xs font-medium hover:bg-ganitel-neutral-1 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Suivant →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ExperienceTable({
+  items,
+  offset,
+}: {
+  items: ExperienceAdminListItem[];
+  offset: number;
+}) {
   return (
     <div className="overflow-x-auto rounded-xl border border-ganitel-stroke-neutral">
       <table className="w-full text-sm">
@@ -113,7 +176,7 @@ function ExperienceTable({ items }: { items: ExperienceAdminListItem[] }) {
         </thead>
         <tbody className="divide-y divide-ganitel-stroke-neutral">
           {items.map((item) => (
-            <ExperienceRow key={item.id} item={item} />
+            <ExperienceRow key={item.id} item={item} offset={offset} />
           ))}
         </tbody>
       </table>
@@ -121,10 +184,16 @@ function ExperienceTable({ items }: { items: ExperienceAdminListItem[] }) {
   );
 }
 
-function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
+function ExperienceRow({
+  item,
+  offset,
+}: {
+  item: ExperienceAdminListItem;
+  offset: number;
+}) {
   const qc = useQueryClient();
   const invalidate = () =>
-    qc.invalidateQueries({ queryKey: adminExperiencesKey });
+    qc.invalidateQueries({ queryKey: adminExperiencesKey(offset) });
 
   const publish = useMutation({
     mutationFn: () => publishExperience(item.id),
@@ -164,6 +233,12 @@ function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
       </td>
       <td className="px-4 py-3">
         <div className="flex justify-end gap-2">
+          <Link
+            to={`/admin/experiences/${item.id}/edit`}
+            className="rounded-lg border border-ganitel-stroke-neutral px-3 py-1 text-xs font-medium text-ganitel-text-body hover:bg-ganitel-neutral-1"
+          >
+            Modifier
+          </Link>
           {(item.status === "draft" || item.status === "unlisted") && (
             <button
               type="button"
