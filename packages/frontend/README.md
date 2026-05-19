@@ -57,10 +57,9 @@ client/
 
 Copy `.env.example` to `.env`. Keys (with what they're for):
 
-| Key                 | Notes                                |
-| ------------------- | ------------------------------------ |
-| `VITE_API_BASE_URL` | Client-side base, defaults to `/api` |
-| `INTERNAL_API_URL`  | Server-side base for SSR fetches     |
+| Key            | Notes                                                          |
+| -------------- | -------------------------------------------------------------- |
+| `API_BASE_URL` | Absolute backend URL for SSR fetches (loaders run server-side) |
 
 ## Running
 
