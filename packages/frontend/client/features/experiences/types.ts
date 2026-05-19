@@ -39,3 +39,40 @@ export interface ExperienceSearchOut {
   limit: number;
   offset: number;
 }
+
+export interface ExperienceCreateInput {
+  title: string;
+  description?: string;
+  experience_type: string;
+  city: string;
+  country_code: string;
+  location: GeoPoint;
+  capacity: number;
+  duration_minutes: number;
+  cancellation_policy?: ExperienceCancellationPolicy;
+  base_price: Money;
+  content_language?: "fr" | "en";
+}
+
+export interface ExperienceAdminListItem {
+  id: string;
+  title: string;
+  experience_type: string;
+  city: string;
+  country_code: string;
+  status: ExperienceStatus;
+  duration_minutes: number;
+  base_price: Money;
+  cover_photo: MediaPublic | null;
+  created_at: string;
+  published_at: string | null;
+}
+
+export interface ExperienceAdminListOut {
+  items: ExperienceAdminListItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export type ExperienceUpdateInput = Partial<ExperienceCreateInput>;

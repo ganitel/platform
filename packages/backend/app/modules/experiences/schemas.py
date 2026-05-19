@@ -6,7 +6,7 @@ the properties module to avoid drift."""
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.core.money import Money
 from app.modules.experiences.models import (
@@ -46,17 +46,30 @@ class ExperienceCreateIn(BaseModel):
 class ExperienceUpdateIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    title: str | None = Field(default=None, min_length=3, max_length=180)
-    description: str | None = Field(default=None, max_length=10_000)
-    experience_type: str | None = None
-    city: str | None = None
-    country_code: CountryCode | None = None
+    # See PropertyUpdateIn for the rationale on `T = default` vs `T | None`.
+    # NOT NULL DB columns are tightened to typed defaults; complex types
+    # (`location`, `base_price`) keep `T | None` for omit-semantics and the
+    # field_validator below rejects explicit null only.
+    title: str = Field(default="", min_length=3, max_length=180)
+    description: str = Field(default="", max_length=10_000)
+    experience_type: str = ""
+    city: str = ""
+    country_code: CountryCode = "CM"
     location: GeoPoint | None = None
-    capacity: int | None = Field(default=None, ge=1, le=64)
-    duration_minutes: int | None = Field(default=None, ge=MIN_DURATION_MIN, le=MAX_DURATION_MIN)
-    cancellation_policy: ExperienceCancellationPolicy | None = None
+    capacity: int = Field(default=0, ge=1, le=64)
+    duration_minutes: int = Field(
+        default=MIN_DURATION_MIN, ge=MIN_DURATION_MIN, le=MAX_DURATION_MIN
+    )
+    cancellation_policy: ExperienceCancellationPolicy = ExperienceCancellationPolicy.MODERATE
     base_price: Money | None = None
-    content_language: ContentLanguage | None = None
+    content_language: ContentLanguage = "fr"
+
+    @field_validator("location", "base_price", mode="after")
+    @classmethod
+    def _reject_explicit_null_complex(cls, v):
+        if v is None:
+            raise ValueError("must not be null; omit the field for a partial update")
+        return v
 
 
 class ExperiencePublic(BaseModel):
@@ -91,3 +104,36 @@ class SearchOut(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+class ExperienceAdminListItem(BaseModel):
+    id: UUID
+    title: str
+    experience_type: str
+    city: str
+    country_code: CountryCode
+    status: ExperienceStatus
+    duration_minutes: int
+    base_price: Money
+    cover_photo: MediaPublic | None
+    created_at: datetime
+    published_at: datetime | None
+
+
+class AdminListOut(BaseModel):
+    items: list[ExperienceAdminListItem]
+    total: int
+    limit: int
+    offset: int
+
+
+class AttachPhotoIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    media_id: UUID
+    position: int = Field(default=0, ge=0, le=64)
+
+
+class PhotoAttachOut(BaseModel):
+    id: UUID
+    position: int

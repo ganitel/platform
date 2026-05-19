@@ -8,7 +8,7 @@ from uuid import UUID
 
 from geoalchemy2.shape import from_shape, to_shape
 from shapely.geometry import Point
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -20,6 +20,7 @@ from app.modules.properties.models import Property, PropertyPhoto, PropertyStatu
 from app.modules.properties.schemas import (
     GeoPoint,
     HostPublic,
+    PropertyAdminListItem,
     PropertyCreateIn,
     PropertyDetail,
     PropertyListingMetadata,
@@ -187,6 +188,42 @@ async def unpublish(session: AsyncSession, property: Property, user: User) -> Pr
     return property
 
 
+async def remove(session: AsyncSession, property: Property, user: User) -> Property:
+    _ensure_owner(user, property)
+    property.status = PropertyStatus.REMOVED
+    await session.commit()
+    await session.refresh(property)
+    return property
+
+
+async def list_all_for_admin(
+    session: AsyncSession,
+    *,
+    statuses: tuple[PropertyStatus, ...] = (),
+    limit: int,
+    offset: int,
+) -> list[Property]:
+    stmt = (
+        select(Property)
+        .options(selectinload(Property.photos).selectinload(PropertyPhoto.media))
+        .order_by(Property.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    if statuses:
+        stmt = stmt.where(Property.status.in_(statuses))
+    return list((await session.execute(stmt)).scalars().all())
+
+
+async def count_all_for_admin(
+    session: AsyncSession, *, statuses: tuple[PropertyStatus, ...] = ()
+) -> int:
+    stmt = select(func.count()).select_from(Property)
+    if statuses:
+        stmt = stmt.where(Property.status.in_(statuses))
+    return int((await session.execute(stmt)).scalar_one())
+
+
 async def get(session: AsyncSession, property_id: UUID) -> Property:
     stmt = (
         select(Property)
@@ -253,6 +290,24 @@ async def to_detail(property: Property, host: User) -> PropertyDetail:
         status=property.status,
         host=HostPublic.model_validate(host),
         photos=photos,
+        created_at=property.created_at,
+        published_at=property.published_at,
+    )
+
+
+async def to_admin_list_item(property: Property) -> "PropertyAdminListItem":
+    cover = property.photos[0] if property.photos else None
+    return PropertyAdminListItem(
+        id=property.id,
+        title=property.title,
+        property_type=property.property_type,
+        city=property.city,
+        country_code=property.country_code,
+        status=property.status,
+        base_price=Money(
+            amount=property.base_price_amount, currency=Currency(property.base_price_currency)
+        ),
+        cover_photo=await media_to_public(cover.media) if cover else None,
         created_at=property.created_at,
         published_at=property.published_at,
     )

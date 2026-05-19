@@ -16,12 +16,24 @@ from app.modules.properties import search as search_mod
 from app.modules.properties import service
 from app.modules.properties.schemas import (
     AttachPhotoIn,
+    PhotoAttachOut,
     PropertyCreateIn,
     PropertyDetail,
     PropertyUpdateIn,
     SearchOut,
 )
 from app.modules.users.models import User
+
+
+async def _detail_with_host(session: DbSession, prop, user: User) -> PropertyDetail:
+    """Build a PropertyDetail using the property's actual host, not the
+    acting user. Matters when an admin acts on a property owned by someone
+    else — `to_detail(prop, user)` would mislabel the admin as the host."""
+    host = await session.get(User, prop.host_id)
+    if host is None:
+        raise NotFoundError(code="host.not_found")
+    return await service.to_detail(prop, host)
+
 
 router = APIRouter(prefix="/properties", tags=["properties"])
 
@@ -93,8 +105,7 @@ async def update_property(
 ) -> PropertyDetail:
     prop = await service.get(session, property_id)
     await service.update(session, prop, user, body)
-    fresh = await service.get(session, property_id)
-    return await service.to_detail(fresh, user)
+    return await _detail_with_host(session, prop, user)
 
 
 @router.post("/{property_id}/publish", response_model=PropertyDetail)
@@ -103,8 +114,7 @@ async def publish_property(
 ) -> PropertyDetail:
     prop = await service.get(session, property_id)
     await service.publish(session, prop, user)
-    fresh = await service.get(session, property_id)
-    return await service.to_detail(fresh, user)
+    return await _detail_with_host(session, prop, user)
 
 
 @router.post("/{property_id}/unpublish", response_model=PropertyDetail)
@@ -113,19 +123,31 @@ async def unpublish_property(
 ) -> PropertyDetail:
     prop = await service.get(session, property_id)
     await service.unpublish(session, prop, user)
-    fresh = await service.get(session, property_id)
-    return await service.to_detail(fresh, user)
+    return await _detail_with_host(session, prop, user)
 
 
-@router.post("/{property_id}/photos", status_code=status.HTTP_201_CREATED)
+@router.post("/{property_id}/remove", response_model=PropertyDetail)
+async def remove_property(
+    property_id: UUID, user: CurrentUser, session: DbSession
+) -> PropertyDetail:
+    prop = await service.get(session, property_id)
+    await service.remove(session, prop, user)
+    return await _detail_with_host(session, prop, user)
+
+
+@router.post(
+    "/{property_id}/photos",
+    response_model=PhotoAttachOut,
+    status_code=status.HTTP_201_CREATED,
+)
 async def attach_photo(
     property_id: UUID, body: AttachPhotoIn, user: CurrentUser, session: DbSession
-) -> dict:
+) -> PhotoAttachOut:
     prop = await service.get(session, property_id)
     photo = await service.attach_photo(
         session, prop, user, media_id=body.media_id, position=body.position
     )
-    return {"id": str(photo.id), "position": photo.position}
+    return PhotoAttachOut(id=photo.id, position=photo.position)
 
 
 @router.delete("/{property_id}/photos/{photo_id}", status_code=status.HTTP_204_NO_CONTENT)

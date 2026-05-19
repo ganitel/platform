@@ -1,6 +1,10 @@
 import { apiClient } from "@/shared/api/client";
 import type {
+  AdminListOut,
+  PropertyCreateInput,
   PropertyDetail,
+  PropertyStatus,
+  PropertyUpdateInput,
   SearchFilters,
   SearchOut,
 } from "@/features/properties/types";
@@ -16,5 +20,50 @@ export async function searchProperties(
 
 export async function getProperty(id: string): Promise<PropertyDetail> {
   const r = await apiClient.get<PropertyDetail>(`/properties/${id}`);
+  return r.data;
+}
+
+export interface AdminListParams {
+  status?: PropertyStatus[];
+  limit?: number;
+  offset?: number;
+}
+
+export async function listAdminProperties(
+  params: AdminListParams = {},
+): Promise<AdminListOut> {
+  const r = await apiClient.get<AdminListOut>("/admin/properties", {
+    params: params as Record<string, unknown>,
+  });
+  return r.data;
+}
+
+export async function createProperty(
+  body: PropertyCreateInput,
+): Promise<PropertyDetail> {
+  const r = await apiClient.post<PropertyDetail>("/properties", body);
+  return r.data;
+}
+
+export async function updateProperty(
+  id: string,
+  body: PropertyUpdateInput,
+): Promise<PropertyDetail> {
+  const r = await apiClient.patch<PropertyDetail>(`/properties/${id}`, body);
+  return r.data;
+}
+
+export async function publishProperty(id: string): Promise<PropertyDetail> {
+  const r = await apiClient.post<PropertyDetail>(`/properties/${id}/publish`);
+  return r.data;
+}
+
+export async function unpublishProperty(id: string): Promise<PropertyDetail> {
+  const r = await apiClient.post<PropertyDetail>(`/properties/${id}/unpublish`);
+  return r.data;
+}
+
+export async function removeProperty(id: string): Promise<PropertyDetail> {
+  const r = await apiClient.post<PropertyDetail>(`/properties/${id}/remove`);
   return r.data;
 }
