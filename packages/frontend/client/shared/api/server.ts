@@ -2,19 +2,15 @@
  * Server-only fetch helper for route `loader` / `action` functions.
  *
  * Routes call this; components must keep using `apiClient` from `./client`.
- * Why a separate helper:
- *   - relative URLs can't resolve at request time on the SSR server
- *   - native fetch is plenty (no axios in the server bundle)
- *
- * The internal API URL is configurable via `INTERNAL_API_URL`. In prod, point
- * it at a private backend hostname (no public DNS hop). Defaults to the dev
- * backend port for local work.
+ * SSR loaders run on a server (Vercel function in prod) — no browser origin to
+ * ride, so they need the absolute backend URL via `API_BASE_URL`. Defaults to
+ * the dev backend port for local work.
  */
 
 import { createSupabaseServerClient } from "@/lib/supabase.server";
 
 const baseUrl = (
-  globalThis.process?.env?.INTERNAL_API_URL ?? "http://localhost:8000/api"
+  globalThis.process?.env?.API_BASE_URL ?? "http://localhost:8000/api"
 ).replace(/\/+$/, "");
 
 /**
