@@ -660,6 +660,151 @@ const dict = {
     fr: "Ce membre est déjà approuvé et visible sur la page À propos. Pour le désactiver, utilisez l'outil d'administration.",
     en: "This member is already approved and visible on the About page. Use admin tooling to deactivate.",
   },
+
+  "admin.brand": { fr: "Ganitel", en: "Ganitel" },
+  "admin.shell.eyebrow": { fr: "Backoffice", en: "Backoffice" },
+  "admin.shell.mode": { fr: "Mode admin", en: "Admin mode" },
+  "admin.shell.exit": { fr: "Quitter vers le site", en: "Back to the site" },
+  "admin.nav.overview": { fr: "Vue d'ensemble", en: "Overview" },
+  "admin.nav.rentals": { fr: "Hébergements", en: "Stays" },
+  "admin.nav.experiences": { fr: "Expériences", en: "Experiences" },
+
+  "admin.filter.label": { fr: "Filtrer", en: "Filter" },
+  "admin.filter.reset": { fr: "Tout réinitialiser", en: "Reset filters" },
+  "admin.status.draft": { fr: "Brouillon", en: "Draft" },
+  "admin.status.published": { fr: "Publié", en: "Published" },
+  "admin.status.unlisted": { fr: "Masqué", en: "Unlisted" },
+  "admin.status.removed": { fr: "Supprimé", en: "Removed" },
+
+  "admin.action.edit": { fr: "Modifier", en: "Edit" },
+  "admin.action.publish": { fr: "Publier", en: "Publish" },
+  "admin.action.unpublish": { fr: "Masquer", en: "Unlist" },
+  "admin.action.delete": { fr: "Supprimer", en: "Delete" },
+  "admin.action.prev": { fr: "← Précédent", en: "← Previous" },
+  "admin.action.next": { fr: "Suivant →", en: "Next →" },
+  "admin.pagination.of": { fr: "sur", en: "of" },
+
+  "admin.state.loading": { fr: "Chargement…", en: "Loading…" },
+  "admin.state.error_prefix": {
+    fr: "Erreur de chargement :",
+    en: "Failed to load:",
+  },
+  "admin.confirm.delete": {
+    fr: "Supprimer « {title} » ?",
+    en: 'Delete "{title}"?',
+  },
+
+  "admin.meta.dashboard": { fr: "Admin — Ganitel", en: "Admin — Ganitel" },
+  "admin.meta.rentals": {
+    fr: "Admin — Hébergements",
+    en: "Admin — Stays",
+  },
+  "admin.meta.experiences": {
+    fr: "Admin — Expériences",
+    en: "Admin — Experiences",
+  },
+
+  "admin.dashboard.eyebrow": { fr: "Backoffice", en: "Backoffice" },
+  "admin.dashboard.title": { fr: "Tableau de bord", en: "Dashboard" },
+  "admin.dashboard.description": {
+    fr: "Vue d'ensemble du catalogue Ganitel — logements et expériences confondus.",
+    en: "Overview of the Ganitel catalog — stays and experiences combined.",
+  },
+  "admin.stats.catalog": { fr: "Au catalogue", en: "In catalog" },
+  "admin.stats.catalog_sub": {
+    fr: "Logements + expériences",
+    en: "Stays + experiences",
+  },
+  "admin.stats.published": { fr: "Publiés", en: "Published" },
+  "admin.stats.published_sub": { fr: "Visibles en ligne", en: "Live on site" },
+  "admin.stats.drafts": { fr: "Brouillons", en: "Drafts" },
+  "admin.stats.drafts_sub": { fr: "À finaliser", en: "To finish" },
+  "admin.stats.unlisted": { fr: "Masqués", en: "Unlisted" },
+  "admin.stats.unlisted_sub": {
+    fr: "Retirés du site",
+    en: "Hidden from site",
+  },
+
+  "admin.section.rentals.eyebrow": { fr: "Hébergements", en: "Stays" },
+  "admin.section.rentals.title": {
+    fr: "Logements & séjours",
+    en: "Homes & stays",
+  },
+  "admin.section.rentals.description": {
+    fr: "Villas, studios, maisons d'hôtes. Édition, publication, retrait du catalogue.",
+    en: "Villas, studios, guesthouses. Edit, publish, remove from the catalog.",
+  },
+  "admin.section.experiences.eyebrow": {
+    fr: "Expériences",
+    en: "Experiences",
+  },
+  "admin.section.experiences.title": {
+    fr: "Activités & escapades",
+    en: "Activities & escapes",
+  },
+  "admin.section.experiences.description": {
+    fr: "Visites, ateliers, immersions. Suivi des statuts et accès direct aux fiches.",
+    en: "Tours, workshops, immersions. Track statuses and jump straight to records.",
+  },
+
+  "admin.section.total": { fr: "Total", en: "Total" },
+  "admin.section.published": { fr: "Publiés", en: "Published" },
+  "admin.section.drafts": { fr: "Brouillons", en: "Drafts" },
+  "admin.section.hidden": { fr: "Retirés", en: "Hidden" },
+
+  "admin.rentals.eyebrow": { fr: "Catalogue", en: "Catalog" },
+  "admin.rentals.title": { fr: "Hébergements", en: "Stays" },
+  "admin.rentals.description": {
+    fr: "Tous les logements Ganitel — brouillons, publiés et archivés.",
+    en: "All Ganitel stays — drafts, published, and archived.",
+  },
+  "admin.rentals.add": {
+    fr: "Ajouter un hébergement",
+    en: "Add a stay",
+  },
+  "admin.rentals.empty.title": {
+    fr: "Aucun hébergement pour le moment",
+    en: "No stays yet",
+  },
+  "admin.rentals.empty.description": {
+    fr: "Crée ton premier logement pour qu'il apparaisse ici.",
+    en: "Create your first stay and it will appear here.",
+  },
+  "admin.rentals.col.title": { fr: "Hébergement", en: "Stay" },
+  "admin.rentals.col.location": { fr: "Lieu", en: "Location" },
+  "admin.rentals.col.type": { fr: "Type", en: "Type" },
+  "admin.rentals.col.price": { fr: "Prix / nuit", en: "Price / night" },
+  "admin.rentals.col.status": { fr: "Statut", en: "Status" },
+  "admin.rentals.col.actions": { fr: "Actions", en: "Actions" },
+
+  "admin.experiences.eyebrow": { fr: "Catalogue", en: "Catalog" },
+  "admin.experiences.title": { fr: "Expériences", en: "Experiences" },
+  "admin.experiences.description": {
+    fr: "Toutes les activités Ganitel — visites, ateliers et escapades.",
+    en: "All Ganitel activities — tours, workshops, and escapes.",
+  },
+  "admin.experiences.add": {
+    fr: "Ajouter une expérience",
+    en: "Add an experience",
+  },
+  "admin.experiences.empty.title": {
+    fr: "Aucune expérience pour le moment",
+    en: "No experiences yet",
+  },
+  "admin.experiences.empty.description": {
+    fr: "Crée ta première expérience pour qu'elle apparaisse ici.",
+    en: "Create your first experience and it will appear here.",
+  },
+  "admin.experiences.col.title": { fr: "Expérience", en: "Experience" },
+  "admin.experiences.col.location": { fr: "Lieu", en: "Location" },
+  "admin.experiences.col.type": { fr: "Type", en: "Type" },
+  "admin.experiences.col.duration": { fr: "Durée", en: "Duration" },
+  "admin.experiences.col.price": { fr: "Prix", en: "Price" },
+  "admin.experiences.col.status": { fr: "Statut", en: "Status" },
+  "admin.experiences.col.actions": { fr: "Actions", en: "Actions" },
+
+  "admin.duration.min_short": { fr: "min", en: "min" },
+  "admin.duration.hour_short": { fr: "h", en: "h" },
 } satisfies Dict;
 
 export type TranslationKey = keyof typeof dict;
