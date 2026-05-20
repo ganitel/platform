@@ -8,8 +8,7 @@ import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
-import { getServerToken } from "@/shared/api/server";
-import { serverFetch } from "@/shared/api/server";
+import { getServerToken, serverFetch } from "@/shared/api/server";
 import type { UserMe } from "@/features/auth/api/me";
 import { apiClient } from "@/shared/api/client";
 import { getSupabase } from "@/lib/supabase";
@@ -22,9 +21,13 @@ export const meta: Route.MetaFunction = () => [
 export async function loader({ request }: Route.LoaderArgs) {
   const token = await getServerToken(request);
   if (!token) return redirect("/sign-in");
-  const me = await serverFetch<UserMe>("/me", { token });
-  // If display_name is already set, redirect away.
-  if (me.display_name) return redirect("/");
+  try {
+    const me = await serverFetch<UserMe>("/me", { token });
+    if (me.display_name) return redirect("/");
+  } catch {
+    // Fall through to render the form so a failing /me never produces a 500;
+    // PATCH /me on submit will surface the real error if auth is broken.
+  }
   return null;
 }
 

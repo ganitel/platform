@@ -6,7 +6,7 @@ or any external service. If a fixture needs a DB URL, add it under
 """
 
 import pytest
-from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric import ec, rsa
 
 
 @pytest.fixture
@@ -16,4 +16,11 @@ def rsa_keypair():
         public_exponent=65537,
         key_size=2048,
     )
+    return private_key, private_key.public_key()
+
+
+@pytest.fixture
+def ec_keypair():
+    """Generate a one-time EC P-256 key pair (matches Supabase asymmetric-key default)."""
+    private_key = ec.generate_private_key(ec.SECP256R1())
     return private_key, private_key.public_key()
