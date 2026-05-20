@@ -13,7 +13,7 @@ from fastapi import APIRouter, Query
 from app.core.deps import CurrentAdmin, DbSession
 from app.modules.experiences import service
 from app.modules.experiences.models import ExperienceStatus
-from app.modules.experiences.schemas import AdminListOut
+from app.modules.experiences.schemas import AdminListOut, AdminStatusSummary
 
 router = APIRouter(prefix="/admin/experiences", tags=["experiences", "admin"])
 
@@ -31,3 +31,11 @@ async def admin_list_experiences(
     total = await service.count_all_for_admin(session, statuses=statuses)
     items = await asyncio.gather(*(service.to_admin_list_item(e) for e in rows))
     return AdminListOut(items=list(items), total=total, limit=limit, offset=offset)
+
+
+@router.get("/summary", response_model=AdminStatusSummary)
+async def admin_experiences_summary(
+    admin: CurrentAdmin,
+    session: DbSession,
+) -> AdminStatusSummary:
+    return await service.status_summary(session)

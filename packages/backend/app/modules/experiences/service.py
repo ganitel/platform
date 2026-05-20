@@ -22,6 +22,7 @@ from app.modules.experiences.models import (
     ExperienceStatus,
 )
 from app.modules.experiences.schemas import (
+    AdminStatusSummary,
     ExperienceAdminListItem,
     ExperienceCreateIn,
     ExperienceDetail,
@@ -158,6 +159,19 @@ async def count_all_for_admin(
     if statuses:
         stmt = stmt.where(Experience.status.in_(statuses))
     return int((await session.execute(stmt)).scalar_one())
+
+
+async def status_summary(session: AsyncSession) -> AdminStatusSummary:
+    stmt = select(Experience.status, func.count()).group_by(Experience.status)
+    rows = (await session.execute(stmt)).all()
+    by_status = {status.value: int(count) for status, count in rows}
+    return AdminStatusSummary(
+        draft=by_status.get(ExperienceStatus.DRAFT.value, 0),
+        published=by_status.get(ExperienceStatus.PUBLISHED.value, 0),
+        unlisted=by_status.get(ExperienceStatus.UNLISTED.value, 0),
+        removed=by_status.get(ExperienceStatus.REMOVED.value, 0),
+        total=sum(by_status.values()),
+    )
 
 
 async def get(session: AsyncSession, experience_id: UUID) -> Experience:

@@ -15,6 +15,22 @@ export function formatMoney(money: Money, locale: Locale): string {
   }).format(value);
 }
 
+/**
+ * Locale-aware integer formatter for prices rendered next to a separate
+ * currency badge (admin tables). Returns the raw string on non-numeric input
+ * so the caller never displays "NaN".
+ */
+export function formatPriceAmount(
+  amount: number | string,
+  locale: Locale,
+): string {
+  const n = typeof amount === "string" ? Number(amount) : amount;
+  if (!Number.isFinite(n)) return String(amount);
+  return new Intl.NumberFormat(localeMap[locale], {
+    maximumFractionDigits: 0,
+  }).format(n);
+}
+
 export function formatDate(date: string | Date, locale: Locale): string {
   const d = typeof date === "string" ? new Date(date) : date;
   return new Intl.DateTimeFormat(localeMap[locale], {

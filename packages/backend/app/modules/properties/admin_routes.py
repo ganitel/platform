@@ -13,7 +13,7 @@ from fastapi import APIRouter, Query
 from app.core.deps import CurrentAdmin, DbSession
 from app.modules.properties import service
 from app.modules.properties.models import PropertyStatus
-from app.modules.properties.schemas import AdminListOut
+from app.modules.properties.schemas import AdminListOut, AdminStatusSummary
 
 router = APIRouter(prefix="/admin/properties", tags=["properties", "admin"])
 
@@ -31,3 +31,11 @@ async def admin_list_properties(
     total = await service.count_all_for_admin(session, statuses=statuses)
     items = await asyncio.gather(*(service.to_admin_list_item(p) for p in rows))
     return AdminListOut(items=list(items), total=total, limit=limit, offset=offset)
+
+
+@router.get("/summary", response_model=AdminStatusSummary)
+async def admin_properties_summary(
+    admin: CurrentAdmin,
+    session: DbSession,
+) -> AdminStatusSummary:
+    return await service.status_summary(session)

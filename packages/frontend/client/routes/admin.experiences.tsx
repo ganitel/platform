@@ -1,7 +1,25 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { Link } from "react-router";
+import { Eye, EyeOff, Pencil, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 
+import { AdminShell } from "@/features/admin/admin-shell";
+import {
+  AdminCell,
+  AdminCellTitle,
+  AdminPagination,
+  AdminRow,
+  AdminTable,
+  type AdminColumn,
+} from "@/features/admin/admin-table";
+import {
+  ActionButton,
+  ActionLink,
+  AdminCard,
+  EmptyState,
+  FilterChip,
+  StatusPill,
+  useAdminStatusLabel,
+} from "@/features/admin/admin-ui";
 import {
   listAdminExperiences,
   publishExperience,
@@ -12,11 +30,27 @@ import type {
   ExperienceAdminListItem,
   ExperienceStatus,
 } from "@/features/experiences/types";
+import { useExperienceTypeLabel } from "@/features/reference/hooks";
 import { AdminGuard } from "@/shared/components/admin-guard";
+import { formatPriceAmount } from "@/shared/lib/format";
+import { transformImage } from "@/shared/lib/image";
+import {
+  localeFromAcceptLanguage,
+  t,
+  useLocale,
+  useT,
+  type TranslationKey,
+} from "@/shared/lib/i18n";
 import type { Route } from "./+types/admin.experiences";
 
-export const meta: Route.MetaFunction = () => [
-  { title: "Admin — Expériences" },
+export async function loader({ request }: Route.LoaderArgs) {
+  return {
+    locale: localeFromAcceptLanguage(request.headers.get("Accept-Language")),
+  };
+}
+
+export const meta: Route.MetaFunction = ({ data }) => [
+  { title: t("admin.meta.experiences", data?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 
@@ -27,22 +61,9 @@ const ALL_STATUSES: ExperienceStatus[] = [
   "unlisted",
   "removed",
 ];
+
 const adminExperiencesKey = (offset: number, statuses: ExperienceStatus[]) =>
   ["admin", "experiences", { offset, limit: PAGE_SIZE, statuses }] as const;
-
-const STATUS_LABEL: Record<ExperienceStatus, string> = {
-  draft: "Brouillon",
-  published: "Publié",
-  unlisted: "Masqué",
-  removed: "Supprimé",
-};
-
-const STATUS_CLASS: Record<ExperienceStatus, string> = {
-  draft: "bg-yellow-100 text-yellow-800",
-  published: "bg-green-100 text-green-800",
-  unlisted: "bg-gray-200 text-gray-700",
-  removed: "bg-red-100 text-red-800",
-};
 
 export default function AdminExperiencesRoute() {
   return (
@@ -53,6 +74,8 @@ export default function AdminExperiencesRoute() {
 }
 
 function AdminExperiencesPage() {
+  const tr = useT();
+  const statusLabel = useAdminStatusLabel();
   const [offset, setOffset] = useState(0);
   const [statuses, setStatuses] = useState<ExperienceStatus[]>([]);
   const query = useQuery({
@@ -65,6 +88,40 @@ function AdminExperiencesPage() {
       }),
   });
 
+  const columns: AdminColumn[] = useMemo(
+    () => [
+      { key: "title", label: tr("admin.experiences.col.title"), width: "auto" },
+      {
+        key: "location",
+        label: tr("admin.experiences.col.location"),
+        width: "180px",
+      },
+      { key: "type", label: tr("admin.experiences.col.type"), width: "140px" },
+      {
+        key: "duration",
+        label: tr("admin.experiences.col.duration"),
+        width: "110px",
+      },
+      {
+        key: "price",
+        label: tr("admin.experiences.col.price"),
+        width: "140px",
+      },
+      {
+        key: "status",
+        label: tr("admin.experiences.col.status"),
+        width: "130px",
+      },
+      {
+        key: "actions",
+        label: tr("admin.experiences.col.actions"),
+        width: "320px",
+        align: "right",
+      },
+    ],
+    [tr],
+  );
+
   function toggleStatus(s: ExperienceStatus) {
     setOffset(0);
     setStatuses((prev) =>
@@ -73,69 +130,85 @@ function AdminExperiencesPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      <header className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-ganitel-text-title">
-            Expériences
-          </h1>
-          <p className="mt-1 text-sm text-ganitel-text-body">
-            Backoffice Ganitel — toutes les expériences, tous statuts confondus.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Link
-            to="/admin"
-            className="rounded-xl border border-ganitel-stroke-neutral px-4 py-2 text-sm font-medium text-ganitel-text-body hover:bg-ganitel-neutral-1"
+    <AdminShell
+      eyebrow={tr("admin.experiences.eyebrow")}
+      title={tr("admin.experiences.title")}
+      description={tr("admin.experiences.description")}
+      actions={
+        <ActionLink
+          to="/admin/experiences/new"
+          tone="primary"
+          icon={<Plus className="size-3.5" strokeWidth={2} />}
+        >
+          {tr("admin.experiences.add")}
+        </ActionLink>
+      }
+    >
+      <div className="mb-6 flex flex-wrap items-center gap-2">
+        <span className="mr-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-ganitel-text-placeholder">
+          {tr("admin.filter.label")}
+        </span>
+        {ALL_STATUSES.map((s) => (
+          <FilterChip
+            key={s}
+            status={s}
+            active={statuses.includes(s)}
+            onClick={() => toggleStatus(s)}
           >
-            ← Backoffice
-          </Link>
-          <Link
-            to="/admin/experiences/new"
-            className="rounded-xl bg-ganitel-secondary px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+            {statusLabel(s)}
+          </FilterChip>
+        ))}
+        {statuses.length > 0 ? (
+          <button
+            type="button"
+            onClick={() => {
+              setOffset(0);
+              setStatuses([]);
+            }}
+            className="ml-1 text-xs font-medium text-ganitel-text-subtitle underline-offset-4 hover:text-ganitel-text-title hover:underline"
           >
-            Ajouter une expérience
-          </Link>
-        </div>
-      </header>
-
-      <div className="mb-4 flex flex-wrap gap-2">
-        {ALL_STATUSES.map((s) => {
-          const active = statuses.includes(s);
-          return (
-            <button
-              key={s}
-              type="button"
-              onClick={() => toggleStatus(s)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-                active
-                  ? `${STATUS_CLASS[s]} ring-2 ring-offset-1 ring-ganitel-secondary`
-                  : "bg-ganitel-neutral-1 text-ganitel-text-body hover:bg-ganitel-stroke-neutral"
-              }`}
-            >
-              {STATUS_LABEL[s]}
-            </button>
-          );
-        })}
+            {tr("admin.filter.reset")}
+          </button>
+        ) : null}
       </div>
 
       {query.isPending ? (
-        <p className="text-sm text-ganitel-text-body">Chargement…</p>
+        <AdminCard>
+          <p className="px-6 py-12 text-center text-sm text-ganitel-text-subtitle">
+            {tr("admin.state.loading")}
+          </p>
+        </AdminCard>
       ) : query.isError ? (
-        <p className="text-sm text-red-600">
-          Erreur de chargement:{" "}
-          {query.error instanceof Error
-            ? query.error.message
-            : String(query.error)}
-        </p>
+        <AdminCard>
+          <p className="px-6 py-12 text-center text-sm text-red-600">
+            {tr("admin.state.error_prefix")}{" "}
+            {query.error instanceof Error
+              ? query.error.message
+              : String(query.error)}
+          </p>
+        </AdminCard>
       ) : query.data.total === 0 ? (
-        <p className="text-sm text-ganitel-text-body">
-          Aucune expérience pour le moment.
-        </p>
+        <EmptyState
+          title={tr("admin.experiences.empty.title")}
+          description={tr("admin.experiences.empty.description")}
+          action={
+            <ActionLink
+              to="/admin/experiences/new"
+              tone="primary"
+              icon={<Plus className="size-3.5" strokeWidth={2} />}
+            >
+              {tr("admin.experiences.add")}
+            </ActionLink>
+          }
+        />
       ) : (
         <>
-          <ExperienceTable items={query.data.items} />
-          <Pagination
+          <AdminTable columns={columns}>
+            {query.data.items.map((item) => (
+              <ExperienceRow key={item.id} item={item} />
+            ))}
+          </AdminTable>
+          <AdminPagination
             offset={offset}
             limit={query.data.limit}
             total={query.data.total}
@@ -144,82 +217,15 @@ function AdminExperiencesPage() {
           />
         </>
       )}
-    </div>
-  );
-}
-
-function Pagination({
-  offset,
-  limit,
-  total,
-  shown,
-  onOffsetChange,
-}: {
-  offset: number;
-  limit: number;
-  total: number;
-  shown: number;
-  onOffsetChange: (n: number) => void;
-}) {
-  const from = total === 0 ? 0 : offset + 1;
-  const to = offset + shown;
-  const hasPrev = offset > 0;
-  const hasNext = to < total;
-  return (
-    <div className="mt-4 flex items-center justify-between text-sm text-ganitel-text-body">
-      <span>
-        {from}–{to} sur {total}
-      </span>
-      <div className="flex gap-2">
-        <button
-          type="button"
-          disabled={!hasPrev}
-          onClick={() => onOffsetChange(Math.max(0, offset - limit))}
-          className="rounded-lg border border-ganitel-stroke-neutral px-3 py-1 text-xs font-medium hover:bg-ganitel-neutral-1 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          ← Précédent
-        </button>
-        <button
-          type="button"
-          disabled={!hasNext}
-          onClick={() => onOffsetChange(offset + limit)}
-          className="rounded-lg border border-ganitel-stroke-neutral px-3 py-1 text-xs font-medium hover:bg-ganitel-neutral-1 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Suivant →
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function ExperienceTable({ items }: { items: ExperienceAdminListItem[] }) {
-  return (
-    <div className="overflow-x-auto rounded-xl border border-ganitel-stroke-neutral">
-      <table className="w-full text-sm">
-        <thead className="bg-ganitel-neutral-1 text-left text-xs uppercase tracking-wide text-ganitel-text-body">
-          <tr>
-            <th className="px-4 py-3">Titre</th>
-            <th className="px-4 py-3">Ville</th>
-            <th className="px-4 py-3">Type</th>
-            <th className="px-4 py-3">Durée</th>
-            <th className="px-4 py-3">Prix</th>
-            <th className="px-4 py-3">Statut</th>
-            <th className="px-4 py-3 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-ganitel-stroke-neutral">
-          {items.map((item) => (
-            <ExperienceRow key={item.id} item={item} />
-          ))}
-        </tbody>
-      </table>
-    </div>
+    </AdminShell>
   );
 }
 
 function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
+  const tr = useT();
+  const locale = useLocale();
+  const typeLabel = useExperienceTypeLabel();
   const qc = useQueryClient();
-  // Prefix-match invalidates every paginated/filtered variant of the list.
   const invalidate = () =>
     qc.invalidateQueries({ queryKey: ["admin", "experiences"] });
 
@@ -238,74 +244,107 @@ function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
 
   const isBusy = publish.isPending || unpublish.isPending || remove.isPending;
   const lastError = publish.error ?? unpublish.error ?? remove.error ?? null;
+  const cover = item.cover_photo
+    ? {
+        url: transformImage(item.cover_photo.url, { width: 120, quality: 70 }),
+        alt: item.title,
+      }
+    : null;
 
   return (
-    <tr className={isBusy ? "opacity-60" : undefined}>
-      <td className="px-4 py-3 font-medium text-ganitel-text-title">
-        {item.title}
-      </td>
-      <td className="px-4 py-3">
-        {item.city}, {item.country_code}
-      </td>
-      <td className="px-4 py-3">{item.experience_type}</td>
-      <td className="px-4 py-3">{item.duration_minutes} min</td>
-      <td className="px-4 py-3">
-        {item.base_price.amount} {item.base_price.currency}
-      </td>
-      <td className="px-4 py-3">
-        <span
-          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_CLASS[item.status]}`}
-        >
-          {STATUS_LABEL[item.status]}
+    <AdminRow isBusy={isBusy}>
+      <AdminCell>
+        <AdminCellTitle title={item.title} cover={cover} />
+      </AdminCell>
+      <AdminCell>
+        <span className="text-ganitel-text-title">{item.city}</span>
+        <span className="ml-1 text-ganitel-text-placeholder">
+          · {item.country_code}
         </span>
-      </td>
-      <td className="px-4 py-3">
-        <div className="flex justify-end gap-2">
-          <Link
+      </AdminCell>
+      <AdminCell>
+        <span className="inline-flex items-center rounded-full bg-ganitel-neutral-2 px-2.5 py-1 text-xs font-medium text-ganitel-text-subtitle">
+          {typeLabel(item.experience_type)}
+        </span>
+      </AdminCell>
+      <AdminCell>
+        <span className="tabular-nums">
+          {formatDuration(item.duration_minutes, tr)}
+        </span>
+      </AdminCell>
+      <AdminCell>
+        <span className="font-medium tabular-nums text-ganitel-text-title">
+          {formatPriceAmount(item.base_price.amount, locale)}
+        </span>
+        <span className="ml-1 text-xs uppercase tracking-wider text-ganitel-text-placeholder">
+          {item.base_price.currency}
+        </span>
+      </AdminCell>
+      <AdminCell>
+        <StatusPill status={item.status} />
+      </AdminCell>
+      <AdminCell align="right">
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
+          <ActionLink
             to={`/admin/experiences/${item.id}/edit`}
-            className="rounded-lg border border-ganitel-stroke-neutral px-3 py-1 text-xs font-medium text-ganitel-text-body hover:bg-ganitel-neutral-1"
+            icon={<Pencil className="size-3.5" strokeWidth={1.75} />}
           >
-            Modifier
-          </Link>
+            {tr("admin.action.edit")}
+          </ActionLink>
           {(item.status === "draft" || item.status === "unlisted") && (
-            <button
-              type="button"
+            <ActionButton
+              tone="success"
+              icon={<Eye className="size-3.5" strokeWidth={1.75} />}
               onClick={() => publish.mutate()}
               disabled={isBusy}
-              className="rounded-lg border border-green-600 px-3 py-1 text-xs font-medium text-green-700 hover:bg-green-50 disabled:opacity-50"
             >
-              Publier
-            </button>
+              {tr("admin.action.publish")}
+            </ActionButton>
           )}
           {item.status === "published" && (
-            <button
-              type="button"
+            <ActionButton
+              icon={<EyeOff className="size-3.5" strokeWidth={1.75} />}
               onClick={() => unpublish.mutate()}
               disabled={isBusy}
-              className="rounded-lg border border-gray-600 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
-              Masquer
-            </button>
+              {tr("admin.action.unpublish")}
+            </ActionButton>
           )}
           {item.status !== "removed" && (
-            <button
-              type="button"
+            <ActionButton
+              tone="danger"
+              icon={<Trash2 className="size-3.5" strokeWidth={1.75} />}
               onClick={() => {
-                if (confirm(`Supprimer "${item.title}" ?`)) remove.mutate();
+                const msg = tr("admin.confirm.delete").replace(
+                  "{title}",
+                  item.title,
+                );
+                if (confirm(msg)) remove.mutate();
               }}
               disabled={isBusy}
-              className="rounded-lg border border-red-600 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
             >
-              Supprimer
-            </button>
+              {tr("admin.action.delete")}
+            </ActionButton>
           )}
         </div>
-        {lastError && (
-          <p className="mt-1 text-right text-xs text-red-600">
+        {lastError ? (
+          <p className="mt-2 text-right text-xs text-red-600">
             {lastError instanceof Error ? lastError.message : String(lastError)}
           </p>
-        )}
-      </td>
-    </tr>
+        ) : null}
+      </AdminCell>
+    </AdminRow>
   );
+}
+
+function formatDuration(
+  minutes: number,
+  tr: (key: TranslationKey) => string,
+): string {
+  const minShort = tr("admin.duration.min_short");
+  const hourShort = tr("admin.duration.hour_short");
+  if (minutes < 60) return `${minutes} ${minShort}`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? `${h} ${hourShort}` : `${h} ${hourShort} ${m}`;
 }
