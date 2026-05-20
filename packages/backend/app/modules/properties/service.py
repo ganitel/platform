@@ -16,7 +16,13 @@ from app.core.errors import ForbiddenError, NotFoundError, ValidationError
 from app.core.money import Currency, Money
 from app.modules.media.models import Media
 from app.modules.media.service import to_public as media_to_public
-from app.modules.properties.models import Property, PropertyPhoto, PropertyStatus
+from app.modules.properties.models import (
+    KitchenType,
+    ParkingAvailability,
+    Property,
+    PropertyPhoto,
+    PropertyStatus,
+)
 from app.modules.properties.schemas import (
     GeoPoint,
     HostPublic,
@@ -45,13 +51,74 @@ def _ensure_owner(user: User, property: Property) -> None:
         raise ForbiddenError(code="property.not_owner")
 
 
+def can_view_detail(property: Property, user: User | None) -> bool:
+    if property.status == PropertyStatus.PUBLISHED:
+        return True
+    if user is None or user.status != "active":
+        return False
+    return user.is_admin or property.host_id == user.id
+
+
 def _contains_any(values: set[str], candidates: set[str]) -> bool:
     return any(value in values for value in candidates)
 
 
+def _allow_state(values: set[str], allowed: set[str], disallowed: set[str]) -> bool | None:
+    if _contains_any(values, allowed):
+        return True
+    if _contains_any(values, disallowed):
+        return False
+    return None
+
+
+def _normalized_amenities(property: Property) -> set[str]:
+    return {a.strip().lower() for a in property.amenities if a and a.strip()}
+
+
+def _parking_available(property: Property, normalized: set[str]) -> ParkingAvailability:
+    if property.parking_available != ParkingAvailability.NONE:
+        return property.parking_available
+    if "free_parking" in normalized:
+        return ParkingAvailability.FREE
+    if "paid_parking" in normalized:
+        return ParkingAvailability.PAID
+    return property.parking_available
+
+
+def _kitchen_type(property: Property, normalized: set[str]) -> KitchenType:
+    if property.kitchen_type != KitchenType.NONE:
+        return property.kitchen_type
+    if _contains_any(normalized, {"kitchen", "stove"}):
+        return KitchenType.FULL
+    if _contains_any(normalized, {"fridge", "microwave"}):
+        return KitchenType.KITCHENETTE
+    return property.kitchen_type
+
+
+def _bool_with_legacy_amenity(
+    current: bool, normalized: set[str], *, allowed: set[str], disallowed: set[str]
+) -> bool:
+    if current:
+        return True
+    return _allow_state(normalized, allowed, disallowed) is True
+
+
 def _showcase_amenities(property: Property) -> PropertyShowcaseAmenities:
-    amenities = list(property.amenities)
-    normalized = {a.strip().lower() for a in amenities if a and a.strip()}
+    normalized = _normalized_amenities(property)
+    parking_available = _parking_available(property, normalized)
+    kitchen_type = _kitchen_type(property, normalized)
+    smoking_allowed = _bool_with_legacy_amenity(
+        property.smoking_allowed,
+        normalized,
+        allowed={"smoking_allowed", "allows_smoking"},
+        disallowed={"no_smoking", "non_smoking", "smoke_free"},
+    )
+    pets_allowed = _bool_with_legacy_amenity(
+        property.pets_allowed,
+        normalized,
+        allowed={"pets_allowed", "pet_friendly"},
+        disallowed={"no_pets", "pets_not_allowed"},
+    )
     has_wifi = _contains_any(normalized, {"wifi", "wi-fi", "wi_fi", "internet"})
     has_ac = _contains_any(
         normalized,
@@ -63,10 +130,9 @@ def _showcase_amenities(property: Property) -> PropertyShowcaseAmenities:
         "ac": has_ac,
         "gym": has_gym,
         "pool": _contains_any(normalized, {"pool"}),
-        "kitchen": property.kitchen_type != "none" or _contains_any(normalized, {"kitchen"}),
+        "kitchen": kitchen_type != KitchenType.NONE,
         "workspace": _contains_any(normalized, {"workspace", "desk"}),
-        "parking": property.parking_available != "none"
-        or _contains_any(normalized, {"free_parking", "paid_parking", "parking"}),
+        "parking": parking_available != ParkingAvailability.NONE,
         "washer": _contains_any(normalized, {"washer"}),
         "hot_water": _contains_any(normalized, {"hot_water"}),
         "tv": _contains_any(normalized, {"tv"}),
@@ -78,24 +144,35 @@ def _showcase_amenities(property: Property) -> PropertyShowcaseAmenities:
         has_wifi=has_wifi,
         has_ac=has_ac,
         has_gym=has_gym,
-        smoking_allowed=property.smoking_allowed,
-        pets_allowed=property.pets_allowed,
+        smoking_allowed=smoking_allowed,
+        pets_allowed=pets_allowed,
         highlights=highlights,
     )
 
 
 def _listing_metadata(property: Property) -> PropertyListingMetadata:
+    normalized = _normalized_amenities(property)
     return PropertyListingMetadata(
-        parking_available=property.parking_available,
+        parking_available=_parking_available(property, normalized),
         elevator=property.elevator,
         accessible=property.accessible,
         private_bathroom=property.private_bathroom,
-        kitchen_type=property.kitchen_type,
+        kitchen_type=_kitchen_type(property, normalized),
         events_allowed=property.events_allowed,
         family_friendly=property.family_friendly,
         child_friendly=property.child_friendly,
-        pets_allowed=property.pets_allowed,
-        smoking_allowed=property.smoking_allowed,
+        pets_allowed=_bool_with_legacy_amenity(
+            property.pets_allowed,
+            normalized,
+            allowed={"pets_allowed", "pet_friendly"},
+            disallowed={"no_pets", "pets_not_allowed"},
+        ),
+        smoking_allowed=_bool_with_legacy_amenity(
+            property.smoking_allowed,
+            normalized,
+            allowed={"smoking_allowed", "allows_smoking"},
+            disallowed={"no_smoking", "non_smoking", "smoke_free"},
+        ),
         check_in_time=property.check_in_time,
         check_out_time=property.check_out_time,
     )

@@ -8,8 +8,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Query, Response, status
 
-from app.core.cache import PUBLIC_CDN_CACHE
-from app.core.deps import CurrentUser, DbSession
+from app.core.cache import PRIVATE_NO_STORE, PUBLIC_CDN_CACHE
+from app.core.deps import CurrentUser, DbSession, OptionalUser
 from app.core.errors import NotFoundError
 from app.modules.experiences import search as search_mod
 from app.modules.experiences import service
@@ -88,13 +88,17 @@ async def search_experiences(
 
 @router.get("/{experience_id}", response_model=ExperienceDetail)
 async def get_experience(
-    experience_id: UUID, response: Response, session: DbSession
+    experience_id: UUID, response: Response, session: DbSession, viewer: OptionalUser
 ) -> ExperienceDetail:
     exp = await service.get(session, experience_id)
+    if not service.can_view_detail(exp, viewer):
+        raise NotFoundError(code="experience.not_found")
     host = await session.get(User, exp.host_id)
     if host is None:
         raise NotFoundError(code="host.not_found")
-    response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
+    response.headers["Cache-Control"] = (
+        PUBLIC_CDN_CACHE if exp.status == "published" else PRIVATE_NO_STORE
+    )
     return await service.to_detail(exp, host)
 
 

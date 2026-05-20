@@ -9,8 +9,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Query, Response, status
 
-from app.core.cache import PUBLIC_CDN_CACHE
-from app.core.deps import CurrentUser, DbSession
+from app.core.cache import PRIVATE_NO_STORE, PUBLIC_CDN_CACHE
+from app.core.deps import CurrentUser, DbSession, OptionalUser
 from app.core.errors import NotFoundError
 from app.modules.properties import search as search_mod
 from app.modules.properties import service
@@ -90,12 +90,18 @@ async def search_properties(
 
 
 @router.get("/{property_id}", response_model=PropertyDetail)
-async def get_property(property_id: UUID, response: Response, session: DbSession) -> PropertyDetail:
+async def get_property(
+    property_id: UUID, response: Response, session: DbSession, viewer: OptionalUser
+) -> PropertyDetail:
     prop = await service.get(session, property_id)
+    if not service.can_view_detail(prop, viewer):
+        raise NotFoundError(code="property.not_found")
     host = await session.get(User, prop.host_id)
     if host is None:
         raise NotFoundError(code="host.not_found")
-    response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
+    response.headers["Cache-Control"] = (
+        PUBLIC_CDN_CACHE if prop.status == "published" else PRIVATE_NO_STORE
+    )
     return await service.to_detail(prop, host)
 
 

@@ -48,6 +48,14 @@ def _ensure_owner(user: User, experience: Experience) -> None:
         raise ForbiddenError(code="experience.not_owner")
 
 
+def can_view_detail(experience: Experience, user: User | None) -> bool:
+    if experience.status == ExperienceStatus.PUBLISHED:
+        return True
+    if user is None or user.status != "active":
+        return False
+    return user.is_admin or experience.host_id == user.id
+
+
 async def create_draft(
     session: AsyncSession, host: User, payload: ExperienceCreateIn
 ) -> Experience:
