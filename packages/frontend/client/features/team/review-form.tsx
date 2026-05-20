@@ -15,15 +15,10 @@ import {
 } from "@/shared/ui/alert-dialog";
 import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { approveTeamMember, rejectTeamMember } from "@/features/team/api";
-import { LocationAutocomplete } from "@/features/team/location-autocomplete";
+import { AddressAutocomplete } from "@/shared/components/address-autocomplete";
 import { ApiError, extractErrorCode } from "@/shared/api/client";
 import { TEAM_FIELD_ERROR_KEYS } from "@/features/team/error-keys";
-import {
-  TITLE_KEYS,
-  TITLE_LABELS,
-  type LocationPick,
-  type TitleKey,
-} from "@/features/team/types";
+import { TITLE_KEYS, TITLE_LABELS, type TitleKey } from "@/features/team/types";
 import { useT } from "@/shared/lib/i18n";
 import { FieldError } from "@/shared/components/field-error";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
@@ -66,7 +61,7 @@ export function ReviewForm({
     });
   }
   const [name, setName] = useState(member.name);
-  const [location, setLocation] = useState<LocationPick>({
+  const [location, setLocation] = useState<{ city: string; country: string }>({
     city: member.city ?? "",
     country: member.country ?? "",
   });
@@ -204,14 +199,29 @@ export function ReviewForm({
           <FieldError message={fieldErrors.name} />
         </div>
 
-        <LocationAutocomplete
+        <AddressAutocomplete
           inputId="rv-location"
           label={t("add_team.location.label")}
           placeholder={t("add_team.location.placeholder")}
-          initialCity={location.city}
-          initialCountry={location.country}
+          granularity="place"
+          initial={
+            location.city
+              ? {
+                  address: `${location.city}, ${location.country}`,
+                  city: location.city,
+                  country: location.country,
+                  country_code: "",
+                  lat: 0,
+                  lng: 0,
+                }
+              : null
+          }
           onChange={(pick) => {
-            setLocation(pick ?? { city: "", country: "" });
+            setLocation(
+              pick
+                ? { city: pick.city, country: pick.country }
+                : { city: "", country: "" },
+            );
             clearFieldError("city", "country");
           }}
         />

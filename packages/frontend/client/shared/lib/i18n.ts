@@ -675,6 +675,59 @@ const dict = {
     fr: "Rien à prévisualiser pour l'instant.",
     en: "Nothing to preview yet.",
   },
+
+  "admin.location.label": { fr: "Adresse", en: "Address" },
+  "admin.location.placeholder": {
+    fr: "Commencez à taper, ex. Rue Joseph, Douala",
+    en: "Start typing, e.g. Rue Joseph, Douala",
+  },
+  "admin.location.plus_code.show": {
+    fr: "Pas d'adresse ? Coller un Plus Code",
+    en: "No address? Paste a Plus Code",
+  },
+  "admin.location.plus_code.hide": {
+    fr: "Masquer le Plus Code",
+    en: "Hide Plus Code",
+  },
+  "admin.location.plus_code.label": { fr: "Plus Code", en: "Plus Code" },
+  "admin.location.plus_code.hint": {
+    fr: "Code court avec ville (ex. XWPP+5M Kribi, Cameroun) ou code complet (ex. 5GVGXWPP+5M). Copiable depuis Google Maps.",
+    en: "Short code with city (e.g. XWPP+5M Kribi, Cameroon) or full code (e.g. 5GVGXWPP+5M). Copyable from Google Maps.",
+  },
+  "admin.location.plus_code.placeholder": {
+    fr: "XWPP+5M Kribi, Cameroun",
+    en: "XWPP+5M Kribi, Cameroon",
+  },
+  "admin.location.plus_code.resolve": { fr: "Résoudre", en: "Resolve" },
+  "admin.location.plus_code.resolving": { fr: "Résolution…", en: "Resolving…" },
+  "admin.location.plus_code.error.empty": {
+    fr: "Saisissez un Plus Code.",
+    en: "Enter a Plus Code.",
+  },
+  "admin.location.plus_code.error.invalid": {
+    fr: "Plus Code invalide. Vérifiez le format.",
+    en: "Invalid Plus Code. Check the format.",
+  },
+  "admin.location.plus_code.error.short_needs_locality": {
+    fr: "Code court : ajoutez une ville (ex. XWPP+5M Kribi, Cameroun).",
+    en: "Short code: add a city (e.g. XWPP+5M Kribi, Cameroon).",
+  },
+  "admin.location.plus_code.error.locality_not_found": {
+    fr: "Ville introuvable. Essayez d'orthographier différemment.",
+    en: "City not found. Try a different spelling.",
+  },
+  "admin.location.plus_code.error.network": {
+    fr: "Échec réseau. Vérifiez votre connexion et réessayez.",
+    en: "Network failure. Check your connection and retry.",
+  },
+  "admin.location.plus_code.error.reverse": {
+    fr: "Impossible d'identifier la ville pour ce point.",
+    en: "Couldn't identify a city for this point.",
+  },
+  "admin.location.plus_code.error.lib": {
+    fr: "Décodeur Plus Code indisponible.",
+    en: "Plus Code decoder unavailable.",
+  },
 } satisfies Dict;
 
 export type TranslationKey = keyof typeof dict;

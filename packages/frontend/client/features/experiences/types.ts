@@ -12,6 +12,7 @@ export interface ExperiencePublic {
   id: string;
   title: string;
   experience_type: string;
+  address: string | null;
   city: string;
   country_code: string;
   location: GeoPoint;
@@ -44,6 +45,7 @@ export interface ExperienceCreateInput {
   title: string;
   description?: string;
   experience_type: string;
+  address?: string | null;
   city: string;
   country_code: string;
   location: GeoPoint;

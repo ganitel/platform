@@ -64,6 +64,7 @@ class Experience(Base):
     description: Mapped[str] = mapped_column(Text(), nullable=False, server_default="")
     experience_type: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
 
+    address: Mapped[str | None] = mapped_column(String(300))
     city: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
     country_code: Mapped[str] = mapped_column(String(2), nullable=False, index=True)
     location: Mapped[Any] = mapped_column(

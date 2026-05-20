@@ -34,6 +34,7 @@ class PropertyCreateIn(BaseModel):
     title: str = Field(..., min_length=3, max_length=180)
     description: str = Field(default="", max_length=10_000)
     property_type: str = Field(..., min_length=2, max_length=40)
+    address: str | None = Field(default=None, max_length=300)
     city: str = Field(..., min_length=1, max_length=120)
     country_code: CountryCode
     location: GeoPoint
@@ -74,6 +75,7 @@ class PropertyUpdateIn(BaseModel):
     title: str = Field(default="", min_length=3, max_length=180)
     description: str = Field(default="", max_length=10_000)
     property_type: str = ""
+    address: str | None = Field(default=None, max_length=300)
     city: str = ""
     country_code: CountryCode = "CM"
     location: GeoPoint | None = None
@@ -147,6 +149,7 @@ class PropertyPublic(BaseModel):
     id: UUID
     title: str
     property_type: str
+    address: str | None
     city: str
     country_code: CountryCode
     location: GeoPoint
