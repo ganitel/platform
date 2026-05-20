@@ -258,3 +258,108 @@
     max-width: 87.5rem;
   }
 }
+
+.ganitel-prose {
+  color: var(--color-ganitel-text-subtitle);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+.ganitel-prose > * + * {
+  margin-top: 1em;
+}
+.ganitel-prose h1,
+.ganitel-prose h2,
+.ganitel-prose h3,
+.ganitel-prose h4 {
+  color: var(--color-ganitel-text-title);
+  font-family: "Bricolage Grotesque", "Helvetica Neue", sans-serif;
+  font-variation-settings: "wdth" 85;
+  line-height: 1.2;
+  margin-top: 1.6em;
+}
+.ganitel-prose h2 {
+  font-size: 1.375rem;
+}
+.ganitel-prose h3 {
+  font-size: 1.125rem;
+}
+.ganitel-prose h4 {
+  font-size: 1rem;
+}
+.ganitel-prose strong {
+  color: var(--color-ganitel-text-title);
+  font-weight: 600;
+}
+.ganitel-prose em {
+  font-style: italic;
+}
+.ganitel-prose a {
+  color: var(--color-ganitel-text-title);
+  text-decoration: underline;
+  text-decoration-color: var(--color-ganitel-secondary);
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1.5px;
+  transition: text-decoration-color 150ms ease-out;
+}
+.ganitel-prose a:hover {
+  text-decoration-color: var(--color-ganitel-text-title);
+}
+.ganitel-prose ul,
+.ganitel-prose ol {
+  padding-left: 1.5em;
+}
+.ganitel-prose ul {
+  list-style: disc;
+}
+.ganitel-prose ol {
+  list-style: decimal;
+}
+.ganitel-prose li + li {
+  margin-top: 0.35em;
+}
+.ganitel-prose blockquote {
+  border-left: 3px solid var(--color-ganitel-secondary);
+  padding-left: 1em;
+  color: var(--color-ganitel-text-subtitle);
+  font-style: italic;
+}
+.ganitel-prose code {
+  background-color: var(--color-ganitel-neutral-2);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  font-size: 0.85em;
+}
+.ganitel-prose pre {
+  background-color: var(--color-ganitel-neutral-2);
+  border-radius: 8px;
+  padding: 0.85em 1em;
+  overflow-x: auto;
+}
+.ganitel-prose pre code {
+  background: none;
+  padding: 0;
+}
+.ganitel-prose hr {
+  border: 0;
+  border-top: 1px solid var(--color-ganitel-stroke-neutral);
+  margin: 2em 0;
+}
+.ganitel-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.ganitel-prose th,
+.ganitel-prose td {
+  border-bottom: 1px solid var(--color-ganitel-stroke-neutral);
+  padding: 0.5em 0.75em;
+  text-align: left;
+}
+.ganitel-prose th {
+  color: var(--color-ganitel-text-title);
+  font-weight: 600;
+}
+.ganitel-prose del {
+  text-decoration: line-through;
+  color: var(--color-ganitel-text-placeholder);
+}

@@ -660,6 +660,21 @@ const dict = {
     fr: "Ce membre est déjà approuvé et visible sur la page À propos. Pour le désactiver, utilisez l'outil d'administration.",
     en: "This member is already approved and visible on the About page. Use admin tooling to deactivate.",
   },
+
+  "markdown.editor.tabs_label": {
+    fr: "Modes de l'éditeur",
+    en: "Editor modes",
+  },
+  "markdown.editor.write": { fr: "Écrire", en: "Write" },
+  "markdown.editor.preview": { fr: "Aperçu", en: "Preview" },
+  "markdown.editor.hint": {
+    fr: "Markdown pris en charge — **gras**, *italique*, ## titres, listes, [liens](https://exemple.com).",
+    en: "Markdown supported — **bold**, *italic*, ## headings, lists, [links](https://example.com).",
+  },
+  "markdown.editor.empty_preview": {
+    fr: "Rien à prévisualiser pour l'instant.",
+    en: "Nothing to preview yet.",
+  },
 } satisfies Dict;
 
 export type TranslationKey = keyof typeof dict;
