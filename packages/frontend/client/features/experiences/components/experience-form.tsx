@@ -10,6 +10,7 @@ import {
   listCancellationPolicies,
   listExperienceTypes,
 } from "@/features/reference/api";
+import { MarkdownEditor } from "@/shared/components/markdown-editor";
 import { INPUT_CLASS, LABEL_CLASS } from "@/shared/lib/form-styles";
 
 interface FormState {
@@ -131,12 +132,11 @@ export function ExperienceForm({
           />
         </Field>
         <Field label="Description">
-          <textarea
-            rows={4}
+          <MarkdownEditor
+            rows={8}
             maxLength={10000}
             value={form.description}
-            onChange={(e) => update("description", e.target.value)}
-            className={INPUT_CLASS}
+            onChange={(v) => update("description", v)}
           />
         </Field>
         <Field label="Type">
