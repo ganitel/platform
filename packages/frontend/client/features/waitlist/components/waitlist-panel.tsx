@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Phone, Sparkles } from "lucide-react";
+import { Mail, Sparkles } from "lucide-react";
 
 import { joinWaitlist } from "@/features/waitlist/api";
 import { WAITLIST_FIELD_ERROR_KEYS } from "@/features/waitlist/error-keys";
@@ -8,6 +8,7 @@ import { FormErrorAlert } from "@/shared/components/form-error-alert";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
 import { FormSuccessIcon } from "@/shared/components/form-success-icon";
 import { IconInput } from "@/shared/components/icon-input";
+import { PhoneInput } from "@/shared/components/phone-input";
 import { useLocale, useT } from "@/shared/lib/i18n";
 import { translateFormError } from "@/shared/lib/form-error";
 import { INPUT_CLASS } from "@/shared/lib/form-styles";
@@ -38,6 +39,7 @@ export function WaitlistPanel({
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneValid, setPhoneValid] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [errorDetail, setErrorDetail] = useState("");
 
@@ -136,12 +138,14 @@ export function WaitlistPanel({
                   className={INPUT_CLASS}
                 />
 
-                <IconInput
-                  icon={Phone}
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder={t("waitlist.phone")}
+                <PhoneInput
+                  id="waitlist-phone"
+                  label={t("waitlist.phone")}
+                  hideLabel
+                  onChange={(value, isValid) => {
+                    setPhone(value);
+                    setPhoneValid(isValid);
+                  }}
                 />
               </div>
 
@@ -150,7 +154,7 @@ export function WaitlistPanel({
               )}
 
               <FormSubmitButton
-                disabled={!email}
+                disabled={!email || !phoneValid}
                 isSubmitting={state === "submitting"}
                 submittingLabel={t("waitlist.submitting")}
               >

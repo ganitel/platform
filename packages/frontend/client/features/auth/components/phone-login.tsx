@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
+import { PhoneInput } from "@/shared/components/phone-input";
 import { getSupabase } from "@/lib/supabase";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/shared/ui/input-otp";
 import { Label } from "@/shared/ui/label";
 
@@ -13,6 +13,7 @@ export function PhoneLogin() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("phone");
   const [phone, setPhone] = useState("");
+  const [phoneValid, setPhoneValid] = useState(true);
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -95,28 +96,20 @@ export function PhoneLogin() {
 
   return (
     <form onSubmit={sendOtp} className="space-y-4">
-      <div className="space-y-1.5">
-        <Label htmlFor="phone">Numéro de téléphone</Label>
-        <Input
-          id="phone"
-          type="tel"
-          placeholder="+237 6XX XXX XXX"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          autoComplete="tel"
-          required
-          className="h-11"
-        />
-        <p className="text-xs text-ganitel-text-subtitle">
-          Inclure le code pays (ex. +237)
-        </p>
-      </div>
+      <PhoneInput
+        id="phone"
+        label="Numéro de téléphone"
+        onChange={(value, isValid) => {
+          setPhone(value);
+          setPhoneValid(isValid);
+        }}
+      />
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       <Button
         type="submit"
-        disabled={loading || !phone.trim()}
+        disabled={loading || !phone.trim() || !phoneValid}
         className="h-11 w-full rounded-xl bg-ganitel-primary text-ganitel-text-button hover:bg-ganitel-primary/90"
       >
         {loading ? "Envoi…" : "Recevoir un code"}

@@ -6,7 +6,7 @@ import type { Route } from "./+types/join";
 
 import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { joinWaitlist } from "@/features/waitlist/api";
-import { PhoneInput } from "@/features/waitlist/components/phone-input";
+import { PhoneInput } from "@/shared/components/phone-input";
 import { WAITLIST_FIELD_ERROR_KEYS } from "@/features/waitlist/error-keys";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { FieldError } from "@/shared/components/field-error";

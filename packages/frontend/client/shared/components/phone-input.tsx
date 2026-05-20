@@ -11,7 +11,7 @@ import {
   PHONE_COUNTRIES,
   getPhoneCountry,
   type PhoneCountry,
-} from "@/features/waitlist/phone-countries";
+} from "@/shared/lib/phone-countries";
 
 const OTHER_VALUE = "OTHER";
 const E164_RE = /^\+[1-9]\d{6,14}$/;
@@ -25,6 +25,7 @@ interface PhoneInputProps {
   id: string;
   label: string;
   onChange: (value: string, isValid: boolean) => void;
+  hideLabel?: boolean;
 }
 
 function normalizeDigits(input: string): string {
@@ -41,7 +42,12 @@ function buildE164(country: PhoneCountry, national: string): string {
   return `+${country.dialCode}${digits}`;
 }
 
-export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
+export function PhoneInput({
+  id,
+  label,
+  onChange,
+  hideLabel = false,
+}: PhoneInputProps) {
   const t = useT();
   const locale = useLocale();
 
@@ -129,7 +135,7 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
 
   return (
     <div>
-      <label htmlFor={id} className={LABEL_CLASS}>
+      <label htmlFor={id} className={hideLabel ? "sr-only" : LABEL_CLASS}>
         {label}
       </label>
 
@@ -144,7 +150,7 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
         <Popover.Root open={open} onOpenChange={setOpen}>
           <Popover.Trigger
             type="button"
-            aria-label={t("join.phone.country.aria")}
+            aria-label={t("phone.country.aria")}
             className={cn(
               "flex shrink-0 items-center gap-2 rounded-l-xl pl-3.5 pr-2.5 text-sm text-ganitel-text-title",
               "border-r border-ganitel-stroke-neutral hover:bg-ganitel-neutral-2 transition-colors",
@@ -158,7 +164,7 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
                   aria-hidden
                 />
                 <span className="font-medium">
-                  {t("join.phone.country.other_short")}
+                  {t("phone.country.other_short")}
                 </span>
               </>
             ) : (
@@ -203,14 +209,14 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
                     aria-hidden
                   />
                   <CommandPrimitive.Input
-                    placeholder={t("join.phone.country.search")}
+                    placeholder={t("phone.country.search")}
                     className="h-11 w-full bg-transparent text-sm text-ganitel-text-title placeholder:text-ganitel-text-placeholder focus:outline-none"
                   />
                 </div>
 
                 <CommandPrimitive.List className="flex-1 overflow-y-auto overscroll-contain p-1">
                   <CommandPrimitive.Empty className="px-3 py-6 text-center text-sm text-ganitel-text-subtitle">
-                    {t("join.phone.country.empty")}
+                    {t("phone.country.empty")}
                   </CommandPrimitive.Empty>
 
                   <CommandPrimitive.Group
@@ -231,7 +237,7 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
                   <CommandPrimitive.Separator className="my-1 h-px bg-ganitel-stroke-neutral" />
 
                   <CommandPrimitive.Group
-                    heading={t("join.phone.country.all")}
+                    heading={t("phone.country.all")}
                     className="**:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-[11px] **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-wider **:[[cmdk-group-heading]]:text-ganitel-text-placeholder"
                   >
                     {sortedCountries.rest.map((c) => (
@@ -257,7 +263,7 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
                       aria-hidden
                     />
                     <span className="flex-1 font-medium">
-                      {t("join.phone.country.other")}
+                      {t("phone.country.other")}
                     </span>
                     {isOther && (
                       <Check
@@ -299,7 +305,7 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
             autoComplete="tel-national"
             value={national}
             onChange={handleNationalChange}
-            placeholder={t("join.phone.placeholder")}
+            placeholder={t("phone.placeholder")}
             className={cn(INNER_INPUT_CLASS, "rounded-r-xl px-3.5 py-3")}
           />
         )}
@@ -312,15 +318,11 @@ export function PhoneInput({ id, label, onChange }: PhoneInputProps) {
             customInvalid ? "text-red-500" : "text-ganitel-text-placeholder",
           )}
         >
-          {customInvalid
-            ? t("join.phone.invalid")
-            : t("join.phone.country.other_hint")}
+          {customInvalid ? t("phone.invalid") : t("phone.country.other_hint")}
         </p>
       ) : (
         nationalInvalid && (
-          <p className="mt-1.5 text-xs text-red-500">
-            {t("join.phone.invalid")}
-          </p>
+          <p className="mt-1.5 text-xs text-red-500">{t("phone.invalid")}</p>
         )
       )}
     </div>
