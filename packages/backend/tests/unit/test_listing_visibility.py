@@ -8,7 +8,6 @@ from app.modules.experiences.models import ExperienceStatus
 from app.modules.properties import service as property_service
 from app.modules.properties.models import KitchenType, ParkingAvailability, PropertyStatus
 
-
 HOST_ID = uuid4()
 OTHER_ID = uuid4()
 
