@@ -59,9 +59,12 @@ def verify_jwt(token: str) -> AuthClaims:
     if not sub:
         raise AuthError(code="token.missing_sub")
 
-    email: str | None = claims.get("email")
+    # Phone-OTP tokens from Supabase carry `"email": ""` (empty string) rather
+    # than omitting the claim; normalize to None so we don't persist blanks that
+    # later break EmailStr validation on the way back out.
+    email: str | None = claims.get("email") or None
     phone: str | None = claims.get("phone_number") or claims.get("phoneNumber")
-    name: str | None = claims.get("name")
+    name: str | None = claims.get("name") or None
 
     return AuthClaims(
         user_id=str(sub),
