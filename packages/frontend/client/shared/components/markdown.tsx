@@ -1,8 +1,13 @@
 import ReactMarkdown from "react-markdown";
-import rehypeSanitize from "rehype-sanitize";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 
 import { cn } from "@/shared/lib/cn";
+
+const sanitizeSchema = {
+  ...defaultSchema,
+  tagNames: (defaultSchema.tagNames ?? []).filter((tag) => tag !== "h1"),
+};
 
 interface MarkdownProps {
   source: string;
@@ -14,7 +19,7 @@ export function Markdown({ source, className }: MarkdownProps) {
     <div className={cn("ganitel-prose", className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeSanitize]}
+        rehypePlugins={[[rehypeSanitize, sanitizeSchema]]}
         components={{
           a: ({ href, children }) => (
             <a href={href} target="_blank" rel="noopener noreferrer nofollow">

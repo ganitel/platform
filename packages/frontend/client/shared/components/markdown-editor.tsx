@@ -81,7 +81,7 @@ export function MarkdownEditor({
           role="tabpanel"
           id={previewId}
           aria-labelledby={`${previewId}-tab`}
-          className="min-h-[8rem] rounded-xl border border-ganitel-stroke-neutral bg-white px-4 py-3 text-sm shadow-sm"
+          className="min-h-48 rounded-xl border border-ganitel-stroke-neutral bg-white px-4 py-3 text-sm shadow-sm"
         >
           {value.trim() ? (
             <Markdown source={value} />
