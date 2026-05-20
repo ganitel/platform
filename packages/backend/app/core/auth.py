@@ -43,7 +43,7 @@ def verify_jwt(token: str) -> AuthClaims:
         claims: dict[str, Any] = jwt.decode(
             token,
             signing_key,
-            algorithms=["RS256"],
+            algorithms=["RS256", "ES256"],
             issuer=settings.JWT_ISSUER,
             options={"verify_aud": False},
         )

@@ -59,6 +59,36 @@ def test_verify_jwt_extracts_claims(rsa_keypair) -> None:
     assert claims.name == "Alice"
 
 
+def test_verify_jwt_accepts_es256_tokens(ec_keypair) -> None:
+    """Supabase asymmetric-key default is ES256 (EC P-256), not RS256."""
+    from app.core.auth import verify_jwt
+
+    private_key, public_key = ec_keypair
+    token = jwt.encode(
+        {
+            "sub": "abc123",
+            "iss": "https://test.supabase.co/auth/v1",
+        },
+        private_key,
+        algorithm="ES256",
+    )
+
+    mock_jwks = MagicMock()
+    mock_jwks.get_signing_key_from_jwt.return_value = _make_signing_key(public_key)
+
+    with (
+        patch("app.core.auth._client", return_value=mock_jwks),
+        patch("app.core.auth.get_settings") as mock_settings,
+    ):
+        mock_settings.return_value.JWT_JWKS_URL = (
+            "https://test.supabase.co/auth/v1/.well-known/jwks.json"
+        )
+        mock_settings.return_value.JWT_ISSUER = "https://test.supabase.co/auth/v1"
+        claims = verify_jwt(token)
+
+    assert claims.user_id == "abc123"
+
+
 def test_verify_jwt_accepts_camelcase_phone_claim(rsa_keypair) -> None:
     """Some providers emit `phoneNumber` instead of `phone_number` — accept both."""
     from app.core.auth import verify_jwt

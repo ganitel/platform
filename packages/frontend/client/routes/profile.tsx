@@ -4,7 +4,11 @@ import type { Route } from "./+types/profile";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { ErrorState } from "@/shared/components/error-state";
-import { getServerToken, serverFetch } from "@/shared/api/server";
+import {
+  getServerToken,
+  serverFetch,
+  ServerApiError,
+} from "@/shared/api/server";
 import type { UserMe } from "@/features/auth/api/me";
 
 export const meta: Route.MetaFunction = () => [
@@ -17,14 +21,22 @@ export async function loader({ request }: Route.LoaderArgs) {
     return redirect("/");
   }
   const token = await getServerToken(request);
-  if (!token) {
+  const signInRedirect = () => {
     const url = new URL(request.url);
     return redirect(
       `/sign-in?redirect_url=${encodeURIComponent(url.pathname + url.search)}`,
     );
+  };
+  if (!token) return signInRedirect();
+  try {
+    const me = await serverFetch<UserMe>("/me", { token });
+    return { me };
+  } catch (error) {
+    if (error instanceof ServerApiError && error.status === 401) {
+      return signInRedirect();
+    }
+    throw error;
   }
-  const me = await serverFetch<UserMe>("/me", { token });
-  return { me };
 }
 
 export default function ProfileRoute({ loaderData }: Route.ComponentProps) {
