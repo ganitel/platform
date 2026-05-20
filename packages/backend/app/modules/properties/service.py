@@ -18,6 +18,7 @@ from app.modules.media.models import Media
 from app.modules.media.service import to_public as media_to_public
 from app.modules.properties.models import Property, PropertyPhoto, PropertyStatus
 from app.modules.properties.schemas import (
+    AdminStatusSummary,
     GeoPoint,
     HostPublic,
     PropertyAdminListItem,
@@ -223,6 +224,19 @@ async def count_all_for_admin(
     if statuses:
         stmt = stmt.where(Property.status.in_(statuses))
     return int((await session.execute(stmt)).scalar_one())
+
+
+async def status_summary(session: AsyncSession) -> AdminStatusSummary:
+    stmt = select(Property.status, func.count()).group_by(Property.status)
+    rows = (await session.execute(stmt)).all()
+    by_status = {status.value: int(count) for status, count in rows}
+    return AdminStatusSummary(
+        draft=by_status.get(PropertyStatus.DRAFT.value, 0),
+        published=by_status.get(PropertyStatus.PUBLISHED.value, 0),
+        unlisted=by_status.get(PropertyStatus.UNLISTED.value, 0),
+        removed=by_status.get(PropertyStatus.REMOVED.value, 0),
+        total=sum(by_status.values()),
+    )
 
 
 async def get(session: AsyncSession, property_id: UUID) -> Property:

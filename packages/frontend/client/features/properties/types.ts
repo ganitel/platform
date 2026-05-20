@@ -134,6 +134,14 @@ export interface PropertyAdminListItem {
   published_at: string | null;
 }
 
+export interface AdminStatusSummary {
+  draft: number;
+  published: number;
+  unlisted: number;
+  removed: number;
+  total: number;
+}
+
 export interface AdminListOut {
   items: PropertyAdminListItem[];
   total: number;

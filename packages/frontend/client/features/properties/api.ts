@@ -1,6 +1,7 @@
 import { apiClient } from "@/shared/api/client";
 import type {
   AdminListOut,
+  AdminStatusSummary,
   PropertyCreateInput,
   PropertyDetail,
   PropertyStatus,
@@ -35,6 +36,13 @@ export async function listAdminProperties(
   const r = await apiClient.get<AdminListOut>("/admin/properties", {
     params: params as Record<string, unknown>,
   });
+  return r.data;
+}
+
+export async function getAdminPropertiesSummary(): Promise<AdminStatusSummary> {
+  const r = await apiClient.get<AdminStatusSummary>(
+    "/admin/properties/summary",
+  );
   return r.data;
 }
 
