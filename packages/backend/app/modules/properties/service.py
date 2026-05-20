@@ -14,6 +14,7 @@ from sqlalchemy.orm import selectinload
 
 from app.core.errors import ForbiddenError, NotFoundError, ValidationError
 from app.core.money import Currency, Money
+from app.core.text import normalize_db_entries
 from app.modules.media.models import Media
 from app.modules.media.service import to_public as media_to_public
 from app.modules.properties.models import (
@@ -64,7 +65,7 @@ def _contains_any(values: set[str], candidates: set[str]) -> bool:
 
 
 def _showcase_amenities(property: Property) -> PropertyShowcaseAmenities:
-    normalized = {a.strip().lower() for a in property.amenities if a and a.strip()}
+    normalized = normalize_db_entries(property.amenities)
     has_wifi = _contains_any(normalized, {"wifi", "wi-fi", "wi_fi", "internet"})
     has_ac = _contains_any(
         normalized,
