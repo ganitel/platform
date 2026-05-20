@@ -32,7 +32,7 @@ def test_verify_jwt_extracts_claims(rsa_keypair) -> None:
         {
             "sub": "abc123",
             "email": "x@y.com",
-            "phone_number": "+237600000000",
+            "phone": "+237600000000",
             "name": "Alice",
             "iss": "https://test.supabase.co/auth/v1",
         },
@@ -89,15 +89,18 @@ def test_verify_jwt_accepts_es256_tokens(ec_keypair) -> None:
     assert claims.user_id == "abc123"
 
 
-def test_verify_jwt_accepts_camelcase_phone_claim(rsa_keypair) -> None:
-    """Some providers emit `phoneNumber` instead of `phone_number` — accept both."""
+def test_verify_jwt_normalizes_empty_email_and_name_to_none(rsa_keypair) -> None:
+    """Supabase phone-OTP tokens carry empty `email`/`name` strings; persisting
+    those breaks EmailStr serialization on the way back out of /me."""
     from app.core.auth import verify_jwt
 
     private_key, public_key = rsa_keypair
     token = jwt.encode(
         {
             "sub": "u",
-            "phoneNumber": "+237600000000",
+            "email": "",
+            "name": "",
+            "phone": "+237600000000",
             "iss": "https://test.supabase.co/auth/v1",
         },
         private_key,
@@ -117,6 +120,8 @@ def test_verify_jwt_accepts_camelcase_phone_claim(rsa_keypair) -> None:
         mock_settings.return_value.JWT_ISSUER = "https://test.supabase.co/auth/v1"
         claims = verify_jwt(token)
 
+    assert claims.email is None
+    assert claims.name is None
     assert claims.phone == "+237600000000"
 
 

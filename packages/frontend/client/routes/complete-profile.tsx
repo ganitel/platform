@@ -65,7 +65,7 @@ export default function CompleteProfilePage() {
     <AuthLayout title="Presque prêt" subtitle="Votre profil">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="name">Votre prénom ou nom</Label>
+          <Label htmlFor="name">Votre nom complet</Label>
           <Input
             id="name"
             type="text"

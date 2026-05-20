@@ -59,9 +59,13 @@ def verify_jwt(token: str) -> AuthClaims:
     if not sub:
         raise AuthError(code="token.missing_sub")
 
-    email: str | None = claims.get("email")
-    phone: str | None = claims.get("phone_number") or claims.get("phoneNumber")
-    name: str | None = claims.get("name")
+    # Supabase Auth puts the user's phone in the top-level `phone` claim and
+    # frequently emits `""` for fields it doesn't have (e.g. `email` for a
+    # phone-only user). Normalize blanks to None so we never persist them and
+    # break `EmailStr | None` validation on the way back out.
+    email: str | None = claims.get("email") or None
+    phone: str | None = claims.get("phone") or None
+    name: str | None = claims.get("name") or None
 
     return AuthClaims(
         user_id=str(sub),
