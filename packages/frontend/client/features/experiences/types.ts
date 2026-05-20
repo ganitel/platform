@@ -1,9 +1,12 @@
 import type {
+  AdminStatusSummary,
   GeoPoint,
   HostPublic,
   MediaPublic,
   Money,
 } from "@/features/properties/types";
+
+export type { AdminStatusSummary };
 
 export type ExperienceCancellationPolicy = "flexible" | "moderate" | "strict";
 export type ExperienceStatus = "draft" | "published" | "unlisted" | "removed";

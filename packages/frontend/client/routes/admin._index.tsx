@@ -11,10 +11,9 @@ import {
 import { Link } from "react-router";
 
 import { AdminShell } from "@/features/admin/admin-shell";
-import { listAdminExperiences } from "@/features/experiences/api";
-import type { ExperienceStatus } from "@/features/experiences/types";
-import { listAdminProperties } from "@/features/properties/api";
-import type { PropertyStatus } from "@/features/properties/types";
+import { getAdminExperiencesSummary } from "@/features/experiences/api";
+import { getAdminPropertiesSummary } from "@/features/properties/api";
+import type { AdminStatusSummary } from "@/features/properties/types";
 import { AdminGuard } from "@/shared/components/admin-guard";
 import { cn } from "@/shared/lib/cn";
 import { t, useT, type TranslationKey } from "@/shared/lib/i18n";
@@ -47,35 +46,23 @@ function AdminIndexPage() {
   );
 }
 
-type StatusCounts = Record<
-  "draft" | "published" | "unlisted" | "removed",
-  number
->;
-
-function emptyCounts(): StatusCounts {
-  return { draft: 0, published: 0, unlisted: 0, removed: 0 };
-}
-
 function StatsRow() {
   const tr = useT();
   const rentals = useQuery({
     queryKey: ["admin", "rentals", "summary"],
-    queryFn: () => listAdminProperties({ limit: 200, offset: 0 }),
+    queryFn: getAdminPropertiesSummary,
   });
   const experiences = useQuery({
     queryKey: ["admin", "experiences", "summary"],
-    queryFn: () => listAdminExperiences({ limit: 200, offset: 0 }),
+    queryFn: getAdminExperiencesSummary,
   });
 
-  const rentalCounts = countByStatus<PropertyStatus>(rentals.data?.items);
-  const experienceCounts = countByStatus<ExperienceStatus>(
-    experiences.data?.items,
-  );
-  const combined: StatusCounts = {
-    draft: rentalCounts.draft + experienceCounts.draft,
-    published: rentalCounts.published + experienceCounts.published,
-    unlisted: rentalCounts.unlisted + experienceCounts.unlisted,
-    removed: rentalCounts.removed + experienceCounts.removed,
+  const combined = {
+    draft: (rentals.data?.draft ?? 0) + (experiences.data?.draft ?? 0),
+    published:
+      (rentals.data?.published ?? 0) + (experiences.data?.published ?? 0),
+    unlisted: (rentals.data?.unlisted ?? 0) + (experiences.data?.unlisted ?? 0),
+    removed: (rentals.data?.removed ?? 0) + (experiences.data?.removed ?? 0),
   };
 
   const loading = rentals.isPending || experiences.isPending;
@@ -180,17 +167,12 @@ function SectionsGrid() {
   const tr = useT();
   const rentals = useQuery({
     queryKey: ["admin", "rentals", "summary"],
-    queryFn: () => listAdminProperties({ limit: 200, offset: 0 }),
+    queryFn: getAdminPropertiesSummary,
   });
   const experiences = useQuery({
     queryKey: ["admin", "experiences", "summary"],
-    queryFn: () => listAdminExperiences({ limit: 200, offset: 0 }),
+    queryFn: getAdminExperiencesSummary,
   });
-
-  const rentalCounts = countByStatus<PropertyStatus>(rentals.data?.items);
-  const experienceCounts = countByStatus<ExperienceStatus>(
-    experiences.data?.items,
-  );
 
   return (
     <section className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -200,8 +182,7 @@ function SectionsGrid() {
         title={tr("admin.section.rentals.title")}
         description={tr("admin.section.rentals.description")}
         icon={<Home className="size-5" strokeWidth={1.5} />}
-        total={rentals.data?.total ?? 0}
-        counts={rentalCounts}
+        summary={rentals.data}
         loading={rentals.isPending}
       />
       <SectionCard
@@ -210,8 +191,7 @@ function SectionsGrid() {
         title={tr("admin.section.experiences.title")}
         description={tr("admin.section.experiences.description")}
         icon={<Compass className="size-5" strokeWidth={1.5} />}
-        total={experiences.data?.total ?? 0}
-        counts={experienceCounts}
+        summary={experiences.data}
         loading={experiences.isPending}
       />
     </section>
@@ -224,8 +204,7 @@ function SectionCard({
   title,
   description,
   icon,
-  total,
-  counts,
+  summary,
   loading,
 }: {
   to: string;
@@ -233,8 +212,7 @@ function SectionCard({
   title: string;
   description: string;
   icon: React.ReactNode;
-  total: number;
-  counts: StatusCounts;
+  summary: AdminStatusSummary | undefined;
   loading: boolean;
 }) {
   return (
@@ -269,22 +247,24 @@ function SectionCard({
       <dl className="grid grid-cols-4 gap-3 border-t border-ganitel-stroke-neutral pt-5">
         <Stat
           labelKey="admin.section.total"
-          value={loading ? null : total}
+          value={loading || !summary ? null : summary.total}
           accent="primary"
         />
         <Stat
           labelKey="admin.section.published"
-          value={loading ? null : counts.published}
+          value={loading || !summary ? null : summary.published}
           accent="moss"
         />
         <Stat
           labelKey="admin.section.drafts"
-          value={loading ? null : counts.draft}
+          value={loading || !summary ? null : summary.draft}
           accent="warm"
         />
         <Stat
           labelKey="admin.section.hidden"
-          value={loading ? null : counts.unlisted + counts.removed}
+          value={
+            loading || !summary ? null : summary.unlisted + summary.removed
+          }
           accent="neutral"
           icon={<Trash2 className="size-3" strokeWidth={1.75} />}
         />
@@ -323,17 +303,4 @@ function Stat({
       </dd>
     </div>
   );
-}
-
-function countByStatus<T extends string>(
-  items: { status: T }[] | undefined,
-): StatusCounts {
-  const out = emptyCounts();
-  if (!items) return out;
-  for (const item of items) {
-    if (item.status in out) {
-      out[item.status as keyof StatusCounts] += 1;
-    }
-  }
-  return out;
 }

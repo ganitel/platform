@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link, useLocation } from "react-router";
+import { Link, NavLink } from "react-router";
 import { Compass, Home, LayoutGrid, LogOut, Sparkles } from "lucide-react";
 
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
@@ -9,7 +9,9 @@ type NavItem = {
   to: string;
   labelKey: TranslationKey;
   icon: typeof Home;
-  match: (pathname: string) => boolean;
+  // `end` makes the match exact — only "/admin" itself is active for the
+  // overview link, while "/admin/rentals" is left to match its own item.
+  end?: boolean;
 };
 
 const NAV: NavItem[] = [
@@ -17,19 +19,13 @@ const NAV: NavItem[] = [
     to: "/admin",
     labelKey: "admin.nav.overview",
     icon: LayoutGrid,
-    match: (p) => p === "/admin" || p === "/admin/",
+    end: true,
   },
-  {
-    to: "/admin/rentals",
-    labelKey: "admin.nav.rentals",
-    icon: Home,
-    match: (p) => p.startsWith("/admin/rentals"),
-  },
+  { to: "/admin/rentals", labelKey: "admin.nav.rentals", icon: Home },
   {
     to: "/admin/experiences",
     labelKey: "admin.nav.experiences",
     icon: Compass,
-    match: (p) => p.startsWith("/admin/experiences"),
   },
 ];
 
@@ -68,7 +64,6 @@ export function AdminShell({
 
 function AdminSidebar() {
   const t = useT();
-  const { pathname } = useLocation();
   return (
     <aside className="hidden w-60 shrink-0 flex-col lg:flex">
       <div className="sticky top-8 flex flex-col gap-8 rounded-3xl border border-ganitel-stroke-neutral/70 bg-ganitel-primary p-6 text-ganitel-paper shadow-[0_30px_80px_-40px_rgba(24,16,12,0.35)]">
@@ -84,29 +79,35 @@ function AdminSidebar() {
         <nav className="flex flex-col gap-1">
           {NAV.map((item) => {
             const Icon = item.icon;
-            const active = item.match(pathname);
             return (
-              <Link
+              <NavLink
                 key={item.to}
                 to={item.to}
-                className={cn(
-                  "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                  active
-                    ? "bg-ganitel-paper text-ganitel-primary"
-                    : "text-ganitel-paper/75 hover:bg-white/[0.06] hover:text-ganitel-paper",
-                )}
+                end={item.end}
+                className={({ isActive }) =>
+                  cn(
+                    "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-ganitel-paper text-ganitel-primary"
+                      : "text-ganitel-paper/75 hover:bg-white/[0.06] hover:text-ganitel-paper",
+                  )
+                }
               >
-                <Icon
-                  className={cn(
-                    "size-4",
-                    active
-                      ? "text-ganitel-primary"
-                      : "text-ganitel-paper/55 group-hover:text-ganitel-paper",
-                  )}
-                  strokeWidth={1.75}
-                />
-                <span>{t(item.labelKey)}</span>
-              </Link>
+                {({ isActive }) => (
+                  <>
+                    <Icon
+                      className={cn(
+                        "size-4",
+                        isActive
+                          ? "text-ganitel-primary"
+                          : "text-ganitel-paper/55 group-hover:text-ganitel-paper",
+                      )}
+                      strokeWidth={1.75}
+                    />
+                    <span>{t(item.labelKey)}</span>
+                  </>
+                )}
+              </NavLink>
             );
           })}
         </nav>

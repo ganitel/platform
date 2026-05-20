@@ -211,3 +211,13 @@ class AdminListOut(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+class AdminStatusSummary(BaseModel):
+    """Status counts for the admin dashboard — single SQL aggregation."""
+
+    draft: int = 0
+    published: int = 0
+    unlisted: int = 0
+    removed: int = 0
+    total: int = 0

@@ -30,7 +30,9 @@ import type {
   ExperienceAdminListItem,
   ExperienceStatus,
 } from "@/features/experiences/types";
+import { useExperienceTypeLabel } from "@/features/reference/hooks";
 import { AdminGuard } from "@/shared/components/admin-guard";
+import { formatPriceAmount } from "@/shared/lib/format";
 import { transformImage } from "@/shared/lib/image";
 import { t, useLocale, useT, type TranslationKey } from "@/shared/lib/i18n";
 import type { Route } from "./+types/admin.experiences";
@@ -210,6 +212,7 @@ function AdminExperiencesPage() {
 function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
   const tr = useT();
   const locale = useLocale();
+  const typeLabel = useExperienceTypeLabel();
   const qc = useQueryClient();
   const invalidate = () =>
     qc.invalidateQueries({ queryKey: ["admin", "experiences"] });
@@ -249,7 +252,7 @@ function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
       </AdminCell>
       <AdminCell>
         <span className="inline-flex items-center rounded-full bg-ganitel-neutral-2 px-2.5 py-1 text-xs font-medium text-ganitel-text-subtitle">
-          {item.experience_type}
+          {typeLabel(item.experience_type)}
         </span>
       </AdminCell>
       <AdminCell>
@@ -259,7 +262,7 @@ function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
       </AdminCell>
       <AdminCell>
         <span className="font-medium tabular-nums text-ganitel-text-title">
-          {formatPrice(item.base_price.amount, locale)}
+          {formatPriceAmount(item.base_price.amount, locale)}
         </span>
         <span className="ml-1 text-xs uppercase tracking-wider text-ganitel-text-placeholder">
           {item.base_price.currency}
@@ -320,14 +323,6 @@ function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
       </AdminCell>
     </AdminRow>
   );
-}
-
-function formatPrice(amount: number | string, locale: "fr" | "en"): string {
-  const n = typeof amount === "string" ? Number(amount) : amount;
-  if (!Number.isFinite(n)) return String(amount);
-  return new Intl.NumberFormat(locale === "fr" ? "fr-FR" : "en-US", {
-    maximumFractionDigits: 0,
-  }).format(n);
 }
 
 function formatDuration(

@@ -30,7 +30,9 @@ import type {
   PropertyAdminListItem,
   PropertyStatus,
 } from "@/features/properties/types";
+import { usePropertyTypeLabel } from "@/features/reference/hooks";
 import { AdminGuard } from "@/shared/components/admin-guard";
+import { formatPriceAmount } from "@/shared/lib/format";
 import { transformImage } from "@/shared/lib/image";
 import { t, useLocale, useT } from "@/shared/lib/i18n";
 import type { Route } from "./+types/admin.rentals";
@@ -197,6 +199,7 @@ function AdminRentalsPage() {
 function RentalRow({ item }: { item: PropertyAdminListItem }) {
   const tr = useT();
   const locale = useLocale();
+  const typeLabel = usePropertyTypeLabel();
   const qc = useQueryClient();
   const invalidate = () =>
     qc.invalidateQueries({ queryKey: ["admin", "rentals"] });
@@ -236,12 +239,12 @@ function RentalRow({ item }: { item: PropertyAdminListItem }) {
       </AdminCell>
       <AdminCell>
         <span className="inline-flex items-center rounded-full bg-ganitel-neutral-2 px-2.5 py-1 text-xs font-medium text-ganitel-text-subtitle">
-          {item.property_type}
+          {typeLabel(item.property_type)}
         </span>
       </AdminCell>
       <AdminCell>
         <span className="font-medium tabular-nums text-ganitel-text-title">
-          {formatPrice(item.base_price.amount, locale)}
+          {formatPriceAmount(item.base_price.amount, locale)}
         </span>
         <span className="ml-1 text-xs uppercase tracking-wider text-ganitel-text-placeholder">
           {item.base_price.currency}
@@ -302,12 +305,4 @@ function RentalRow({ item }: { item: PropertyAdminListItem }) {
       </AdminCell>
     </AdminRow>
   );
-}
-
-function formatPrice(amount: number | string, locale: "fr" | "en"): string {
-  const n = typeof amount === "string" ? Number(amount) : amount;
-  if (!Number.isFinite(n)) return String(amount);
-  return new Intl.NumberFormat(locale === "fr" ? "fr-FR" : "en-US", {
-    maximumFractionDigits: 0,
-  }).format(n);
 }

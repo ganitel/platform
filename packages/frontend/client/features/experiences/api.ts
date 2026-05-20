@@ -1,5 +1,6 @@
 import { apiClient } from "@/shared/api/client";
 import type {
+  AdminStatusSummary,
   ExperienceAdminListOut,
   ExperienceCreateInput,
   ExperienceDetail,
@@ -19,6 +20,13 @@ export async function listAdminExperiences(
   const r = await apiClient.get<ExperienceAdminListOut>("/admin/experiences", {
     params: params as Record<string, unknown>,
   });
+  return r.data;
+}
+
+export async function getAdminExperiencesSummary(): Promise<AdminStatusSummary> {
+  const r = await apiClient.get<AdminStatusSummary>(
+    "/admin/experiences/summary",
+  );
   return r.data;
 }
 
