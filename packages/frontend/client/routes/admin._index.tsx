@@ -16,11 +16,22 @@ import { getAdminPropertiesSummary } from "@/features/properties/api";
 import type { AdminStatusSummary } from "@/features/properties/types";
 import { AdminGuard } from "@/shared/components/admin-guard";
 import { cn } from "@/shared/lib/cn";
-import { t, useT, type TranslationKey } from "@/shared/lib/i18n";
+import {
+  localeFromAcceptLanguage,
+  t,
+  useT,
+  type TranslationKey,
+} from "@/shared/lib/i18n";
 import type { Route } from "./+types/admin._index";
 
-export const meta: Route.MetaFunction = () => [
-  { title: t("admin.meta.dashboard", "fr") },
+export async function loader({ request }: Route.LoaderArgs) {
+  return {
+    locale: localeFromAcceptLanguage(request.headers.get("Accept-Language")),
+  };
+}
+
+export const meta: Route.MetaFunction = ({ data }) => [
+  { title: t("admin.meta.dashboard", data?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 

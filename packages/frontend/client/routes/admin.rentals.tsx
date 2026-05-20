@@ -34,11 +34,22 @@ import { usePropertyTypeLabel } from "@/features/reference/hooks";
 import { AdminGuard } from "@/shared/components/admin-guard";
 import { formatPriceAmount } from "@/shared/lib/format";
 import { transformImage } from "@/shared/lib/image";
-import { t, useLocale, useT } from "@/shared/lib/i18n";
+import {
+  localeFromAcceptLanguage,
+  t,
+  useLocale,
+  useT,
+} from "@/shared/lib/i18n";
 import type { Route } from "./+types/admin.rentals";
 
-export const meta: Route.MetaFunction = () => [
-  { title: t("admin.meta.rentals", "fr") },
+export async function loader({ request }: Route.LoaderArgs) {
+  return {
+    locale: localeFromAcceptLanguage(request.headers.get("Accept-Language")),
+  };
+}
+
+export const meta: Route.MetaFunction = ({ data }) => [
+  { title: t("admin.meta.rentals", data?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 

@@ -34,11 +34,23 @@ import { useExperienceTypeLabel } from "@/features/reference/hooks";
 import { AdminGuard } from "@/shared/components/admin-guard";
 import { formatPriceAmount } from "@/shared/lib/format";
 import { transformImage } from "@/shared/lib/image";
-import { t, useLocale, useT, type TranslationKey } from "@/shared/lib/i18n";
+import {
+  localeFromAcceptLanguage,
+  t,
+  useLocale,
+  useT,
+  type TranslationKey,
+} from "@/shared/lib/i18n";
 import type { Route } from "./+types/admin.experiences";
 
-export const meta: Route.MetaFunction = () => [
-  { title: t("admin.meta.experiences", "fr") },
+export async function loader({ request }: Route.LoaderArgs) {
+  return {
+    locale: localeFromAcceptLanguage(request.headers.get("Accept-Language")),
+  };
+}
+
+export const meta: Route.MetaFunction = ({ data }) => [
+  { title: t("admin.meta.experiences", data?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 
