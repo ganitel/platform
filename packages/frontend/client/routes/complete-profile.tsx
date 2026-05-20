@@ -8,7 +8,11 @@ import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
-import { getServerToken, serverFetch } from "@/shared/api/server";
+import {
+  getServerToken,
+  serverFetch,
+  ServerApiError,
+} from "@/shared/api/server";
 import type { UserMe } from "@/features/auth/api/me";
 import { apiClient } from "@/shared/api/client";
 import { getSupabase } from "@/lib/supabase";
@@ -24,9 +28,12 @@ export async function loader({ request }: Route.LoaderArgs) {
   try {
     const me = await serverFetch<UserMe>("/me", { token });
     if (me.display_name) return redirect("/");
-  } catch {
-    // Fall through to render the form so a failing /me never produces a 500;
-    // PATCH /me on submit will surface the real error if auth is broken.
+  } catch (error) {
+    if (error instanceof ServerApiError && error.status === 401) {
+      return redirect("/sign-in");
+    }
+    // Non-auth failure: render the form so the user can still attempt PATCH /me
+    // and see the real error rather than an opaque 500.
   }
   return null;
 }
