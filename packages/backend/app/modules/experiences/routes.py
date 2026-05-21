@@ -9,10 +9,11 @@ from uuid import UUID
 from fastapi import APIRouter, Query, Response, status
 
 from app.core.cache import PUBLIC_CDN_CACHE
-from app.core.deps import CurrentUser, DbSession
+from app.core.deps import CurrentUser, DbSession, OptionalUser
 from app.core.errors import NotFoundError
 from app.modules.experiences import search as search_mod
 from app.modules.experiences import service
+from app.modules.experiences.models import Experience, ExperienceStatus
 from app.modules.experiences.schemas import (
     AttachPhotoIn,
     ExperienceCreateIn,
@@ -22,6 +23,26 @@ from app.modules.experiences.schemas import (
     SearchOut,
 )
 from app.modules.users.models import User
+
+
+PRIVATE_DETAIL_CACHE = "private, no-store"
+
+
+def _can_view_private_detail(exp: Experience, user: User | None) -> bool:
+    return user is not None and (user.is_admin or exp.host_id == user.id)
+
+
+def _set_detail_cache_and_enforce_visibility(
+    response: Response,
+    exp: Experience,
+    user: User | None,
+) -> None:
+    if exp.status == ExperienceStatus.PUBLISHED:
+        response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
+        return
+    if not _can_view_private_detail(exp, user):
+        raise NotFoundError(code="experience.not_found")
+    response.headers["Cache-Control"] = PRIVATE_DETAIL_CACHE
 
 
 async def _detail_with_host(session: DbSession, exp, user: User) -> ExperienceDetail:
@@ -88,13 +109,16 @@ async def search_experiences(
 
 @router.get("/{experience_id}", response_model=ExperienceDetail)
 async def get_experience(
-    experience_id: UUID, response: Response, session: DbSession
+    experience_id: UUID,
+    response: Response,
+    session: DbSession,
+    user: OptionalUser,
 ) -> ExperienceDetail:
     exp = await service.get(session, experience_id)
+    _set_detail_cache_and_enforce_visibility(response, exp, user)
     host = await session.get(User, exp.host_id)
     if host is None:
         raise NotFoundError(code="host.not_found")
-    response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
     return await service.to_detail(exp, host)
 
 
