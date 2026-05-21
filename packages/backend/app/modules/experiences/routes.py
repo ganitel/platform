@@ -24,7 +24,6 @@ from app.modules.experiences.schemas import (
 )
 from app.modules.users.models import User
 
-
 PRIVATE_DETAIL_CACHE = "private, no-store"
 
 

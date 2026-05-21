@@ -9,11 +9,15 @@ from app.core.errors import NotFoundError
 from app.modules.experiences.models import ExperienceStatus
 from app.modules.experiences.routes import (
     PRIVATE_DETAIL_CACHE as EXPERIENCE_PRIVATE_DETAIL_CACHE,
+)
+from app.modules.experiences.routes import (
     _set_detail_cache_and_enforce_visibility as enforce_experience_visibility,
 )
 from app.modules.properties.models import PropertyStatus
 from app.modules.properties.routes import (
     PRIVATE_DETAIL_CACHE as PROPERTY_PRIVATE_DETAIL_CACHE,
+)
+from app.modules.properties.routes import (
     _set_detail_cache_and_enforce_visibility as enforce_property_visibility,
 )
 
@@ -53,8 +57,9 @@ def test_property_detail_visibility_allows_owner_and_sets_cache(status, cache_he
 def test_property_detail_visibility_hides_non_public_listing_from_anonymous(status) -> None:
     response = Response()
 
-    with pytest.raises(NotFoundError, match="property.not_found"):
+    with pytest.raises(NotFoundError) as exc:
         enforce_property_visibility(response, _listing(status, uuid4()), None)
+    assert exc.value.code == "property.not_found"
 
 
 @pytest.mark.unit
@@ -97,8 +102,9 @@ def test_experience_detail_visibility_allows_owner_and_sets_cache(status, cache_
 def test_experience_detail_visibility_hides_non_public_listing_from_anonymous(status) -> None:
     response = Response()
 
-    with pytest.raises(NotFoundError, match="experience.not_found"):
+    with pytest.raises(NotFoundError) as exc:
         enforce_experience_visibility(response, _listing(status, uuid4()), None)
+    assert exc.value.code == "experience.not_found"
 
 
 @pytest.mark.unit
