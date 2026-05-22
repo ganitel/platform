@@ -20,5 +20,7 @@ Disallow: /bookings
 Disallow: /join
 Disallow: /add-team
 Disallow: /team-members/
+Disallow: /admin
+Disallow: /admin/
 
 Sitemap: https://ganitel.com/sitemap.xml
