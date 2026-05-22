@@ -9,14 +9,14 @@ import { MobileDetailPanel } from "@/shared/components/mobile-detail-panel";
 import { ErrorState } from "@/shared/components/error-state";
 import { Markdown } from "@/shared/components/markdown";
 import { serverFetch, ServerApiError } from "@/shared/api/server";
-import { PUBLIC_CDN_CACHE } from "@/shared/lib/cache";
+import { PRIVATE_NO_STORE_CACHE } from "@/shared/lib/cache";
 import { formatMoney } from "@/shared/lib/format";
 import { useLocale, useT } from "@/shared/lib/i18n";
 import { seo, absoluteUrl } from "@/shared/lib/seo";
 import type { ExperienceDetail } from "@/features/experiences/types";
 
 export const headers: Route.HeadersFunction = () => ({
-  "Cache-Control": PUBLIC_CDN_CACHE,
+  "Cache-Control": PRIVATE_NO_STORE_CACHE,
 });
 
 export const meta: Route.MetaFunction = ({
