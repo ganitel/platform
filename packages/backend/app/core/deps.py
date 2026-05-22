@@ -21,9 +21,12 @@ log = logging.getLogger(__name__)
 DbSession = Annotated[AsyncSession, Depends(get_session)]
 
 
-async def _resolve(authorization: str | None, session: AsyncSession) -> User | None:
+async def _resolve(
+    authorization: str | None, session: AsyncSession, *, log_missing: bool = True
+) -> User | None:
     if not authorization:
-        log.warning("auth.reject reason=missing_authorization_header")
+        if log_missing:
+            log.warning("auth.reject reason=missing_authorization_header")
         return None
     scheme, _, token = authorization.partition(" ")
     if scheme.lower() != "bearer" or not token:
@@ -41,7 +44,7 @@ async def optional_user(
     session: DbSession,
     authorization: Annotated[str | None, Header()] = None,
 ) -> User | None:
-    return await _resolve(authorization, session)
+    return await _resolve(authorization, session, log_missing=False)
 
 
 async def current_user(

@@ -10,10 +10,11 @@ from uuid import UUID
 from fastapi import APIRouter, Query, Response, status
 
 from app.core.cache import PUBLIC_CDN_CACHE
-from app.core.deps import CurrentUser, DbSession
+from app.core.deps import CurrentUser, DbSession, OptionalUser
 from app.core.errors import NotFoundError
 from app.modules.properties import search as search_mod
 from app.modules.properties import service
+from app.modules.properties.models import Property, PropertyStatus
 from app.modules.properties.schemas import (
     AttachPhotoIn,
     PhotoAttachOut,
@@ -23,6 +24,25 @@ from app.modules.properties.schemas import (
     SearchOut,
 )
 from app.modules.users.models import User
+
+PRIVATE_DETAIL_CACHE = "private, no-store"
+
+
+def _can_view_private_detail(prop: Property, user: User | None) -> bool:
+    return user is not None and (user.is_admin or prop.host_id == user.id)
+
+
+def _set_detail_cache_and_enforce_visibility(
+    response: Response,
+    prop: Property,
+    user: User | None,
+) -> None:
+    if prop.status == PropertyStatus.PUBLISHED:
+        response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
+        return
+    if not _can_view_private_detail(prop, user):
+        raise NotFoundError(code="property.not_found")
+    response.headers["Cache-Control"] = PRIVATE_DETAIL_CACHE
 
 
 async def _detail_with_host(session: DbSession, prop, user: User) -> PropertyDetail:
@@ -90,12 +110,17 @@ async def search_properties(
 
 
 @router.get("/{property_id}", response_model=PropertyDetail)
-async def get_property(property_id: UUID, response: Response, session: DbSession) -> PropertyDetail:
+async def get_property(
+    property_id: UUID,
+    response: Response,
+    session: DbSession,
+    user: OptionalUser,
+) -> PropertyDetail:
     prop = await service.get(session, property_id)
+    _set_detail_cache_and_enforce_visibility(response, prop, user)
     host = await session.get(User, prop.host_id)
     if host is None:
         raise NotFoundError(code="host.not_found")
-    response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
     return await service.to_detail(prop, host)
 
 
