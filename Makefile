@@ -3,7 +3,7 @@
 .PHONY: install install-hooks dev dev-backend dev-frontend \
         db-revision db-upgrade db-downgrade seed \
         test test-backend test-frontend \
-        lint format typecheck check precommit build help
+        lint format typecheck check precommit build login help
 
 # ── Bootstrap ─────────────────────────────────────────────────────────────────
 
@@ -97,6 +97,15 @@ precommit: ## Run all pre-commit hooks against every tracked file
 
 build: ## Build frontend for production (build/{client,server})
 	cd packages/frontend && bun run build
+
+# ── Ops ───────────────────────────────────────────────────────────────────────
+
+login: ## SSH into the VPS using GANITEL_VPS_HOST / GANITEL_VPS_USER / GANITEL_VPS_PASSWORD env vars
+	@[ -n "$$GANITEL_VPS_HOST" ]     || (echo "GANITEL_VPS_HOST is not set";     exit 1)
+	@[ -n "$$GANITEL_VPS_USER" ]     || (echo "GANITEL_VPS_USER is not set";     exit 1)
+	@[ -n "$$GANITEL_VPS_PASSWORD" ] || (echo "GANITEL_VPS_PASSWORD is not set"; exit 1)
+	@command -v sshpass >/dev/null 2>&1 || (echo "sshpass is required (brew install hudochenkov/sshpass/sshpass)"; exit 1)
+	@SSHPASS="$$GANITEL_VPS_PASSWORD" sshpass -e ssh -o StrictHostKeyChecking=accept-new "$$GANITEL_VPS_USER@$$GANITEL_VPS_HOST"
 
 # ── Help ──────────────────────────────────────────────────────────────────────
 
