@@ -8,8 +8,8 @@ import {
   TEAM_ERROR_CODE_KEYS,
   TEAM_FIELD_ERROR_KEYS,
 } from "@/features/team/error-keys";
-import { LocationAutocomplete } from "@/features/team/location-autocomplete";
-import type { LocationPick } from "@/features/team/types";
+import { AddressAutocomplete } from "@/shared/components/address-autocomplete";
+import type { LocationPick } from "@/shared/lib/location";
 import { useT } from "@/shared/lib/i18n";
 import { FieldError } from "@/shared/components/field-error";
 import { FormErrorAlert } from "@/shared/components/form-error-alert";
@@ -236,12 +236,12 @@ export function AddTeamForm() {
               <FieldError message={fieldErrors.name} />
             </div>
 
-            <LocationAutocomplete
+            <AddressAutocomplete
               inputId="add-team-location"
               label={t("add_team.location.label")}
               placeholder={t("add_team.location.placeholder")}
-              initialCity=""
-              initialCountry=""
+              initial={null}
+              granularity="place"
               onChange={(pick) => {
                 setLocation(pick);
                 clearFieldError("city", "country");

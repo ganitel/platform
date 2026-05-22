@@ -8,6 +8,7 @@ import { BookingPanel } from "@/features/properties/components/booking-panel";
 import { WaitlistPanel } from "@/features/waitlist/components/waitlist-panel";
 import { MobileDetailPanel } from "@/shared/components/mobile-detail-panel";
 import { ErrorState } from "@/shared/components/error-state";
+import { Markdown } from "@/shared/components/markdown";
 import { serverFetch, ServerApiError } from "@/shared/api/server";
 import { PUBLIC_CDN_CACHE } from "@/shared/lib/cache";
 import { formatMoney } from "@/shared/lib/format";
@@ -160,9 +161,11 @@ export default function PropertyDetailRoute({
               <h2 className="mb-3 text-lg font-semibold text-ganitel-text-title">
                 {t("property.description")}
               </h2>
-              <p className="whitespace-pre-line text-sm leading-relaxed text-ganitel-text-subtitle">
-                {property.description || "—"}
-              </p>
+              {property.description ? (
+                <Markdown source={property.description} />
+              ) : (
+                <p className="text-sm text-ganitel-text-subtitle">—</p>
+              )}
             </div>
 
             {property.amenities.length > 0 ? (

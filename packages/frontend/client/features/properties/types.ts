@@ -55,6 +55,7 @@ export interface PropertyPublic {
   id: string;
   title: string;
   property_type: string;
+  address: string | null;
   city: string;
   country_code: string;
   location: GeoPoint;
@@ -93,6 +94,7 @@ export interface PropertyCreateInput {
   title: string;
   description?: string;
   property_type: string;
+  address?: string | null;
   city: string;
   country_code: string;
   location: GeoPoint;

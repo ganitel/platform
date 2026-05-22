@@ -7,6 +7,7 @@ import { PropertyGallery } from "@/features/properties/components/property-galle
 import { WaitlistPanel } from "@/features/waitlist/components/waitlist-panel";
 import { MobileDetailPanel } from "@/shared/components/mobile-detail-panel";
 import { ErrorState } from "@/shared/components/error-state";
+import { Markdown } from "@/shared/components/markdown";
 import { serverFetch, ServerApiError } from "@/shared/api/server";
 import { PUBLIC_CDN_CACHE } from "@/shared/lib/cache";
 import { formatMoney } from "@/shared/lib/format";
@@ -163,9 +164,7 @@ export default function ExperienceDetailRoute({
                 <h2 className="mb-3 text-lg font-semibold text-ganitel-text-title">
                   {t("property.description")}
                 </h2>
-                <p className="whitespace-pre-line text-sm leading-relaxed text-ganitel-text-subtitle">
-                  {experience.description}
-                </p>
+                <Markdown source={experience.description} />
               </div>
             ) : null}
 

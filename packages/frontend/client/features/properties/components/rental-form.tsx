@@ -13,16 +13,16 @@ import {
   listCancellationPolicies,
   listPropertyTypes,
 } from "@/features/reference/api";
+import { LocationPicker } from "@/shared/components/location-picker";
+import { MarkdownEditor } from "@/shared/components/markdown-editor";
 import { INPUT_CLASS, LABEL_CLASS } from "@/shared/lib/form-styles";
+import type { LocationPick } from "@/shared/lib/location";
 
 interface FormState {
   title: string;
   description: string;
   property_type: string;
-  city: string;
-  country_code: string;
-  lat: string;
-  lng: string;
+  location: LocationPick | null;
   capacity: string;
   bedrooms: string;
   beds: string;
@@ -51,10 +51,7 @@ const BLANK: FormState = {
   title: "",
   description: "",
   property_type: "",
-  city: "",
-  country_code: "CM",
-  lat: "",
-  lng: "",
+  location: null,
   capacity: "2",
   bedrooms: "1",
   beds: "1",
@@ -87,10 +84,14 @@ function fromDetail(d: PropertyDetail): FormState {
     title: d.title,
     description: d.description ?? "",
     property_type: d.property_type,
-    city: d.city,
-    country_code: d.country_code,
-    lat: String(d.location.lat),
-    lng: String(d.location.lng),
+    location: {
+      address: d.address ?? `${d.city}, ${d.country_code}`,
+      city: d.city,
+      country: d.country_code,
+      country_code: d.country_code,
+      lat: d.location.lat,
+      lng: d.location.lng,
+    },
     capacity: String(d.capacity),
     bedrooms: String(d.bedrooms),
     beds: String(d.beds),
@@ -165,13 +166,15 @@ export function RentalForm({
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!form.location) return;
     const payload: PropertyCreateInput = {
       title: form.title,
       description: form.description,
       property_type: form.property_type,
-      city: form.city,
-      country_code: form.country_code.toUpperCase(),
-      location: { lat: Number(form.lat), lng: Number(form.lng) },
+      address: form.location.address,
+      city: form.location.city,
+      country_code: form.location.country_code,
+      location: { lat: form.location.lat, lng: form.location.lng },
       capacity: Number(form.capacity),
       bedrooms: Number(form.bedrooms),
       beds: Number(form.beds),
@@ -214,12 +217,11 @@ export function RentalForm({
           />
         </Field>
         <Field label="Description">
-          <textarea
-            rows={4}
+          <MarkdownEditor
+            rows={8}
             maxLength={10000}
             value={form.description}
-            onChange={(e) => update("description", e.target.value)}
-            className={INPUT_CLASS}
+            onChange={(v) => update("description", v)}
           />
         </Field>
         <Field label="Type">
@@ -252,48 +254,10 @@ export function RentalForm({
       </Section>
 
       <Section title="Localisation">
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Ville">
-            <input
-              required
-              value={form.city}
-              onChange={(e) => update("city", e.target.value)}
-              className={INPUT_CLASS}
-            />
-          </Field>
-          <Field label="Pays (ISO 2 lettres)">
-            <input
-              required
-              minLength={2}
-              maxLength={2}
-              value={form.country_code}
-              onChange={(e) =>
-                update("country_code", e.target.value.toUpperCase())
-              }
-              className={INPUT_CLASS}
-            />
-          </Field>
-          <Field label="Latitude">
-            <input
-              required
-              type="number"
-              step="any"
-              value={form.lat}
-              onChange={(e) => update("lat", e.target.value)}
-              className={INPUT_CLASS}
-            />
-          </Field>
-          <Field label="Longitude">
-            <input
-              required
-              type="number"
-              step="any"
-              value={form.lng}
-              onChange={(e) => update("lng", e.target.value)}
-              className={INPUT_CLASS}
-            />
-          </Field>
-        </div>
+        <LocationPicker
+          initial={form.location}
+          onChange={(pick) => update("location", pick)}
+        />
       </Section>
 
       <Section title="Capacité">
@@ -519,7 +483,7 @@ export function RentalForm({
       <div className="flex items-center justify-end gap-3">
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || !form.location}
           className="rounded-xl bg-ganitel-secondary px-6 py-3 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
         >
           {isPending ? pendingLabel : submitLabel}
