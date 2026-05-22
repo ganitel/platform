@@ -35,7 +35,7 @@ export function Privacy() {
         >
           <LegalFooterNotes className="mb-10" />
           <Markdown source={t("privacy.body")} />
-          <LegalFooterNotes className="mt-12" showContact />
+          <LegalFooterNotes className="mt-12" showNotice={false} showContact />
         </motion.div>
       </section>
     </>

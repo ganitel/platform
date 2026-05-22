@@ -3,15 +3,18 @@ import { cn } from "@/shared/lib/cn";
 
 interface LegalFooterNotesProps {
   className?: string;
+  showNotice?: boolean;
   showContact?: boolean;
 }
 
 export function LegalFooterNotes({
   className,
+  showNotice = true,
   showContact = false,
 }: LegalFooterNotesProps) {
   const t = useT();
   const email = t("legal.contact_email");
+  if (!showNotice && !showContact) return null;
   return (
     <div
       className={cn(
@@ -19,8 +22,11 @@ export function LegalFooterNotes({
         className,
       )}
     >
-      <p className="m-0 uppercase tracking-[0.12em]">{t("legal.updated_at")}</p>
-      <p className="m-0 italic">{t("legal.draft_notice")}</p>
+      {showNotice ? (
+        <p className="m-0 uppercase tracking-[0.12em]">
+          {t("legal.updated_at")}
+        </p>
+      ) : null}
       {showContact ? (
         <p className="m-0 not-italic text-ganitel-text-subtitle">
           {t("legal.contact_intro")}{" "}

@@ -882,10 +882,6 @@ const dict = {
     fr: "Dernière mise à jour — 22 mai 2026",
     en: "Last updated — May 22, 2026",
   },
-  "legal.draft_notice": {
-    fr: "Document de travail — relu par nos conseils juridiques avant l'ouverture commerciale.",
-    en: "Working draft — under review by our legal counsel ahead of public launch.",
-  },
   "legal.contact_intro": {
     fr: "Une question ? Écrivez-nous à",
     en: "A question? Reach us at",
