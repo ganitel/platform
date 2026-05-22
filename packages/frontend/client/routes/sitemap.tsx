@@ -7,13 +7,16 @@ import type { ExperienceSearchOut } from "@/features/experiences/types";
 
 const STATIC_PATHS: Array<{
   path: string;
-  changefreq: "daily" | "weekly" | "monthly";
+  changefreq: "daily" | "weekly" | "monthly" | "yearly";
   priority: number;
 }> = [
   { path: "/", changefreq: "daily", priority: 1.0 },
   { path: "/browse", changefreq: "daily", priority: 0.9 },
   { path: "/browse?kind=experiences", changefreq: "daily", priority: 0.9 },
   { path: "/about", changefreq: "monthly", priority: 0.6 },
+  { path: "/faq", changefreq: "monthly", priority: 0.5 },
+  { path: "/terms", changefreq: "yearly", priority: 0.3 },
+  { path: "/privacy", changefreq: "yearly", priority: 0.3 },
 ];
 
 function xmlEscape(s: string): string {

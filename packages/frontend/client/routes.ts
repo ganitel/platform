@@ -15,6 +15,9 @@ export default [
     route("bookings", "routes/bookings.tsx"),
     route("profile", "routes/profile.tsx"),
     route("about", "routes/about.tsx"),
+    route("terms", "routes/terms.tsx"),
+    route("privacy", "routes/privacy.tsx"),
+    route("faq", "routes/faq.tsx"),
   ]),
 
   // Auth pages — no app shell.
