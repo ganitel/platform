@@ -26,8 +26,8 @@ def _listing(status, host_id):
     return SimpleNamespace(status=status, host_id=host_id)
 
 
-def _user(user_id, *, is_admin=False):
-    return SimpleNamespace(id=user_id, is_admin=is_admin)
+def _user(user_id, *, is_admin=False, status="active"):
+    return SimpleNamespace(id=user_id, is_admin=is_admin, status=status)
 
 
 @pytest.mark.unit
@@ -76,6 +76,25 @@ def test_property_detail_visibility_allows_admin_for_private_listing() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize("is_admin", [False, True])
+def test_property_detail_visibility_hides_private_listing_from_inactive_user(
+    is_admin,
+) -> None:
+    host_id = uuid4()
+    user_id = uuid4() if is_admin else host_id
+    response = Response()
+
+    with pytest.raises(NotFoundError) as exc:
+        enforce_property_visibility(
+            response,
+            _listing(PropertyStatus.UNLISTED, host_id),
+            _user(user_id, is_admin=is_admin, status="inactive"),
+        )
+
+    assert exc.value.code == "property.not_found"
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     ("status", "cache_header"),
     [
@@ -118,3 +137,22 @@ def test_experience_detail_visibility_allows_admin_for_private_listing() -> None
     )
 
     assert response.headers["Cache-Control"] == EXPERIENCE_PRIVATE_DETAIL_CACHE
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("is_admin", [False, True])
+def test_experience_detail_visibility_hides_private_listing_from_inactive_user(
+    is_admin,
+) -> None:
+    host_id = uuid4()
+    user_id = uuid4() if is_admin else host_id
+    response = Response()
+
+    with pytest.raises(NotFoundError) as exc:
+        enforce_experience_visibility(
+            response,
+            _listing(ExperienceStatus.UNLISTED, host_id),
+            _user(user_id, is_admin=is_admin, status="inactive"),
+        )
+
+    assert exc.value.code == "experience.not_found"
