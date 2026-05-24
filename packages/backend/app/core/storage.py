@@ -6,7 +6,8 @@ uploads directly. On read we return a presigned GET URL (keys that are already `
 """
 
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import Any, Literal
+from urllib.parse import urlencode
 
 import aioboto3
 from botocore.config import Config
@@ -70,6 +71,55 @@ async def public_or_signed_url(key: str) -> str:
             Params={"Bucket": s.S3_BUCKET, "Key": key},
             ExpiresIn=s.MEDIA_GET_URL_TTL_SECONDS,
         )
+
+
+def public_url(key: str) -> str:
+    """Return the permanent public URL for an object in the public Supabase bucket.
+
+    Keys that already look like absolute URLs (seed/demo data) are returned verbatim.
+    """
+    if key.startswith(("http://", "https://")):
+        return key
+    s = get_settings()
+    if not s.SUPABASE_PROJECT_URL:
+        raise RuntimeError("SUPABASE_PROJECT_URL is not configured")
+    return f"{s.SUPABASE_PROJECT_URL.rstrip('/')}/storage/v1/object/public/{s.S3_BUCKET}/{key}"
+
+
+def image_transform_url(
+    key: str,
+    *,
+    width: int | None = None,
+    height: int | None = None,
+    quality: int | None = None,
+    fmt: Literal["webp", "avif"] | None = None,
+) -> str:
+    """Build a Supabase image transformation URL. Falls back to `public_url`
+    when SUPABASE_IMAGE_TRANSFORMS_ENABLED is false (e.g. the free plan).
+
+    Callers always pass the variant they want; flipping the flag activates
+    real transforms without any call-site changes.
+    """
+    s = get_settings()
+    if not s.SUPABASE_IMAGE_TRANSFORMS_ENABLED:
+        return public_url(key)
+    if key.startswith(("http://", "https://")):
+        return key
+    if not s.SUPABASE_PROJECT_URL:
+        raise RuntimeError("SUPABASE_PROJECT_URL is not configured")
+    params: dict[str, str] = {}
+    if width is not None:
+        params["width"] = str(width)
+    if height is not None:
+        params["height"] = str(height)
+    if quality is not None:
+        params["quality"] = str(quality)
+    if fmt is not None:
+        params["format"] = fmt
+    base = (
+        f"{s.SUPABASE_PROJECT_URL.rstrip('/')}/storage/v1/render/image/public/{s.S3_BUCKET}/{key}"
+    )
+    return f"{base}?{urlencode(params)}" if params else base
 
 
 async def ensure_bucket_exists() -> None:
