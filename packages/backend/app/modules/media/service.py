@@ -15,8 +15,9 @@ _EXTENSIONS = {
     "image/jpeg": "jpg",
     "image/png": "png",
     "image/webp": "webp",
-    "image/gif": "gif",
-    "image/heic": "heic",
+    "image/avif": "avif",
+    "video/mp4": "mp4",
+    "video/webm": "webm",
 }
 
 
