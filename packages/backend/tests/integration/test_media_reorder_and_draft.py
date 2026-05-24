@@ -1,12 +1,14 @@
+from decimal import Decimal
 from uuid import uuid4
 
 import pytest
 
 from app.core.errors import ValidationError
+from app.core.money import Currency, Money
 from app.modules.media.models import Media
 from app.modules.media.service import delete_unattached_draft
 from app.modules.properties import service as prop_service
-from app.modules.properties.schemas import PropertyCreateIn
+from app.modules.properties.schemas import GeoPoint, PropertyCreateIn
 from tests.integration.test_listing_media_flow import _request_upload, _seed_user
 
 
@@ -24,9 +26,9 @@ async def test_reorder_rejects_partial_set(db_session):
             property_type="villa",
             city="Douala",
             country_code="CM",
-            location={"lat": 4, "lng": 9},
+            location=GeoPoint(lat=4, lng=9),
             capacity=2,
-            base_price={"amount": "1", "currency": "XAF"},
+            base_price=Money(amount=Decimal("1"), currency=Currency.XAF),
             media_ids=[m.id for m in medias],
         ),
     )
@@ -60,9 +62,9 @@ async def test_delete_draft_skips_attached(db_session):
             property_type="villa",
             city="Douala",
             country_code="CM",
-            location={"lat": 4, "lng": 9},
+            location=GeoPoint(lat=4, lng=9),
             capacity=2,
-            base_price={"amount": "1", "currency": "XAF"},
+            base_price=Money(amount=Decimal("1"), currency=Currency.XAF),
             media_ids=[attached.id],
         ),
     )

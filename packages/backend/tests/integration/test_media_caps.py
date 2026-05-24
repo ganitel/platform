@@ -1,10 +1,13 @@
 """Per-listing media caps: 20 total, sub-cap of 3 videos."""
 
+from decimal import Decimal
+
 import pytest
 
 from app.core.errors import ConflictError
+from app.core.money import Currency, Money
 from app.modules.properties import service as prop_service
-from app.modules.properties.schemas import PropertyCreateIn
+from app.modules.properties.schemas import GeoPoint, PropertyCreateIn
 from tests.integration.test_listing_media_flow import _request_upload, _seed_user
 
 
@@ -19,9 +22,9 @@ async def test_cannot_attach_21st_item(db_session):
         property_type="villa",
         city="Douala",
         country_code="CM",
-        location={"lat": 4, "lng": 9},
+        location=GeoPoint(lat=4, lng=9),
         capacity=2,
-        base_price={"amount": "1", "currency": "XAF"},
+        base_price=Money(amount=Decimal("1"), currency=Currency.XAF),
         media_ids=[m.id for m in medias],
     )
     prop = await prop_service.create_draft(db_session, user, payload)
@@ -47,9 +50,9 @@ async def test_cannot_attach_4th_video(db_session):
         property_type="villa",
         city="Douala",
         country_code="CM",
-        location={"lat": 4, "lng": 9},
+        location=GeoPoint(lat=4, lng=9),
         capacity=2,
-        base_price={"amount": "1", "currency": "XAF"},
+        base_price=Money(amount=Decimal("1"), currency=Currency.XAF),
         media_ids=[v.id for v in vids],
     )
     prop = await prop_service.create_draft(db_session, user, payload)
