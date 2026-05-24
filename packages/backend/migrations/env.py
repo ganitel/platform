@@ -20,7 +20,16 @@ from app.modules.team import models as _team_models  # noqa: F401
 from app.modules.users import models as _users_models  # noqa: F401
 
 config = context.config
-config.set_main_option("sqlalchemy.url", str(get_settings().DATABASE_URL))
+_configured_url = config.get_main_option("sqlalchemy.url")
+if not _configured_url or _configured_url == "driver://user:pass@localhost/dbname":
+    _db_url = str(get_settings().DATABASE_URL)
+else:
+    _db_url = _configured_url
+if _db_url.startswith("postgresql://") or _db_url.startswith("postgresql+psycopg://"):
+    _db_url = _db_url.replace("postgresql://", "postgresql+asyncpg://", 1).replace(
+        "postgresql+psycopg://", "postgresql+asyncpg://", 1
+    )
+config.set_main_option("sqlalchemy.url", _db_url)
 
 target_metadata = Base.metadata
 
