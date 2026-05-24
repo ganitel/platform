@@ -3,6 +3,7 @@
 from datetime import date, timedelta
 from decimal import Decimal
 from typing import Any
+from uuid import uuid4
 
 import pytest
 from pydantic import ValidationError
@@ -196,20 +197,87 @@ def test_update_me_rejects_unknown_field() -> None:
 
 
 def test_media_upload_accepts_image_mime() -> None:
-    MediaUploadIn(mime_type="image/jpeg")
-    MediaUploadIn(mime_type="image/png")
-    MediaUploadIn(mime_type="image/webp")
-    MediaUploadIn(mime_type="image/avif")
+    MediaUploadIn(mime_type="image/jpeg", kind="image")
+    MediaUploadIn(mime_type="image/png", kind="image")
+    MediaUploadIn(mime_type="image/webp", kind="image")
+    MediaUploadIn(mime_type="image/avif", kind="image")
 
 
 def test_media_upload_rejects_non_image_mime() -> None:
     with pytest.raises(ValidationError):
-        MediaUploadIn.model_validate({"mime_type": "application/pdf"})
+        MediaUploadIn.model_validate({"mime_type": "application/pdf", "kind": "image"})
 
 
 def test_media_upload_rejects_oversize() -> None:
     with pytest.raises(ValidationError):
-        MediaUploadIn(mime_type="image/jpeg", size_bytes=10**9)
+        MediaUploadIn(mime_type="image/jpeg", kind="image", size_bytes=11 * 1024 * 1024)
+
+
+def test_media_upload_image_with_video_kind_rejected() -> None:
+    with pytest.raises(ValueError):
+        MediaUploadIn(mime_type="image/jpeg", kind="video", size_bytes=1000)
+
+
+def test_media_upload_video_requires_duration() -> None:
+    with pytest.raises(ValueError):
+        MediaUploadIn(mime_type="video/mp4", kind="video", size_bytes=1000)
+
+
+def test_media_upload_video_accepts_mp4_with_duration() -> None:
+    m = MediaUploadIn(
+        mime_type="video/mp4",
+        kind="video",
+        size_bytes=10_000_000,
+        duration_ms=30_000,
+    )
+    assert m.kind == "video"
+
+
+def test_media_upload_video_rejects_oversize() -> None:
+    with pytest.raises(ValueError):
+        MediaUploadIn(
+            mime_type="video/mp4",
+            kind="video",
+            size_bytes=300 * 1024 * 1024,
+            duration_ms=10_000,
+        )
+
+
+def test_media_upload_image_rejects_oversize_at_11mb() -> None:
+    with pytest.raises(ValueError):
+        MediaUploadIn(
+            mime_type="image/jpeg",
+            kind="image",
+            size_bytes=11 * 1024 * 1024,
+        )
+
+
+def test_media_upload_image_rejects_avif_video_kind() -> None:
+    with pytest.raises(ValueError):
+        MediaUploadIn(mime_type="video/webm", kind="image", size_bytes=1000, duration_ms=10)
+
+
+def test_media_upload_video_rejects_overlong_duration() -> None:
+    with pytest.raises(ValueError):
+        MediaUploadIn(
+            mime_type="video/mp4",
+            kind="video",
+            size_bytes=10_000,
+            duration_ms=61_000,
+        )
+
+
+def test_media_upload_accepts_draft_id_and_poster() -> None:
+    m = MediaUploadIn(
+        mime_type="video/mp4",
+        kind="video",
+        size_bytes=1000,
+        duration_ms=5_000,
+        draft_id=uuid4(),
+        poster_media_id=uuid4(),
+    )
+    assert m.draft_id is not None
+    assert m.poster_media_id is not None
 
 
 # -------------------- waitlist --------------------
