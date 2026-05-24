@@ -48,7 +48,7 @@ export function AdminShell({
   return (
     <div className="min-h-screen bg-ganitel-paper">
       <Header />
-      <div className="mx-auto flex max-w-[1400px] gap-8 px-4 py-8 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl gap-8 px-4 py-8 md:px-8">
         <AdminSidebar />
         <main className="min-w-0 flex-1">
           <PageHeader
