@@ -13,7 +13,7 @@ from app.modules.experiences.models import (
     ExperienceCancellationPolicy,
     ExperienceStatus,
 )
-from app.modules.media.schemas import MediaPublic
+from app.modules.media.schemas import MediaItemPublic, MediaPublic
 from app.modules.properties.schemas import (
     ContentLanguage,
     CountryCode,
@@ -42,6 +42,7 @@ class ExperienceCreateIn(BaseModel):
     cancellation_policy: ExperienceCancellationPolicy = ExperienceCancellationPolicy.MODERATE
     base_price: Money
     content_language: ContentLanguage = "fr"
+    media_ids: list[UUID] = Field(default_factory=list, max_length=20)
 
 
 class ExperienceUpdateIn(BaseModel):
@@ -87,7 +88,7 @@ class ExperiencePublic(BaseModel):
     capacity: int
     duration_minutes: int
     base_price: Money
-    cover_photo: MediaPublic | None
+    cover_media: MediaPublic | None
     distance_km: float | None = None
 
 
@@ -97,7 +98,7 @@ class ExperienceDetail(ExperiencePublic):
     content_language: ContentLanguage
     status: ExperienceStatus
     host: HostPublic
-    photos: list[MediaPublic]
+    media: list[MediaItemPublic]
     created_at: datetime
     published_at: datetime | None
 
@@ -118,7 +119,7 @@ class ExperienceAdminListItem(BaseModel):
     status: ExperienceStatus
     duration_minutes: int
     base_price: Money
-    cover_photo: MediaPublic | None
+    cover_media: MediaPublic | None
     created_at: datetime
     published_at: datetime | None
 
@@ -140,13 +141,23 @@ class AdminStatusSummary(BaseModel):
     total: int = 0
 
 
-class AttachPhotoIn(BaseModel):
+class AttachMediaIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     media_id: UUID
     position: int = Field(default=0, ge=0, le=64)
 
 
-class PhotoAttachOut(BaseModel):
+class MediaAttachOut(BaseModel):
     id: UUID
     position: int
+
+
+class ReorderMediaItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    media_item_id: UUID
+    position: int = Field(..., ge=0, le=64)
+
+
+class ReorderMediaIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    order: list[ReorderMediaItem]

@@ -1,5 +1,5 @@
 """HTTP endpoints for experiences — anonymous search + detail, plus
-host/admin create / update / publish / unpublish / remove / photo
+host/admin create / update / publish / unpublish / remove / media
 management, mirroring the properties module."""
 
 from decimal import Decimal
@@ -15,11 +15,12 @@ from app.modules.experiences import search as search_mod
 from app.modules.experiences import service
 from app.modules.experiences.models import Experience, ExperienceStatus
 from app.modules.experiences.schemas import (
-    AttachPhotoIn,
+    AttachMediaIn,
     ExperienceCreateIn,
     ExperienceDetail,
     ExperienceUpdateIn,
-    PhotoAttachOut,
+    MediaAttachOut,
+    ReorderMediaIn,
     SearchOut,
 )
 from app.modules.users.models import User
@@ -44,14 +45,14 @@ def _set_detail_cache_and_enforce_visibility(
     response.headers["Cache-Control"] = PRIVATE_DETAIL_CACHE
 
 
-async def _detail_with_host(session: DbSession, exp, user: User) -> ExperienceDetail:
+async def _detail_with_host(session: DbSession, exp: Experience, user: User) -> ExperienceDetail:
     """Build an ExperienceDetail using the experience's actual host, not the
     acting user. Matters when an admin acts on an experience owned by someone
-    else — `to_detail(exp, user)` would mislabel the admin as the host."""
+    else — `to_detail(session, exp, user)` would mislabel the admin as the host."""
     host = await session.get(User, exp.host_id)
     if host is None:
         raise NotFoundError(code="host.not_found")
-    return await service.to_detail(exp, host)
+    return await service.to_detail(session, exp, host)
 
 
 router = APIRouter(prefix="/experiences", tags=["experiences"])
@@ -63,7 +64,7 @@ async def create_experience(
 ) -> ExperienceDetail:
     exp = await service.create_draft(session, user, body)
     fresh = await service.get(session, exp.id)
-    return await service.to_detail(fresh, user)
+    return await service.to_detail(session, fresh, user)
 
 
 @router.get("", response_model=SearchOut)
@@ -101,7 +102,7 @@ async def search_experiences(
     )
     rows = await search_mod.search(session, f)
     total = await search_mod.count(session, f)
-    items = [await service.to_public(e, distance_km=d) for e, d in rows]
+    items = [await service.to_public(session, e, distance_km=d) for e, d in rows]
     response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
     return SearchOut(items=items, total=total, limit=limit, offset=offset)
 
@@ -118,7 +119,7 @@ async def get_experience(
     host = await session.get(User, exp.host_id)
     if host is None:
         raise NotFoundError(code="host.not_found")
-    return await service.to_detail(exp, host)
+    return await service.to_detail(session, exp, host)
 
 
 @router.patch("/{experience_id}", response_model=ExperienceDetail)
@@ -161,29 +162,43 @@ async def remove_experience(
 
 
 @router.post(
-    "/{experience_id}/photos",
-    response_model=PhotoAttachOut,
+    "/{experience_id}/media",
+    response_model=MediaAttachOut,
     status_code=status.HTTP_201_CREATED,
 )
-async def attach_photo(
+async def attach_media(
     experience_id: UUID,
-    body: AttachPhotoIn,
+    body: AttachMediaIn,
     user: CurrentUser,
     session: DbSession,
-) -> PhotoAttachOut:
+) -> MediaAttachOut:
     exp = await service.get(session, experience_id)
-    photo = await service.attach_photo(
+    item = await service.attach_media(
         session, exp, user, media_id=body.media_id, position=body.position
     )
-    return PhotoAttachOut(id=photo.id, position=photo.position)
+    return MediaAttachOut(id=item.id, position=item.position)
 
 
-@router.delete("/{experience_id}/photos/{photo_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def detach_photo(
+@router.patch("/{experience_id}/media", response_model=ExperienceDetail)
+async def reorder_media(
     experience_id: UUID,
-    photo_id: UUID,
+    body: ReorderMediaIn,
+    user: CurrentUser,
+    session: DbSession,
+) -> ExperienceDetail:
+    exp = await service.get(session, experience_id)
+    await service.reorder_media(
+        session, exp, user, [(o.media_item_id, o.position) for o in body.order]
+    )
+    return await _detail_with_host(session, exp, user)
+
+
+@router.delete("/{experience_id}/media/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def detach_media(
+    experience_id: UUID,
+    item_id: UUID,
     user: CurrentUser,
     session: DbSession,
 ) -> None:
     exp = await service.get(session, experience_id)
-    await service.detach_photo(session, exp, user, photo_id)
+    await service.detach_media(session, exp, user, item_id)

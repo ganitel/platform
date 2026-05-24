@@ -1,6 +1,6 @@
 """Experience lifecycle and projections — mirrors properties/service.py.
 
-Create / update / publish / unpublish / remove + photo attach/detach +
+Create / update / publish / unpublish / remove + media attach/detach/reorder +
 admin list + the `to_*` mappers that turn ORM rows into API schemas.
 """
 
@@ -29,7 +29,9 @@ from app.modules.experiences.schemas import (
     ExperiencePublic,
     ExperienceUpdateIn,
 )
-from app.modules.media.models import Media
+from app.modules.media.models import Media, MediaKind
+from app.modules.media.schemas import MediaItemPublic, MediaPublic
+from app.modules.media.service import load_poster
 from app.modules.media.service import to_public as media_to_public
 from app.modules.properties.schemas import GeoPoint, HostPublic
 from app.modules.users.models import User
@@ -47,6 +49,25 @@ def _point_out(loc) -> GeoPoint:
 def _ensure_owner(user: User, experience: Experience) -> None:
     if experience.host_id != user.id and not user.is_admin:
         raise ForbiddenError(code="experience.not_owner")
+
+
+async def _resolve_listing_media(
+    session: AsyncSession, items: list[ExperienceMediaItem]
+) -> list[MediaItemPublic]:
+    out: list[MediaItemPublic] = []
+    for it in items:
+        poster = await load_poster(session, it.media)
+        public = await media_to_public(it.media, poster=poster)
+        out.append(MediaItemPublic(**public.model_dump(), media_item_id=it.id))
+    return out
+
+
+async def _cover(session: AsyncSession, items: list[ExperienceMediaItem]) -> MediaPublic | None:
+    if not items:
+        return None
+    first = items[0]
+    poster = await load_poster(session, first.media)
+    return await media_to_public(first.media, poster=poster)
 
 
 async def create_draft(
@@ -72,6 +93,15 @@ async def create_draft(
         status=ExperienceStatus.DRAFT,
     )
     session.add(exp)
+    await session.flush()
+
+    if payload.media_ids:
+        for idx, media_id in enumerate(payload.media_ids):
+            media = await session.get(Media, media_id)
+            if media is None or (media.owner_user_id != host.id and not host.is_admin):
+                raise NotFoundError(code="media.not_found")
+            session.add(ExperienceMediaItem(experience_id=exp.id, media_id=media_id, position=idx))
+
     await session.commit()
     await session.refresh(exp)
     return exp
@@ -108,7 +138,7 @@ async def publish(session: AsyncSession, experience: Experience, user: User) -> 
     if experience.base_price_amount is None or experience.base_price_amount <= 0:
         issues["base_price_amount"] = "not_positive"
     if not experience.media:
-        issues["photos"] = "empty"
+        issues["media"] = "empty"
     if issues:
         raise ValidationError(code="experience.not_ready", extra={"issues": issues})
     experience.status = ExperienceStatus.PUBLISHED
@@ -187,45 +217,60 @@ async def get(session: AsyncSession, experience_id: UUID) -> Experience:
     return exp
 
 
-async def attach_photo(
-    session: AsyncSession,
-    experience: Experience,
-    user: User,
-    *,
-    media_id: UUID,
-    position: int,
+async def attach_media(
+    session: AsyncSession, experience: Experience, user: User, *, media_id: UUID, position: int
 ) -> ExperienceMediaItem:
+    from app.core.errors import ConflictError
+
     _ensure_owner(user, experience)
     media = await session.get(Media, media_id)
     if media is None:
         raise NotFoundError(code="media.not_found")
     if media.owner_user_id != user.id and not user.is_admin:
         raise ForbiddenError(code="media.not_owner")
-    photo = ExperienceMediaItem(experience_id=experience.id, media_id=media_id, position=position)
-    session.add(photo)
+
+    current_total = len(experience.media)
+    if current_total >= 20:
+        raise ConflictError(code="media.cap_exceeded")
+    if media.kind == MediaKind.VIDEO:
+        current_videos = sum(1 for it in experience.media if it.media.kind == MediaKind.VIDEO)
+        if current_videos >= 3:
+            raise ConflictError(code="media.video_cap_exceeded")
+
+    item = ExperienceMediaItem(experience_id=experience.id, media_id=media_id, position=position)
+    session.add(item)
     await session.commit()
-    await session.refresh(photo)
-    return photo
+    await session.refresh(item)
+    return item
 
 
-async def detach_photo(
-    session: AsyncSession,
-    experience: Experience,
-    user: User,
-    photo_id: UUID,
+async def detach_media(
+    session: AsyncSession, experience: Experience, user: User, item_id: UUID
 ) -> None:
     _ensure_owner(user, experience)
-    photo = await session.get(ExperienceMediaItem, photo_id)
-    if photo is None or photo.experience_id != experience.id:
-        raise NotFoundError(code="photo.not_found")
-    await session.delete(photo)
+    item = await session.get(ExperienceMediaItem, item_id)
+    if item is None or item.experience_id != experience.id:
+        raise NotFoundError(code="media_item.not_found")
+    await session.delete(item)
+    await session.commit()
+
+
+async def reorder_media(
+    session: AsyncSession, experience: Experience, user: User, order: list[tuple[UUID, int]]
+) -> None:
+    _ensure_owner(user, experience)
+    existing = {it.id: it for it in experience.media}
+    requested = {item_id for item_id, _ in order}
+    if requested != set(existing.keys()):
+        raise ValidationError(code="media.reorder_mismatch")
+    for item_id, pos in order:
+        existing[item_id].position = pos
     await session.commit()
 
 
 async def to_public(
-    experience: Experience, *, distance_km: float | None = None
+    session: AsyncSession, experience: Experience, *, distance_km: float | None = None
 ) -> ExperiencePublic:
-    cover = experience.media[0] if experience.media else None
     return ExperiencePublic(
         id=experience.id,
         title=experience.title,
@@ -240,13 +285,13 @@ async def to_public(
             amount=experience.base_price_amount,
             currency=Currency(experience.base_price_currency),
         ),
-        cover_photo=await media_to_public(cover.media) if cover else None,
+        cover_media=await _cover(session, experience.media),
         distance_km=distance_km,
     )
 
 
-async def to_detail(experience: Experience, host: User) -> ExperienceDetail:
-    photos = [await media_to_public(p.media) for p in experience.media]
+async def to_detail(session: AsyncSession, experience: Experience, host: User) -> ExperienceDetail:
+    media_items = await _resolve_listing_media(session, experience.media)
     return ExperienceDetail(
         id=experience.id,
         title=experience.title,
@@ -261,20 +306,21 @@ async def to_detail(experience: Experience, host: User) -> ExperienceDetail:
             amount=experience.base_price_amount,
             currency=Currency(experience.base_price_currency),
         ),
-        cover_photo=photos[0] if photos else None,
+        cover_media=media_items[0] if media_items else None,
         description=experience.description,
         cancellation_policy=experience.cancellation_policy,
         content_language=cast(Literal["fr", "en"], experience.content_language),
         status=experience.status,
         host=HostPublic.model_validate(host),
-        photos=photos,
+        media=media_items,
         created_at=experience.created_at,
         published_at=experience.published_at,
     )
 
 
-async def to_admin_list_item(experience: Experience) -> ExperienceAdminListItem:
-    cover = experience.media[0] if experience.media else None
+async def to_admin_list_item(
+    session: AsyncSession, experience: Experience
+) -> ExperienceAdminListItem:
     return ExperienceAdminListItem(
         id=experience.id,
         title=experience.title,
@@ -287,7 +333,7 @@ async def to_admin_list_item(experience: Experience) -> ExperienceAdminListItem:
             amount=experience.base_price_amount,
             currency=Currency(experience.base_price_currency),
         ),
-        cover_photo=await media_to_public(cover.media) if cover else None,
+        cover_media=await _cover(session, experience.media),
         created_at=experience.created_at,
         published_at=experience.published_at,
     )
