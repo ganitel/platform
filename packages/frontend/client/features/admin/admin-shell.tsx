@@ -68,7 +68,7 @@ function AdminSidebar() {
   const t = useT();
   return (
     <aside className="hidden w-60 shrink-0 flex-col lg:flex">
-      <div className="sticky top-8 flex flex-col gap-8 rounded-3xl border border-ganitel-stroke-neutral/70 bg-ganitel-primary p-6 text-ganitel-paper shadow-[0_30px_80px_-40px_rgba(24,16,12,0.35)]">
+      <div className="sticky top-24 flex flex-col gap-8 rounded-3xl border border-ganitel-stroke-neutral/70 bg-ganitel-primary p-6 text-ganitel-paper shadow-[0_30px_80px_-40px_rgba(24,16,12,0.35)]">
         <div className="flex flex-col gap-1">
           <span className="font-italic-serif text-2xl leading-none text-ganitel-secondary">
             {t("admin.brand")}
