@@ -48,13 +48,13 @@ export function Header() {
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-ganitel-text-title"
-          aria-label="Ganitel"
+          aria-label="ganitel"
         >
           <span className="grid size-7 rotate-[-4deg] place-items-center rounded-lg bg-ganitel-text-title text-[13px] font-extrabold leading-none text-ganitel-paper">
             G
           </span>
           <span className="font-display text-[22px] font-extrabold leading-none tracking-[-0.045em]">
-            Ganitel
+            ganitel
           </span>
         </Link>
 

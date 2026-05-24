@@ -4,6 +4,7 @@ import type { Route } from "./+types/experiences.$id";
 
 import { HostCard } from "@/features/properties/components/host-card";
 import { PropertyGallery } from "@/features/properties/components/property-gallery";
+import { useExperienceTypeLabel } from "@/features/reference/hooks";
 import { WaitlistPanel } from "@/features/waitlist/components/waitlist-panel";
 import { MobileDetailPanel } from "@/shared/components/mobile-detail-panel";
 import { ErrorState } from "@/shared/components/error-state";
@@ -11,7 +12,14 @@ import { Markdown } from "@/shared/components/markdown";
 import { serverFetch, ServerApiError } from "@/shared/api/server";
 import { PUBLIC_CDN_CACHE } from "@/shared/lib/cache";
 import { formatMoney } from "@/shared/lib/format";
-import { useLocale, useT } from "@/shared/lib/i18n";
+import {
+  type Locale,
+  localeFromAcceptLanguage,
+  t as translate,
+  useLocale,
+  useT,
+} from "@/shared/lib/i18n";
+import { pickPriceForLocale } from "@/shared/lib/price";
 import { seo, absoluteUrl } from "@/shared/lib/seo";
 import type { ExperienceDetail } from "@/features/experiences/types";
 
@@ -23,26 +31,30 @@ export const meta: Route.MetaFunction = ({
   data,
   params,
 }: {
-  data: { experience: ExperienceDetail } | null | undefined;
+  data: { experience: ExperienceDetail; locale: Locale } | null | undefined;
   params: { id?: string };
 }) => {
+  const locale = data?.locale ?? "fr";
   if (!data?.experience) {
     return seo({
-      title: "Expérience introuvable — Ganitel",
-      description:
-        "Cette expérience n'est plus disponible. Découvrez nos autres expériences sur Ganitel.",
+      title: translate("experience.not_found.title", locale),
+      description: translate("experience.not_found.description", locale),
       pathname: `/experiences/${params.id ?? ""}`,
+      locale,
       noindex: true,
     });
   }
   const e = data.experience;
-  const title = `${e.title} — ${e.city} | Ganitel`;
+  const title = `${e.title} — ${e.city} | ganitel`;
   const description = (
     e.description?.slice(0, 160) ||
-    `${e.experience_type} à ${e.city}, ${e.country_code}.`
+    translate("property.type_in_city", locale)
+      .replace("{type}", e.experience_type)
+      .replace("{city}", e.city)
+      .replace("{country}", e.country_code)
   ).replace(/\s+/g, " ");
-  const ogImage = e.cover_photo?.url
-    ? { url: e.cover_photo.url, alt: e.title }
+  const ogImage = e.cover_media?.url
+    ? { url: e.cover_media.url, alt: e.title }
     : { url: "/og/experiences.png", alt: e.title };
 
   const jsonLd = {
@@ -52,7 +64,7 @@ export const meta: Route.MetaFunction = ({
     name: e.title,
     description: e.description || undefined,
     url: absoluteUrl(`/experiences/${e.id}`),
-    image: e.photos.map((m) => m.url),
+    image: e.media.map((m) => m.url),
     address: {
       "@type": "PostalAddress",
       addressLocality: e.city,
@@ -68,13 +80,16 @@ export const meta: Route.MetaFunction = ({
             longitude: e.location.lng,
           }
         : undefined,
-    offers: {
-      "@type": "Offer",
-      price: e.base_price.amount,
-      priceCurrency: e.base_price.currency,
-      url: absoluteUrl(`/experiences/${e.id}`),
-      availability: "https://schema.org/InStock",
-    },
+    offers:
+      e.prices.length > 0
+        ? {
+            "@type": "Offer",
+            price: e.prices[0].amount,
+            priceCurrency: e.prices[0].currency,
+            url: absoluteUrl(`/experiences/${e.id}`),
+            availability: "https://schema.org/InStock",
+          }
+        : undefined,
     duration: `PT${e.duration_minutes}M`,
     additionalType: e.experience_type,
   };
@@ -89,15 +104,20 @@ export const meta: Route.MetaFunction = ({
   });
 };
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
+  const locale = localeFromAcceptLanguage(
+    request.headers.get("Accept-Language"),
+  );
   try {
     const experience = await serverFetch<ExperienceDetail>(
       `/experiences/${params.id}`,
     );
-    return { experience };
+    return { experience, locale };
   } catch (e) {
     if (e instanceof ServerApiError && e.status === 404) {
-      throw data("Expérience introuvable", { status: 404 });
+      throw data(translate("experience.not_found.short", locale), {
+        status: 404,
+      });
     }
     throw e;
   }
@@ -117,8 +137,10 @@ export default function ExperienceDetailRoute({
   const { experience } = loaderData;
   const t = useT();
   const locale = useLocale();
+  const experienceTypeLabel = useExperienceTypeLabel();
 
-  const priceText = formatMoney(experience.base_price, locale);
+  const pickedPrice = pickPriceForLocale(experience.prices, locale);
+  const priceText = pickedPrice ? formatMoney(pickedPrice, locale) : "";
   const priceLabel = t("experience.per_person");
 
   const panel = (
@@ -126,7 +148,7 @@ export default function ExperienceDetailRoute({
       itemId={experience.id}
       kind="experience"
       title={experience.title}
-      price={experience.base_price}
+      price={pickedPrice ?? { amount: "0", currency: "XAF" }}
       priceLabel={priceLabel}
     />
   );
@@ -137,7 +159,7 @@ export default function ExperienceDetailRoute({
         <header className="mb-5 flex flex-wrap items-start justify-between gap-4 md:mb-6">
           <div>
             <p className="text-[11px] uppercase tracking-[0.2em] text-ganitel-secondary">
-              {experience.experience_type}
+              {experienceTypeLabel(experience.experience_type)}
             </p>
             <h1 className="mt-2 font-infoma text-[28px] leading-[1.05] text-ganitel-text-title sm:text-3xl md:text-4xl">
               {experience.title}
@@ -148,7 +170,7 @@ export default function ExperienceDetailRoute({
           </div>
         </header>
 
-        <PropertyGallery photos={experience.photos} title={experience.title} />
+        <PropertyGallery photos={experience.media} title={experience.title} />
 
         <div className="mt-8 grid grid-cols-1 gap-8 md:mt-10 md:gap-10 lg:grid-cols-[1fr_360px]">
           <section className="space-y-8 md:space-y-10">

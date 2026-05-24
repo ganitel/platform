@@ -75,3 +75,32 @@ export async function removeProperty(id: string): Promise<PropertyDetail> {
   const r = await apiClient.post<PropertyDetail>(`/properties/${id}/remove`);
   return r.data;
 }
+
+export async function attachPropertyMedia(
+  propertyId: string,
+  body: { media_id: string; position: number },
+): Promise<{ id: string; position: number }> {
+  const r = await apiClient.post<{ id: string; position: number }>(
+    `/properties/${propertyId}/media`,
+    body,
+  );
+  return r.data;
+}
+
+export async function detachPropertyMedia(
+  propertyId: string,
+  itemId: string,
+): Promise<void> {
+  await apiClient.delete(`/properties/${propertyId}/media/${itemId}`);
+}
+
+export async function reorderPropertyMedia(
+  propertyId: string,
+  order: { media_item_id: string; position: number }[],
+): Promise<PropertyDetail> {
+  const r = await apiClient.patch<PropertyDetail>(
+    `/properties/${propertyId}/media`,
+    { order },
+  );
+  return r.data;
+}

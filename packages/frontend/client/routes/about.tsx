@@ -13,12 +13,12 @@ export const headers: Route.HeadersFunction = () => ({
 
 const META = {
   fr: {
-    title: "À propos — Ganitel",
+    title: "À propos — ganitel",
     description:
       "Nous aimons le Cameroun et sa diversité. Des séjours et expériences sur mesure, conçus pour faire ressentir chaque recoin du pays.",
   },
   en: {
-    title: "About — Ganitel",
+    title: "About — ganitel",
     description:
       "We love Cameroon and its diversity. Custom stays and experiences crafted to make you feel every corner of the country.",
   },

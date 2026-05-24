@@ -3,6 +3,8 @@ import { Link } from "react-router";
 import type { PropertyPublic } from "@/features/properties/types";
 import { formatMoney } from "@/shared/lib/format";
 import { useLocale, useT } from "@/shared/lib/i18n";
+import { pickPriceForLocale } from "@/shared/lib/price";
+import { thumbnailUrl } from "@/shared/lib/media";
 import {
   buildSrcSet,
   transformImage,
@@ -23,10 +25,13 @@ export function PropertyCard({ property, priority }: Props) {
   const locale = useLocale();
   const t = useT();
 
-  const rawCover = property.cover_photo?.url ?? PLACEHOLDER_COVER;
+  const rawCover = property.cover_media
+    ? thumbnailUrl(property.cover_media)
+    : PLACEHOLDER_COVER;
   const cover = transformImage(rawCover, { width: 600, quality: 75 });
   const srcSet = buildSrcSet(rawCover, CARD_WIDTHS, 75);
-  const price = formatMoney(property.base_price, locale);
+  const priceEntry = pickPriceForLocale(property.prices, locale);
+  const price = priceEntry ? formatMoney(priceEntry, locale) : "";
 
   return (
     <Link to={`/properties/${property.id}`} className="group flex flex-col">
@@ -66,13 +71,17 @@ export function PropertyCard({ property, priority }: Props) {
           {property.bedrooms} {t("property.bedrooms")}
         </p>
 
-        <p className="font-display text-[15px] leading-snug">
-          <span className="font-semibold text-ganitel-text-title">{price}</span>
-          <span className="text-ganitel-text-placeholder">
-            {" · "}
-            {t("property.per_night")}
-          </span>
-        </p>
+        {price && (
+          <p className="font-display text-[15px] leading-snug">
+            <span className="font-semibold text-ganitel-text-title">
+              {price}
+            </span>
+            <span className="text-ganitel-text-placeholder">
+              {" · "}
+              {t("property.per_night")}
+            </span>
+          </p>
+        )}
       </div>
     </Link>
   );

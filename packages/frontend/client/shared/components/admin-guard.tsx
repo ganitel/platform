@@ -3,6 +3,7 @@ import { Navigate } from "react-router";
 
 import { useMe } from "@/features/auth/hooks/use-me";
 import { useSession } from "@/lib/supabase";
+import { useT } from "@/shared/lib/i18n";
 
 interface AdminGuardProps {
   children: ReactNode;
@@ -21,9 +22,10 @@ export function AdminGuard({ children }: AdminGuardProps) {
 }
 
 function Loader() {
+  const tr = useT();
   return (
     <div className="flex min-h-screen items-center justify-center text-sm text-ganitel-text-body">
-      Chargement…
+      {tr("common.loading")}
     </div>
   );
 }

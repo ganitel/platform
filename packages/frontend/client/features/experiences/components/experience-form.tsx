@@ -12,7 +12,13 @@ import {
 } from "@/features/reference/api";
 import { LocationPicker } from "@/shared/components/location-picker";
 import { MarkdownEditor } from "@/shared/components/markdown-editor";
+import { MediaUploader } from "@/shared/components/media-uploader";
+import type {
+  UploaderItem,
+  UploaderOnChange,
+} from "@/shared/components/media-uploader.types";
 import { INPUT_CLASS, LABEL_CLASS } from "@/shared/lib/form-styles";
+import { useLocale, useT } from "@/shared/lib/i18n";
 import type { LocationPick } from "@/shared/lib/location";
 
 interface FormState {
@@ -23,8 +29,7 @@ interface FormState {
   capacity: string;
   duration_minutes: string;
   cancellation_policy: ExperienceCancellationPolicy;
-  base_price_amount: string;
-  base_price_currency: string;
+  prices: { amount: string; currency: string }[];
   content_language: "fr" | "en";
 }
 
@@ -36,8 +41,7 @@ const BLANK: FormState = {
   capacity: "8",
   duration_minutes: "120",
   cancellation_policy: "moderate",
-  base_price_amount: "",
-  base_price_currency: "XAF",
+  prices: [{ amount: "", currency: "XAF" }],
   content_language: "fr",
 };
 
@@ -57,10 +61,17 @@ function fromDetail(d: ExperienceDetail): FormState {
     capacity: String(d.capacity),
     duration_minutes: String(d.duration_minutes),
     cancellation_policy: d.cancellation_policy,
-    base_price_amount: d.base_price.amount,
-    base_price_currency: d.base_price.currency,
+    prices: d.prices.map((p) => ({ amount: p.amount, currency: p.currency })),
     content_language: (d.content_language as "fr" | "en") ?? "fr",
   };
+}
+
+interface ExperienceFormMediaState {
+  mode: "draft" | "listing";
+  draftId?: string;
+  listingId?: string;
+  items: UploaderItem[];
+  setItems: UploaderOnChange;
 }
 
 interface ExperienceFormProps {
@@ -70,6 +81,7 @@ interface ExperienceFormProps {
   isPending: boolean;
   error: unknown;
   onSubmit: (payload: ExperienceCreateInput) => void;
+  mediaState: ExperienceFormMediaState;
 }
 
 export function ExperienceForm({
@@ -79,7 +91,10 @@ export function ExperienceForm({
   isPending,
   error,
   onSubmit,
+  mediaState,
 }: ExperienceFormProps) {
+  const tr = useT();
+  const locale = useLocale();
   const [form, setForm] = useState<FormState>(() =>
     initial ? fromDetail(initial) : BLANK,
   );
@@ -111,19 +126,28 @@ export function ExperienceForm({
       capacity: Number(form.capacity),
       duration_minutes: Number(form.duration_minutes),
       cancellation_policy: form.cancellation_policy,
-      base_price: {
-        amount: form.base_price_amount,
-        currency: form.base_price_currency,
-      },
+      prices: form.prices.map((p) => ({
+        amount: p.amount,
+        currency: p.currency,
+      })),
       content_language: form.content_language,
+      media_ids:
+        mediaState.mode === "draft"
+          ? mediaState.items
+              .filter((it) => it.mediaId !== null)
+              .map((it) => it.mediaId as string)
+          : undefined,
     };
     onSubmit(payload);
   }
 
+  const labelOf = (ref: { label_en: string; label_fr: string }) =>
+    locale === "en" ? ref.label_en : ref.label_fr;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <Section title="Informations">
-        <Field label="Titre">
+      <Section title={tr("admin.form.section.info")}>
+        <Field label={tr("admin.form.title.label")}>
           <input
             required
             minLength={3}
@@ -133,7 +157,7 @@ export function ExperienceForm({
             className={INPUT_CLASS}
           />
         </Field>
-        <Field label="Description">
+        <Field label={tr("admin.form.description.label")}>
           <MarkdownEditor
             rows={8}
             maxLength={10000}
@@ -141,22 +165,22 @@ export function ExperienceForm({
             onChange={(v) => update("description", v)}
           />
         </Field>
-        <Field label="Type">
+        <Field label={tr("admin.form.type.label")}>
           <select
             required
             value={form.experience_type}
             onChange={(e) => update("experience_type", e.target.value)}
             className={INPUT_CLASS}
           >
-            <option value="">— Choisir —</option>
+            <option value="">{tr("admin.form.select.placeholder")}</option>
             {experienceTypes.data?.map((p) => (
               <option key={p.code} value={p.code}>
-                {p.label_fr}
+                {labelOf(p)}
               </option>
             ))}
           </select>
         </Field>
-        <Field label="Langue du contenu">
+        <Field label={tr("admin.form.content_language.label")}>
           <select
             value={form.content_language}
             onChange={(e) =>
@@ -164,22 +188,22 @@ export function ExperienceForm({
             }
             className={INPUT_CLASS}
           >
-            <option value="fr">Français</option>
-            <option value="en">English</option>
+            <option value="fr">{tr("admin.form.lang.fr")}</option>
+            <option value="en">{tr("admin.form.lang.en")}</option>
           </select>
         </Field>
       </Section>
 
-      <Section title="Localisation">
+      <Section title={tr("admin.form.section.location")}>
         <LocationPicker
           initial={form.location}
           onChange={(pick) => update("location", pick)}
         />
       </Section>
 
-      <Section title="Format">
+      <Section title={tr("admin.form.section.format")}>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Participants max">
+          <Field label={tr("admin.form.participants.label")}>
             <input
               required
               type="number"
@@ -190,7 +214,7 @@ export function ExperienceForm({
               className={INPUT_CLASS}
             />
           </Field>
-          <Field label="Durée (minutes)">
+          <Field label={tr("admin.form.duration.label")}>
             <input
               required
               type="number"
@@ -202,7 +226,7 @@ export function ExperienceForm({
             />
           </Field>
         </div>
-        <Field label="Politique d’annulation">
+        <Field label={tr("admin.form.cancellation.label")}>
           <select
             value={form.cancellation_policy}
             onChange={(e) =>
@@ -215,46 +239,105 @@ export function ExperienceForm({
           >
             {policies.data?.map((p) => (
               <option key={p.code} value={p.code}>
-                {p.label_fr}
+                {labelOf(p)}
               </option>
             ))}
           </select>
         </Field>
       </Section>
 
-      <Section title="Tarif">
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Prix par participant">
-            <input
-              required
-              type="number"
-              min={0}
-              step="0.01"
-              value={form.base_price_amount}
-              onChange={(e) => update("base_price_amount", e.target.value)}
-              className={INPUT_CLASS}
-            />
-          </Field>
-          <Field label="Devise">
-            <select
-              value={form.base_price_currency}
-              onChange={(e) => update("base_price_currency", e.target.value)}
-              className={INPUT_CLASS}
-            >
-              <option value="XAF">XAF</option>
-              <option value="XOF">XOF</option>
-              <option value="EUR">EUR</option>
-              <option value="USD">USD</option>
-            </select>
-          </Field>
+      <Section title={tr("admin.form.section.price")}>
+        <div className="space-y-2">
+          {form.prices.map((p, idx) => (
+            <div key={idx} className="flex items-end gap-2">
+              <Field label={tr("admin.form.price.amount")}>
+                <input
+                  type="number"
+                  required
+                  min={0}
+                  step="any"
+                  value={p.amount}
+                  onChange={(e) => {
+                    const next = [...form.prices];
+                    next[idx] = { ...next[idx], amount: e.target.value };
+                    update("prices", next);
+                  }}
+                  className={INPUT_CLASS}
+                />
+              </Field>
+              <Field label={tr("admin.form.price.currency")}>
+                <select
+                  value={p.currency}
+                  onChange={(e) => {
+                    const next = [...form.prices];
+                    next[idx] = { ...next[idx], currency: e.target.value };
+                    update("prices", next);
+                  }}
+                  className={INPUT_CLASS}
+                >
+                  <option value="XAF">XAF</option>
+                  <option value="XOF">XOF</option>
+                  <option value="EUR">EUR</option>
+                  <option value="USD">USD</option>
+                </select>
+              </Field>
+              {form.prices.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    update(
+                      "prices",
+                      form.prices.filter((_, i) => i !== idx),
+                    );
+                  }}
+                  className="cursor-pointer rounded border px-3 py-2 text-sm"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              update("prices", [
+                ...form.prices,
+                { amount: "", currency: "XAF" },
+              ]);
+            }}
+            className="cursor-pointer rounded-md border border-dashed px-4 py-2 text-sm"
+          >
+            {tr("admin.form.price.add")}
+          </button>
         </div>
       </Section>
 
       {error != null && (
         <p className="text-sm text-red-600">
-          Erreur: {error instanceof Error ? error.message : String(error)}
+          {tr("common.error_prefix")}
+          {": "}
+          {error instanceof Error ? error.message : String(error)}
         </p>
       )}
+
+      <Section title={tr("admin.form.section.media")}>
+        <MediaUploader
+          {...(mediaState.mode === "draft"
+            ? {
+                mode: "draft",
+                draftId: mediaState.draftId as string,
+                value: mediaState.items,
+                onChange: mediaState.setItems,
+              }
+            : {
+                mode: "listing",
+                listingKind: "experience",
+                listingId: mediaState.listingId as string,
+                value: mediaState.items,
+                onChange: mediaState.setItems,
+              })}
+        />
+      </Section>
 
       <div className="flex items-center justify-end gap-3">
         <button

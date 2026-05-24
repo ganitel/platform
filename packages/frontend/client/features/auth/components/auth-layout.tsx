@@ -39,7 +39,7 @@ export function AuthLayout({
           to="/"
           className="relative z-10 inline-flex w-fit font-infoma text-3xl tracking-tight text-ganitel-text-button"
         >
-          Ganitel
+          ganitel
         </Link>
 
         <div className="relative z-10 max-w-md">
@@ -55,7 +55,7 @@ export function AuthLayout({
         </div>
 
         <p className="relative z-10 hidden text-xs text-ganitel-text-button/50 lg:block">
-          © {new Date().getFullYear()} Ganitel
+          © {new Date().getFullYear()} ganitel
         </p>
       </aside>
 

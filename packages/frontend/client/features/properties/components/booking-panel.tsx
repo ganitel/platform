@@ -10,6 +10,7 @@ import { ApiError } from "@/shared/api/client";
 import { formatMoney, formatDate } from "@/shared/lib/format";
 import type { TranslationKey } from "@/shared/lib/i18n";
 import { useLocale, useT } from "@/shared/lib/i18n";
+import { pickPriceForLocale } from "@/shared/lib/price";
 import {
   createBooking,
   initiatePayment,
@@ -47,8 +48,9 @@ export function BookingPanel({ property }: Props) {
     checkin && checkout
       ? Math.round((checkout.getTime() - checkin.getTime()) / 86_400_000)
       : 0;
-  const subtotal = nights * Number(property.base_price.amount);
-  const currency = property.base_price.currency;
+  const pickedPrice = pickPriceForLocale(property.prices, locale);
+  const subtotal = nights * Number(pickedPrice?.amount ?? "0");
+  const currency = pickedPrice?.currency ?? "XAF";
   const datesReady = Boolean(checkin && checkout && nights > 0);
 
   async function reserve() {
@@ -61,6 +63,7 @@ export function BookingPanel({ property }: Props) {
         check_in_date: toIsoDate(checkin),
         check_out_date: toIsoDate(checkout),
         guest_count: guests,
+        currency,
       });
       const payment = await initiatePayment(booking.id, "noop");
       if (payment.client_action.kind === "auto_capture") {
@@ -110,7 +113,7 @@ export function BookingPanel({ property }: Props) {
     <div className="rounded-2xl border border-ganitel-stroke-neutral bg-ganitel-background-secondary p-6 shadow-sm space-y-4">
       <p className="text-sm text-ganitel-text-subtitle">
         <span className="text-2xl font-semibold text-ganitel-text-title">
-          {formatMoney(property.base_price, locale)}
+          {pickedPrice ? formatMoney(pickedPrice, locale) : ""}
         </span>
         <span> · {t("property.per_night")}</span>
       </p>
@@ -155,7 +158,7 @@ export function BookingPanel({ property }: Props) {
         <div className="space-y-1 border-t border-ganitel-stroke-neutral pt-4 text-sm text-ganitel-text-subtitle">
           <div className="flex justify-between">
             <span>
-              {formatMoney(property.base_price, locale)} × {nights}{" "}
+              {pickedPrice ? formatMoney(pickedPrice, locale) : ""} × {nights}{" "}
               {t("booking.nights")}
             </span>
             <span>

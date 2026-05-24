@@ -70,3 +70,32 @@ export async function removeExperience(id: string): Promise<ExperienceDetail> {
   const r = await apiClient.post<ExperienceDetail>(`/experiences/${id}/remove`);
   return r.data;
 }
+
+export async function attachExperienceMedia(
+  experienceId: string,
+  body: { media_id: string; position: number },
+): Promise<{ id: string; position: number }> {
+  const r = await apiClient.post<{ id: string; position: number }>(
+    `/experiences/${experienceId}/media`,
+    body,
+  );
+  return r.data;
+}
+
+export async function detachExperienceMedia(
+  experienceId: string,
+  itemId: string,
+): Promise<void> {
+  await apiClient.delete(`/experiences/${experienceId}/media/${itemId}`);
+}
+
+export async function reorderExperienceMedia(
+  experienceId: string,
+  order: { media_item_id: string; position: number }[],
+): Promise<ExperienceDetail> {
+  const r = await apiClient.patch<ExperienceDetail>(
+    `/experiences/${experienceId}/media`,
+    { order },
+  );
+  return r.data;
+}

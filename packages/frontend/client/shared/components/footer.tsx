@@ -22,7 +22,7 @@ export function Footer() {
             G
           </span>
           <span className="font-display text-[13px] font-extrabold tracking-[-0.04em]">
-            Ganitel
+            ganitel
           </span>
           <span>· {year}</span>
         </div>
@@ -47,13 +47,13 @@ export function Footer() {
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-ganitel-text-title"
-          aria-label="Ganitel"
+          aria-label="ganitel"
         >
           <span className="grid size-5 rotate-[-4deg] place-items-center rounded-md bg-ganitel-text-title text-[10px] font-extrabold leading-none text-ganitel-paper">
             G
           </span>
           <span className="font-display text-[14px] font-extrabold tracking-[-0.04em]">
-            Ganitel
+            ganitel
           </span>
           <span className="text-ganitel-text-placeholder">· {year}</span>
         </Link>

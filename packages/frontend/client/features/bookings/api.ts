@@ -6,6 +6,7 @@ export interface CreateBookingPayload {
   check_in_date: string;
   check_out_date: string;
   guest_count: number;
+  currency: string;
 }
 
 export async function createBooking(

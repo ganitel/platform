@@ -2,6 +2,7 @@ import type {
   AdminStatusSummary,
   GeoPoint,
   HostPublic,
+  MediaItemPublic,
   MediaPublic,
   Money,
 } from "@/features/properties/types";
@@ -21,8 +22,8 @@ export interface ExperiencePublic {
   location: GeoPoint;
   capacity: number;
   duration_minutes: number;
-  base_price: Money;
-  cover_photo: MediaPublic | null;
+  prices: Money[];
+  cover_media: MediaPublic | null;
   distance_km: number | null;
 }
 
@@ -32,7 +33,7 @@ export interface ExperienceDetail extends ExperiencePublic {
   content_language: string;
   status: ExperienceStatus;
   host: HostPublic;
-  photos: MediaPublic[];
+  media: MediaItemPublic[];
   created_at: string;
   published_at: string | null;
 }
@@ -55,8 +56,9 @@ export interface ExperienceCreateInput {
   capacity: number;
   duration_minutes: number;
   cancellation_policy?: ExperienceCancellationPolicy;
-  base_price: Money;
+  prices: Money[];
   content_language?: "fr" | "en";
+  media_ids?: string[];
 }
 
 export interface ExperienceAdminListItem {
@@ -67,8 +69,8 @@ export interface ExperienceAdminListItem {
   country_code: string;
   status: ExperienceStatus;
   duration_minutes: number;
-  base_price: Money;
-  cover_photo: MediaPublic | null;
+  prices: Money[];
+  cover_media: MediaPublic | null;
   created_at: string;
   published_at: string | null;
 }

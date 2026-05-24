@@ -1,39 +1,37 @@
 import type { Route } from "./+types/_index";
 
 import { Landing } from "@/features/landing/landing";
-import { serverFetch } from "@/shared/api/server";
-import { PUBLIC_CDN_CACHE } from "@/shared/lib/cache";
+import { PUBLIC_CDN_CACHE_LONG } from "@/shared/lib/cache";
+import { localeFromAcceptLanguage, t } from "@/shared/lib/i18n";
 import { seo } from "@/shared/lib/seo";
-import type { PropertyPublic, SearchOut } from "@/features/properties/types";
 
 export const headers: Route.HeadersFunction = () => ({
-  "Cache-Control": PUBLIC_CDN_CACHE,
+  "Cache-Control": PUBLIC_CDN_CACHE_LONG,
 });
 
-export const meta: Route.MetaFunction = () =>
-  seo({
-    title: "Ganitel — Là où la lumière prend son temps",
-    description:
-      "Logements et expériences soigneusement sélectionnés au Cameroun, au Sénégal et en Côte d'Ivoire.",
+export const meta: Route.MetaFunction = ({ data }) => {
+  const locale = data?.locale ?? "fr";
+  const title = t("index.meta.title", locale);
+  return seo({
+    title,
+    description: t("index.meta.description", locale),
     pathname: "/",
+    locale,
     ogImage: {
       url: "/og/default.png",
-      alt: "Ganitel — Là où la lumière prend son temps",
+      alt: title,
     },
     alternates: { fr: "/", en: "/" },
   });
+};
 
-export async function loader() {
-  // Marketing page keeps rendering if the catalog API is unreachable; the
-  // featured grid is decorative, not load-bearing for the pitch.
-  try {
-    const data = await serverFetch<SearchOut>("/properties?limit=8");
-    return { items: data.items };
-  } catch {
-    return { items: [] as PropertyPublic[] };
-  }
+export async function loader({ request }: Route.LoaderArgs) {
+  const locale = localeFromAcceptLanguage(
+    request.headers.get("Accept-Language"),
+  );
+  return { locale };
 }
 
-export default function IndexRoute({ loaderData }: Route.ComponentProps) {
-  return <Landing items={loaderData.items} />;
+export default function IndexRoute() {
+  return <Landing />;
 }

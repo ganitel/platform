@@ -20,6 +20,7 @@ import {
   StatusPill,
   useAdminStatusLabel,
 } from "@/features/admin/admin-ui";
+import { extractPublishIssues } from "@/features/admin/publish-error";
 import {
   listAdminExperiences,
   publishExperience,
@@ -33,7 +34,9 @@ import type {
 import { useExperienceTypeLabel } from "@/features/reference/hooks";
 import { AdminGuard } from "@/shared/components/admin-guard";
 import { formatPriceAmount } from "@/shared/lib/format";
+import { pickPriceForLocale } from "@/shared/lib/price";
 import { transformImage } from "@/shared/lib/image";
+import { thumbnailUrl } from "@/shared/lib/media";
 import {
   localeFromAcceptLanguage,
   t,
@@ -244,9 +247,12 @@ function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
 
   const isBusy = publish.isPending || unpublish.isPending || remove.isPending;
   const lastError = publish.error ?? unpublish.error ?? remove.error ?? null;
-  const cover = item.cover_photo
+  const cover = item.cover_media
     ? {
-        url: transformImage(item.cover_photo.url, { width: 120, quality: 70 }),
+        url: transformImage(thumbnailUrl(item.cover_media), {
+          width: 120,
+          quality: 70,
+        }),
         alt: item.title,
       }
     : null;
@@ -273,12 +279,19 @@ function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
         </span>
       </AdminCell>
       <AdminCell>
-        <span className="font-medium tabular-nums text-ganitel-text-title">
-          {formatPriceAmount(item.base_price.amount, locale)}
-        </span>
-        <span className="ml-1 text-xs uppercase tracking-wider text-ganitel-text-placeholder">
-          {item.base_price.currency}
-        </span>
+        {(() => {
+          const p = pickPriceForLocale(item.prices, locale);
+          return p ? (
+            <>
+              <span className="font-medium tabular-nums text-ganitel-text-title">
+                {formatPriceAmount(p.amount, locale)}
+              </span>
+              <span className="ml-1 text-xs uppercase tracking-wider text-ganitel-text-placeholder">
+                {p.currency}
+              </span>
+            </>
+          ) : null;
+        })()}
       </AdminCell>
       <AdminCell>
         <StatusPill status={item.status} />
@@ -327,13 +340,43 @@ function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
             </ActionButton>
           )}
         </div>
-        {lastError ? (
-          <p className="mt-2 text-right text-xs text-red-600">
-            {lastError instanceof Error ? lastError.message : String(lastError)}
-          </p>
-        ) : null}
+        {lastError ? <RowError tr={tr} error={lastError} /> : null}
       </AdminCell>
     </AdminRow>
+  );
+}
+
+function RowError({
+  tr,
+  error,
+}: {
+  tr: ReturnType<typeof useT>;
+  error: unknown;
+}) {
+  const issues = extractPublishIssues(error);
+  if (issues) {
+    return (
+      <div className="mt-2 text-right text-xs text-red-600">
+        <p className="font-medium">{tr("admin.publish_error.intro")}</p>
+        <ul className="mt-1 space-y-0.5">
+          {issues.map((issue) => (
+            <li key={issue.field}>
+              {issue.key
+                ? tr(issue.key)
+                : tr("admin.publish_error.generic").replace(
+                    "{field}",
+                    issue.field,
+                  )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+  return (
+    <p className="mt-2 text-right text-xs text-red-600">
+      {error instanceof Error ? error.message : String(error)}
+    </p>
   );
 }
 

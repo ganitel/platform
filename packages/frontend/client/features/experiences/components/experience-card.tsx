@@ -3,6 +3,8 @@ import { Link } from "react-router";
 import type { ExperiencePublic } from "@/features/experiences/types";
 import { formatMoney } from "@/shared/lib/format";
 import { useLocale, useT } from "@/shared/lib/i18n";
+import { pickPriceForLocale } from "@/shared/lib/price";
+import { thumbnailUrl } from "@/shared/lib/media";
 import {
   buildSrcSet,
   transformImage,
@@ -30,10 +32,13 @@ export function ExperienceCard({ experience, priority }: Props) {
   const locale = useLocale();
   const t = useT();
 
-  const rawCover = experience.cover_photo?.url ?? PLACEHOLDER_COVER;
+  const rawCover = experience.cover_media
+    ? thumbnailUrl(experience.cover_media)
+    : PLACEHOLDER_COVER;
   const cover = transformImage(rawCover, { width: 600, quality: 75 });
   const srcSet = buildSrcSet(rawCover, CARD_WIDTHS, 75);
-  const price = formatMoney(experience.base_price, locale);
+  const priceEntry = pickPriceForLocale(experience.prices, locale);
+  const price = priceEntry ? formatMoney(priceEntry, locale) : "";
   const duration = formatDuration(experience.duration_minutes);
 
   return (
@@ -74,13 +79,17 @@ export function ExperienceCard({ experience, priority }: Props) {
           {duration}
         </p>
 
-        <p className="font-display text-[15px] leading-snug">
-          <span className="font-semibold text-ganitel-text-title">{price}</span>
-          <span className="text-ganitel-text-placeholder">
-            {" · "}
-            {t("experience.per_person")}
-          </span>
-        </p>
+        {price && (
+          <p className="font-display text-[15px] leading-snug">
+            <span className="font-semibold text-ganitel-text-title">
+              {price}
+            </span>
+            <span className="text-ganitel-text-placeholder">
+              {" · "}
+              {t("experience.per_person")}
+            </span>
+          </p>
+        )}
       </div>
     </Link>
   );

@@ -7,10 +7,16 @@ import { getServerToken } from "@/shared/api/server";
 import { listMyBookings } from "@/features/bookings/api";
 import type { BookingPublic } from "@/features/bookings/types";
 import { formatMoney, formatDate } from "@/shared/lib/format";
-import { useLocale, useT, type TranslationKey } from "@/shared/lib/i18n";
+import {
+  localeFromAcceptLanguage,
+  t,
+  useLocale,
+  useT,
+  type TranslationKey,
+} from "@/shared/lib/i18n";
 
-export const meta: Route.MetaFunction = () => [
-  { title: "Mes réservations — Ganitel" },
+export const meta: Route.MetaFunction = ({ data }) => [
+  { title: t("bookings.meta.title", data?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 
@@ -18,6 +24,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   if (import.meta.env.VITE_PRELAUNCH_MODE === "true") {
     return redirect("/");
   }
+  const locale = localeFromAcceptLanguage(
+    request.headers.get("Accept-Language"),
+  );
   const token = await getServerToken(request);
   if (!token) {
     const url = new URL(request.url);
@@ -25,7 +34,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       `/sign-in?redirect_url=${encodeURIComponent(url.pathname + url.search)}`,
     );
   }
-  return null;
+  return { locale };
 }
 
 const STATUS_I18N_KEY: Record<BookingPublic["status"], TranslationKey> = {

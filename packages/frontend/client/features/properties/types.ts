@@ -9,11 +9,23 @@ export interface Money {
   currency: string;
 }
 
+export type MediaKind = "image" | "video";
+
 export interface MediaPublic {
   id: string;
   url: string;
   mime_type: string;
+  kind: MediaKind;
+  poster_url: string | null;
+  duration_ms: number | null;
   created_at: string;
+}
+
+/** Element of a listing's `media` array. Same shape as MediaPublic plus the
+ *  join-row id, which the frontend needs to detach or reorder a specific
+ *  attachment. */
+export interface MediaItemPublic extends MediaPublic {
+  media_item_id: string;
 }
 
 export interface HostPublic {
@@ -63,11 +75,11 @@ export interface PropertyPublic {
   bedrooms: number;
   beds: number;
   bathrooms: number;
-  base_price: Money;
+  prices: Money[];
   amenities: string[];
   showcase_amenities: PropertyShowcaseAmenities;
   listing_metadata: PropertyListingMetadata;
-  cover_photo: MediaPublic | null;
+  cover_media: MediaPublic | null;
   distance_km: number | null;
 }
 
@@ -78,7 +90,7 @@ export interface PropertyDetail extends PropertyPublic {
   content_language: string;
   status: PropertyStatus;
   host: HostPublic;
-  photos: MediaPublic[];
+  media: MediaItemPublic[];
   created_at: string;
   published_at: string | null;
 }
@@ -117,8 +129,9 @@ export interface PropertyCreateInput {
   check_out_time?: string | null;
   house_rules?: string | null;
   cancellation_policy?: CancellationPolicy;
-  base_price: Money;
+  prices: Money[];
   content_language?: "fr" | "en";
+  media_ids?: string[];
 }
 
 export interface PropertyAdminListItem {
@@ -128,8 +141,8 @@ export interface PropertyAdminListItem {
   city: string;
   country_code: string;
   status: PropertyStatus;
-  base_price: Money;
-  cover_photo: MediaPublic | null;
+  prices: Money[];
+  cover_media: MediaPublic | null;
   created_at: string;
   published_at: string | null;
 }
@@ -158,6 +171,7 @@ export interface SearchFilters {
   guests?: number;
   min_price?: number;
   max_price?: number;
+  currency?: string;
   property_type?: string[];
   amenity?: string[];
   sort?: "relevance" | "price_asc" | "price_desc" | "newest" | "distance";

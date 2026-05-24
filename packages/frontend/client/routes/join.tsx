@@ -8,7 +8,12 @@ import { AuthLayout } from "@/features/auth/components/auth-layout";
 import { joinWaitlist } from "@/features/waitlist/api";
 import { PhoneInput } from "@/shared/components/phone-input";
 import { WAITLIST_FIELD_ERROR_KEYS } from "@/features/waitlist/error-keys";
-import { useT, type TranslationKey } from "@/shared/lib/i18n";
+import {
+  localeFromAcceptLanguage,
+  t as translate,
+  useT,
+  type TranslationKey,
+} from "@/shared/lib/i18n";
 import { FieldError } from "@/shared/components/field-error";
 import { FormErrorAlert } from "@/shared/components/form-error-alert";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
@@ -19,15 +24,26 @@ import { translateFormError } from "@/shared/lib/form-error";
 import { INPUT_CLASS, LABEL_CLASS } from "@/shared/lib/form-styles";
 import { seo } from "@/shared/lib/seo";
 
-export const meta: Route.MetaFunction = () =>
-  seo({
-    title: "Rejoindre Ganitel — liste d'attente",
-    description:
-      "Rejoignez la liste d'attente de Ganitel. Soyez parmi les premiers à découvrir nos logements et expériences au Cameroun, Sénégal et Côte d'Ivoire.",
+export async function loader({ request }: Route.LoaderArgs) {
+  return {
+    locale: localeFromAcceptLanguage(request.headers.get("Accept-Language")),
+  };
+}
+
+export const meta: Route.MetaFunction = ({ data }) => {
+  const locale = data?.locale ?? "fr";
+  return seo({
+    title: translate("join.meta.title", locale),
+    description: translate("join.meta.description", locale),
     pathname: "/join",
-    ogImage: { url: "/og/default.png", alt: "Rejoindre Ganitel" },
+    locale,
+    ogImage: {
+      url: "/og/default.png",
+      alt: translate("join.meta.og_alt", locale),
+    },
     noindex: true,
   });
+};
 
 type Role = "traveler" | "host";
 type Interest = "renting" | "experiences";

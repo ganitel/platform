@@ -1,8 +1,10 @@
 import { useState } from "react";
 
 import { getSupabase } from "@/lib/supabase";
+import { useT } from "@/shared/lib/i18n";
 
 export function GoogleButton() {
+  const tr = useT();
   const [loading, setLoading] = useState(false);
 
   async function handleGoogle() {
@@ -38,7 +40,7 @@ export function GoogleButton() {
           fill="#EA4335"
         />
       </svg>
-      {loading ? "Redirection…" : "Continuer avec Google"}
+      {loading ? tr("auth.google.redirecting") : tr("auth.google.label")}
     </button>
   );
 }

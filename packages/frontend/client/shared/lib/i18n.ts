@@ -219,7 +219,7 @@ const dict = {
   },
 
   "join.subtitle": { fr: "Liste d'attente", en: "Waitlist" },
-  "join.title": { fr: "Rejoignez Ganitel", en: "Join Ganitel" },
+  "join.title": { fr: "Rejoignez ganitel", en: "Join ganitel" },
   "join.email": { fr: "Votre adresse e-mail", en: "Your email address" },
   "join.phone": {
     fr: "Votre numéro WhatsApp (optionnel)",
@@ -417,7 +417,7 @@ const dict = {
     fr: "Dates souhaitées, type de logement, questions…",
     en: "Preferred dates, type of stay, questions…",
   },
-  "join.submit": { fr: "Rejoindre Ganitel", en: "Join Ganitel" },
+  "join.submit": { fr: "Rejoindre ganitel", en: "Join ganitel" },
   "join.submitting": { fr: "Inscription…", en: "Joining…" },
   "join.error": {
     fr: "Une erreur s'est produite. Réessayez.",
@@ -516,7 +516,7 @@ const dict = {
     fr: "Les visages derrière",
     en: "The people behind",
   },
-  "about.team.title_em": { fr: "Ganitel.", en: "Ganitel." },
+  "about.team.title_em": { fr: "ganitel.", en: "ganitel." },
   "about.team.lede": {
     fr: "Une petite équipe basée entre le Cameroun et l'Europe, rejointe par des guides locaux qui connaissent leur région mieux que personne.",
     en: "A small team between Cameroon and Europe, joined by local guides who know their region better than anyone.",
@@ -529,8 +529,8 @@ const dict = {
   "about.cta": { fr: "Découvrir les séjours", en: "Browse stays" },
 
   "add_team.title": {
-    fr: "Rejoindre l'équipe Ganitel",
-    en: "Join the Ganitel team",
+    fr: "Rejoindre l'équipe ganitel",
+    en: "Join the ganitel team",
   },
   "add_team.subtitle": {
     fr: "Présentez-vous. Un membre de l'équipe vérifiera votre profil avant de le publier.",
@@ -744,7 +744,7 @@ const dict = {
     en: "Plus Code decoder unavailable.",
   },
 
-  "admin.brand": { fr: "Ganitel", en: "Ganitel" },
+  "admin.brand": { fr: "ganitel", en: "ganitel" },
   "admin.shell.eyebrow": { fr: "Backoffice", en: "Backoffice" },
   "admin.shell.mode": { fr: "Mode admin", en: "Admin mode" },
   "admin.shell.exit": { fr: "Quitter vers le site", en: "Back to the site" },
@@ -777,7 +777,7 @@ const dict = {
     en: 'Delete "{title}"?',
   },
 
-  "admin.meta.dashboard": { fr: "Admin — Ganitel", en: "Admin — Ganitel" },
+  "admin.meta.dashboard": { fr: "Admin — ganitel", en: "Admin — ganitel" },
   "admin.meta.rentals": {
     fr: "Admin — Hébergements",
     en: "Admin — Stays",
@@ -790,8 +790,8 @@ const dict = {
   "admin.dashboard.eyebrow": { fr: "Backoffice", en: "Backoffice" },
   "admin.dashboard.title": { fr: "Tableau de bord", en: "Dashboard" },
   "admin.dashboard.description": {
-    fr: "Vue d'ensemble du catalogue Ganitel — logements et expériences confondus.",
-    en: "Overview of the Ganitel catalog — stays and experiences combined.",
+    fr: "Vue d'ensemble du catalogue ganitel — logements et expériences confondus.",
+    en: "Overview of the ganitel catalog — stays and experiences combined.",
   },
   "admin.stats.catalog": { fr: "Au catalogue", en: "In catalog" },
   "admin.stats.catalog_sub": {
@@ -838,8 +838,8 @@ const dict = {
   "admin.rentals.eyebrow": { fr: "Catalogue", en: "Catalog" },
   "admin.rentals.title": { fr: "Hébergements", en: "Stays" },
   "admin.rentals.description": {
-    fr: "Tous les logements Ganitel — brouillons, publiés et archivés.",
-    en: "All Ganitel stays — drafts, published, and archived.",
+    fr: "Tous les logements ganitel — brouillons, publiés et archivés.",
+    en: "All ganitel stays — drafts, published, and archived.",
   },
   "admin.rentals.add": {
     fr: "Ajouter un hébergement",
@@ -863,8 +863,8 @@ const dict = {
   "admin.experiences.eyebrow": { fr: "Catalogue", en: "Catalog" },
   "admin.experiences.title": { fr: "Expériences", en: "Experiences" },
   "admin.experiences.description": {
-    fr: "Toutes les activités Ganitel — visites, ateliers et escapades.",
-    en: "All Ganitel activities — tours, workshops, and escapes.",
+    fr: "Toutes les activités ganitel — visites, ateliers et escapades.",
+    en: "All ganitel activities — tours, workshops, and escapes.",
   },
   "admin.experiences.add": {
     fr: "Ajouter une expérience",
@@ -904,36 +904,36 @@ const dict = {
   "legal.contact_email": { fr: "hello@ganitel.com", en: "hello@ganitel.com" },
 
   "terms.meta.title": {
-    fr: "Conditions générales — Ganitel",
-    en: "Terms of Service — Ganitel",
+    fr: "Conditions générales — ganitel",
+    en: "Terms of Service — ganitel",
   },
   "terms.meta.description": {
-    fr: "Règles d'utilisation de Ganitel pour les voyageurs et les hôtes au Cameroun, au Sénégal et en Côte d'Ivoire.",
-    en: "Rules for using Ganitel as a traveler or host in Cameroon, Senegal, and Côte d'Ivoire.",
+    fr: "Règles d'utilisation de ganitel pour les voyageurs et les hôtes au Cameroun, au Sénégal et en Côte d'Ivoire.",
+    en: "Rules for using ganitel as a traveler or host in Cameroon, Senegal, and Côte d'Ivoire.",
   },
   "terms.tag": { fr: "Conditions", en: "Terms" },
   "terms.title": { fr: "Conditions", en: "Terms of" },
   "terms.title_em": { fr: "générales.", en: "service." },
   "terms.lede": {
-    fr: "Le cadre qui nous lie quand vous réservez un séjour ou proposez un hébergement sur Ganitel.",
-    en: "The framework that binds us when you book a stay or list a home on Ganitel.",
+    fr: "Le cadre qui nous lie quand vous réservez un séjour ou proposez un hébergement sur ganitel.",
+    en: "The framework that binds us when you book a stay or list a home on ganitel.",
   },
   "terms.body": {
     fr: `## 1. Qui sommes-nous ?
 
-Ganitel ("Ganitel", "nous") est une place de marché qui met en relation des voyageurs et des hôtes de logements et d'expériences au Cameroun, au Sénégal et en Côte d'Ivoire. Les présentes conditions régissent l'accès au site **ganitel.com** ainsi qu'à tous les services associés.
+ganitel ("ganitel", "nous") est une place de marché qui met en relation des voyageurs et des hôtes de logements et d'expériences au Cameroun, au Sénégal et en Côte d'Ivoire. Les présentes conditions régissent l'accès au site **ganitel.com** ainsi qu'à tous les services associés.
 
 ## 2. Éligibilité et compte
 
-Vous devez avoir au moins 18 ans et la capacité juridique de contracter pour utiliser Ganitel. Vous pouvez parcourir le catalogue sans créer de compte ; un compte est requis pour réserver, communiquer avec un hôte ou publier une annonce. Vous vous engagez à fournir des informations exactes et à les tenir à jour.
+Vous devez avoir au moins 18 ans et la capacité juridique de contracter pour utiliser ganitel. Vous pouvez parcourir le catalogue sans créer de compte ; un compte est requis pour réserver, communiquer avec un hôte ou publier une annonce. Vous vous engagez à fournir des informations exactes et à les tenir à jour.
 
-## 3. Rôle de Ganitel
+## 3. Rôle de ganitel
 
-Ganitel agit comme intermédiaire technique entre voyageurs et hôtes. Le contrat de location ou de prestation d'expérience est conclu directement entre vous et l'hôte. Ganitel n'est ni propriétaire ni gestionnaire des logements et expériences proposés.
+ganitel agit comme intermédiaire technique entre voyageurs et hôtes. Le contrat de location ou de prestation d'expérience est conclu directement entre vous et l'hôte. ganitel n'est ni propriétaire ni gestionnaire des logements et expériences proposés.
 
 ## 4. Réservation et paiement
 
-Les paiements sont traités via **Flutterwave** et acceptent les principaux moyens locaux : Mobile Money (MTN, Orange), Wave, ainsi que les cartes bancaires. Les montants sont affichés en franc CFA (XAF ou XOF selon le pays) et incluent les frais de service Ganitel. Le paiement est débité au moment de la confirmation et reversé à l'hôte après le début du séjour, déduction faite de notre commission.
+Les paiements sont traités via **Flutterwave** et acceptent les principaux moyens locaux : Mobile Money (MTN, Orange), Wave, ainsi que les cartes bancaires. Les montants sont affichés en franc CFA (XAF ou XOF selon le pays) et incluent les frais de service ganitel. Le paiement est débité au moment de la confirmation et reversé à l'hôte après le début du séjour, déduction faite de notre commission.
 
 ## 5. Annulations et remboursements
 
@@ -953,11 +953,11 @@ Nous pouvons vous demander de vérifier votre identité (pièce d'identité, jus
 
 ## 9. Propriété intellectuelle
 
-Les contenus que vous publiez restent votre propriété ; vous accordez à Ganitel une licence mondiale, non exclusive et gratuite pour les afficher, les indexer et les promouvoir dans le cadre du service. La marque "Ganitel", le logo et l'interface du site sont protégés.
+Les contenus que vous publiez restent votre propriété ; vous accordez à ganitel une licence mondiale, non exclusive et gratuite pour les afficher, les indexer et les promouvoir dans le cadre du service. La marque "ganitel", le logo et l'interface du site sont protégés.
 
 ## 10. Responsabilité
 
-Ganitel n'est pas responsable des litiges entre voyageurs et hôtes, ni des dommages indirects (pertes d'exploitation, préjudice moral, perte d'opportunité). Notre responsabilité totale est plafonnée au montant des frais de service perçus sur la réservation litigieuse.
+ganitel n'est pas responsable des litiges entre voyageurs et hôtes, ni des dommages indirects (pertes d'exploitation, préjudice moral, perte d'opportunité). Notre responsabilité totale est plafonnée au montant des frais de service perçus sur la réservation litigieuse.
 
 ## 11. Suspension et résiliation
 
@@ -976,19 +976,19 @@ Nous pouvons faire évoluer les présentes conditions. Les changements significa
 Pour toute question relative aux présentes conditions, écrivez-nous à **hello@ganitel.com**.`,
     en: `## 1. Who we are
 
-Ganitel ("Ganitel", "we") is a marketplace that connects travelers with hosts of stays and experiences in Cameroon, Senegal, and Côte d'Ivoire. These terms govern access to **ganitel.com** and all related services.
+ganitel ("ganitel", "we") is a marketplace that connects travelers with hosts of stays and experiences in Cameroon, Senegal, and Côte d'Ivoire. These terms govern access to **ganitel.com** and all related services.
 
 ## 2. Eligibility and account
 
-You must be at least 18 years old and legally able to enter contracts to use Ganitel. You can browse the catalog without an account; an account is required to book, message a host, or list a stay. You agree to provide accurate information and keep it up to date.
+You must be at least 18 years old and legally able to enter contracts to use ganitel. You can browse the catalog without an account; an account is required to book, message a host, or list a stay. You agree to provide accurate information and keep it up to date.
 
-## 3. Ganitel's role
+## 3. ganitel's role
 
-Ganitel acts as a technical intermediary between travelers and hosts. The rental or experience contract is concluded directly between you and the host. Ganitel neither owns nor manages the listed stays and experiences.
+ganitel acts as a technical intermediary between travelers and hosts. The rental or experience contract is concluded directly between you and the host. ganitel neither owns nor manages the listed stays and experiences.
 
 ## 4. Booking and payment
 
-Payments are processed through **Flutterwave** and accept the main local methods: Mobile Money (MTN, Orange), Wave, as well as bank cards. Amounts are displayed in CFA francs (XAF or XOF depending on the country) and include Ganitel service fees. The payment is captured at confirmation and disbursed to the host once the stay begins, minus our commission.
+Payments are processed through **Flutterwave** and accept the main local methods: Mobile Money (MTN, Orange), Wave, as well as bank cards. Amounts are displayed in CFA francs (XAF or XOF depending on the country) and include ganitel service fees. The payment is captured at confirmation and disbursed to the host once the stay begins, minus our commission.
 
 ## 5. Cancellations and refunds
 
@@ -1008,11 +1008,11 @@ We may ask you to verify your identity (ID, proof of address, insurance certific
 
 ## 9. Intellectual property
 
-Content you publish remains yours; you grant Ganitel a worldwide, non-exclusive, royalty-free license to display, index, and promote it as part of the service. The "Ganitel" name, logo, and site interface are protected.
+Content you publish remains yours; you grant ganitel a worldwide, non-exclusive, royalty-free license to display, index, and promote it as part of the service. The "ganitel" name, logo, and site interface are protected.
 
 ## 10. Liability
 
-Ganitel is not responsible for disputes between travelers and hosts, nor for indirect damages (loss of business, moral prejudice, loss of opportunity). Our total liability is capped at the service fees collected on the disputed booking.
+ganitel is not responsible for disputes between travelers and hosts, nor for indirect damages (loss of business, moral prejudice, loss of opportunity). Our total liability is capped at the service fees collected on the disputed booking.
 
 ## 11. Suspension and termination
 
@@ -1032,12 +1032,12 @@ For any question about these terms, write to **hello@ganitel.com**.`,
   },
 
   "privacy.meta.title": {
-    fr: "Politique de confidentialité — Ganitel",
-    en: "Privacy Policy — Ganitel",
+    fr: "Politique de confidentialité — ganitel",
+    en: "Privacy Policy — ganitel",
   },
   "privacy.meta.description": {
-    fr: "Comment Ganitel collecte, utilise et protège vos données personnelles.",
-    en: "How Ganitel collects, uses, and protects your personal data.",
+    fr: "Comment ganitel collecte, utilise et protège vos données personnelles.",
+    en: "How ganitel collects, uses, and protects your personal data.",
   },
   "privacy.tag": { fr: "Confidentialité", en: "Privacy" },
   "privacy.title": { fr: "Vos données,", en: "Your data," },
@@ -1049,7 +1049,7 @@ For any question about these terms, write to **hello@ganitel.com**.`,
   "privacy.body": {
     fr: `## 1. Qui est responsable du traitement ?
 
-Ganitel est responsable du traitement de vos données personnelles dans le cadre de l'utilisation de **ganitel.com** et des services associés. Vous pouvez nous joindre à **hello@ganitel.com**.
+ganitel est responsable du traitement de vos données personnelles dans le cadre de l'utilisation de **ganitel.com** et des services associés. Vous pouvez nous joindre à **hello@ganitel.com**.
 
 ## 2. Données que nous collectons
 
@@ -1105,7 +1105,7 @@ Nous utilisons un nombre limité de cookies, essentiellement techniques (session
 
 ## 10. Mineurs
 
-Ganitel n'est pas destiné aux personnes de moins de 18 ans. Si vous constatez qu'un mineur a créé un compte, signalez-le-nous : nous procéderons à la fermeture du compte.
+ganitel n'est pas destiné aux personnes de moins de 18 ans. Si vous constatez qu'un mineur a créé un compte, signalez-le-nous : nous procéderons à la fermeture du compte.
 
 ## 11. Modifications
 
@@ -1116,7 +1116,7 @@ Cette politique peut évoluer. Les changements significatifs vous seront notifi�
 Pour toute question ou pour exercer vos droits, écrivez-nous à **hello@ganitel.com**.`,
     en: `## 1. Who controls your data
 
-Ganitel is the data controller for personal data processed when you use **ganitel.com** and related services. You can reach us at **hello@ganitel.com**.
+ganitel is the data controller for personal data processed when you use **ganitel.com** and related services. You can reach us at **hello@ganitel.com**.
 
 ## 2. Data we collect
 
@@ -1172,7 +1172,7 @@ We use a small number of cookies, mostly technical (session, language preference
 
 ## 10. Minors
 
-Ganitel is not intended for people under 18. If you notice that a minor has created an account, report it to us and we will close the account.
+ganitel is not intended for people under 18. If you notice that a minor has created an account, report it to us and we will close the account.
 
 ## 11. Changes
 
@@ -1184,19 +1184,19 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
   },
 
   "faq.meta.title": {
-    fr: "Aide & FAQ — Ganitel",
-    en: "Help & FAQ — Ganitel",
+    fr: "Aide & FAQ — ganitel",
+    en: "Help & FAQ — ganitel",
   },
   "faq.meta.description": {
-    fr: "Réponses aux questions fréquentes sur Ganitel : réservation, paiement, annulation, hôtes et plus.",
-    en: "Answers to common questions about Ganitel: booking, payment, cancellation, hosts, and more.",
+    fr: "Réponses aux questions fréquentes sur ganitel : réservation, paiement, annulation, hôtes et plus.",
+    en: "Answers to common questions about ganitel: booking, payment, cancellation, hosts, and more.",
   },
   "faq.tag": { fr: "Aide", en: "Help" },
   "faq.title": { fr: "Vos questions,", en: "Your questions," },
   "faq.title_em": { fr: "nos réponses.", en: "our answers." },
   "faq.lede": {
-    fr: "L'essentiel pour réserver l'esprit tranquille, ou pour proposer votre logement sur Ganitel.",
-    en: "The essentials for booking with peace of mind, or for listing your stay on Ganitel.",
+    fr: "L'essentiel pour réserver l'esprit tranquille, ou pour proposer votre logement sur ganitel.",
+    en: "The essentials for booking with peace of mind, or for listing your stay on ganitel.",
   },
   "faq.still_need_help": {
     fr: "Vous ne trouvez pas votre réponse ?",
@@ -1231,8 +1231,8 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
   },
 
   "faq.q.regions.question": {
-    fr: "Dans quels pays Ganitel est-il disponible ?",
-    en: "Where is Ganitel available?",
+    fr: "Dans quels pays ganitel est-il disponible ?",
+    en: "Where is ganitel available?",
   },
   "faq.q.regions.answer": {
     fr: "Au lancement : Cameroun, Sénégal et Côte d'Ivoire. D'autres pays d'Afrique francophone et anglophone suivront.",
@@ -1240,8 +1240,8 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
   },
 
   "faq.q.host_listing.question": {
-    fr: "Comment proposer mon logement sur Ganitel ?",
-    en: "How do I list my place on Ganitel?",
+    fr: "Comment proposer mon logement sur ganitel ?",
+    en: "How do I list my place on ganitel?",
   },
   "faq.q.host_listing.answer": {
     fr: "Écrivez-nous à hello@ganitel.com avec quelques photos et l'adresse du bien. Chaque logement est visité par notre équipe avant d'être publié — c'est ce qui garantit la qualité du catalogue.",
@@ -1253,8 +1253,8 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
     en: "How do you verify hosts and stays?",
   },
   "faq.q.verification.answer": {
-    fr: "Identité de l'hôte vérifiée (KYC), visite physique du logement par un membre de l'équipe Ganitel et contrôle qualité des photos et de la fiche. Les avis voyageurs viennent ensuite affiner le score.",
-    en: "Host identity is verified (KYC), the property is visited in person by a Ganitel team member, and photos and listing details are quality-checked. Traveler reviews then refine the score over time.",
+    fr: "Identité de l'hôte vérifiée (KYC), visite physique du logement par un membre de l'équipe ganitel et contrôle qualité des photos et de la fiche. Les avis voyageurs viennent ensuite affiner le score.",
+    en: "Host identity is verified (KYC), the property is visited in person by a ganitel team member, and photos and listing details are quality-checked. Traveler reviews then refine the score over time.",
   },
 
   "faq.q.safety.question": {
@@ -1267,8 +1267,8 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
   },
 
   "faq.q.languages.question": {
-    fr: "Dans quelles langues puis-je utiliser Ganitel ?",
-    en: "Which languages does Ganitel support?",
+    fr: "Dans quelles langues puis-je utiliser ganitel ?",
+    en: "Which languages does ganitel support?",
   },
   "faq.q.languages.answer": {
     fr: "Français et anglais. La langue se règle automatiquement selon votre navigateur et peut être ajustée depuis votre profil.",
@@ -1276,12 +1276,366 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
   },
 
   "faq.q.account.question": {
-    fr: "Dois-je créer un compte pour utiliser Ganitel ?",
-    en: "Do I need an account to use Ganitel?",
+    fr: "Dois-je créer un compte pour utiliser ganitel ?",
+    en: "Do I need an account to use ganitel?",
   },
   "faq.q.account.answer": {
     fr: "Non pour parcourir le catalogue. Oui pour réserver, contacter un hôte ou publier une annonce. La création de compte prend moins d'une minute.",
     en: "No to browse the catalog. Yes to book, contact a host, or list a property. Creating an account takes less than a minute.",
+  },
+
+  "common.yes": { fr: "Oui", en: "Yes" },
+  "common.no": { fr: "Non", en: "No" },
+  "common.back": { fr: "← Retour", en: "← Back" },
+  "common.dash": { fr: "—", en: "—" },
+  "common.loading_aria": { fr: "Chargement", en: "Loading" },
+  "common.error_prefix": { fr: "Erreur", en: "Error" },
+  "common.load_error_prefix": {
+    fr: "Erreur de chargement",
+    en: "Failed to load",
+  },
+
+  "index.meta.title": {
+    fr: "ganitel — Là où la lumière prend son temps",
+    en: "ganitel — Stay where the light moves slowly",
+  },
+  "index.meta.description": {
+    fr: "Logements et expériences soigneusement sélectionnés au Cameroun, au Sénégal et en Côte d'Ivoire.",
+    en: "Carefully selected stays and experiences in Cameroon, Senegal and Côte d'Ivoire.",
+  },
+
+  "bookings.meta.title": {
+    fr: "Mes réservations — ganitel",
+    en: "My bookings — ganitel",
+  },
+
+  "join.meta.title": {
+    fr: "Rejoindre ganitel — liste d'attente",
+    en: "Join ganitel — waitlist",
+  },
+  "join.meta.description": {
+    fr: "Rejoignez la liste d'attente de ganitel. Soyez parmi les premiers à découvrir nos logements et expériences au Cameroun, Sénégal et Côte d'Ivoire.",
+    en: "Join the ganitel waitlist. Be among the first to discover our stays and experiences in Cameroon, Senegal and Côte d'Ivoire.",
+  },
+  "join.meta.og_alt": { fr: "Rejoindre ganitel", en: "Join ganitel" },
+
+  "add_team.meta.title": {
+    fr: "Rejoindre l'équipe — ganitel",
+    en: "Join the team — ganitel",
+  },
+
+  "team_review.meta.title": {
+    fr: "Évaluation d'une candidature — ganitel",
+    en: "Review submission — ganitel",
+  },
+
+  "browse.section.stays": { fr: "Logements", en: "Stays" },
+  "browse.section.experiences": { fr: "Expériences", en: "Experiences" },
+  "browse.meta.description.stays": {
+    fr: "Logements soigneusement sélectionnés à Douala, Yaoundé, Dakar, Abidjan et plus.",
+    en: "Carefully selected stays in Douala, Yaoundé, Dakar, Abidjan and beyond.",
+  },
+  "browse.meta.description.experiences": {
+    fr: "Expériences à vivre au Cameroun, au Sénégal et en Côte d'Ivoire autour de nos logements ou en escapade.",
+    en: "Experiences to live in Cameroon, Senegal and Côte d'Ivoire — around our stays or as a getaway.",
+  },
+
+  "property.not_found.title": {
+    fr: "Logement introuvable — ganitel",
+    en: "Stay not found — ganitel",
+  },
+  "property.not_found.description": {
+    fr: "Cette annonce n'est pas disponible. Découvrez nos autres logements sur ganitel.",
+    en: "This listing is not available. Discover our other stays on ganitel.",
+  },
+  "property.not_found.short": {
+    fr: "Logement introuvable",
+    en: "Stay not found",
+  },
+  "property.type_in_city": {
+    fr: "{type} à {city}, {country}.",
+    en: "{type} in {city}, {country}.",
+  },
+
+  "experience.not_found.title": {
+    fr: "Expérience introuvable — ganitel",
+    en: "Experience not found — ganitel",
+  },
+  "experience.not_found.description": {
+    fr: "Cette expérience n'est plus disponible. Découvrez nos autres expériences sur ganitel.",
+    en: "This experience is no longer available. Discover our other experiences on ganitel.",
+  },
+  "experience.not_found.short": {
+    fr: "Expérience introuvable",
+    en: "Experience not found",
+  },
+
+  "sign_in.meta.title": { fr: "Connexion — ganitel", en: "Sign in — ganitel" },
+  "sign_in.welcome": { fr: "Bienvenue", en: "Welcome" },
+  "sign_in.subtitle": { fr: "Connexion", en: "Sign in" },
+  "sign_in.or": { fr: "ou", en: "or" },
+
+  "complete_profile.meta.title": {
+    fr: "Compléter votre profil — ganitel",
+    en: "Complete your profile — ganitel",
+  },
+  "complete_profile.title": { fr: "Presque prêt", en: "Almost there" },
+  "complete_profile.subtitle": { fr: "Votre profil", en: "Your profile" },
+  "complete_profile.full_name.label": {
+    fr: "Votre nom complet",
+    en: "Your full name",
+  },
+  "complete_profile.full_name.placeholder": {
+    fr: "Ex. Daniel Mvondo",
+    en: "e.g. Daniel Mvondo",
+  },
+  "complete_profile.submit": { fr: "Continuer", en: "Continue" },
+  "complete_profile.submitting": { fr: "Enregistrement…", en: "Saving…" },
+
+  "profile.meta.title": {
+    fr: "Mon profil — ganitel",
+    en: "My profile — ganitel",
+  },
+  "profile.label.status": { fr: "Statut", en: "Status" },
+  "profile.label.language": { fr: "Langue", en: "Language" },
+  "profile.label.host": { fr: "Hôte", en: "Host" },
+  "profile.label.admin": { fr: "Admin", en: "Admin" },
+
+  "auth.phone.label": { fr: "Numéro de téléphone", en: "Phone number" },
+  "auth.phone.send_code": { fr: "Recevoir un code", en: "Send code" },
+  "auth.phone.sending": { fr: "Envoi…", en: "Sending…" },
+  "auth.phone.send_error": {
+    fr: "Erreur lors de l'envoi du code.",
+    en: "Could not send the code.",
+  },
+  "auth.otp.label": { fr: "Code reçu par SMS", en: "SMS code" },
+  "auth.otp.sent_to": { fr: "Envoyé au {phone}", en: "Sent to {phone}" },
+  "auth.otp.verifying": { fr: "Vérification…", en: "Verifying…" },
+  "auth.otp.submit": { fr: "Connexion", en: "Sign in" },
+  "auth.otp.invalid": { fr: "Code invalide.", en: "Invalid code." },
+  "auth.otp.change_number": { fr: "Changer de numéro", en: "Change number" },
+  "auth.google.label": {
+    fr: "Continuer avec Google",
+    en: "Continue with Google",
+  },
+  "auth.google.redirecting": { fr: "Redirection…", en: "Redirecting…" },
+  "auth.menu.aria": { fr: "Compte", en: "Account" },
+
+  "admin.rentals.new.meta.title": {
+    fr: "Admin — Nouvel hébergement",
+    en: "Admin — New stay",
+  },
+  "admin.rentals.new.title": { fr: "Nouvel hébergement", en: "New stay" },
+  "admin.rentals.new.subtitle": {
+    fr: "Ajoutez vos photos et vidéos directement dans le formulaire. Limites : 20 médias, 3 vidéos max, images ≤ 10 Mo, vidéos ≤ 200 Mo et 60 s.",
+    en: "Add your photos and videos directly in the form. Limits: 20 items, 3 videos max, images ≤ 10 MB, videos ≤ 200 MB and 60 s.",
+  },
+  "admin.rentals.new.submit": {
+    fr: "Créer le brouillon",
+    en: "Create draft",
+  },
+  "admin.rentals.new.submitting": { fr: "Création…", en: "Creating…" },
+  "admin.rentals.edit.meta.title": {
+    fr: "Admin — Modifier l'hébergement",
+    en: "Admin — Edit stay",
+  },
+  "admin.rentals.edit.title": {
+    fr: "Modifier l'hébergement",
+    en: "Edit stay",
+  },
+  "admin.rentals.edit.submit": {
+    fr: "Enregistrer les modifications",
+    en: "Save changes",
+  },
+  "admin.rentals.edit.submitting": {
+    fr: "Enregistrement…",
+    en: "Saving…",
+  },
+
+  "admin.experiences.new.meta.title": {
+    fr: "Admin — Nouvelle expérience",
+    en: "Admin — New experience",
+  },
+  "admin.experiences.new.title": {
+    fr: "Nouvelle expérience",
+    en: "New experience",
+  },
+  "admin.experiences.new.subtitle": {
+    fr: "Ajoutez vos photos et vidéos directement dans le formulaire. Limites : 20 médias, 3 vidéos max, images ≤ 10 Mo, vidéos ≤ 200 Mo et 60 s.",
+    en: "Add your photos and videos directly in the form. Limits: 20 items, 3 videos max, images ≤ 10 MB, videos ≤ 200 MB and 60 s.",
+  },
+  "admin.experiences.new.submit": {
+    fr: "Créer le brouillon",
+    en: "Create draft",
+  },
+  "admin.experiences.new.submitting": { fr: "Création…", en: "Creating…" },
+  "admin.experiences.edit.meta.title": {
+    fr: "Admin — Modifier l'expérience",
+    en: "Admin — Edit experience",
+  },
+  "admin.experiences.edit.title": {
+    fr: "Modifier l'expérience",
+    en: "Edit experience",
+  },
+  "admin.experiences.edit.submit": {
+    fr: "Enregistrer les modifications",
+    en: "Save changes",
+  },
+  "admin.experiences.edit.submitting": {
+    fr: "Enregistrement…",
+    en: "Saving…",
+  },
+
+  "admin.form.section.info": { fr: "Informations", en: "Details" },
+  "admin.form.section.location": { fr: "Localisation", en: "Location" },
+  "admin.form.section.capacity": { fr: "Capacité", en: "Capacity" },
+  "admin.form.section.amenities": { fr: "Équipements", en: "Amenities" },
+  "admin.form.section.rules": { fr: "Règles", en: "Rules" },
+  "admin.form.section.price": { fr: "Tarif", en: "Pricing" },
+  "admin.form.section.format": { fr: "Format", en: "Format" },
+  "admin.form.section.media": { fr: "Photos & vidéos", en: "Photos & videos" },
+
+  "admin.form.title.label": { fr: "Titre", en: "Title" },
+  "admin.form.description.label": { fr: "Description", en: "Description" },
+  "admin.form.type.label": { fr: "Type", en: "Type" },
+  "admin.form.select.placeholder": { fr: "— Choisir —", en: "— Select —" },
+  "admin.form.content_language.label": {
+    fr: "Langue du contenu",
+    en: "Content language",
+  },
+  "admin.form.lang.fr": { fr: "Français", en: "French" },
+  "admin.form.lang.en": { fr: "English", en: "English" },
+
+  "admin.form.capacity.label": { fr: "Voyageurs", en: "Guests" },
+  "admin.form.bedrooms.label": { fr: "Chambres", en: "Bedrooms" },
+  "admin.form.beds.label": { fr: "Lits", en: "Beds" },
+  "admin.form.bathrooms.label": { fr: "Salles de bain", en: "Bathrooms" },
+
+  "admin.form.parking.label": { fr: "Parking", en: "Parking" },
+  "admin.form.parking.none": { fr: "Aucun", en: "None" },
+  "admin.form.parking.free": { fr: "Gratuit", en: "Free" },
+  "admin.form.parking.paid": { fr: "Payant", en: "Paid" },
+
+  "admin.form.kitchen.label": { fr: "Cuisine", en: "Kitchen" },
+  "admin.form.kitchen.none": { fr: "Aucune", en: "None" },
+  "admin.form.kitchen.kitchenette": { fr: "Kitchenette", en: "Kitchenette" },
+  "admin.form.kitchen.full": { fr: "Cuisine complète", en: "Full kitchen" },
+
+  "admin.form.bool.elevator": { fr: "Ascenseur", en: "Elevator" },
+  "admin.form.bool.accessible": {
+    fr: "Accessible PMR",
+    en: "Wheelchair accessible",
+  },
+  "admin.form.bool.private_bathroom": {
+    fr: "Salle de bain privée",
+    en: "Private bathroom",
+  },
+  "admin.form.bool.pets": { fr: "Animaux", en: "Pets" },
+  "admin.form.bool.smoking": { fr: "Fumeur", en: "Smoking" },
+  "admin.form.bool.events": { fr: "Événements", en: "Events" },
+  "admin.form.bool.family_friendly": {
+    fr: "Familles bienvenues",
+    en: "Family friendly",
+  },
+  "admin.form.bool.child_friendly": {
+    fr: "Enfants bienvenus",
+    en: "Child friendly",
+  },
+
+  "admin.form.check_in.label": { fr: "Arrivée", en: "Check-in" },
+  "admin.form.check_out.label": { fr: "Départ", en: "Check-out" },
+  "admin.form.house_rules.label": { fr: "Règles libres", en: "House rules" },
+  "admin.form.cancellation.label": {
+    fr: "Politique d'annulation",
+    en: "Cancellation policy",
+  },
+
+  "admin.form.price_per_night.label": {
+    fr: "Prix par nuit",
+    en: "Price per night",
+  },
+  "admin.form.price_per_participant.label": {
+    fr: "Prix par participant",
+    en: "Price per participant",
+  },
+  "admin.form.currency.label": { fr: "Devise", en: "Currency" },
+  "admin.form.price.amount": { fr: "Montant", en: "Amount" },
+  "admin.form.price.currency": { fr: "Devise", en: "Currency" },
+  "admin.form.price.add": { fr: "Ajouter une devise", en: "Add a currency" },
+
+  "admin.form.participants.label": {
+    fr: "Participants max",
+    en: "Max participants",
+  },
+  "admin.form.duration.label": {
+    fr: "Durée (minutes)",
+    en: "Duration (minutes)",
+  },
+
+  "admin.publish_error.intro": {
+    fr: "Impossible de publier :",
+    en: "Cannot publish:",
+  },
+  "admin.publish_error.title.missing": {
+    fr: "Titre manquant",
+    en: "Title missing",
+  },
+  "admin.publish_error.base_price_amount.not_positive": {
+    fr: "Le prix doit être supérieur à 0",
+    en: "Price must be greater than 0",
+  },
+  "admin.publish_error.photos.empty": {
+    fr: "Au moins une photo est requise",
+    en: "At least one photo is required",
+  },
+  "admin.publish_error.prices.empty": {
+    fr: "Au moins un prix est requis",
+    en: "At least one price is required",
+  },
+  "admin.publish_error.media.empty": {
+    fr: "Au moins un média est requis",
+    en: "At least one media item is required",
+  },
+  "admin.publish_error.generic": {
+    fr: "Champ invalide : {field}",
+    en: "Invalid field: {field}",
+  },
+
+  "media_uploader.add": {
+    fr: "Ajouter des photos / vidéos ({count} / {max})",
+    en: "Add photos / videos ({count} / {max})",
+  },
+  "media_uploader.cover": {
+    fr: "Couverture",
+    en: "Cover",
+  },
+  "media_uploader.uploading": {
+    fr: "Envoi…",
+    en: "Uploading…",
+  },
+  "media_uploader.error.unsupported_format": {
+    fr: "Format non supporté : {mime}",
+    en: "Unsupported format: {mime}",
+  },
+  "media_uploader.error.image_too_large": {
+    fr: "Image trop lourde (max {mb} Mo)",
+    en: "Image too large (max {mb} MB)",
+  },
+  "media_uploader.error.video_too_large": {
+    fr: "Vidéo trop lourde (max {mb} Mo)",
+    en: "Video too large (max {mb} MB)",
+  },
+  "media_uploader.error.video_too_long": {
+    fr: "Vidéo trop longue (max {seconds} s)",
+    en: "Video too long (max {seconds} s)",
+  },
+  "media_uploader.error.upload_failed": {
+    fr: "Échec de l'envoi.",
+    en: "Upload failed.",
+  },
+  "media_uploader.error.unknown_mime": {
+    fr: "inconnu",
+    en: "unknown",
   },
 } satisfies Dict;
 
