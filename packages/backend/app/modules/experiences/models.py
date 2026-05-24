@@ -1,5 +1,5 @@
-"""SQLAlchemy ORM models for experiences: the listing itself, its photo
-join table (`ExperiencePhoto`), and enums (`ExperienceStatus`,
+"""SQLAlchemy ORM models for experiences: the listing itself, its media
+join table (`ExperienceMediaItem`), and enums (`ExperienceStatus`,
 `ExperienceCancellationPolicy`).
 
 Experiences are time-bounded activities (tours, workshops, sound baths,
@@ -115,15 +115,15 @@ class Experience(Base):
     )
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    photos: Mapped[list["ExperiencePhoto"]] = relationship(
+    media: Mapped[list["ExperienceMediaItem"]] = relationship(
         back_populates="experience",
         cascade="all, delete-orphan",
-        order_by="ExperiencePhoto.position",
+        order_by="ExperienceMediaItem.position",
     )
 
 
-class ExperiencePhoto(Base):
-    __tablename__ = "experience_photos"
+class ExperienceMediaItem(Base):
+    __tablename__ = "experience_media"
 
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
     experience_id: Mapped[UUID] = mapped_column(
@@ -137,5 +137,5 @@ class ExperiencePhoto(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
-    experience: Mapped[Experience] = relationship(back_populates="photos")
+    experience: Mapped[Experience] = relationship(back_populates="media")
     media: Mapped[Media] = relationship()

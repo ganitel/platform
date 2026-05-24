@@ -18,7 +18,7 @@ from app.core.errors import ForbiddenError, NotFoundError, ValidationError
 from app.core.money import Currency, Money
 from app.modules.experiences.models import (
     Experience,
-    ExperiencePhoto,
+    ExperienceMediaItem,
     ExperienceStatus,
 )
 from app.modules.experiences.schemas import (
@@ -107,7 +107,7 @@ async def publish(session: AsyncSession, experience: Experience, user: User) -> 
         issues["title"] = "missing"
     if experience.base_price_amount is None or experience.base_price_amount <= 0:
         issues["base_price_amount"] = "not_positive"
-    if not experience.photos:
+    if not experience.media:
         issues["photos"] = "empty"
     if issues:
         raise ValidationError(code="experience.not_ready", extra={"issues": issues})
@@ -143,7 +143,7 @@ async def list_all_for_admin(
 ) -> list[Experience]:
     stmt = (
         select(Experience)
-        .options(selectinload(Experience.photos).selectinload(ExperiencePhoto.media))
+        .options(selectinload(Experience.media).selectinload(ExperienceMediaItem.media))
         .order_by(Experience.created_at.desc())
         .limit(limit)
         .offset(offset)
@@ -178,7 +178,7 @@ async def status_summary(session: AsyncSession) -> AdminStatusSummary:
 async def get(session: AsyncSession, experience_id: UUID) -> Experience:
     stmt = (
         select(Experience)
-        .options(selectinload(Experience.photos).selectinload(ExperiencePhoto.media))
+        .options(selectinload(Experience.media).selectinload(ExperienceMediaItem.media))
         .where(Experience.id == experience_id)
     )
     exp = (await session.execute(stmt)).scalar_one_or_none()
@@ -194,14 +194,14 @@ async def attach_photo(
     *,
     media_id: UUID,
     position: int,
-) -> ExperiencePhoto:
+) -> ExperienceMediaItem:
     _ensure_owner(user, experience)
     media = await session.get(Media, media_id)
     if media is None:
         raise NotFoundError(code="media.not_found")
     if media.owner_user_id != user.id and not user.is_admin:
         raise ForbiddenError(code="media.not_owner")
-    photo = ExperiencePhoto(experience_id=experience.id, media_id=media_id, position=position)
+    photo = ExperienceMediaItem(experience_id=experience.id, media_id=media_id, position=position)
     session.add(photo)
     await session.commit()
     await session.refresh(photo)
@@ -215,7 +215,7 @@ async def detach_photo(
     photo_id: UUID,
 ) -> None:
     _ensure_owner(user, experience)
-    photo = await session.get(ExperiencePhoto, photo_id)
+    photo = await session.get(ExperienceMediaItem, photo_id)
     if photo is None or photo.experience_id != experience.id:
         raise NotFoundError(code="photo.not_found")
     await session.delete(photo)
@@ -225,7 +225,7 @@ async def detach_photo(
 async def to_public(
     experience: Experience, *, distance_km: float | None = None
 ) -> ExperiencePublic:
-    cover = experience.photos[0] if experience.photos else None
+    cover = experience.media[0] if experience.media else None
     return ExperiencePublic(
         id=experience.id,
         title=experience.title,
@@ -246,7 +246,7 @@ async def to_public(
 
 
 async def to_detail(experience: Experience, host: User) -> ExperienceDetail:
-    photos = [await media_to_public(p.media) for p in experience.photos]
+    photos = [await media_to_public(p.media) for p in experience.media]
     return ExperienceDetail(
         id=experience.id,
         title=experience.title,
@@ -274,7 +274,7 @@ async def to_detail(experience: Experience, host: User) -> ExperienceDetail:
 
 
 async def to_admin_list_item(experience: Experience) -> ExperienceAdminListItem:
-    cover = experience.photos[0] if experience.photos else None
+    cover = experience.media[0] if experience.media else None
     return ExperienceAdminListItem(
         id=experience.id,
         title=experience.title,

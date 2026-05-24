@@ -12,7 +12,7 @@ from sqlalchemy import Select, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.modules.experiences.models import Experience, ExperiencePhoto, ExperienceStatus
+from app.modules.experiences.models import Experience, ExperienceMediaItem, ExperienceStatus
 
 SortKey = Literal["relevance", "distance", "price_asc", "price_desc", "newest"]
 
@@ -63,7 +63,7 @@ async def count(session: AsyncSession, f: SearchFilters) -> int:
 
 async def search(session: AsyncSession, f: SearchFilters) -> list[tuple[Experience, float | None]]:
     stmt = select(Experience).options(
-        selectinload(Experience.photos).selectinload(ExperiencePhoto.media)
+        selectinload(Experience.media).selectinload(ExperienceMediaItem.media)
     )
     stmt = _apply_filters(stmt, f)
 

@@ -36,7 +36,7 @@ from app.core.logging import configure_logging, get_logger
 from app.modules.experiences.models import (
     Experience,
     ExperienceCancellationPolicy,
-    ExperiencePhoto,
+    ExperienceMediaItem,
     ExperienceStatus,
 )
 from app.modules.media.models import Media
@@ -568,8 +568,8 @@ async def _wipe_demo_data(session: Any, host_ids: list[Any]) -> tuple[int, int]:
         media_ids.extend(
             (
                 await session.execute(
-                    select(ExperiencePhoto.media_id).where(
-                        ExperiencePhoto.experience_id.in_(exp_ids)
+                    select(ExperienceMediaItem.media_id).where(
+                        ExperienceMediaItem.experience_id.in_(exp_ids)
                     )
                 )
             )
@@ -683,7 +683,7 @@ async def _create_experience(session: Any, host: User, item: dict[str, Any]) -> 
     await session.flush()
 
     for position, media in enumerate(photos):
-        session.add(ExperiencePhoto(experience_id=exp.id, media_id=media.id, position=position))
+        session.add(ExperienceMediaItem(experience_id=exp.id, media_id=media.id, position=position))
 
     return exp
 
