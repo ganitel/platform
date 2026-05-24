@@ -123,10 +123,20 @@ def image_transform_url(
 
 
 async def ensure_bucket_exists() -> None:
-    """Idempotent — creates the bucket if missing. Used in dev startup."""
+    """Idempotent — creates the bucket if it doesn't exist. Used in dev startup.
+
+    Only a 404 ("NoSuchBucket") is treated as missing. Anything else
+    (403 / permission denied, transient 5xx) is re-raised so misconfiguration
+    surfaces loudly.
+    """
+    from botocore.exceptions import ClientError
+
     s = get_settings()
     async with s3_client() as client:
         try:
             await client.head_bucket(Bucket=s.S3_BUCKET)
-        except client.exceptions.ClientError:
+        except ClientError as exc:
+            code = exc.response.get("Error", {}).get("Code")
+            if code not in {"404", "NoSuchBucket"}:
+                raise
             await client.create_bucket(Bucket=s.S3_BUCKET)

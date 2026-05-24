@@ -4,9 +4,10 @@ These do not touch the network or S3 — they only assemble strings from
 settings, so they belong in tests/unit/.
 """
 
-from unittest.mock import patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from botocore.exceptions import ClientError
 
 from app.core.config import Settings
 from app.core.storage import image_transform_url, public_url
@@ -69,3 +70,39 @@ def test_image_transform_url_uses_render_endpoint_when_enabled(
     assert "width=800" in url
     assert "quality=80" in url
     assert "format=webp" in url
+
+
+@pytest.mark.asyncio
+async def test_ensure_bucket_exists_creates_when_404(settings_no_transforms):
+    from app.core import storage
+
+    client = AsyncMock()
+    client.exceptions = MagicMock()
+    client.exceptions.ClientError = ClientError
+    client.head_bucket.side_effect = ClientError({"Error": {"Code": "404"}}, "HeadBucket")
+
+    cm = MagicMock()
+    cm.__aenter__ = AsyncMock(return_value=client)
+    cm.__aexit__ = AsyncMock(return_value=None)
+    with patch("app.core.storage.s3_client", return_value=cm):
+        await storage.ensure_bucket_exists()
+    client.create_bucket.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_ensure_bucket_exists_reraises_on_permission_denied(
+    settings_no_transforms,
+):
+    from app.core import storage
+
+    client = AsyncMock()
+    client.exceptions = MagicMock()
+    client.exceptions.ClientError = ClientError
+    client.head_bucket.side_effect = ClientError({"Error": {"Code": "403"}}, "HeadBucket")
+
+    cm = MagicMock()
+    cm.__aenter__ = AsyncMock(return_value=client)
+    cm.__aexit__ = AsyncMock(return_value=None)
+    with patch("app.core.storage.s3_client", return_value=cm), pytest.raises(ClientError):
+        await storage.ensure_bucket_exists()
+    client.create_bucket.assert_not_called()
