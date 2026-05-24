@@ -2,7 +2,7 @@ import type { MetaDescriptor } from "react-router";
 
 import type { Locale } from "@/shared/lib/i18n";
 
-export const SITE_NAME = "Ganitel";
+export const SITE_NAME = "ganitel";
 export const SITE_URL = (
   globalThis.process?.env?.APP_URL ?? "https://ganitel.com"
 ).replace(/\/+$/, "");

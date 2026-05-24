@@ -1,6 +1,6 @@
-# Ganitel Backend
+# ganitel Backend
 
-FastAPI service for the Ganitel platform. Feature-organized; auth via Clerk.
+FastAPI service for the ganitel platform. Feature-organized; auth via Clerk.
 
 ## Layout
 

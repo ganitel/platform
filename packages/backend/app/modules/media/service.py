@@ -10,7 +10,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.core.storage import presign_put, public_url
 from app.modules.media.models import Media, MediaKind
-from app.modules.media.schemas import MediaKind as SchemaMediaKind
 from app.modules.media.schemas import MediaMimeType, MediaPublic, MediaUploadIn, MediaUploadOut
 from app.modules.users.models import User
 
@@ -61,7 +60,7 @@ async def to_public(media: Media, *, poster: Media | None = None) -> MediaPublic
         id=media.id,
         url=public_url(media.key),
         mime_type=cast(MediaMimeType, media.mime_type),
-        kind=cast(SchemaMediaKind, media.kind.value),
+        kind=media.kind.value,
         poster_url=public_url(poster.key) if poster is not None else None,
         duration_ms=media.duration_ms,
         created_at=media.created_at,

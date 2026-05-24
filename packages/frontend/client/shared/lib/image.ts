@@ -80,5 +80,5 @@ export const CARD_SIZES =
   "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw";
 
 /** Standard tier for hero / above-the-fold full-bleed photos. */
-export const HERO_WIDTHS = [640, 960, 1440, 2000] as const;
+export const HERO_WIDTHS = [640, 960, 1440] as const;
 export const HERO_SIZES = "100vw";

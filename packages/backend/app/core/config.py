@@ -7,7 +7,7 @@ CORS origins, payment/SMS provider keys, …) belongs here."""
 from functools import lru_cache
 from typing import Annotated, Literal, cast
 
-from pydantic import BaseModel, Field, PostgresDsn, field_validator
+from pydantic import BaseModel, Field, PostgresDsn, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -77,7 +77,7 @@ class Settings(PaymentSettings, ObjectStorageSettings, BaseSettings):
 
     ENVIRONMENT: Literal["development", "test", "production"] = "development"
     DEBUG: bool = False
-    APP_NAME: str = "Ganitel API"
+    APP_NAME: str = "ganitel API"
     APP_VERSION: str = "0.1.0"
 
     # Defaults assume local Postgres (with PostGIS). Env overrides in real deployments.
@@ -117,7 +117,7 @@ class Settings(PaymentSettings, ObjectStorageSettings, BaseSettings):
     # submits the /add-team form. Submissions still succeed if these are unset;
     # we just log a warning instead of sending the review email.
     RESEND_API_KEY: str | None = None
-    RESEND_FROM_EMAIL: str = "Ganitel <noreply@ganitel.com>"
+    RESEND_FROM_EMAIL: str = "ganitel <noreply@ganitel.com>"
 
     # Public base URL used to build links in outbound email (e.g., review pages).
     APP_BASE_URL: str = "http://localhost:3000"
@@ -133,6 +133,15 @@ class Settings(PaymentSettings, ObjectStorageSettings, BaseSettings):
         if isinstance(v, str):
             return [o.strip() for o in v.split(",") if o.strip()]
         return v
+
+    @model_validator(mode="after")
+    def _require_supabase_url_in_prod(self) -> "Settings":
+        if self.ENVIRONMENT == "production" and not self.SUPABASE_PROJECT_URL:
+            raise ValueError(
+                "SUPABASE_PROJECT_URL is required in production — "
+                "media endpoints raise per-request RuntimeError without it."
+            )
+        return self
 
 
 @lru_cache

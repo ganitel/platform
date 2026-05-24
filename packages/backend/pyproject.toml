@@ -1,7 +1,7 @@
 [project]
 name = "ganitel-backend"
 version = "0.1.0"
-description = "Ganitel — Africa-first marketplace for housing, experiences, and payments"
+description = "ganitel — Africa-first marketplace for housing, experiences, and payments"
 requires-python = ">=3.12"
 dependencies = [
     "aioboto3>=15.5.0",

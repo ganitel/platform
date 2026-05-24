@@ -34,16 +34,20 @@ function apiOrigin(): string | null {
   }
 }
 
+const GOOGLE_FONTS_HREF =
+  "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,500..800&family=Instrument+Serif:ital@0;1&display=swap";
+
 export const links: Route.LinksFunction = () => {
   const api = apiOrigin();
   return [
-    { rel: "stylesheet", href: indexCss },
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
     {
       rel: "preconnect",
       href: "https://fonts.gstatic.com",
       crossOrigin: "anonymous",
     },
+    { rel: "stylesheet", href: GOOGLE_FONTS_HREF },
+    { rel: "stylesheet", href: indexCss },
     ...(api
       ? [
           { rel: "preconnect", href: api, crossOrigin: "anonymous" as const },
@@ -56,7 +60,7 @@ export const links: Route.LinksFunction = () => {
 };
 
 export const meta: Route.MetaFunction = () => [
-  { title: "Ganitel — séjours et expériences" },
+  { title: "ganitel — séjours et expériences" },
 ];
 
 export async function loader({ request }: Route.LoaderArgs) {

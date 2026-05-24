@@ -26,7 +26,7 @@ def _render(entry: WaitlistEntry) -> tuple[str, str]:
     audience_en = "host" if entry.role == "host" else "traveler"
 
     if entry.role == "host":
-        subject = "Bienvenue sur Ganitel — votre projet d'hôte"
+        subject = "Bienvenue sur ganitel — votre projet d'hôte"
         intro = (
             "Merci d'avoir partagé votre projet d'hébergement. "
             "Un membre de l'équipe vous écrira pour comprendre vos envies "
@@ -34,13 +34,13 @@ def _render(entry: WaitlistEntry) -> tuple[str, str]:
         )
     elif entry.property_id or entry.experience_id:
         target_label = "ce séjour" if entry.property_id else "cette expérience"
-        subject = f"Ganitel — votre place sur {target_label}"
+        subject = f"ganitel — votre place sur {target_label}"
         intro = (
             f"Merci de votre intérêt pour {target_label}. "
             "Nous vous écrirons en priorité dès l'ouverture des réservations."
         )
     else:
-        subject = "Bienvenue sur la liste Ganitel"
+        subject = "Bienvenue sur la liste ganitel"
         intro = (
             "Merci d'avoir rejoint la liste. Nous vous écrirons dès "
             "l'ouverture des réservations, séjours et expériences inclus."
@@ -58,7 +58,7 @@ def _render(entry: WaitlistEntry) -> tuple[str, str]:
   <p style="font-size:13px;color:#666">Inscription enregistrée en tant que {escape(audience)} ({escape(audience_en)}).</p>
   <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
   <p style="font-size:12px;color:#888">
-    Ganitel — séjours et expériences soigneusement choisis au Cameroun, au Sénégal et en Côte d'Ivoire.
+    ganitel — séjours et expériences soigneusement choisis au Cameroun, au Sénégal et en Côte d'Ivoire.
   </p>
 </body></html>
 """.strip()
