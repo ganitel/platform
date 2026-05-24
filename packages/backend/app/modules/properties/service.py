@@ -1,5 +1,5 @@
 """Property lifecycle and projections: draft create / patch / publish /
-unpublish, photo attach/detach, and the `to_public` / `to_detail`
+unpublish, media attach/detach/reorder, and the `to_public` / `to_detail`
 mappers that turn ORM rows into API schemas."""
 
 from datetime import UTC, datetime
@@ -14,9 +14,11 @@ from sqlalchemy.orm import selectinload
 
 from app.core.errors import ForbiddenError, NotFoundError, ValidationError
 from app.core.money import Currency, Money
-from app.modules.media.models import Media
+from app.modules.media.models import Media, MediaKind
+from app.modules.media.schemas import MediaItemPublic, MediaPublic
+from app.modules.media.service import load_poster
 from app.modules.media.service import to_public as media_to_public
-from app.modules.properties.models import Property, PropertyPhoto, PropertyStatus
+from app.modules.properties.models import Property, PropertyMediaItem, PropertyStatus
 from app.modules.properties.schemas import (
     AdminStatusSummary,
     GeoPoint,
@@ -102,9 +104,33 @@ def _listing_metadata(property: Property) -> PropertyListingMetadata:
     )
 
 
+async def _resolve_listing_media(
+    session: AsyncSession, items: list[PropertyMediaItem]
+) -> list[MediaItemPublic]:
+    out: list[MediaItemPublic] = []
+    for it in items:
+        poster = await load_poster(session, it.media)
+        public = await media_to_public(it.media, poster=poster)
+        out.append(
+            MediaItemPublic(
+                **public.model_dump(),
+                media_item_id=it.id,
+            )
+        )
+    return out
+
+
+async def _cover(session: AsyncSession, items: list[PropertyMediaItem]) -> MediaPublic | None:
+    if not items:
+        return None
+    first = items[0]
+    poster = await load_poster(session, first.media)
+    return await media_to_public(first.media, poster=poster)
+
+
 async def create_draft(session: AsyncSession, host: User, payload: PropertyCreateIn) -> Property:
     if not host.is_host:
-        host.is_host = True  # auto-promote on first listing
+        host.is_host = True
     prop = Property(
         host_id=host.id,
         title=payload.title,
@@ -139,6 +165,15 @@ async def create_draft(session: AsyncSession, host: User, payload: PropertyCreat
         status=PropertyStatus.DRAFT,
     )
     session.add(prop)
+    await session.flush()
+
+    if payload.media_ids:
+        for idx, media_id in enumerate(payload.media_ids):
+            media = await session.get(Media, media_id)
+            if media is None or (media.owner_user_id != host.id and not host.is_admin):
+                raise NotFoundError(code="media.not_found")
+            session.add(PropertyMediaItem(property_id=prop.id, media_id=media_id, position=idx))
+
     await session.commit()
     await session.refresh(prop)
     return prop
@@ -171,8 +206,8 @@ async def publish(session: AsyncSession, property: Property, user: User) -> Prop
         issues["title"] = "missing"
     if property.base_price_amount is None or property.base_price_amount <= 0:
         issues["base_price_amount"] = "not_positive"
-    if not property.photos:
-        issues["photos"] = "empty"
+    if not property.media:
+        issues["media"] = "empty"
     if issues:
         raise ValidationError(code="property.not_ready", extra={"issues": issues})
     property.status = PropertyStatus.PUBLISHED
@@ -207,7 +242,7 @@ async def list_all_for_admin(
 ) -> list[Property]:
     stmt = (
         select(Property)
-        .options(selectinload(Property.photos).selectinload(PropertyPhoto.media))
+        .options(selectinload(Property.media).selectinload(PropertyMediaItem.media))
         .order_by(Property.created_at.desc())
         .limit(limit)
         .offset(offset)
@@ -242,7 +277,7 @@ async def status_summary(session: AsyncSession) -> AdminStatusSummary:
 async def get(session: AsyncSession, property_id: UUID) -> Property:
     stmt = (
         select(Property)
-        .options(selectinload(Property.photos).selectinload(PropertyPhoto.media))
+        .options(selectinload(Property.media).selectinload(PropertyMediaItem.media))
         .where(Property.id == property_id)
     )
     prop = (await session.execute(stmt)).scalar_one_or_none()
@@ -251,35 +286,63 @@ async def get(session: AsyncSession, property_id: UUID) -> Property:
     return prop
 
 
-async def attach_photo(
+async def attach_media(
     session: AsyncSession, property: Property, user: User, *, media_id: UUID, position: int
-) -> PropertyPhoto:
+) -> PropertyMediaItem:
+    from app.core.errors import ConflictError
+
     _ensure_owner(user, property)
     media = await session.get(Media, media_id)
     if media is None:
         raise NotFoundError(code="media.not_found")
     if media.owner_user_id != user.id and not user.is_admin:
         raise ForbiddenError(code="media.not_owner")
-    photo = PropertyPhoto(property_id=property.id, media_id=media_id, position=position)
-    session.add(photo)
+
+    current_total = len(property.media)
+    if current_total >= 20:
+        raise ConflictError(code="media.cap_exceeded")
+    if media.kind == MediaKind.VIDEO:
+        current_videos = sum(1 for it in property.media if it.media.kind == MediaKind.VIDEO)
+        if current_videos >= 3:
+            raise ConflictError(code="media.video_cap_exceeded")
+
+    item = PropertyMediaItem(property_id=property.id, media_id=media_id, position=position)
+    session.add(item)
     await session.commit()
-    await session.refresh(photo)
-    return photo
+    await session.refresh(item)
+    return item
 
 
-async def detach_photo(
-    session: AsyncSession, property: Property, user: User, photo_id: UUID
+async def detach_media(
+    session: AsyncSession, property: Property, user: User, item_id: UUID
 ) -> None:
     _ensure_owner(user, property)
-    photo = await session.get(PropertyPhoto, photo_id)
-    if photo is None or photo.property_id != property.id:
-        raise NotFoundError(code="photo.not_found")
-    await session.delete(photo)
+    item = await session.get(PropertyMediaItem, item_id)
+    if item is None or item.property_id != property.id:
+        raise NotFoundError(code="media_item.not_found")
+    await session.delete(item)
     await session.commit()
 
 
-async def to_detail(property: Property, host: User) -> PropertyDetail:
-    photos = [await media_to_public(p.media) for p in property.photos]
+async def reorder_media(
+    session: AsyncSession, property: Property, user: User, order: list[tuple[UUID, int]]
+) -> None:
+    """Atomic reorder. The set of ids must exactly match the property's
+    current media items; partial overlap raises ValidationError."""
+    _ensure_owner(user, property)
+    existing = {it.id: it for it in property.media}
+    requested = {item_id for item_id, _ in order}
+    if requested != set(existing.keys()):
+        raise ValidationError(code="media.reorder_mismatch")
+    if len({pos for _, pos in order}) != len(order):
+        raise ValidationError(code="media.reorder_duplicate_positions")
+    for item_id, pos in order:
+        existing[item_id].position = pos
+    await session.commit()
+
+
+async def to_detail(session: AsyncSession, property: Property, host: User) -> PropertyDetail:
+    media_items = await _resolve_listing_media(session, property.media)
     return PropertyDetail(
         id=property.id,
         title=property.title,
@@ -298,21 +361,20 @@ async def to_detail(property: Property, host: User) -> PropertyDetail:
         amenities=list(property.amenities),
         showcase_amenities=_showcase_amenities(property),
         listing_metadata=_listing_metadata(property),
-        cover_photo=photos[0] if photos else None,
+        cover_media=media_items[0] if media_items else None,
         description=property.description,
         house_rules=property.house_rules,
         cancellation_policy=property.cancellation_policy,
         content_language=cast(Literal["fr", "en"], property.content_language),
         status=property.status,
         host=HostPublic.model_validate(host),
-        photos=photos,
+        media=media_items,
         created_at=property.created_at,
         published_at=property.published_at,
     )
 
 
-async def to_admin_list_item(property: Property) -> "PropertyAdminListItem":
-    cover = property.photos[0] if property.photos else None
+async def to_admin_list_item(session: AsyncSession, property: Property) -> PropertyAdminListItem:
     return PropertyAdminListItem(
         id=property.id,
         title=property.title,
@@ -323,14 +385,15 @@ async def to_admin_list_item(property: Property) -> "PropertyAdminListItem":
         base_price=Money(
             amount=property.base_price_amount, currency=Currency(property.base_price_currency)
         ),
-        cover_photo=await media_to_public(cover.media) if cover else None,
+        cover_media=await _cover(session, property.media),
         created_at=property.created_at,
         published_at=property.published_at,
     )
 
 
-async def to_public(property: Property, *, distance_km: float | None = None) -> PropertyPublic:
-    cover = property.photos[0] if property.photos else None
+async def to_public(
+    session: AsyncSession, property: Property, *, distance_km: float | None = None
+) -> PropertyPublic:
     return PropertyPublic(
         id=property.id,
         title=property.title,
@@ -349,6 +412,6 @@ async def to_public(property: Property, *, distance_km: float | None = None) -> 
         amenities=list(property.amenities),
         showcase_amenities=_showcase_amenities(property),
         listing_metadata=_listing_metadata(property),
-        cover_photo=await media_to_public(cover.media) if cover else None,
+        cover_media=await _cover(session, property.media),
         distance_km=distance_km,
     )

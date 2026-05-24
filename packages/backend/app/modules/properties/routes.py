@@ -1,5 +1,5 @@
 """HTTP endpoints for properties — anonymous search + detail, and
-host-only create / update / publish / photo management. All search
+host-only create / update / publish / media management. All search
 parameters are query-string based; see `search.py` for the filter and
 sort logic."""
 
@@ -16,11 +16,12 @@ from app.modules.properties import search as search_mod
 from app.modules.properties import service
 from app.modules.properties.models import Property, PropertyStatus
 from app.modules.properties.schemas import (
-    AttachPhotoIn,
-    PhotoAttachOut,
+    AttachMediaIn,
+    MediaAttachOut,
     PropertyCreateIn,
     PropertyDetail,
     PropertyUpdateIn,
+    ReorderMediaIn,
     SearchOut,
 )
 from app.modules.users.models import User
@@ -45,14 +46,14 @@ def _set_detail_cache_and_enforce_visibility(
     response.headers["Cache-Control"] = PRIVATE_DETAIL_CACHE
 
 
-async def _detail_with_host(session: DbSession, prop, user: User) -> PropertyDetail:
+async def _detail_with_host(session: DbSession, prop: Property, user: User) -> PropertyDetail:
     """Build a PropertyDetail using the property's actual host, not the
     acting user. Matters when an admin acts on a property owned by someone
-    else — `to_detail(prop, user)` would mislabel the admin as the host."""
+    else — `to_detail(session, prop, user)` would mislabel the admin as the host."""
     host = await session.get(User, prop.host_id)
     if host is None:
         raise NotFoundError(code="host.not_found")
-    return await service.to_detail(prop, host)
+    return await service.to_detail(session, prop, host)
 
 
 router = APIRouter(prefix="/properties", tags=["properties"])
@@ -64,7 +65,7 @@ async def create_property(
 ) -> PropertyDetail:
     prop = await service.create_draft(session, user, body)
     fresh = await service.get(session, prop.id)
-    return await service.to_detail(fresh, user)
+    return await service.to_detail(session, fresh, user)
 
 
 @router.get("", response_model=SearchOut)
@@ -104,7 +105,7 @@ async def search_properties(
     )
     rows = await search_mod.search(session, f)
     total = await search_mod.count(session, f)
-    items = [await service.to_public(p, distance_km=d) for p, d in rows]
+    items = [await service.to_public(session, p, distance_km=d) for p, d in rows]
     response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
     return SearchOut(items=items, total=total, limit=limit, offset=offset)
 
@@ -121,7 +122,7 @@ async def get_property(
     host = await session.get(User, prop.host_id)
     if host is None:
         raise NotFoundError(code="host.not_found")
-    return await service.to_detail(prop, host)
+    return await service.to_detail(session, prop, host)
 
 
 @router.patch("/{property_id}", response_model=PropertyDetail)
@@ -161,23 +162,37 @@ async def remove_property(
 
 
 @router.post(
-    "/{property_id}/photos",
-    response_model=PhotoAttachOut,
+    "/{property_id}/media",
+    response_model=MediaAttachOut,
     status_code=status.HTTP_201_CREATED,
 )
-async def attach_photo(
-    property_id: UUID, body: AttachPhotoIn, user: CurrentUser, session: DbSession
-) -> PhotoAttachOut:
+async def attach_media(
+    property_id: UUID, body: AttachMediaIn, user: CurrentUser, session: DbSession
+) -> MediaAttachOut:
     prop = await service.get(session, property_id)
-    photo = await service.attach_photo(
+    item = await service.attach_media(
         session, prop, user, media_id=body.media_id, position=body.position
     )
-    return PhotoAttachOut(id=photo.id, position=photo.position)
+    return MediaAttachOut(id=item.id, position=item.position)
 
 
-@router.delete("/{property_id}/photos/{photo_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def detach_photo(
-    property_id: UUID, photo_id: UUID, user: CurrentUser, session: DbSession
+@router.patch("/{property_id}/media", response_model=PropertyDetail)
+async def reorder_media(
+    property_id: UUID,
+    body: ReorderMediaIn,
+    user: CurrentUser,
+    session: DbSession,
+) -> PropertyDetail:
+    prop = await service.get(session, property_id)
+    await service.reorder_media(
+        session, prop, user, [(o.media_item_id, o.position) for o in body.order]
+    )
+    return await _detail_with_host(session, prop, user)
+
+
+@router.delete("/{property_id}/media/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def detach_media(
+    property_id: UUID, item_id: UUID, user: CurrentUser, session: DbSession
 ) -> None:
     prop = await service.get(session, property_id)
-    await service.detach_photo(session, prop, user, photo_id)
+    await service.detach_media(session, prop, user, item_id)

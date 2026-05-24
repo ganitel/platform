@@ -29,7 +29,7 @@ async def admin_list_properties(
     statuses = tuple(status) if status else ()
     rows = await service.list_all_for_admin(session, statuses=statuses, limit=limit, offset=offset)
     total = await service.count_all_for_admin(session, statuses=statuses)
-    items = await asyncio.gather(*(service.to_admin_list_item(p) for p in rows))
+    items = await asyncio.gather(*(service.to_admin_list_item(session, p) for p in rows))
     return AdminListOut(items=list(items), total=total, limit=limit, offset=offset)
 
 

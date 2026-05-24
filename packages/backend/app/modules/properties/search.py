@@ -13,7 +13,7 @@ from sqlalchemy import Select, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.modules.properties.models import Property, PropertyPhoto, PropertyStatus
+from app.modules.properties.models import Property, PropertyMediaItem, PropertyStatus
 
 SortKey = Literal["relevance", "distance", "price_asc", "price_desc", "newest"]
 
@@ -67,7 +67,9 @@ async def count(session: AsyncSession, f: SearchFilters) -> int:
 
 
 async def search(session: AsyncSession, f: SearchFilters) -> list[tuple[Property, float | None]]:
-    stmt = select(Property).options(selectinload(Property.photos).selectinload(PropertyPhoto.media))
+    stmt = select(Property).options(
+        selectinload(Property.media).selectinload(PropertyMediaItem.media)
+    )
     stmt = _apply_filters(stmt, f)
 
     distance_expr = None

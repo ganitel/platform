@@ -36,14 +36,14 @@ from app.core.logging import configure_logging, get_logger
 from app.modules.experiences.models import (
     Experience,
     ExperienceCancellationPolicy,
-    ExperiencePhoto,
+    ExperienceMediaItem,
     ExperienceStatus,
 )
 from app.modules.media.models import Media
 from app.modules.properties.models import (
     CancellationPolicy,
     Property,
-    PropertyPhoto,
+    PropertyMediaItem,
     PropertyStatus,
 )
 from app.modules.users.models import User
@@ -549,7 +549,9 @@ async def _wipe_demo_data(session: Any, host_ids: list[Any]) -> tuple[int, int]:
         media_ids.extend(
             (
                 await session.execute(
-                    select(PropertyPhoto.media_id).where(PropertyPhoto.property_id.in_(prop_ids))
+                    select(PropertyMediaItem.media_id).where(
+                        PropertyMediaItem.property_id.in_(prop_ids)
+                    )
                 )
             )
             .scalars()
@@ -566,8 +568,8 @@ async def _wipe_demo_data(session: Any, host_ids: list[Any]) -> tuple[int, int]:
         media_ids.extend(
             (
                 await session.execute(
-                    select(ExperiencePhoto.media_id).where(
-                        ExperiencePhoto.experience_id.in_(exp_ids)
+                    select(ExperienceMediaItem.media_id).where(
+                        ExperienceMediaItem.experience_id.in_(exp_ids)
                     )
                 )
             )
@@ -641,7 +643,7 @@ async def _create_listing(session: Any, host: User, listing: dict[str, Any]) -> 
     await session.flush()  # populate prop.id
 
     for position, media in enumerate(photos):
-        session.add(PropertyPhoto(property_id=prop.id, media_id=media.id, position=position))
+        session.add(PropertyMediaItem(property_id=prop.id, media_id=media.id, position=position))
 
     return prop
 
@@ -681,7 +683,7 @@ async def _create_experience(session: Any, host: User, item: dict[str, Any]) -> 
     await session.flush()
 
     for position, media in enumerate(photos):
-        session.add(ExperiencePhoto(experience_id=exp.id, media_id=media.id, position=position))
+        session.add(ExperienceMediaItem(experience_id=exp.id, media_id=media.id, position=position))
 
     return exp
 

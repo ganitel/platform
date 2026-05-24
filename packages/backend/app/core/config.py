@@ -57,6 +57,14 @@ class ObjectStorageSettings(BaseModel):
     )
     MEDIA_GET_URL_TTL_SECONDS: int = 3600
     MEDIA_PUT_URL_TTL_SECONDS: int = 600
+    SUPABASE_PROJECT_URL: str | None = Field(
+        default=None,
+        description="Supabase project URL (https://<ref>.supabase.co) used to build public object and image-transform URLs. Distinct from S3_ENDPOINT_URL which is the S3 protocol endpoint used for writes.",
+    )
+    SUPABASE_IMAGE_TRANSFORMS_ENABLED: bool = Field(
+        default=False,
+        description="Set to true when on a Supabase paid plan that includes Image Transformations. When false, image_transform_url falls back to public_url.",
+    )
 
 
 class Settings(PaymentSettings, ObjectStorageSettings, BaseSettings):
