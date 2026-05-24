@@ -1588,9 +1588,54 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
     fr: "Au moins une photo est requise",
     en: "At least one photo is required",
   },
+  "admin.publish_error.prices.empty": {
+    fr: "Au moins un prix est requis",
+    en: "At least one price is required",
+  },
+  "admin.publish_error.media.empty": {
+    fr: "Au moins un média est requis",
+    en: "At least one media item is required",
+  },
   "admin.publish_error.generic": {
     fr: "Champ invalide : {field}",
     en: "Invalid field: {field}",
+  },
+
+  "media_uploader.add": {
+    fr: "Ajouter des photos / vidéos ({count} / {max})",
+    en: "Add photos / videos ({count} / {max})",
+  },
+  "media_uploader.cover": {
+    fr: "Couverture",
+    en: "Cover",
+  },
+  "media_uploader.uploading": {
+    fr: "Envoi…",
+    en: "Uploading…",
+  },
+  "media_uploader.error.unsupported_format": {
+    fr: "Format non supporté : {mime}",
+    en: "Unsupported format: {mime}",
+  },
+  "media_uploader.error.image_too_large": {
+    fr: "Image trop lourde (max {mb} Mo)",
+    en: "Image too large (max {mb} MB)",
+  },
+  "media_uploader.error.video_too_large": {
+    fr: "Vidéo trop lourde (max {mb} Mo)",
+    en: "Video too large (max {mb} MB)",
+  },
+  "media_uploader.error.video_too_long": {
+    fr: "Vidéo trop longue (max {seconds} s)",
+    en: "Video too long (max {seconds} s)",
+  },
+  "media_uploader.error.upload_failed": {
+    fr: "Échec de l'envoi.",
+    en: "Upload failed.",
+  },
+  "media_uploader.error.unknown_mime": {
+    fr: "inconnu",
+    en: "unknown",
   },
 } satisfies Dict;
 

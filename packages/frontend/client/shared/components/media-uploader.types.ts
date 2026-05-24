@@ -23,12 +23,16 @@ export interface UploaderItem {
   progress: number;
 }
 
+export type UploaderOnChange = (
+  next: UploaderItem[] | ((prev: UploaderItem[]) => UploaderItem[]),
+) => void;
+
 export type UploaderProps =
   | {
       mode: "draft";
       draftId: string;
       value: UploaderItem[];
-      onChange: (next: UploaderItem[]) => void;
+      onChange: UploaderOnChange;
       disabled?: boolean;
     }
   | {
@@ -36,7 +40,7 @@ export type UploaderProps =
       listingKind: "property" | "experience";
       listingId: string;
       value: UploaderItem[];
-      onChange: (next: UploaderItem[]) => void;
+      onChange: UploaderOnChange;
       disabled?: boolean;
     };
 

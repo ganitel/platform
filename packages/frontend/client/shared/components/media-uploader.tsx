@@ -30,12 +30,18 @@ import {
   MAX_VIDEO_DURATION_MS,
   type MediaMimeType,
 } from "@/features/media/types";
+import { useT } from "@/shared/lib/i18n";
 
 import { type UploaderItem, type UploaderProps } from "./media-uploader.types";
 
 const ACCEPT_ATTR = [...ACCEPTED_IMAGE_MIMES, ...ACCEPTED_VIDEO_MIMES].join(
   ",",
 );
+const MAX_IMAGE_MB = Math.round(MAX_IMAGE_BYTES / (1024 * 1024));
+const MAX_VIDEO_MB = Math.round(MAX_VIDEO_BYTES / (1024 * 1024));
+const MAX_VIDEO_SECONDS = Math.round(MAX_VIDEO_DURATION_MS / 1000);
+
+type Translator = ReturnType<typeof useT>;
 
 function isImageMime(m: string): boolean {
   return (ACCEPTED_IMAGE_MIMES as readonly string[]).includes(m);
@@ -45,14 +51,24 @@ function isVideoMime(m: string): boolean {
   return (ACCEPTED_VIDEO_MIMES as readonly string[]).includes(m);
 }
 
-function rejectionReason(file: File): string | null {
+function rejectionReason(file: File, t: Translator): string | null {
   const isImg = isImageMime(file.type);
   const isVid = isVideoMime(file.type);
-  if (!isImg && !isVid) return `Format non supporté: ${file.type || "inconnu"}`;
+  if (!isImg && !isVid)
+    return t("media_uploader.error.unsupported_format").replace(
+      "{mime}",
+      file.type || t("media_uploader.error.unknown_mime"),
+    );
   if (isImg && file.size > MAX_IMAGE_BYTES)
-    return `Image trop lourde (max 10 Mo).`;
+    return t("media_uploader.error.image_too_large").replace(
+      "{mb}",
+      String(MAX_IMAGE_MB),
+    );
   if (isVid && file.size > MAX_VIDEO_BYTES)
-    return `Vidéo trop lourde (max 200 Mo).`;
+    return t("media_uploader.error.video_too_large").replace(
+      "{mb}",
+      String(MAX_VIDEO_MB),
+    );
   return null;
 }
 
@@ -60,13 +76,24 @@ function newLocalId(): string {
   return `loc-${crypto.randomUUID()}`;
 }
 
+function isLocalItem(item: UploaderItem): boolean {
+  return item.localId.startsWith("loc-");
+}
+
 export function MediaUploader(props: UploaderProps) {
   const { value, onChange, disabled } = props;
+  const t = useT();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
   );
   const reorderTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Tracks latest value for cleanup effects that should see the most recent
+  // state when unmounting, not the snapshot from a stale render.
+  const valueRef = useRef(value);
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
 
   const remainingSlots = MAX_MEDIA_PER_LISTING - value.length;
   const currentVideos = value.filter((v) => v.kind === "video").length;
@@ -82,6 +109,18 @@ export function MediaUploader(props: UploaderProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.mode === "draft" ? props.draftId : null]);
 
+  useEffect(() => {
+    return () => {
+      if (reorderTimer.current) {
+        clearTimeout(reorderTimer.current);
+        reorderTimer.current = null;
+      }
+      for (const item of valueRef.current) {
+        if (isLocalItem(item)) URL.revokeObjectURL(item.previewUrl);
+      }
+    };
+  }, []);
+
   const handleFiles = useCallback(
     async (files: FileList | null) => {
       if (!files || files.length === 0) return;
@@ -89,7 +128,7 @@ export function MediaUploader(props: UploaderProps) {
       let videoCount = 0;
 
       for (const file of Array.from(files)) {
-        const reason = rejectionReason(file);
+        const reason = rejectionReason(file, t);
         if (reason) {
           console.warn("MediaUploader rejected:", file.name, reason);
           continue;
@@ -102,6 +141,7 @@ export function MediaUploader(props: UploaderProps) {
         accepted.push(file);
       }
 
+      const startLen = value.length;
       const placeholders: UploaderItem[] = accepted.map((file) => ({
         localId: newLocalId(),
         mediaId: null,
@@ -117,18 +157,21 @@ export function MediaUploader(props: UploaderProps) {
         errorMessage: null,
         progress: 0,
       }));
-      onChange([...value, ...placeholders]);
+      onChange((prev) => [...prev, ...placeholders]);
 
       for (let i = 0; i < accepted.length; i++) {
         const file = accepted[i];
         const placeholder = placeholders[i];
+        const position = startLen + i;
         try {
-          await uploadOne(props, file, placeholder);
+          await uploadOne(props, file, placeholder, position, t);
         } catch (cause) {
           const message =
-            cause instanceof Error ? cause.message : "Échec de l'envoi.";
-          props.onChange(
-            props.value.map((v) =>
+            cause instanceof Error
+              ? cause.message
+              : t("media_uploader.error.upload_failed");
+          props.onChange((prev) =>
+            prev.map((v) =>
               v.localId === placeholder.localId
                 ? { ...v, status: "error", errorMessage: message }
                 : v,
@@ -137,7 +180,7 @@ export function MediaUploader(props: UploaderProps) {
         }
       }
     },
-    [value, onChange, currentVideos, remainingSlots, props],
+    [t, onChange, currentVideos, remainingSlots, value.length, props],
   );
 
   function onDragEnd(event: DragEndEvent) {
@@ -175,6 +218,7 @@ export function MediaUploader(props: UploaderProps) {
   function removeItem(localId: string) {
     const item = value.find((v) => v.localId === localId);
     if (!item) return;
+    if (isLocalItem(item)) URL.revokeObjectURL(item.previewUrl);
     if (props.mode === "listing" && item.itemId) {
       const itemId = item.itemId;
       void (
@@ -189,7 +233,7 @@ export function MediaUploader(props: UploaderProps) {
         console.error("detach failed", err);
       });
     }
-    onChange(value.filter((v) => v.localId !== localId));
+    onChange((prev) => prev.filter((v) => v.localId !== localId));
   }
 
   return (
@@ -208,7 +252,9 @@ export function MediaUploader(props: UploaderProps) {
         onClick={() => inputRef.current?.click()}
         className="cursor-pointer rounded-md border border-dashed px-4 py-3 text-sm disabled:cursor-not-allowed"
       >
-        Ajouter des photos / vidéos ({value.length} / {MAX_MEDIA_PER_LISTING})
+        {t("media_uploader.add")
+          .replace("{count}", String(value.length))
+          .replace("{max}", String(MAX_MEDIA_PER_LISTING))}
       </button>
       <DndContext
         sensors={sensors}
@@ -226,6 +272,8 @@ export function MediaUploader(props: UploaderProps) {
                 item={item}
                 index={idx}
                 onRemove={removeItem}
+                coverLabel={t("media_uploader.cover")}
+                uploadingLabel={t("media_uploader.uploading")}
               />
             ))}
           </ul>
@@ -239,10 +287,14 @@ function SortableTile({
   item,
   index,
   onRemove,
+  coverLabel,
+  uploadingLabel,
 }: {
   item: UploaderItem;
   index: number;
   onRemove: (localId: string) => void;
+  coverLabel: string;
+  uploadingLabel: string;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
@@ -278,7 +330,7 @@ function SortableTile({
       )}
       {index === 0 && (
         <span className="absolute left-1 top-1 rounded bg-black/70 px-2 py-0.5 text-xs text-white">
-          Cover
+          {coverLabel}
         </span>
       )}
       <button
@@ -293,7 +345,7 @@ function SortableTile({
       </button>
       {item.status === "uploading" && (
         <div className="absolute inset-0 grid place-items-center bg-black/40 text-xs text-white">
-          Envoi…
+          {uploadingLabel}
         </div>
       )}
       {item.status === "error" && (
@@ -309,12 +361,14 @@ async function uploadOne(
   props: UploaderProps,
   file: File,
   placeholder: UploaderItem,
+  position: number,
+  t: Translator,
 ): Promise<void> {
   const mime = file.type as MediaMimeType;
   if (isVideoMime(file.type)) {
-    await uploadVideo(props, file, mime, placeholder);
+    await uploadVideo(props, file, mime, placeholder, position, t);
   } else {
-    await uploadImage(props, file, mime, placeholder);
+    await uploadImage(props, file, mime, placeholder, position);
   }
 }
 
@@ -323,6 +377,7 @@ async function uploadImage(
   file: File,
   mime: MediaMimeType,
   placeholder: UploaderItem,
+  position: number,
 ): Promise<void> {
   const out = await requestUpload({
     mime_type: mime,
@@ -331,14 +386,14 @@ async function uploadImage(
     draft_id: props.mode === "draft" ? props.draftId : undefined,
   });
   await putToPresignedUrl(out.upload_url, file, mime);
-  props.onChange(
-    props.value.map((v) =>
+  props.onChange((prev) =>
+    prev.map((v) =>
       v.localId === placeholder.localId
         ? { ...v, mediaId: out.media_id, status: "ready", progress: 1 }
         : v,
     ),
   );
-  await maybeAttachListing(props, placeholder.localId, out.media_id);
+  await maybeAttachListing(props, placeholder.localId, out.media_id, position);
 }
 
 async function uploadVideo(
@@ -346,14 +401,20 @@ async function uploadVideo(
   file: File,
   mime: MediaMimeType,
   placeholder: UploaderItem,
+  position: number,
+  t: Translator,
 ): Promise<void> {
+  const tooLongMessage = t("media_uploader.error.video_too_long").replace(
+    "{seconds}",
+    String(MAX_VIDEO_SECONDS),
+  );
   let posterMediaId: string | null = null;
   let durationMs = 0;
   try {
     const { posterBlob, duration } = await extractPoster(file);
     durationMs = Math.round(duration * 1000);
     if (durationMs > MAX_VIDEO_DURATION_MS) {
-      throw new Error("Vidéo trop longue (max 60 s).");
+      throw new Error(tooLongMessage);
     }
     if (posterBlob) {
       const posterOut = await requestUpload({
@@ -366,8 +427,7 @@ async function uploadVideo(
       posterMediaId = posterOut.media_id;
     }
   } catch (cause) {
-    if (cause instanceof Error && cause.message.includes("max 60 s"))
-      throw cause;
+    if (cause instanceof Error && cause.message === tooLongMessage) throw cause;
     console.warn(
       "poster generation failed; uploading video without poster",
       cause,
@@ -377,7 +437,7 @@ async function uploadVideo(
   if (durationMs === 0) {
     durationMs = await readVideoDurationMs(file);
     if (durationMs > MAX_VIDEO_DURATION_MS) {
-      throw new Error("Vidéo trop longue (max 60 s).");
+      throw new Error(tooLongMessage);
     }
   }
 
@@ -390,8 +450,8 @@ async function uploadVideo(
     draft_id: props.mode === "draft" ? props.draftId : undefined,
   });
   await putToPresignedUrl(out.upload_url, file, mime);
-  props.onChange(
-    props.value.map((v) =>
+  props.onChange((prev) =>
+    prev.map((v) =>
       v.localId === placeholder.localId
         ? {
             ...v,
@@ -403,7 +463,7 @@ async function uploadVideo(
         : v,
     ),
   );
-  await maybeAttachListing(props, placeholder.localId, out.media_id);
+  await maybeAttachListing(props, placeholder.localId, out.media_id, position);
 }
 
 async function extractPoster(
@@ -500,26 +560,25 @@ async function maybeAttachListing(
   props: UploaderProps,
   localId: string,
   mediaId: string,
+  position: number,
 ): Promise<void> {
   if (props.mode === "draft") return;
-  const position = props.value.findIndex((v) => v.localId === localId);
-  const finalPosition = position < 0 ? props.value.length : position;
   const out =
     props.listingKind === "property"
       ? await import("@/features/properties/api").then((m) =>
           m.attachPropertyMedia(props.listingId, {
             media_id: mediaId,
-            position: finalPosition,
+            position,
           }),
         )
       : await import("@/features/experiences/api").then((m) =>
           m.attachExperienceMedia(props.listingId, {
             media_id: mediaId,
-            position: finalPosition,
+            position,
           }),
         );
-  props.onChange(
-    props.value.map((v) =>
+  props.onChange((prev) =>
+    prev.map((v) =>
       v.localId === localId ? { ...v, itemId: out.id, status: "attached" } : v,
     ),
   );

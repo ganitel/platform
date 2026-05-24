@@ -14,8 +14,9 @@ export interface PublishIssue {
 
 const ISSUE_KEYS: Record<string, TranslationKey> = {
   "title:missing": "admin.publish_error.title.missing",
-  "prices:empty": "admin.publish_error.base_price_amount.not_positive",
+  "prices:empty": "admin.publish_error.prices.empty",
   "photos:empty": "admin.publish_error.photos.empty",
+  "media:empty": "admin.publish_error.media.empty",
 };
 
 export function extractPublishIssues(error: unknown): PublishIssue[] | null {

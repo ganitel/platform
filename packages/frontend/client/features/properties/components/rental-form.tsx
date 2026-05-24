@@ -16,7 +16,10 @@ import {
 import { LocationPicker } from "@/shared/components/location-picker";
 import { MarkdownEditor } from "@/shared/components/markdown-editor";
 import { MediaUploader } from "@/shared/components/media-uploader";
-import type { UploaderItem } from "@/shared/components/media-uploader.types";
+import type {
+  UploaderItem,
+  UploaderOnChange,
+} from "@/shared/components/media-uploader.types";
 import { INPUT_CLASS, LABEL_CLASS } from "@/shared/lib/form-styles";
 import { useLocale, useT } from "@/shared/lib/i18n";
 import type { LocationPick } from "@/shared/lib/location";
@@ -122,7 +125,7 @@ interface RentalFormMediaState {
   draftId?: string;
   listingId?: string;
   items: UploaderItem[];
-  setItems: (next: UploaderItem[]) => void;
+  setItems: UploaderOnChange;
 }
 
 interface RentalFormProps {
