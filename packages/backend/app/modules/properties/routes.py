@@ -30,7 +30,9 @@ PRIVATE_DETAIL_CACHE = "private, no-store"
 
 
 def _can_view_private_detail(prop: Property, user: User | None) -> bool:
-    return user is not None and (user.is_admin or prop.host_id == user.id)
+    return (
+        user is not None and user.status == "active" and (user.is_admin or prop.host_id == user.id)
+    )
 
 
 def _set_detail_cache_and_enforce_visibility(
