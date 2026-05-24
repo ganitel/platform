@@ -9,6 +9,7 @@ from uuid import UUID
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.config import get_settings
 from app.core.errors import ConflictError, ForbiddenError, NotFoundError, ValidationError
@@ -53,7 +54,12 @@ async def create_booking(session: AsyncSession, guest: User, payload: BookingCre
 
     nights = (payload.check_out_date - payload.check_in_date).days
 
-    prop = await session.get(Property, payload.property_id)
+    prop_stmt = (
+        select(Property)
+        .options(selectinload(Property.prices))
+        .where(Property.id == payload.property_id)
+    )
+    prop = (await session.execute(prop_stmt)).scalar_one_or_none()
     if prop is None or prop.status != PropertyStatus.PUBLISHED:
         raise NotFoundError(code="property.not_found")
     if prop.host_id == guest.id:
@@ -64,10 +70,17 @@ async def create_booking(session: AsyncSession, guest: User, payload: BookingCre
             extra={"field": "guest_count", "max": prop.capacity},
         )
 
+    matching = next(
+        (p for p in prop.prices if p.currency == payload.currency.value),
+        None,
+    )
+    if matching is None:
+        raise ValidationError(code="booking.currency_unavailable", extra={"field": "currency"})
+
     await expire_old_holds(session, property_id=payload.property_id)
 
     settings = get_settings()
-    subtotal = prop.base_price_amount * nights
+    subtotal = matching.amount * nights
 
     booking = Booking(
         guest_id=guest.id,
@@ -76,11 +89,11 @@ async def create_booking(session: AsyncSession, guest: User, payload: BookingCre
         check_out_date=payload.check_out_date,
         guest_count=payload.guest_count,
         subtotal_amount=subtotal,
-        subtotal_currency=prop.base_price_currency,
+        subtotal_currency=matching.currency,
         total_amount=subtotal,
-        total_currency=prop.base_price_currency,
+        total_currency=matching.currency,
         host_payout_amount=subtotal,
-        host_payout_currency=prop.base_price_currency,
+        host_payout_currency=matching.currency,
         status=BookingStatus.PENDING_PAYMENT,
         hold_expires_at=datetime.now(UTC) + timedelta(minutes=settings.BOOKING_HOLD_MINUTES),
     )
@@ -97,7 +110,7 @@ async def create_booking(session: AsyncSession, guest: User, payload: BookingCre
             "host_id": str(prop.host_id),
             "property_id": str(prop.id),
             "subtotal_amount": str(subtotal),
-            "currency": prop.base_price_currency,
+            "currency": matching.currency,
         },
     )
 

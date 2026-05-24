@@ -9,7 +9,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.core.money import Money
+from app.core.money import Currency, Money
 from app.modules.bookings.models import BookingStatus
 
 PaymentProvider = Literal["tranzak", "stripe", "noop"]
@@ -22,6 +22,7 @@ class BookingCreateIn(BaseModel):
     check_in_date: date
     check_out_date: date
     guest_count: int = Field(..., ge=1, le=64)
+    currency: Currency
 
     @model_validator(mode="after")
     def _dates_ordered(self) -> Self:

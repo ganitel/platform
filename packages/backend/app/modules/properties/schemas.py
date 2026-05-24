@@ -1,13 +1,13 @@
 """Pydantic schemas for properties — listing inputs, public search
 results, and full detail responses. Money is exposed via the shared
-`Money` value object so the wire shape is `{amount, currency}` even
-though storage splits it into two columns."""
+`Money` value object. Listings now support per-currency pricing via
+`prices: list[Money]` instead of a single `base_price`."""
 
 from datetime import datetime, time
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.core.money import Money
 from app.modules.media.schemas import MediaItemPublic, MediaPublic
@@ -57,9 +57,16 @@ class PropertyCreateIn(BaseModel):
     check_out_time: time | None = None
     house_rules: str | None = Field(default=None, max_length=4000)
     cancellation_policy: CancellationPolicy = CancellationPolicy.MODERATE
-    base_price: Money
+    prices: list[Money] = Field(..., min_length=1, max_length=10)
     content_language: ContentLanguage = "fr"
     media_ids: list[UUID] = Field(default_factory=list, max_length=20)
+
+    @model_validator(mode="after")
+    def _unique_currencies(self) -> Self:
+        currencies = [p.currency for p in self.prices]
+        if len(currencies) != len(set(currencies)):
+            raise ValueError("prices must not contain duplicate currencies")
+        return self
 
 
 class PropertyUpdateIn(BaseModel):
@@ -99,15 +106,25 @@ class PropertyUpdateIn(BaseModel):
     check_out_time: time | None = None  # DB column is nullable
     house_rules: str | None = None  # DB column is nullable
     cancellation_policy: CancellationPolicy = CancellationPolicy.MODERATE
-    base_price: Money | None = None
+    prices: list[Money] | None = None
     content_language: ContentLanguage = "fr"
 
-    @field_validator("location", "base_price", mode="after")
+    @field_validator("location", mode="after")
     @classmethod
     def _reject_explicit_null_complex(cls, v):
         if v is None:
             raise ValueError("must not be null; omit the field for a partial update")
         return v
+
+    @model_validator(mode="after")
+    def _validate_prices(self) -> Self:
+        if self.prices is not None:
+            currencies = [p.currency for p in self.prices]
+            if len(currencies) != len(set(currencies)):
+                raise ValueError("prices must not contain duplicate currencies")
+            if len(self.prices) == 0:
+                raise ValueError("prices must not be empty when provided")
+        return self
 
 
 class HostPublic(BaseModel):
@@ -158,7 +175,7 @@ class PropertyPublic(BaseModel):
     bedrooms: int
     beds: int
     bathrooms: int
-    base_price: Money
+    prices: list[Money]
     amenities: list[str]
     showcase_amenities: PropertyShowcaseAmenities
     listing_metadata: PropertyListingMetadata
@@ -217,7 +234,7 @@ class PropertyAdminListItem(BaseModel):
     city: str
     country_code: CountryCode
     status: PropertyStatus
-    base_price: Money
+    prices: list[Money]
     cover_media: MediaPublic | None
     created_at: datetime
     published_at: datetime | None

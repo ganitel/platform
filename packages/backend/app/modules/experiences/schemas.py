@@ -4,9 +4,10 @@ GeoPoint, HostPublic, CountryCode, ContentLanguage) are reused from
 the properties module to avoid drift."""
 
 from datetime import datetime
+from typing import Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.core.money import Money
 from app.modules.experiences.models import (
@@ -40,9 +41,16 @@ class ExperienceCreateIn(BaseModel):
     capacity: int = Field(..., ge=1, le=64)
     duration_minutes: int = Field(..., ge=MIN_DURATION_MIN, le=MAX_DURATION_MIN)
     cancellation_policy: ExperienceCancellationPolicy = ExperienceCancellationPolicy.MODERATE
-    base_price: Money
+    prices: list[Money] = Field(..., min_length=1, max_length=10)
     content_language: ContentLanguage = "fr"
     media_ids: list[UUID] = Field(default_factory=list, max_length=20)
+
+    @model_validator(mode="after")
+    def _unique_currencies(self) -> Self:
+        currencies = [p.currency for p in self.prices]
+        if len(currencies) != len(set(currencies)):
+            raise ValueError("prices must not contain duplicate currencies")
+        return self
 
 
 class ExperienceUpdateIn(BaseModel):
@@ -64,15 +72,25 @@ class ExperienceUpdateIn(BaseModel):
         default=MIN_DURATION_MIN, ge=MIN_DURATION_MIN, le=MAX_DURATION_MIN
     )
     cancellation_policy: ExperienceCancellationPolicy = ExperienceCancellationPolicy.MODERATE
-    base_price: Money | None = None
+    prices: list[Money] | None = None
     content_language: ContentLanguage = "fr"
 
-    @field_validator("location", "base_price", mode="after")
+    @field_validator("location", mode="after")
     @classmethod
     def _reject_explicit_null_complex(cls, v):
         if v is None:
             raise ValueError("must not be null; omit the field for a partial update")
         return v
+
+    @model_validator(mode="after")
+    def _validate_prices(self) -> Self:
+        if self.prices is not None:
+            currencies = [p.currency for p in self.prices]
+            if len(currencies) != len(set(currencies)):
+                raise ValueError("prices must not contain duplicate currencies")
+            if len(self.prices) == 0:
+                raise ValueError("prices must not be empty when provided")
+        return self
 
 
 class ExperiencePublic(BaseModel):
@@ -87,7 +105,7 @@ class ExperiencePublic(BaseModel):
     location: GeoPoint
     capacity: int
     duration_minutes: int
-    base_price: Money
+    prices: list[Money]
     cover_media: MediaPublic | None
     distance_km: float | None = None
 
@@ -118,7 +136,7 @@ class ExperienceAdminListItem(BaseModel):
     country_code: CountryCode
     status: ExperienceStatus
     duration_minutes: int
-    base_price: Money
+    prices: list[Money]
     cover_media: MediaPublic | None
     created_at: datetime
     published_at: datetime | None

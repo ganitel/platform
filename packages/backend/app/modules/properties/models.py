@@ -1,7 +1,6 @@
 """SQLAlchemy ORM models for properties: the listing itself, its media
-join table (`PropertyMediaItem`), and enums (`PropertyStatus`,
-`CancellationPolicy`). Money is stored split into amount + currency
-columns; the API recomposes via `Money`."""
+join table (`PropertyMediaItem`), price table (`PropertyPrice`), and
+enums (`PropertyStatus`, `CancellationPolicy`)."""
 
 from datetime import datetime, time
 from decimal import Decimal
@@ -22,6 +21,7 @@ from sqlalchemy import (
     String,
     Text,
     Time,
+    UniqueConstraint,
     Uuid,
     func,
 )
@@ -59,10 +59,7 @@ class KitchenType(StrEnum):
 
 class Property(Base):
     __tablename__ = "properties"
-    __table_args__ = (
-        CheckConstraint("capacity >= 1", name="ck_properties_capacity_positive"),
-        CheckConstraint("base_price_amount >= 0", name="ck_properties_price_non_negative"),
-    )
+    __table_args__ = (CheckConstraint("capacity >= 1", name="ck_properties_capacity_positive"),)
 
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
     host_id: Mapped[UUID] = mapped_column(
@@ -126,9 +123,6 @@ class Property(Base):
         default=CancellationPolicy.MODERATE,
     )
 
-    base_price_amount: Mapped[Decimal] = mapped_column(Numeric(19, 4), nullable=False)
-    base_price_currency: Mapped[str] = mapped_column(String(3), nullable=False)
-
     content_language: Mapped[str] = mapped_column(String(2), nullable=False, default="fr")
     status: Mapped[PropertyStatus] = mapped_column(
         Enum(
@@ -161,6 +155,28 @@ class Property(Base):
         back_populates="property",
         cascade="all, delete-orphan",
         order_by="PropertyMediaItem.position",
+    )
+    prices: Mapped[list["PropertyPrice"]] = relationship(
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+
+class PropertyPrice(Base):
+    __tablename__ = "property_prices"
+
+    id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
+    property_id: Mapped[UUID] = mapped_column(
+        Uuid(), ForeignKey("properties.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    currency: Mapped[str] = mapped_column(String(3), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Numeric(19, 4), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    __table_args__ = (
+        UniqueConstraint("property_id", "currency", name="uq_property_prices_property_currency"),
     )
 
 

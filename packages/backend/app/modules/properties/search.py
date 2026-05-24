@@ -1,6 +1,9 @@
 """Search query builder for properties. Translates the public filter
 shape (q, geo radius, capacity, price range, amenities, sort) into a
-SQLAlchemy query, and computes `distance_km` when a center is given."""
+SQLAlchemy query, and computes `distance_km` when a center is given.
+
+Price filters require a `currency` to be specified; without it, price
+filters and price-based sorting fall back to relevance/newest."""
 
 from dataclasses import dataclass
 from decimal import Decimal
@@ -13,7 +16,7 @@ from sqlalchemy import Select, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.modules.properties.models import Property, PropertyMediaItem, PropertyStatus
+from app.modules.properties.models import Property, PropertyMediaItem, PropertyPrice, PropertyStatus
 
 SortKey = Literal["relevance", "distance", "price_asc", "price_desc", "newest"]
 
@@ -29,6 +32,7 @@ class SearchFilters:
     guests: int | None = None
     min_price: Decimal | None = None
     max_price: Decimal | None = None
+    currency: str | None = None
     property_types: tuple[str, ...] = ()
     amenities: tuple[str, ...] = ()
     sort: SortKey = "relevance"
@@ -49,10 +53,17 @@ def _apply_filters(stmt: Select, f: SearchFilters):
         stmt = stmt.where(Property.country_code == f.country_code.upper())
     if f.guests is not None:
         stmt = stmt.where(Property.capacity >= f.guests)
-    if f.min_price is not None:
-        stmt = stmt.where(Property.base_price_amount >= f.min_price)
-    if f.max_price is not None:
-        stmt = stmt.where(Property.base_price_amount <= f.max_price)
+    if f.currency:
+        price_join = PropertyPrice.__table__
+        stmt = stmt.join(
+            price_join,
+            (price_join.c.property_id == Property.id)
+            & (price_join.c.currency == f.currency.upper()),
+        )
+        if f.min_price is not None:
+            stmt = stmt.where(price_join.c.amount >= f.min_price)
+        if f.max_price is not None:
+            stmt = stmt.where(price_join.c.amount <= f.max_price)
     if f.property_types:
         stmt = stmt.where(Property.property_type.in_(f.property_types))
     if f.amenities:
@@ -78,12 +89,17 @@ async def search(session: AsyncSession, f: SearchFilters) -> list[tuple[Property
         distance_expr = func.ST_Distance(Property.location, point)
         stmt = stmt.add_columns(distance_expr.label("distance_m"))
 
+    price_sort_available = f.currency is not None
+
     if f.sort == "distance" and distance_expr is not None:
         stmt = stmt.order_by(distance_expr.asc())
-    elif f.sort == "price_asc":
-        stmt = stmt.order_by(Property.base_price_amount.asc())
-    elif f.sort == "price_desc":
-        stmt = stmt.order_by(Property.base_price_amount.desc())
+    elif f.sort in ("price_asc", "price_desc") and price_sort_available:
+        price_join = PropertyPrice.__table__
+        price_col = price_join.c.amount
+        if f.sort == "price_asc":
+            stmt = stmt.order_by(price_col.asc())
+        else:
+            stmt = stmt.order_by(price_col.desc())
     elif f.sort == "newest":
         stmt = stmt.order_by(Property.published_at.desc().nulls_last())
     elif f.q:
