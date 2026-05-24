@@ -11,7 +11,13 @@ import {
 import { ExperienceGrid } from "@/features/experiences/components/experience-grid";
 import { SearchBar } from "@/features/properties/components/search-bar";
 import { ErrorState } from "@/shared/components/error-state";
-import { useT, type TranslationKey } from "@/shared/lib/i18n";
+import {
+  type Locale,
+  localeFromAcceptLanguage,
+  t as translate,
+  useT,
+  type TranslationKey,
+} from "@/shared/lib/i18n";
 import { cn } from "@/shared/lib/cn";
 import { serverFetch } from "@/shared/api/server";
 import { PUBLIC_CDN_CACHE } from "@/shared/lib/cache";
@@ -48,18 +54,24 @@ const EMPTY_KEY: Record<BrowseKind, TranslationKey> = {
   experiences: "browse.empty.experiences",
 };
 
-export const meta: Route.MetaFunction = ({ location }) => {
+export const meta: Route.MetaFunction = ({ location, data }) => {
+  const locale = data?.locale ?? "fr";
   const params = new URLSearchParams(location.search);
   const kind = parseKind(params.get("kind"));
   const q = params.get("q");
-  const sectionFR = kind === "experiences" ? "Expériences" : "Logements";
-  const title = q
-    ? `${sectionFR} pour « ${q} » — Ganitel`
-    : `${sectionFR} — Ganitel`;
-  const description =
+  const section = translate(
     kind === "experiences"
-      ? "Expériences à vivre au Cameroun, au Sénégal et en Côte d'Ivoire autour de nos logements ou en escapade."
-      : "Logements soigneusement sélectionnés à Douala, Yaoundé, Dakar, Abidjan et plus.";
+      ? "browse.section.experiences"
+      : "browse.section.stays",
+    locale,
+  );
+  const title = q ? `${section} « ${q} » — ganitel` : `${section} — ganitel`;
+  const description = translate(
+    kind === "experiences"
+      ? "browse.meta.description.experiences"
+      : "browse.meta.description.stays",
+    locale,
+  );
   const ogPath =
     kind === "experiences" ? "/og/experiences.png" : "/og/stays.png";
   const pathname = `/browse${kind === "experiences" ? "?kind=experiences" : ""}`;
@@ -67,6 +79,7 @@ export const meta: Route.MetaFunction = ({ location }) => {
     title,
     description,
     pathname,
+    locale,
     ogImage: { url: ogPath, alt: title },
   });
 };
@@ -76,6 +89,7 @@ type StaysData = {
   q: string | null;
   items: PropertyPublic[];
   total: number;
+  locale: Locale;
 };
 
 type ExperiencesData = {
@@ -83,6 +97,7 @@ type ExperiencesData = {
   q: string | null;
   items: ExperiencePublic[];
   total: number;
+  locale: Locale;
 };
 
 type LoaderData = StaysData | ExperiencesData;
@@ -92,6 +107,9 @@ export async function loader({
 }: Route.LoaderArgs): Promise<LoaderData> {
   const url = new URL(request.url);
   const kind = parseKind(url.searchParams.get("kind"));
+  const locale = localeFromAcceptLanguage(
+    request.headers.get("Accept-Language"),
+  );
   const params = new URLSearchParams();
   const q = url.searchParams.get("q");
   if (q) params.set("q", q);
@@ -102,9 +120,9 @@ export async function loader({
       const data = await serverFetch<ExperienceSearchOut>(
         `/experiences?${params.toString()}`,
       );
-      return { kind, q, items: data.items, total: data.total };
+      return { kind, q, items: data.items, total: data.total, locale };
     } catch {
-      return { kind, q, items: [], total: 0 };
+      return { kind, q, items: [], total: 0, locale };
     }
   }
 
@@ -112,9 +130,9 @@ export async function loader({
     const data = await serverFetch<SearchOut>(
       `/properties?${params.toString()}`,
     );
-    return { kind, q, items: data.items, total: data.total };
+    return { kind, q, items: data.items, total: data.total, locale };
   } catch {
-    return { kind, q, items: [], total: 0 };
+    return { kind, q, items: [], total: 0, locale };
   }
 }
 

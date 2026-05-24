@@ -3,8 +3,11 @@ import { ArrowDown, Play } from "lucide-react";
 import type { CSSProperties } from "react";
 
 import { useT } from "@/shared/lib/i18n";
-import type { PropertyPublic } from "@/features/properties/types";
-import { PropertyGrid } from "@/features/properties/components/property-grid";
+import {
+  PropertyGrid,
+  PropertyGridSkeleton,
+} from "@/features/properties/components/property-grid";
+import { useSearchProperties } from "@/features/properties/hooks";
 import { PillLink } from "@/shared/ui/pill-link";
 import { SectionHeader } from "@/shared/ui/section-header";
 import { useCalmMode } from "@/shared/hooks/use-connection";
@@ -24,11 +27,11 @@ const FEATURE_FALLBACK = "https://picsum.photos/seed/ganitelfeat/720/560";
 
 const ENTRANCE_EASE = [0.2, 0.7, 0.2, 1] as const;
 
-export function Landing({ items }: { items: PropertyPublic[] }) {
+export function Landing() {
   return (
     <>
       <Hero />
-      {items.length > 0 ? <FeaturedSection items={items} /> : null}
+      <FeaturedSection />
       <FinalCTA />
     </>
   );
@@ -47,8 +50,8 @@ function Hero() {
 
 function Stage() {
   const calm = useCalmMode();
-  const heroSrcSet = buildSrcSet(HERO_SOURCE, HERO_WIDTHS, 78);
-  const mobileSrc = transformImage(HERO_SOURCE, { width: 720, quality: 70 });
+  const heroSrcSet = buildSrcSet(HERO_SOURCE, HERO_WIDTHS, 70);
+  const mobileSrc = transformImage(HERO_SOURCE, { width: 720, quality: 65 });
 
   return (
     <div className="absolute inset-3 isolate overflow-hidden rounded-[18px] bg-[#14180f] md:inset-5 md:rounded-[22px]">
@@ -60,8 +63,8 @@ function Stage() {
         loading="eager"
         fetchPriority="high"
         decoding="async"
-        width={2000}
-        height={1333}
+        width={1440}
+        height={960}
         onError={(event) => {
           event.currentTarget.srcset = "";
           event.currentTarget.src = HERO_FALLBACK;
@@ -249,8 +252,14 @@ function ScrollHint() {
   );
 }
 
-function FeaturedSection({ items }: { items: PropertyPublic[] }) {
+function FeaturedSection() {
   const t = useT();
+  const { data, isLoading, isError } = useSearchProperties({ limit: 8 });
+  const items = data?.items ?? [];
+
+  if (isError) return null;
+  if (!isLoading && items.length === 0) return null;
+
   return (
     <section className="px-6 py-24 md:px-12 md:py-32">
       <SectionHeader
@@ -268,7 +277,11 @@ function FeaturedSection({ items }: { items: PropertyPublic[] }) {
         transition={{ duration: 0.8, delay: 0.1, ease: ENTRANCE_EASE }}
         className="mx-auto mt-16 max-w-7xl md:mt-20"
       >
-        <PropertyGrid items={items} />
+        {isLoading ? (
+          <PropertyGridSkeleton count={6} />
+        ) : (
+          <PropertyGrid items={items} />
+        )}
       </motion.div>
 
       <div className="mx-auto mt-12 flex max-w-7xl justify-center md:mt-16">

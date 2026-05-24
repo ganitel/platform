@@ -5,6 +5,10 @@ import type { Route } from "./+types/properties.$id";
 import { HostCard } from "@/features/properties/components/host-card";
 import { PropertyGallery } from "@/features/properties/components/property-gallery";
 import { BookingPanel } from "@/features/properties/components/booking-panel";
+import {
+  useAmenityLabel,
+  usePropertyTypeLabel,
+} from "@/features/reference/hooks";
 import { WaitlistPanel } from "@/features/waitlist/components/waitlist-panel";
 import { MobileDetailPanel } from "@/shared/components/mobile-detail-panel";
 import { ErrorState } from "@/shared/components/error-state";
@@ -12,7 +16,13 @@ import { Markdown } from "@/shared/components/markdown";
 import { serverFetch, ServerApiError } from "@/shared/api/server";
 import { PUBLIC_CDN_CACHE } from "@/shared/lib/cache";
 import { formatMoney } from "@/shared/lib/format";
-import { useLocale, useT } from "@/shared/lib/i18n";
+import {
+  localeFromAcceptLanguage,
+  t as translate,
+  useLocale,
+  useT,
+} from "@/shared/lib/i18n";
+import { pickPriceForLocale } from "@/shared/lib/price";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 import { seo, absoluteUrl } from "@/shared/lib/seo";
 import type { PropertyDetail } from "@/features/properties/types";
@@ -22,23 +32,27 @@ export const headers: Route.HeadersFunction = () => ({
 });
 
 export const meta: Route.MetaFunction = ({ data, params }) => {
+  const locale = data?.locale ?? "fr";
   if (!data?.property) {
     return seo({
-      title: "Logement introuvable — Ganitel",
-      description:
-        "Cette annonce n'est pas disponible. Découvrez nos autres logements sur Ganitel.",
+      title: translate("property.not_found.title", locale),
+      description: translate("property.not_found.description", locale),
       pathname: `/properties/${params.id ?? ""}`,
+      locale,
       noindex: true,
     });
   }
   const p = data.property;
-  const title = `${p.title} — ${p.city} | Ganitel`;
+  const title = `${p.title} — ${p.city} | ganitel`;
   const description = (
     p.description?.trim().slice(0, 160) ||
-    `${p.property_type} à ${p.city}, ${p.country_code}.`
+    translate("property.type_in_city", locale)
+      .replace("{type}", p.property_type)
+      .replace("{city}", p.city)
+      .replace("{country}", p.country_code)
   ).replace(/\s+/g, " ");
-  const ogImage = p.cover_photo?.url
-    ? { url: p.cover_photo.url, alt: p.title }
+  const ogImage = p.cover_media?.url
+    ? { url: p.cover_media.url, alt: p.title }
     : { url: "/og/stays.png", alt: p.title };
 
   const jsonLd = {
@@ -48,7 +62,7 @@ export const meta: Route.MetaFunction = ({ data, params }) => {
     name: p.title,
     description: p.description || undefined,
     url: absoluteUrl(`/properties/${p.id}`),
-    image: p.photos.map((m) => m.url),
+    image: p.media.map((m) => m.url),
     address: {
       "@type": "PostalAddress",
       addressLocality: p.city,
@@ -64,7 +78,10 @@ export const meta: Route.MetaFunction = ({ data, params }) => {
             longitude: p.location.lng,
           }
         : undefined,
-    priceRange: `${p.base_price.amount} ${p.base_price.currency}`,
+    priceRange:
+      p.prices.length > 0
+        ? `${p.prices[0].amount} ${p.prices[0].currency}`
+        : undefined,
     numberOfRooms: p.bedrooms,
     petsAllowed: undefined,
     amenityFeature: p.amenities.map((a) => ({
@@ -84,15 +101,20 @@ export const meta: Route.MetaFunction = ({ data, params }) => {
   });
 };
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
+  const locale = localeFromAcceptLanguage(
+    request.headers.get("Accept-Language"),
+  );
   try {
     const property = await serverFetch<PropertyDetail>(
       `/properties/${params.id}`,
     );
-    return { property };
+    return { property, locale };
   } catch (e) {
     if (e instanceof ServerApiError && e.status === 404) {
-      throw data("Logement introuvable", { status: 404 });
+      throw data(translate("property.not_found.short", locale), {
+        status: 404,
+      });
     }
     throw e;
   }
@@ -104,9 +126,12 @@ export default function PropertyDetailRoute({
   const { property } = loaderData;
   const t = useT();
   const locale = useLocale();
+  const propertyTypeLabel = usePropertyTypeLabel();
+  const amenityLabel = useAmenityLabel();
   const isPrelaunch = usePrelaunch();
 
-  const priceText = formatMoney(property.base_price, locale);
+  const pickedPrice = pickPriceForLocale(property.prices, locale);
+  const priceText = pickedPrice ? formatMoney(pickedPrice, locale) : "";
   const priceLabel = t("property.per_night");
 
   const panel = isPrelaunch ? (
@@ -114,7 +139,7 @@ export default function PropertyDetailRoute({
       itemId={property.id}
       kind="property"
       title={property.title}
-      price={property.base_price}
+      price={pickedPrice ?? { amount: "0", currency: "XAF" }}
       priceLabel={priceLabel}
     />
   ) : (
@@ -127,7 +152,7 @@ export default function PropertyDetailRoute({
         <header className="mb-5 flex flex-wrap items-start justify-between gap-4 md:mb-6">
           <div>
             <p className="text-[11px] uppercase tracking-[0.2em] text-ganitel-secondary">
-              {property.property_type}
+              {propertyTypeLabel(property.property_type)}
             </p>
             <h1 className="mt-2 font-infoma text-[28px] leading-[1.05] text-ganitel-text-title sm:text-3xl md:text-4xl">
               {property.title}
@@ -138,7 +163,7 @@ export default function PropertyDetailRoute({
           </div>
         </header>
 
-        <PropertyGallery photos={property.photos} title={property.title} />
+        <PropertyGallery photos={property.media} title={property.title} />
 
         <div className="mt-8 grid grid-cols-1 gap-8 md:mt-10 md:gap-10 lg:grid-cols-[1fr_360px]">
           <section className="space-y-8 md:space-y-10">
@@ -164,7 +189,9 @@ export default function PropertyDetailRoute({
               {property.description ? (
                 <Markdown source={property.description} />
               ) : (
-                <p className="text-sm text-ganitel-text-subtitle">—</p>
+                <p className="text-sm text-ganitel-text-subtitle">
+                  {t("common.dash")}
+                </p>
               )}
             </div>
 
@@ -175,9 +202,7 @@ export default function PropertyDetailRoute({
                 </h2>
                 <ul className="grid grid-cols-2 gap-y-2 text-sm text-ganitel-text-subtitle md:grid-cols-3">
                   {property.amenities.map((a) => (
-                    <li key={a} className="capitalize">
-                      {a.replace(/_/g, " ")}
-                    </li>
+                    <li key={a}>{amenityLabel(a)}</li>
                   ))}
                 </ul>
               </div>

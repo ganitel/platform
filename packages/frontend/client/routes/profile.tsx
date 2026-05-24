@@ -10,9 +10,10 @@ import {
   ServerApiError,
 } from "@/shared/api/server";
 import type { UserMe } from "@/features/auth/api/me";
+import { localeFromAcceptLanguage, t, useT } from "@/shared/lib/i18n";
 
-export const meta: Route.MetaFunction = () => [
-  { title: "Mon profil — Ganitel" },
+export const meta: Route.MetaFunction = ({ data }) => [
+  { title: t("profile.meta.title", data?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 
@@ -20,6 +21,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   if (import.meta.env.VITE_PRELAUNCH_MODE === "true") {
     return redirect("/");
   }
+  const locale = localeFromAcceptLanguage(
+    request.headers.get("Accept-Language"),
+  );
   const token = await getServerToken(request);
   const signInRedirect = () => {
     const url = new URL(request.url);
@@ -30,7 +34,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   if (!token) return signInRedirect();
   try {
     const me = await serverFetch<UserMe>("/me", { token });
-    return { me };
+    return { me, locale };
   } catch (error) {
     if (error instanceof ServerApiError && error.status === 401) {
       return signInRedirect();
@@ -40,6 +44,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function ProfileRoute({ loaderData }: Route.ComponentProps) {
+  const tr = useT();
   const { me } = loaderData;
   const initials = me.display_name
     .split(/\s+/)
@@ -48,6 +53,9 @@ export default function ProfileRoute({ loaderData }: Route.ComponentProps) {
     .slice(0, 2)
     .join("")
     .toUpperCase();
+
+  const yesNo = (value: boolean) =>
+    value ? tr("common.yes") : tr("common.no");
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-12 md:px-8">
@@ -63,7 +71,7 @@ export default function ProfileRoute({ loaderData }: Route.ComponentProps) {
             {me.display_name}
           </h1>
           <p className="text-sm text-ganitel-text-subtitle">
-            {me.email ?? me.phone ?? "—"}
+            {me.email ?? me.phone ?? tr("common.dash")}
           </p>
         </div>
       </div>
@@ -71,7 +79,7 @@ export default function ProfileRoute({ loaderData }: Route.ComponentProps) {
       <dl className="mt-10 grid grid-cols-1 gap-y-4 text-sm md:grid-cols-2">
         <div>
           <dt className="text-xs uppercase tracking-wide text-ganitel-text-subtitle">
-            Statut
+            {tr("profile.label.status")}
           </dt>
           <dd className="mt-1 capitalize text-ganitel-text-title">
             {me.status}
@@ -79,7 +87,7 @@ export default function ProfileRoute({ loaderData }: Route.ComponentProps) {
         </div>
         <div>
           <dt className="text-xs uppercase tracking-wide text-ganitel-text-subtitle">
-            Langue
+            {tr("profile.label.language")}
           </dt>
           <dd className="mt-1 uppercase text-ganitel-text-title">
             {me.language}
@@ -87,19 +95,15 @@ export default function ProfileRoute({ loaderData }: Route.ComponentProps) {
         </div>
         <div>
           <dt className="text-xs uppercase tracking-wide text-ganitel-text-subtitle">
-            Hôte
+            {tr("profile.label.host")}
           </dt>
-          <dd className="mt-1 text-ganitel-text-title">
-            {me.is_host ? "Oui" : "Non"}
-          </dd>
+          <dd className="mt-1 text-ganitel-text-title">{yesNo(me.is_host)}</dd>
         </div>
         <div>
           <dt className="text-xs uppercase tracking-wide text-ganitel-text-subtitle">
-            Admin
+            {tr("profile.label.admin")}
           </dt>
-          <dd className="mt-1 text-ganitel-text-title">
-            {me.is_admin ? "Oui" : "Non"}
-          </dd>
+          <dd className="mt-1 text-ganitel-text-title">{yesNo(me.is_admin)}</dd>
         </div>
       </dl>
     </div>

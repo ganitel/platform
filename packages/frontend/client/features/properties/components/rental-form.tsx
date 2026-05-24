@@ -15,7 +15,10 @@ import {
 } from "@/features/reference/api";
 import { LocationPicker } from "@/shared/components/location-picker";
 import { MarkdownEditor } from "@/shared/components/markdown-editor";
+import { MediaUploader } from "@/shared/components/media-uploader";
+import type { UploaderItem } from "@/shared/components/media-uploader.types";
 import { INPUT_CLASS, LABEL_CLASS } from "@/shared/lib/form-styles";
+import { useLocale, useT } from "@/shared/lib/i18n";
 import type { LocationPick } from "@/shared/lib/location";
 
 interface FormState {
@@ -42,8 +45,7 @@ interface FormState {
   check_out_time: string;
   house_rules: string;
   cancellation_policy: CancellationPolicy;
-  base_price_amount: string;
-  base_price_currency: string;
+  prices: { amount: string; currency: string }[];
   content_language: "fr" | "en";
 }
 
@@ -71,8 +73,7 @@ const BLANK: FormState = {
   check_out_time: "",
   house_rules: "",
   cancellation_policy: "moderate",
-  base_price_amount: "",
-  base_price_currency: "XAF",
+  prices: [{ amount: "", currency: "XAF" }],
   content_language: "fr",
 };
 
@@ -111,10 +112,17 @@ function fromDetail(d: PropertyDetail): FormState {
     check_out_time: trimTime(d.listing_metadata.check_out_time),
     house_rules: d.house_rules ?? "",
     cancellation_policy: d.cancellation_policy,
-    base_price_amount: d.base_price.amount,
-    base_price_currency: d.base_price.currency,
+    prices: d.prices.map((p) => ({ amount: p.amount, currency: p.currency })),
     content_language: (d.content_language as "fr" | "en") ?? "fr",
   };
+}
+
+interface RentalFormMediaState {
+  mode: "draft" | "listing";
+  draftId?: string;
+  listingId?: string;
+  items: UploaderItem[];
+  setItems: (next: UploaderItem[]) => void;
 }
 
 interface RentalFormProps {
@@ -124,6 +132,7 @@ interface RentalFormProps {
   isPending: boolean;
   error: unknown;
   onSubmit: (payload: PropertyCreateInput) => void;
+  mediaState: RentalFormMediaState;
 }
 
 export function RentalForm({
@@ -133,7 +142,10 @@ export function RentalForm({
   isPending,
   error,
   onSubmit,
+  mediaState,
 }: RentalFormProps) {
+  const tr = useT();
+  const locale = useLocale();
   const [form, setForm] = useState<FormState>(() =>
     initial ? fromDetail(initial) : BLANK,
   );
@@ -194,19 +206,28 @@ export function RentalForm({
       check_out_time: form.check_out_time || null,
       house_rules: form.house_rules || null,
       cancellation_policy: form.cancellation_policy,
-      base_price: {
-        amount: form.base_price_amount,
-        currency: form.base_price_currency,
-      },
+      prices: form.prices.map((p) => ({
+        amount: p.amount,
+        currency: p.currency,
+      })),
       content_language: form.content_language,
+      media_ids:
+        mediaState.mode === "draft"
+          ? mediaState.items
+              .filter((it) => it.mediaId !== null)
+              .map((it) => it.mediaId as string)
+          : undefined,
     };
     onSubmit(payload);
   }
 
+  const labelOf = (ref: { label_en: string; label_fr: string }) =>
+    locale === "en" ? ref.label_en : ref.label_fr;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <Section title="Informations">
-        <Field label="Titre">
+      <Section title={tr("admin.form.section.info")}>
+        <Field label={tr("admin.form.title.label")}>
           <input
             required
             minLength={3}
@@ -216,7 +237,7 @@ export function RentalForm({
             className={INPUT_CLASS}
           />
         </Field>
-        <Field label="Description">
+        <Field label={tr("admin.form.description.label")}>
           <MarkdownEditor
             rows={8}
             maxLength={10000}
@@ -224,22 +245,22 @@ export function RentalForm({
             onChange={(v) => update("description", v)}
           />
         </Field>
-        <Field label="Type">
+        <Field label={tr("admin.form.type.label")}>
           <select
             required
             value={form.property_type}
             onChange={(e) => update("property_type", e.target.value)}
             className={INPUT_CLASS}
           >
-            <option value="">— Choisir —</option>
+            <option value="">{tr("admin.form.select.placeholder")}</option>
             {propertyTypes.data?.map((p) => (
               <option key={p.code} value={p.code}>
-                {p.label_fr}
+                {labelOf(p)}
               </option>
             ))}
           </select>
         </Field>
-        <Field label="Langue du contenu">
+        <Field label={tr("admin.form.content_language.label")}>
           <select
             value={form.content_language}
             onChange={(e) =>
@@ -247,22 +268,22 @@ export function RentalForm({
             }
             className={INPUT_CLASS}
           >
-            <option value="fr">Français</option>
-            <option value="en">English</option>
+            <option value="fr">{tr("admin.form.lang.fr")}</option>
+            <option value="en">{tr("admin.form.lang.en")}</option>
           </select>
         </Field>
       </Section>
 
-      <Section title="Localisation">
+      <Section title={tr("admin.form.section.location")}>
         <LocationPicker
           initial={form.location}
           onChange={(pick) => update("location", pick)}
         />
       </Section>
 
-      <Section title="Capacité">
+      <Section title={tr("admin.form.section.capacity")}>
         <div className="grid grid-cols-4 gap-4">
-          <Field label="Voyageurs">
+          <Field label={tr("admin.form.capacity.label")}>
             <input
               required
               type="number"
@@ -273,7 +294,7 @@ export function RentalForm({
               className={INPUT_CLASS}
             />
           </Field>
-          <Field label="Chambres">
+          <Field label={tr("admin.form.bedrooms.label")}>
             <input
               type="number"
               min={0}
@@ -283,7 +304,7 @@ export function RentalForm({
               className={INPUT_CLASS}
             />
           </Field>
-          <Field label="Lits">
+          <Field label={tr("admin.form.beds.label")}>
             <input
               type="number"
               min={0}
@@ -293,7 +314,7 @@ export function RentalForm({
               className={INPUT_CLASS}
             />
           </Field>
-          <Field label="Salles de bain">
+          <Field label={tr("admin.form.bathrooms.label")}>
             <input
               type="number"
               min={0}
@@ -306,7 +327,7 @@ export function RentalForm({
         </div>
       </Section>
 
-      <Section title="Équipements">
+      <Section title={tr("admin.form.section.amenities")}>
         {amenities.data && (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {amenities.data.map((a) => (
@@ -316,13 +337,13 @@ export function RentalForm({
                   checked={form.amenities.has(a.code)}
                   onChange={() => toggleAmenity(a.code)}
                 />
-                {a.label_fr}
+                {labelOf(a)}
               </label>
             ))}
           </div>
         )}
         <div className="mt-4 grid grid-cols-2 gap-4">
-          <Field label="Parking">
+          <Field label={tr("admin.form.parking.label")}>
             <select
               value={form.parking_available}
               onChange={(e) =>
@@ -333,12 +354,12 @@ export function RentalForm({
               }
               className={INPUT_CLASS}
             >
-              <option value="none">Aucun</option>
-              <option value="free">Gratuit</option>
-              <option value="paid">Payant</option>
+              <option value="none">{tr("admin.form.parking.none")}</option>
+              <option value="free">{tr("admin.form.parking.free")}</option>
+              <option value="paid">{tr("admin.form.parking.paid")}</option>
             </select>
           </Field>
-          <Field label="Cuisine">
+          <Field label={tr("admin.form.kitchen.label")}>
             <select
               value={form.kitchen_type}
               onChange={(e) =>
@@ -346,34 +367,36 @@ export function RentalForm({
               }
               className={INPUT_CLASS}
             >
-              <option value="none">Aucune</option>
-              <option value="kitchenette">Kitchenette</option>
-              <option value="full">Cuisine complète</option>
+              <option value="none">{tr("admin.form.kitchen.none")}</option>
+              <option value="kitchenette">
+                {tr("admin.form.kitchen.kitchenette")}
+              </option>
+              <option value="full">{tr("admin.form.kitchen.full")}</option>
             </select>
           </Field>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
           <BoolField
-            label="Ascenseur"
+            label={tr("admin.form.bool.elevator")}
             checked={form.elevator}
             onChange={(v) => update("elevator", v)}
           />
           <BoolField
-            label="Accessible PMR"
+            label={tr("admin.form.bool.accessible")}
             checked={form.accessible}
             onChange={(v) => update("accessible", v)}
           />
           <BoolField
-            label="Salle de bain privée"
+            label={tr("admin.form.bool.private_bathroom")}
             checked={form.private_bathroom}
             onChange={(v) => update("private_bathroom", v)}
           />
         </div>
       </Section>
 
-      <Section title="Règles">
+      <Section title={tr("admin.form.section.rules")}>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Arrivée">
+          <Field label={tr("admin.form.check_in.label")}>
             <input
               type="time"
               value={form.check_in_time}
@@ -381,7 +404,7 @@ export function RentalForm({
               className={INPUT_CLASS}
             />
           </Field>
-          <Field label="Départ">
+          <Field label={tr("admin.form.check_out.label")}>
             <input
               type="time"
               value={form.check_out_time}
@@ -392,32 +415,32 @@ export function RentalForm({
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
           <BoolField
-            label="Animaux"
+            label={tr("admin.form.bool.pets")}
             checked={form.pets_allowed}
             onChange={(v) => update("pets_allowed", v)}
           />
           <BoolField
-            label="Fumeur"
+            label={tr("admin.form.bool.smoking")}
             checked={form.smoking_allowed}
             onChange={(v) => update("smoking_allowed", v)}
           />
           <BoolField
-            label="Événements"
+            label={tr("admin.form.bool.events")}
             checked={form.events_allowed}
             onChange={(v) => update("events_allowed", v)}
           />
           <BoolField
-            label="Familles bienvenues"
+            label={tr("admin.form.bool.family_friendly")}
             checked={form.family_friendly}
             onChange={(v) => update("family_friendly", v)}
           />
           <BoolField
-            label="Enfants bienvenus"
+            label={tr("admin.form.bool.child_friendly")}
             checked={form.child_friendly}
             onChange={(v) => update("child_friendly", v)}
           />
         </div>
-        <Field label="Règles libres">
+        <Field label={tr("admin.form.house_rules.label")}>
           <textarea
             rows={3}
             maxLength={4000}
@@ -426,7 +449,7 @@ export function RentalForm({
             className={INPUT_CLASS}
           />
         </Field>
-        <Field label="Politique d’annulation">
+        <Field label={tr("admin.form.cancellation.label")}>
           <select
             value={form.cancellation_policy}
             onChange={(e) =>
@@ -439,46 +462,105 @@ export function RentalForm({
           >
             {policies.data?.map((p) => (
               <option key={p.code} value={p.code}>
-                {p.label_fr}
+                {labelOf(p)}
               </option>
             ))}
           </select>
         </Field>
       </Section>
 
-      <Section title="Tarif">
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Prix par nuit">
-            <input
-              required
-              type="number"
-              min={0}
-              step="0.01"
-              value={form.base_price_amount}
-              onChange={(e) => update("base_price_amount", e.target.value)}
-              className={INPUT_CLASS}
-            />
-          </Field>
-          <Field label="Devise">
-            <select
-              value={form.base_price_currency}
-              onChange={(e) => update("base_price_currency", e.target.value)}
-              className={INPUT_CLASS}
-            >
-              <option value="XAF">XAF</option>
-              <option value="XOF">XOF</option>
-              <option value="EUR">EUR</option>
-              <option value="USD">USD</option>
-            </select>
-          </Field>
+      <Section title={tr("admin.form.section.price")}>
+        <div className="space-y-2">
+          {form.prices.map((p, idx) => (
+            <div key={idx} className="flex items-end gap-2">
+              <Field label={tr("admin.form.price.amount")}>
+                <input
+                  type="number"
+                  required
+                  min={0}
+                  step="any"
+                  value={p.amount}
+                  onChange={(e) => {
+                    const next = [...form.prices];
+                    next[idx] = { ...next[idx], amount: e.target.value };
+                    update("prices", next);
+                  }}
+                  className={INPUT_CLASS}
+                />
+              </Field>
+              <Field label={tr("admin.form.price.currency")}>
+                <select
+                  value={p.currency}
+                  onChange={(e) => {
+                    const next = [...form.prices];
+                    next[idx] = { ...next[idx], currency: e.target.value };
+                    update("prices", next);
+                  }}
+                  className={INPUT_CLASS}
+                >
+                  <option value="XAF">XAF</option>
+                  <option value="XOF">XOF</option>
+                  <option value="EUR">EUR</option>
+                  <option value="USD">USD</option>
+                </select>
+              </Field>
+              {form.prices.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    update(
+                      "prices",
+                      form.prices.filter((_, i) => i !== idx),
+                    );
+                  }}
+                  className="cursor-pointer rounded border px-3 py-2 text-sm"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              update("prices", [
+                ...form.prices,
+                { amount: "", currency: "XAF" },
+              ]);
+            }}
+            className="cursor-pointer rounded-md border border-dashed px-4 py-2 text-sm"
+          >
+            {tr("admin.form.price.add")}
+          </button>
         </div>
       </Section>
 
       {error != null && (
         <p className="text-sm text-red-600">
-          Erreur: {error instanceof Error ? error.message : String(error)}
+          {tr("common.error_prefix")}
+          {": "}
+          {error instanceof Error ? error.message : String(error)}
         </p>
       )}
+
+      <Section title={tr("admin.form.section.media")}>
+        <MediaUploader
+          {...(mediaState.mode === "draft"
+            ? {
+                mode: "draft",
+                draftId: mediaState.draftId as string,
+                value: mediaState.items,
+                onChange: mediaState.setItems,
+              }
+            : {
+                mode: "listing",
+                listingKind: "property",
+                listingId: mediaState.listingId as string,
+                value: mediaState.items,
+                onChange: mediaState.setItems,
+              })}
+        />
+      </Section>
 
       <div className="flex items-center justify-end gap-3">
         <button

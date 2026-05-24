@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { getSupabase, type Session } from "@/lib/supabase";
+import { useT } from "@/shared/lib/i18n";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import {
   DropdownMenu,
@@ -16,6 +17,7 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ session }: UserMenuProps) {
+  const tr = useT();
   const navigate = useNavigate();
   const [signingOut, setSigningOut] = useState(false);
 
@@ -48,7 +50,7 @@ export function UserMenu({ session }: UserMenuProps) {
         <button
           type="button"
           disabled={signingOut}
-          aria-label="Compte"
+          aria-label={tr("auth.menu.aria")}
           className="rounded-full ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ganitel-primary"
         >
           <Avatar className="size-8">
@@ -60,17 +62,17 @@ export function UserMenu({ session }: UserMenuProps) {
 
       <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuItem asChild>
-          <Link to="/profile">Mon profil</Link>
+          <Link to="/profile">{tr("nav.profile")}</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/bookings">Mes réservations</Link>
+          <Link to="/bookings">{tr("nav.bookings")}</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={handleSignOut}
           className="text-red-600 focus:text-red-600"
         >
-          {signingOut ? "Déconnexion…" : "Se déconnecter"}
+          {signingOut ? tr("common.loading") : tr("common.signout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,14 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 
 import {
+  listAmenities,
   listExperienceTypes,
   listPropertyTypes,
+  type AmenityRef,
   type ExperienceTypeRef,
   type PropertyTypeRef,
 } from "@/features/reference/api";
 import { useLocale, type Locale } from "@/shared/lib/i18n";
 
-type Ref = PropertyTypeRef | ExperienceTypeRef;
+type Ref = PropertyTypeRef | ExperienceTypeRef | AmenityRef;
 
 function labelOf(ref: Ref, locale: Locale): string {
   return locale === "en" ? ref.label_en : ref.label_fr;
@@ -43,5 +45,18 @@ export function useExperienceTypeLabel(): (code: string) => string {
   return (code: string) => {
     const match = data?.find((r) => r.code === code);
     return match ? labelOf(match, locale) : code;
+  };
+}
+
+export function useAmenityLabel(): (code: string) => string {
+  const locale = useLocale();
+  const { data } = useQuery({
+    queryKey: ["reference", "amenities"],
+    queryFn: listAmenities,
+    staleTime: 5 * 60 * 1000,
+  });
+  return (code: string) => {
+    const match = data?.find((r) => r.code === code);
+    return match ? labelOf(match, locale) : code.replace(/_/g, " ");
   };
 }

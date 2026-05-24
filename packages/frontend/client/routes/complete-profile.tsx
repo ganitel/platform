@@ -16,13 +16,17 @@ import {
 import type { UserMe } from "@/features/auth/api/me";
 import { apiClient } from "@/shared/api/client";
 import { getSupabase } from "@/lib/supabase";
+import { localeFromAcceptLanguage, t, useT } from "@/shared/lib/i18n";
 
-export const meta: Route.MetaFunction = () => [
-  { title: "Compléter votre profil — Ganitel" },
+export const meta: Route.MetaFunction = ({ data }) => [
+  { title: t("complete_profile.meta.title", data?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 
 export async function loader({ request }: Route.LoaderArgs) {
+  const locale = localeFromAcceptLanguage(
+    request.headers.get("Accept-Language"),
+  );
   const token = await getServerToken(request);
   if (!token) return redirect("/sign-in");
   try {
@@ -35,10 +39,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     // Non-auth failure: render the form so the user can still attempt PATCH /me
     // and see the real error rather than an opaque 500.
   }
-  return null;
+  return { locale };
 }
 
 export default function CompleteProfilePage() {
+  const tr = useT();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -55,21 +60,24 @@ export default function CompleteProfilePage() {
       await getSupabase().auth.updateUser({ data: { name: trimmed } });
       navigate("/");
     } catch {
-      setError("Une erreur s'est produite. Réessayez.");
+      setError(tr("common.error.generic"));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <AuthLayout title="Presque prêt" subtitle="Votre profil">
+    <AuthLayout
+      title={tr("complete_profile.title")}
+      subtitle={tr("complete_profile.subtitle")}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="name">Votre nom complet</Label>
+          <Label htmlFor="name">{tr("complete_profile.full_name.label")}</Label>
           <Input
             id="name"
             type="text"
-            placeholder="Ex. Daniel Mvondo"
+            placeholder={tr("complete_profile.full_name.placeholder")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -84,7 +92,9 @@ export default function CompleteProfilePage() {
           disabled={loading || !name.trim()}
           className="h-11 w-full rounded-xl bg-ganitel-primary text-ganitel-text-button hover:bg-ganitel-primary/90"
         >
-          {loading ? "Enregistrement…" : "Continuer"}
+          {loading
+            ? tr("complete_profile.submitting")
+            : tr("complete_profile.submit")}
         </Button>
       </form>
     </AuthLayout>
