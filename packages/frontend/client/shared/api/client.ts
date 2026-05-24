@@ -1,5 +1,5 @@
 /**
- * Tiny fetch-based HTTP client for the Ganitel backend.
+ * Tiny fetch-based HTTP client for the ganitel backend.
  *
  * Mirrors the small slice of axios we were using (`.get/.post/.patch/.delete`,
  * `{ data }` response shape, an `ApiError` thrown on non-2xx). Auth: a Supabase

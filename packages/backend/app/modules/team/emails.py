@@ -109,7 +109,7 @@ async def notify_admins(
     tokenized link so each email contains the recipient's specific token."""
     if not admin_emails:
         return 0, 0
-    subject = f"Ganitel — new team-member submission: {member.name}"
+    subject = f"ganitel — new team-member submission: {member.name}"
     loop = asyncio.get_running_loop()
 
     async def send_one(admin: str) -> bool:
