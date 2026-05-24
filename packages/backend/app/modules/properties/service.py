@@ -8,7 +8,7 @@ from uuid import UUID
 
 from geoalchemy2.shape import from_shape, to_shape
 from shapely.geometry import Point
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -18,7 +18,7 @@ from app.modules.media.models import Media, MediaKind
 from app.modules.media.schemas import MediaItemPublic, MediaPublic
 from app.modules.media.service import load_poster
 from app.modules.media.service import to_public as media_to_public
-from app.modules.properties.models import Property, PropertyMediaItem, PropertyStatus
+from app.modules.properties.models import Property, PropertyMediaItem, PropertyPrice, PropertyStatus
 from app.modules.properties.schemas import (
     AdminStatusSummary,
     GeoPoint,
@@ -159,13 +159,20 @@ async def create_draft(session: AsyncSession, host: User, payload: PropertyCreat
         check_out_time=payload.check_out_time,
         house_rules=payload.house_rules,
         cancellation_policy=payload.cancellation_policy,
-        base_price_amount=payload.base_price.amount,
-        base_price_currency=payload.base_price.currency.value,
         content_language=payload.content_language,
         status=PropertyStatus.DRAFT,
     )
     session.add(prop)
     await session.flush()
+
+    for price in payload.prices:
+        session.add(
+            PropertyPrice(
+                property_id=prop.id,
+                currency=price.currency.value,
+                amount=price.amount,
+            )
+        )
 
     if payload.media_ids:
         for idx, media_id in enumerate(payload.media_ids):
@@ -188,10 +195,19 @@ async def update(
         property.location = _point(GeoPoint(**data.pop("location")))
     if "country_code" in data and data["country_code"] is not None:
         property.country_code = data.pop("country_code").upper()
-    if "base_price" in data and data["base_price"] is not None:
-        new_price = data.pop("base_price")
-        property.base_price_amount = new_price["amount"]
-        property.base_price_currency = new_price["currency"]
+    if "prices" in data and data["prices"] is not None:
+        new_prices = data.pop("prices")
+        await session.execute(delete(PropertyPrice).where(PropertyPrice.property_id == property.id))
+        await session.flush()
+        for raw in new_prices:
+            price = Money.model_validate(raw)
+            session.add(
+                PropertyPrice(
+                    property_id=property.id,
+                    currency=price.currency.value,
+                    amount=price.amount,
+                )
+            )
     for k, v in data.items():
         setattr(property, k, v)
     await session.commit()
@@ -204,8 +220,8 @@ async def publish(session: AsyncSession, property: Property, user: User) -> Prop
     issues: dict[str, str] = {}
     if not property.title.strip():
         issues["title"] = "missing"
-    if property.base_price_amount is None or property.base_price_amount <= 0:
-        issues["base_price_amount"] = "not_positive"
+    if not property.prices:
+        issues["prices"] = "empty"
     if not property.media:
         issues["media"] = "empty"
     if issues:
@@ -355,9 +371,7 @@ async def to_detail(session: AsyncSession, property: Property, host: User) -> Pr
         bedrooms=property.bedrooms,
         beds=property.beds,
         bathrooms=property.bathrooms,
-        base_price=Money(
-            amount=property.base_price_amount, currency=Currency(property.base_price_currency)
-        ),
+        prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in property.prices],
         amenities=list(property.amenities),
         showcase_amenities=_showcase_amenities(property),
         listing_metadata=_listing_metadata(property),
@@ -382,9 +396,7 @@ async def to_admin_list_item(session: AsyncSession, property: Property) -> Prope
         city=property.city,
         country_code=property.country_code,
         status=property.status,
-        base_price=Money(
-            amount=property.base_price_amount, currency=Currency(property.base_price_currency)
-        ),
+        prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in property.prices],
         cover_media=await _cover(session, property.media),
         created_at=property.created_at,
         published_at=property.published_at,
@@ -406,9 +418,7 @@ async def to_public(
         bedrooms=property.bedrooms,
         beds=property.beds,
         bathrooms=property.bathrooms,
-        base_price=Money(
-            amount=property.base_price_amount, currency=Currency(property.base_price_currency)
-        ),
+        prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in property.prices],
         amenities=list(property.amenities),
         showcase_amenities=_showcase_amenities(property),
         listing_metadata=_listing_metadata(property),

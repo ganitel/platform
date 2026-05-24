@@ -1,6 +1,6 @@
 """SQLAlchemy ORM models for experiences: the listing itself, its media
-join table (`ExperienceMediaItem`), and enums (`ExperienceStatus`,
-`ExperienceCancellationPolicy`).
+join table (`ExperienceMediaItem`), price table (`ExperiencePrice`), and
+enums (`ExperienceStatus`, `ExperienceCancellationPolicy`).
 
 Experiences are time-bounded activities (tours, workshops, sound baths,
 boat trips, …). Distinct from `Property` — different shape (no
@@ -24,6 +24,7 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
+    UniqueConstraint,
     Uuid,
     func,
 )
@@ -52,7 +53,6 @@ class Experience(Base):
     __table_args__ = (
         CheckConstraint("capacity >= 1", name="ck_experiences_capacity_positive"),
         CheckConstraint("duration_minutes >= 1", name="ck_experiences_duration_positive"),
-        CheckConstraint("base_price_amount >= 0", name="ck_experiences_price_non_negative"),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
@@ -73,9 +73,6 @@ class Experience(Base):
 
     capacity: Mapped[int] = mapped_column(Integer, nullable=False)
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
-
-    base_price_amount: Mapped[Decimal] = mapped_column(Numeric(19, 4), nullable=False)
-    base_price_currency: Mapped[str] = mapped_column(String(3), nullable=False)
 
     cancellation_policy: Mapped[ExperienceCancellationPolicy] = mapped_column(
         Enum(
@@ -119,6 +116,30 @@ class Experience(Base):
         back_populates="experience",
         cascade="all, delete-orphan",
         order_by="ExperienceMediaItem.position",
+    )
+    prices: Mapped[list["ExperiencePrice"]] = relationship(
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+
+class ExperiencePrice(Base):
+    __tablename__ = "experience_prices"
+
+    id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
+    experience_id: Mapped[UUID] = mapped_column(
+        Uuid(), ForeignKey("experiences.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    currency: Mapped[str] = mapped_column(String(3), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Numeric(19, 4), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    __table_args__ = (
+        UniqueConstraint(
+            "experience_id", "currency", name="uq_experience_prices_experience_currency"
+        ),
     )
 
 

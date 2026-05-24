@@ -97,7 +97,7 @@ async def test_create_property_with_media_attaches_in_order(db_session):
         country_code="CM",
         location=GeoPoint(lat=4.05, lng=9.7),
         capacity=4,
-        base_price=Money(amount=Decimal("50000"), currency=Currency.XAF),
+        prices=[Money(amount=Decimal("50000"), currency=Currency.XAF)],
         media_ids=[img1.id, vid.id, img2.id],
     )
 

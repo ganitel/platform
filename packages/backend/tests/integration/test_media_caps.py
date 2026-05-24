@@ -24,7 +24,7 @@ async def test_cannot_attach_21st_item(db_session):
         country_code="CM",
         location=GeoPoint(lat=4, lng=9),
         capacity=2,
-        base_price=Money(amount=Decimal("1"), currency=Currency.XAF),
+        prices=[Money(amount=Decimal("1"), currency=Currency.XAF)],
         media_ids=[m.id for m in medias],
     )
     prop = await prop_service.create_draft(db_session, user, payload)
@@ -52,7 +52,7 @@ async def test_cannot_attach_4th_video(db_session):
         country_code="CM",
         location=GeoPoint(lat=4, lng=9),
         capacity=2,
-        base_price=Money(amount=Decimal("1"), currency=Currency.XAF),
+        prices=[Money(amount=Decimal("1"), currency=Currency.XAF)],
         media_ids=[v.id for v in vids],
     )
     prop = await prop_service.create_draft(db_session, user, payload)

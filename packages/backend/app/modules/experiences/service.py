@@ -10,7 +10,7 @@ from uuid import UUID
 
 from geoalchemy2.shape import from_shape, to_shape
 from shapely.geometry import Point
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -19,6 +19,7 @@ from app.core.money import Currency, Money
 from app.modules.experiences.models import (
     Experience,
     ExperienceMediaItem,
+    ExperiencePrice,
     ExperienceStatus,
 )
 from app.modules.experiences.schemas import (
@@ -87,13 +88,20 @@ async def create_draft(
         capacity=payload.capacity,
         duration_minutes=payload.duration_minutes,
         cancellation_policy=payload.cancellation_policy,
-        base_price_amount=payload.base_price.amount,
-        base_price_currency=payload.base_price.currency.value,
         content_language=payload.content_language,
         status=ExperienceStatus.DRAFT,
     )
     session.add(exp)
     await session.flush()
+
+    for price in payload.prices:
+        session.add(
+            ExperiencePrice(
+                experience_id=exp.id,
+                currency=price.currency.value,
+                amount=price.amount,
+            )
+        )
 
     if payload.media_ids:
         for idx, media_id in enumerate(payload.media_ids):
@@ -119,10 +127,21 @@ async def update(
         experience.location = _point(GeoPoint(**data.pop("location")))
     if "country_code" in data and data["country_code"] is not None:
         experience.country_code = data.pop("country_code").upper()
-    if "base_price" in data and data["base_price"] is not None:
-        new_price = data.pop("base_price")
-        experience.base_price_amount = new_price["amount"]
-        experience.base_price_currency = new_price["currency"]
+    if "prices" in data and data["prices"] is not None:
+        new_prices = data.pop("prices")
+        await session.execute(
+            delete(ExperiencePrice).where(ExperiencePrice.experience_id == experience.id)
+        )
+        await session.flush()
+        for raw in new_prices:
+            price = Money.model_validate(raw)
+            session.add(
+                ExperiencePrice(
+                    experience_id=experience.id,
+                    currency=price.currency.value,
+                    amount=price.amount,
+                )
+            )
     for k, v in data.items():
         setattr(experience, k, v)
     await session.commit()
@@ -135,8 +154,8 @@ async def publish(session: AsyncSession, experience: Experience, user: User) -> 
     issues: dict[str, str] = {}
     if not experience.title.strip():
         issues["title"] = "missing"
-    if experience.base_price_amount is None or experience.base_price_amount <= 0:
-        issues["base_price_amount"] = "not_positive"
+    if not experience.prices:
+        issues["prices"] = "empty"
     if not experience.media:
         issues["media"] = "empty"
     if issues:
@@ -283,10 +302,7 @@ async def to_public(
         location=_point_out(experience.location),
         capacity=experience.capacity,
         duration_minutes=experience.duration_minutes,
-        base_price=Money(
-            amount=experience.base_price_amount,
-            currency=Currency(experience.base_price_currency),
-        ),
+        prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in experience.prices],
         cover_media=await _cover(session, experience.media),
         distance_km=distance_km,
     )
@@ -304,10 +320,7 @@ async def to_detail(session: AsyncSession, experience: Experience, host: User) -
         location=_point_out(experience.location),
         capacity=experience.capacity,
         duration_minutes=experience.duration_minutes,
-        base_price=Money(
-            amount=experience.base_price_amount,
-            currency=Currency(experience.base_price_currency),
-        ),
+        prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in experience.prices],
         cover_media=media_items[0] if media_items else None,
         description=experience.description,
         cancellation_policy=experience.cancellation_policy,
@@ -331,10 +344,7 @@ async def to_admin_list_item(
         country_code=experience.country_code,
         status=experience.status,
         duration_minutes=experience.duration_minutes,
-        base_price=Money(
-            amount=experience.base_price_amount,
-            currency=Currency(experience.base_price_currency),
-        ),
+        prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in experience.prices],
         cover_media=await _cover(session, experience.media),
         created_at=experience.created_at,
         published_at=experience.published_at,

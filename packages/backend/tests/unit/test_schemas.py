@@ -32,6 +32,7 @@ def _booking(**overrides: Any) -> dict[str, Any]:
         "check_in_date": today + timedelta(days=1),
         "check_out_date": today + timedelta(days=4),
         "guest_count": 2,
+        "currency": "XAF",
     }
     base.update(overrides)
     return base
@@ -100,7 +101,7 @@ def _property(**overrides: Any) -> dict[str, Any]:
         "beds": 1,
         "bathrooms": 1,
         "amenities": ["wifi", "ac"],
-        "base_price": Money(amount=Decimal("38000"), currency=Currency.XAF),
+        "prices": [Money(amount=Decimal("38000"), currency=Currency.XAF)],
     }
     base.update(overrides)
     return base
@@ -138,6 +139,30 @@ def test_property_rejects_unknown_content_language() -> None:
 def test_property_amenities_cap() -> None:
     with pytest.raises(ValidationError):
         PropertyCreateIn.model_validate(_property(amenities=[f"a{i}" for i in range(65)]))
+
+
+def test_property_rejects_duplicate_currencies_in_prices() -> None:
+    with pytest.raises(ValidationError, match="duplicate currencies"):
+        PropertyCreateIn.model_validate(
+            _property(
+                prices=[
+                    Money(amount=Decimal("38000"), currency=Currency.XAF),
+                    Money(amount=Decimal("60"), currency=Currency.XAF),
+                ]
+            )
+        )
+
+
+def test_property_accepts_multiple_currencies_in_prices() -> None:
+    p = PropertyCreateIn.model_validate(
+        _property(
+            prices=[
+                Money(amount=Decimal("38000"), currency=Currency.XAF),
+                Money(amount=Decimal("60"), currency=Currency.USD),
+            ]
+        )
+    )
+    assert len(p.prices) == 2
 
 
 def test_property_update_accepts_empty_patch() -> None:

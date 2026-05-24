@@ -28,7 +28,7 @@ async def test_reorder_rejects_partial_set(db_session):
             country_code="CM",
             location=GeoPoint(lat=4, lng=9),
             capacity=2,
-            base_price=Money(amount=Decimal("1"), currency=Currency.XAF),
+            prices=[Money(amount=Decimal("1"), currency=Currency.XAF)],
             media_ids=[m.id for m in medias],
         ),
     )
@@ -64,7 +64,7 @@ async def test_delete_draft_skips_attached(db_session):
             country_code="CM",
             location=GeoPoint(lat=4, lng=9),
             capacity=2,
-            base_price=Money(amount=Decimal("1"), currency=Currency.XAF),
+            prices=[Money(amount=Decimal("1"), currency=Currency.XAF)],
             media_ids=[attached.id],
         ),
     )
