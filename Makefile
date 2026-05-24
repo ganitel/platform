@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 .PHONY: install install-hooks dev dev-backend dev-frontend \
-        db-revision db-upgrade db-downgrade seed \
+        db-revision db-upgrade db-downgrade seed sweep-media \
         test test-backend test-frontend \
         lint format typecheck check precommit build login help
 
@@ -63,6 +63,9 @@ db-downgrade: ## Roll back one migration
 
 seed: ## Seed local DB with ~5 demo hosts + ~10 properties + ~6 experiences (idempotent)
 	cd packages/backend && uv run python -m scripts.seed_demo
+
+sweep-media: ## Sweep orphan draft media (unattached, older than 24h) from S3 + DB
+	cd packages/backend && uv run python -m scripts.sweep_orphan_media
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
 
