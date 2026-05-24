@@ -81,3 +81,56 @@ async def test_delete_draft_skips_attached(db_session):
     assert await db_session.get(Media, attached.id) is not None
     # Unattached one gone
     assert await db_session.get(Media, unattached.id) is None
+
+
+@pytest.mark.asyncio
+async def test_delete_draft_keeps_poster_for_attached_video(db_session):
+    """Video posters are live assets when their video is attached to a listing."""
+    user = await _seed_user(db_session)
+    draft_id = uuid4()
+    poster = await _request_upload(
+        db_session, user, kind="image", mime="image/jpeg", draft_id=draft_id
+    )
+    attached_video = await _request_upload(
+        db_session,
+        user,
+        kind="video",
+        mime="video/mp4",
+        draft_id=draft_id,
+        duration_ms=10_000,
+        poster_media_id=poster.id,
+    )
+    unattached = await _request_upload(
+        db_session, user, kind="image", mime="image/jpeg", draft_id=draft_id
+    )
+    await prop_service.create_draft(
+        db_session,
+        user,
+        PropertyCreateIn(
+            title="test",
+            property_type="villa",
+            city="Douala",
+            country_code="CM",
+            location=GeoPoint(lat=4, lng=9),
+            capacity=2,
+            prices=[Money(amount=Decimal("1"), currency=Currency.XAF)],
+            media_ids=[attached_video.id],
+        ),
+    )
+
+    from unittest.mock import AsyncMock, MagicMock, patch
+
+    cm = MagicMock()
+    client = AsyncMock()
+    cm.__aenter__ = AsyncMock(return_value=client)
+    cm.__aexit__ = AsyncMock(return_value=None)
+    with patch("app.core.storage.s3_client", return_value=cm):
+        deleted = await delete_unattached_draft(db_session, user, draft_id)
+
+    assert deleted == 1
+    client.delete_objects.assert_awaited_once()
+    deleted_keys = client.delete_objects.await_args.kwargs["Delete"]["Objects"]
+    assert deleted_keys == [{"Key": unattached.key}]
+    assert await db_session.get(Media, attached_video.id) is not None
+    assert await db_session.get(Media, poster.id) is not None
+    assert await db_session.get(Media, unattached.id) is None

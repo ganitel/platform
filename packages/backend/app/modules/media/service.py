@@ -4,8 +4,10 @@ and the `to_public` mapper used by callers (listing media, avatars, …)."""
 from typing import cast
 from uuid import UUID, uuid4
 
-from sqlalchemy import exists, select
+from sqlalchemy import exists, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
+from sqlalchemy.sql.elements import ColumnElement
 
 from app.core.config import get_settings
 from app.core.storage import presign_put, public_url
@@ -73,13 +75,32 @@ async def load_poster(session: AsyncSession, media: Media) -> Media | None:
     return await session.get(Media, media.poster_media_id)
 
 
-async def delete_unattached_draft(session: AsyncSession, user: User, draft_id: UUID) -> int:
-    """Delete media tagged with this draft_id that is NOT referenced by any
-    listing media. Returns the number of rows deleted. Idempotent."""
-    from sqlalchemy import delete
-
+def unattached_draft_media_predicates() -> tuple[ColumnElement[bool], ...]:
+    """Predicates for draft media that are safe to delete as unattached."""
     from app.modules.experiences.models import ExperienceMediaItem
     from app.modules.properties.models import PropertyMediaItem
+
+    media_using_poster = aliased(Media)
+    poster_used_by_attached_media = exists().where(
+        media_using_poster.poster_media_id == Media.id,
+        or_(
+            exists().where(PropertyMediaItem.media_id == media_using_poster.id),
+            exists().where(ExperienceMediaItem.media_id == media_using_poster.id),
+        ),
+    )
+
+    return (
+        ~exists().where(PropertyMediaItem.media_id == Media.id),
+        ~exists().where(ExperienceMediaItem.media_id == Media.id),
+        ~poster_used_by_attached_media,
+    )
+
+
+async def delete_unattached_draft(session: AsyncSession, user: User, draft_id: UUID) -> int:
+    """Delete media tagged with this draft_id that is NOT referenced by any
+    listing media or as a poster by attached media. Returns the number of rows
+    deleted. Idempotent."""
+    from sqlalchemy import delete
 
     rows = (
         (
@@ -87,8 +108,7 @@ async def delete_unattached_draft(session: AsyncSession, user: User, draft_id: U
                 select(Media).where(
                     Media.draft_id == draft_id,
                     Media.owner_user_id == user.id,
-                    ~exists().where(PropertyMediaItem.media_id == Media.id),
-                    ~exists().where(ExperienceMediaItem.media_id == Media.id),
+                    *unattached_draft_media_predicates(),
                 )
             )
         )
