@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link, NavLink } from "react-router";
 import { Compass, Home, LayoutGrid, LogOut, Sparkles } from "lucide-react";
 
+import { Header } from "@/shared/components/header";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { cn } from "@/shared/lib/cn";
 
@@ -46,6 +47,7 @@ export function AdminShell({
 }: AdminShellProps) {
   return (
     <div className="min-h-screen bg-ganitel-paper">
+      <Header />
       <div className="mx-auto flex max-w-[1400px] gap-8 px-4 py-8 lg:px-8">
         <AdminSidebar />
         <main className="min-w-0 flex-1">
