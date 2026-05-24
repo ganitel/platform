@@ -28,7 +28,12 @@ class Media(Base):
     bucket: Mapped[str] = mapped_column(String(120), nullable=False)
     key: Mapped[str] = mapped_column(String(512), nullable=False)
     kind: Mapped[MediaKind] = mapped_column(
-        Enum(MediaKind, name="media_kind", native_enum=True),
+        Enum(
+            MediaKind,
+            name="media_kind",
+            native_enum=True,
+            values_callable=lambda e: [x.value for x in e],
+        ),
         nullable=False,
         default=MediaKind.IMAGE,
     )
