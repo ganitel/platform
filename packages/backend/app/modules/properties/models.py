@@ -1,5 +1,5 @@
-"""SQLAlchemy ORM models for properties: the listing itself, its photo
-join table (`PropertyPhoto`), and enums (`PropertyStatus`,
+"""SQLAlchemy ORM models for properties: the listing itself, its media
+join table (`PropertyMediaItem`), and enums (`PropertyStatus`,
 `CancellationPolicy`). Money is stored split into amount + currency
 columns; the API recomposes via `Money`."""
 
@@ -157,15 +157,15 @@ class Property(Base):
     )
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    photos: Mapped[list["PropertyPhoto"]] = relationship(
+    media: Mapped[list["PropertyMediaItem"]] = relationship(
         back_populates="property",
         cascade="all, delete-orphan",
-        order_by="PropertyPhoto.position",
+        order_by="PropertyMediaItem.position",
     )
 
 
-class PropertyPhoto(Base):
-    __tablename__ = "property_photos"
+class PropertyMediaItem(Base):
+    __tablename__ = "property_media"
 
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
     property_id: Mapped[UUID] = mapped_column(
@@ -179,5 +179,5 @@ class PropertyPhoto(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
-    property: Mapped[Property] = relationship(back_populates="photos")
+    property: Mapped[Property] = relationship(back_populates="media")
     media: Mapped[Media] = relationship()

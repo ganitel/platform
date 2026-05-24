@@ -16,7 +16,7 @@ from app.core.errors import ForbiddenError, NotFoundError, ValidationError
 from app.core.money import Currency, Money
 from app.modules.media.models import Media
 from app.modules.media.service import to_public as media_to_public
-from app.modules.properties.models import Property, PropertyPhoto, PropertyStatus
+from app.modules.properties.models import Property, PropertyMediaItem, PropertyStatus
 from app.modules.properties.schemas import (
     AdminStatusSummary,
     GeoPoint,
@@ -171,7 +171,7 @@ async def publish(session: AsyncSession, property: Property, user: User) -> Prop
         issues["title"] = "missing"
     if property.base_price_amount is None or property.base_price_amount <= 0:
         issues["base_price_amount"] = "not_positive"
-    if not property.photos:
+    if not property.media:
         issues["photos"] = "empty"
     if issues:
         raise ValidationError(code="property.not_ready", extra={"issues": issues})
@@ -207,7 +207,7 @@ async def list_all_for_admin(
 ) -> list[Property]:
     stmt = (
         select(Property)
-        .options(selectinload(Property.photos).selectinload(PropertyPhoto.media))
+        .options(selectinload(Property.media).selectinload(PropertyMediaItem.media))
         .order_by(Property.created_at.desc())
         .limit(limit)
         .offset(offset)
@@ -242,7 +242,7 @@ async def status_summary(session: AsyncSession) -> AdminStatusSummary:
 async def get(session: AsyncSession, property_id: UUID) -> Property:
     stmt = (
         select(Property)
-        .options(selectinload(Property.photos).selectinload(PropertyPhoto.media))
+        .options(selectinload(Property.media).selectinload(PropertyMediaItem.media))
         .where(Property.id == property_id)
     )
     prop = (await session.execute(stmt)).scalar_one_or_none()
@@ -253,14 +253,14 @@ async def get(session: AsyncSession, property_id: UUID) -> Property:
 
 async def attach_photo(
     session: AsyncSession, property: Property, user: User, *, media_id: UUID, position: int
-) -> PropertyPhoto:
+) -> PropertyMediaItem:
     _ensure_owner(user, property)
     media = await session.get(Media, media_id)
     if media is None:
         raise NotFoundError(code="media.not_found")
     if media.owner_user_id != user.id and not user.is_admin:
         raise ForbiddenError(code="media.not_owner")
-    photo = PropertyPhoto(property_id=property.id, media_id=media_id, position=position)
+    photo = PropertyMediaItem(property_id=property.id, media_id=media_id, position=position)
     session.add(photo)
     await session.commit()
     await session.refresh(photo)
@@ -271,7 +271,7 @@ async def detach_photo(
     session: AsyncSession, property: Property, user: User, photo_id: UUID
 ) -> None:
     _ensure_owner(user, property)
-    photo = await session.get(PropertyPhoto, photo_id)
+    photo = await session.get(PropertyMediaItem, photo_id)
     if photo is None or photo.property_id != property.id:
         raise NotFoundError(code="photo.not_found")
     await session.delete(photo)
@@ -279,7 +279,7 @@ async def detach_photo(
 
 
 async def to_detail(property: Property, host: User) -> PropertyDetail:
-    photos = [await media_to_public(p.media) for p in property.photos]
+    photos = [await media_to_public(p.media) for p in property.media]
     return PropertyDetail(
         id=property.id,
         title=property.title,
@@ -312,7 +312,7 @@ async def to_detail(property: Property, host: User) -> PropertyDetail:
 
 
 async def to_admin_list_item(property: Property) -> "PropertyAdminListItem":
-    cover = property.photos[0] if property.photos else None
+    cover = property.media[0] if property.media else None
     return PropertyAdminListItem(
         id=property.id,
         title=property.title,
@@ -330,7 +330,7 @@ async def to_admin_list_item(property: Property) -> "PropertyAdminListItem":
 
 
 async def to_public(property: Property, *, distance_km: float | None = None) -> PropertyPublic:
-    cover = property.photos[0] if property.photos else None
+    cover = property.media[0] if property.media else None
     return PropertyPublic(
         id=property.id,
         title=property.title,
