@@ -4,6 +4,7 @@ These do not touch the network or S3 — they only assemble strings from
 settings, so they belong in tests/unit/.
 """
 
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -13,8 +14,8 @@ from app.core.config import Settings
 from app.core.storage import image_transform_url, public_url
 
 
-def _settings(**overrides) -> Settings:
-    base = {
+def _settings(**overrides: Any) -> Settings:
+    base: dict[str, Any] = {
         "SUPABASE_PROJECT_URL": "https://example.supabase.co",
         "S3_BUCKET": "ganitel-uploads",
         "SUPABASE_IMAGE_TRANSFORMS_ENABLED": False,
