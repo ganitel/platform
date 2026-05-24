@@ -17,7 +17,7 @@ from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 import typer
-from sqlalchemy import delete, select
+from sqlalchemy import delete, exists, select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.core.config import get_settings
@@ -43,8 +43,8 @@ async def _delete_orphans(max_age_hours: int) -> int:
                     select(Media).where(
                         Media.draft_id.is_not(None),
                         Media.created_at < cutoff,
-                        ~Media.id.in_(select(PropertyMediaItem.media_id)),
-                        ~Media.id.in_(select(ExperienceMediaItem.media_id)),
+                        ~exists().where(PropertyMediaItem.media_id == Media.id),
+                        ~exists().where(ExperienceMediaItem.media_id == Media.id),
                     )
                 )
             )

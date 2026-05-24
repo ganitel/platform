@@ -263,6 +263,8 @@ async def reorder_media(
     requested = {item_id for item_id, _ in order}
     if requested != set(existing.keys()):
         raise ValidationError(code="media.reorder_mismatch")
+    if len({pos for _, pos in order}) != len(order):
+        raise ValidationError(code="media.reorder_duplicate_positions")
     for item_id, pos in order:
         existing[item_id].position = pos
     await session.commit()

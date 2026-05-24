@@ -207,7 +207,7 @@ async def publish(session: AsyncSession, property: Property, user: User) -> Prop
     if property.base_price_amount is None or property.base_price_amount <= 0:
         issues["base_price_amount"] = "not_positive"
     if not property.media:
-        issues["photos"] = "empty"
+        issues["media"] = "empty"
     if issues:
         raise ValidationError(code="property.not_ready", extra={"issues": issues})
     property.status = PropertyStatus.PUBLISHED
@@ -334,6 +334,8 @@ async def reorder_media(
     requested = {item_id for item_id, _ in order}
     if requested != set(existing.keys()):
         raise ValidationError(code="media.reorder_mismatch")
+    if len({pos for _, pos in order}) != len(order):
+        raise ValidationError(code="media.reorder_duplicate_positions")
     for item_id, pos in order:
         existing[item_id].position = pos
     await session.commit()

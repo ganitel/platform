@@ -4,7 +4,7 @@ and the `to_public` mapper used by callers (listing media, avatars, …)."""
 from typing import cast
 from uuid import UUID, uuid4
 
-from sqlalchemy import select
+from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -88,8 +88,8 @@ async def delete_unattached_draft(session: AsyncSession, user: User, draft_id: U
                 select(Media).where(
                     Media.draft_id == draft_id,
                     Media.owner_user_id == user.id,
-                    ~Media.id.in_(select(PropertyMediaItem.media_id)),
-                    ~Media.id.in_(select(ExperienceMediaItem.media_id)),
+                    ~exists().where(PropertyMediaItem.media_id == Media.id),
+                    ~exists().where(ExperienceMediaItem.media_id == Media.id),
                 )
             )
         )
