@@ -1,12 +1,12 @@
-"""HTTP endpoint for media uploads. Returns a presigned URL the client
-PUTs the file to directly, plus a `media_id` to reference the object
-from other resources (property photos, avatar, …)."""
+"""HTTP endpoints for media uploads and draft cleanup."""
+
+from uuid import UUID
 
 from fastapi import APIRouter, status
 
 from app.core.deps import CurrentUser, DbSession
 from app.modules.media.schemas import MediaUploadIn, MediaUploadOut
-from app.modules.media.service import create_upload
+from app.modules.media.service import create_upload, delete_unattached_draft
 
 router = APIRouter(prefix="/media", tags=["media"])
 
@@ -15,4 +15,9 @@ router = APIRouter(prefix="/media", tags=["media"])
 async def request_upload(
     body: MediaUploadIn, user: CurrentUser, session: DbSession
 ) -> MediaUploadOut:
-    return await create_upload(session, user, mime_type=body.mime_type, size_bytes=body.size_bytes)
+    return await create_upload(session, user, body)
+
+
+@router.delete("/draft/{draft_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_draft(draft_id: UUID, user: CurrentUser, session: DbSession) -> None:
+    await delete_unattached_draft(session, user, draft_id)
