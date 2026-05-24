@@ -10,7 +10,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.core.money import Money
-from app.modules.media.schemas import MediaPublic
+from app.modules.media.schemas import MediaItemPublic, MediaPublic
 from app.modules.properties.models import (
     CancellationPolicy,
     KitchenType,
@@ -59,6 +59,7 @@ class PropertyCreateIn(BaseModel):
     cancellation_policy: CancellationPolicy = CancellationPolicy.MODERATE
     base_price: Money
     content_language: ContentLanguage = "fr"
+    media_ids: list[UUID] = Field(default_factory=list, max_length=20)
 
 
 class PropertyUpdateIn(BaseModel):
@@ -161,7 +162,7 @@ class PropertyPublic(BaseModel):
     amenities: list[str]
     showcase_amenities: PropertyShowcaseAmenities
     listing_metadata: PropertyListingMetadata
-    cover_photo: MediaPublic | None
+    cover_media: MediaPublic | None
     distance_km: float | None = None
 
 
@@ -172,21 +173,34 @@ class PropertyDetail(PropertyPublic):
     content_language: ContentLanguage
     status: PropertyStatus
     host: HostPublic
-    photos: list[MediaPublic]
+    media: list[MediaItemPublic]
     created_at: datetime
     published_at: datetime | None
 
 
-class AttachPhotoIn(BaseModel):
+class AttachMediaIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     media_id: UUID
     position: int = Field(default=0, ge=0, le=64)
 
 
-class PhotoAttachOut(BaseModel):
+class MediaAttachOut(BaseModel):
     id: UUID
     position: int
+
+
+class ReorderMediaItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    media_item_id: UUID
+    position: int = Field(..., ge=0, le=64)
+
+
+class ReorderMediaIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    order: list[ReorderMediaItem]
 
 
 class SearchOut(BaseModel):
@@ -204,7 +218,7 @@ class PropertyAdminListItem(BaseModel):
     country_code: CountryCode
     status: PropertyStatus
     base_price: Money
-    cover_photo: MediaPublic | None
+    cover_media: MediaPublic | None
     created_at: datetime
     published_at: datetime | None
 

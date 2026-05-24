@@ -78,3 +78,10 @@ class MediaPublic(BaseModel):
     poster_url: str | None = None
     duration_ms: int | None = None
     created_at: datetime
+
+
+class MediaItemPublic(MediaPublic):
+    """Listing-media element. Wraps MediaPublic with the join-row id so the
+    frontend can target this exact attachment for detach or reorder."""
+
+    media_item_id: UUID
