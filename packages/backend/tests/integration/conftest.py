@@ -54,6 +54,7 @@ async def integration_engine() -> AsyncGenerator[AsyncEngine, None]:
     await admin_engine.dispose()
 
     sync_url = _per_session_url(db_name).replace("+asyncpg", "")
+    prior_env = os.environ.get("ENVIRONMENT")
     os.environ["ENVIRONMENT"] = "test"
     from app.core.config import get_settings
 
@@ -77,13 +78,19 @@ async def integration_engine() -> AsyncGenerator[AsyncEngine, None]:
 
     engine = create_async_engine(_per_session_url(db_name))
 
-    yield engine
-
-    await engine.dispose()
-    admin_engine = create_async_engine(_admin_url(), isolation_level="AUTOCOMMIT")
-    async with admin_engine.connect() as conn:
-        await conn.execute(text(f'DROP DATABASE IF EXISTS "{db_name}" WITH (FORCE)'))
-    await admin_engine.dispose()
+    try:
+        yield engine
+    finally:
+        await engine.dispose()
+        admin_engine = create_async_engine(_admin_url(), isolation_level="AUTOCOMMIT")
+        async with admin_engine.connect() as conn:
+            await conn.execute(text(f'DROP DATABASE IF EXISTS "{db_name}" WITH (FORCE)'))
+        await admin_engine.dispose()
+        if prior_env is None:
+            os.environ.pop("ENVIRONMENT", None)
+        else:
+            os.environ["ENVIRONMENT"] = prior_env
+        get_settings.cache_clear()
 
 
 @pytest_asyncio.fixture
