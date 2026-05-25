@@ -101,7 +101,8 @@ export function MediaUploader(props: UploaderProps) {
   useEffect(() => {
     if (props.mode !== "draft") return;
     const draftId = props.draftId;
-    const handler = () => {
+    const handler = (event: PageTransitionEvent) => {
+      if (event.persisted) return;
       void deleteDraftMedia(draftId).catch(() => {});
     };
     window.addEventListener("pagehide", handler);

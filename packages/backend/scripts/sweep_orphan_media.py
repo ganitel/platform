@@ -1,8 +1,9 @@
 """Delete unattached draft media older than the threshold (default 24h).
 
 Targets `media` rows where `draft_id IS NOT NULL`, no `property_media`
-or `experience_media` row references the media id, and `created_at` is
-older than `--max-age-hours`.
+or `experience_media` row references the media id, no listing-attached
+media row uses it as a poster, and `created_at` is older than
+`--max-age-hours`.
 
 Run nightly via systemd/cron:
 
@@ -24,6 +25,7 @@ from app.core.config import get_settings
 from app.core.storage import s3_client
 from app.modules.experiences.models import ExperienceMediaItem
 from app.modules.media.models import Media
+from app.modules.media.service import _referenced_by_attached_media
 from app.modules.properties.models import PropertyMediaItem
 
 logger = logging.getLogger("sweep_orphan_media")
@@ -45,6 +47,7 @@ async def _delete_orphans(max_age_hours: int) -> int:
                         Media.created_at < cutoff,
                         ~exists().where(PropertyMediaItem.media_id == Media.id),
                         ~exists().where(ExperienceMediaItem.media_id == Media.id),
+                        ~_referenced_by_attached_media(),
                     )
                 )
             )

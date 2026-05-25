@@ -112,9 +112,15 @@ export function ExperienceForm({
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  const mediaNotReady =
+    mediaState.mode === "draft" &&
+    mediaState.items.some(
+      (item) => item.status === "uploading" || item.status === "error",
+    );
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!form.location) return;
+    if (!form.location || mediaNotReady) return;
     const payload: ExperienceCreateInput = {
       title: form.title,
       description: form.description,
@@ -342,7 +348,7 @@ export function ExperienceForm({
       <div className="flex items-center justify-end gap-3">
         <button
           type="submit"
-          disabled={isPending || !form.location}
+          disabled={isPending || !form.location || mediaNotReady}
           className="rounded-xl bg-ganitel-secondary px-6 py-3 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
         >
           {isPending ? pendingLabel : submitLabel}

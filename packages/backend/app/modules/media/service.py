@@ -4,8 +4,9 @@ and the `to_public` mapper used by callers (listing media, avatars, …)."""
 from typing import cast
 from uuid import UUID, uuid4
 
-from sqlalchemy import exists, select
+from sqlalchemy import exists, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.core.config import get_settings
 from app.core.storage import presign_put, public_url
@@ -73,9 +74,26 @@ async def load_poster(session: AsyncSession, media: Media) -> Media | None:
     return await session.get(Media, media.poster_media_id)
 
 
+def _referenced_by_attached_media():
+    """Return a SQL predicate for poster media used by listing-attached media."""
+    from app.modules.experiences.models import ExperienceMediaItem
+    from app.modules.properties.models import PropertyMediaItem
+
+    referring_media = aliased(Media)
+    return exists().where(
+        referring_media.poster_media_id == Media.id,
+        or_(
+            exists().where(PropertyMediaItem.media_id == referring_media.id),
+            exists().where(ExperienceMediaItem.media_id == referring_media.id),
+        ),
+    )
+
+
 async def delete_unattached_draft(session: AsyncSession, user: User, draft_id: UUID) -> int:
-    """Delete media tagged with this draft_id that is NOT referenced by any
-    listing media. Returns the number of rows deleted. Idempotent."""
+    """Delete draft media that is not used directly or as an attached video's poster.
+
+    Returns the number of rows deleted. Idempotent.
+    """
     from sqlalchemy import delete
 
     from app.modules.experiences.models import ExperienceMediaItem
@@ -89,6 +107,7 @@ async def delete_unattached_draft(session: AsyncSession, user: User, draft_id: U
                     Media.owner_user_id == user.id,
                     ~exists().where(PropertyMediaItem.media_id == Media.id),
                     ~exists().where(ExperienceMediaItem.media_id == Media.id),
+                    ~_referenced_by_attached_media(),
                 )
             )
         )
