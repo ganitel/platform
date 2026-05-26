@@ -1,7 +1,5 @@
 import { Minus, Plus } from "lucide-react";
 
-import { cn } from "@/shared/lib/cn";
-
 interface Props {
   label: string;
   hint?: string;
@@ -49,9 +47,7 @@ export function TravelerStepper({
         </button>
         <span
           aria-live="polite"
-          className={cn(
-            "min-w-[2ch] text-center text-base font-semibold tabular-nums text-ganitel-text-title",
-          )}
+          className="min-w-[2ch] text-center text-base font-semibold tabular-nums text-ganitel-text-title"
         >
           {value}
         </span>
