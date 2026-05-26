@@ -7,7 +7,10 @@ interface WaitlistPayload {
   property_id?: string;
   experience_id?: string;
   interest?: "renting" | "experiences" | "both";
-  headcount?: number;
+  travel_start?: string;
+  travel_end?: string;
+  adults?: number;
+  children?: number;
   budget_range?: string;
   budget_currency?: "xaf" | "eur" | "usd";
   role?: "traveler" | "host";
