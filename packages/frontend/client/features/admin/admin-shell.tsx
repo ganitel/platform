@@ -1,6 +1,13 @@
 import type { ReactNode } from "react";
 import { Link, NavLink } from "react-router";
-import { Compass, Home, LayoutGrid, LogOut, Sparkles } from "lucide-react";
+import {
+  Compass,
+  Home,
+  LayoutGrid,
+  LogOut,
+  Sparkles,
+  UserPlus,
+} from "lucide-react";
 
 import { Header } from "@/shared/components/header";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
@@ -28,6 +35,7 @@ const NAV: NavItem[] = [
     labelKey: "admin.nav.experiences",
     icon: Compass,
   },
+  { to: "/team/add", labelKey: "admin.nav.team", icon: UserPlus },
 ];
 
 interface AdminShellProps {

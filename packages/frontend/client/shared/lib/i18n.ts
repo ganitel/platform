@@ -752,6 +752,7 @@ const dict = {
   "admin.nav.overview": { fr: "Vue d'ensemble", en: "Overview" },
   "admin.nav.rentals": { fr: "Hébergements", en: "Stays" },
   "admin.nav.experiences": { fr: "Expériences", en: "Experiences" },
+  "admin.nav.team": { fr: "Équipe", en: "Team" },
 
   "admin.filter.label": { fr: "Filtrer", en: "Filter" },
   "admin.filter.reset": { fr: "Tout réinitialiser", en: "Reset filters" },
