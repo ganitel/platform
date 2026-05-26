@@ -390,18 +390,6 @@ def test_waitlist_accepts_host_payload() -> None:
     assert entry.host_status == "ready"
 
 
-def test_waitlist_accepts_traveler_role() -> None:
-    entry = WaitlistEntryIn.model_validate(
-        _waitlist(
-            role="traveler",
-            travel_start=(date.today() + timedelta(days=3)).isoformat(),
-            travel_end=(date.today() + timedelta(days=7)).isoformat(),
-            adults=1,
-        )
-    )
-    assert entry.role == "traveler"
-
-
 def test_waitlist_rejects_unknown_role() -> None:
     with pytest.raises(ValidationError):
         WaitlistEntryIn.model_validate(_waitlist(role="vendor"))

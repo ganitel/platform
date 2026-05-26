@@ -70,16 +70,18 @@ class WaitlistEntryIn(BaseModel):
             ]
             if missing:
                 raise ValueError(f"Missing traveler fields: {', '.join(missing)}")
-        if self.travel_start is not None and self.travel_start < date.today():
-            raise PydanticCustomError("travel_start_invalid", "travel_start must be today or later")
-        if (
-            self.travel_start is not None
-            and self.travel_end is not None
-            and self.travel_end < self.travel_start
-        ):
-            raise PydanticCustomError(
-                "travel_end_invalid", "travel_end must be on or after travel_start"
-            )
+            if self.travel_start is not None and self.travel_start < date.today():
+                raise PydanticCustomError(
+                    "travel_start_invalid", "travel_start must be today or later"
+                )
+            if (
+                self.travel_start is not None
+                and self.travel_end is not None
+                and self.travel_end < self.travel_start
+            ):
+                raise PydanticCustomError(
+                    "travel_end_invalid", "travel_end must be on or after travel_start"
+                )
         return self
 
 
