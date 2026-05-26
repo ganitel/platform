@@ -10,7 +10,6 @@ export const WAITLIST_FIELD_ERROR_KEYS: Record<string, TranslationKey> = {
   "travel_end.travel_end_invalid": "join.error.travel_end_invalid",
   "adults.greater_than_equal": "join.error.adults_invalid",
   "adults.less_than_equal": "join.error.adults_invalid",
-  "adults.missing": "join.error.adults_invalid",
   "children.greater_than_equal": "join.error.children_invalid",
   "children.less_than_equal": "join.error.children_invalid",
   "notes.string_too_long": "join.error.notes_too_long",

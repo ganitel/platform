@@ -333,11 +333,6 @@ const dict = {
   "join.interest.renting": { fr: "Locations", en: "Rentals" },
   "join.interest.experiences": { fr: "Expériences", en: "Experiences" },
   "join.interest.both": { fr: "Les deux", en: "Both" },
-  "join.headcount.label": {
-    fr: "Pour combien de personnes ?",
-    en: "For how many people?",
-  },
-  "join.headcount.placeholder": { fr: "Ex. 2", en: "e.g. 2" },
   "join.travel.label": { fr: "Dates de voyage", en: "Travel dates" },
   "join.travel.start.label": { fr: "Arrivée", en: "Arrival" },
   "join.travel.start.placeholder": {
@@ -458,10 +453,6 @@ const dict = {
   "join.error.phone_invalid": {
     fr: "Le numéro de téléphone n'est pas valide. Format attendu : +237612345678.",
     en: "Phone number is not valid. Expected format: +237612345678.",
-  },
-  "join.error.headcount_invalid": {
-    fr: "Le nombre de personnes doit être entre 1 et 500.",
-    en: "Number of people must be between 1 and 500.",
   },
   "join.error.travel_start_invalid": {
     fr: "Date d'arrivée invalide.",
