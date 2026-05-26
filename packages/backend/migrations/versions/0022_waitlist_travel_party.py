@@ -1,6 +1,6 @@
 """add travel dates + adults/children to waitlist_emails
 
-Revision ID: 0022_waitlist_travel_dates_and_party
+Revision ID: 0022_waitlist_travel_party
 Revises: 0021_listing_prices
 Create Date: 2026-05-26
 """
