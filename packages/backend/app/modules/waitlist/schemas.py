@@ -1,4 +1,5 @@
 import re
+from datetime import date
 from typing import Literal
 from uuid import UUID
 
@@ -48,9 +49,13 @@ class WaitlistEntryIn(BaseModel):
     host_inventory: HostInventory | None = None
     host_status: HostStatus | None = None
     notes: str | None = Field(default=None, max_length=1000)
+    travel_start: date | None = None
+    travel_end: date | None = None
+    adults: int | None = Field(default=None, ge=1, le=16)
+    children: int | None = Field(default=None, ge=0, le=16)
 
     @model_validator(mode="after")
-    def _require_host_fields(self) -> "WaitlistEntryIn":
+    def _validate_roles_and_dates(self) -> "WaitlistEntryIn":
         if self.role == "host":
             missing = [
                 f
@@ -59,6 +64,22 @@ class WaitlistEntryIn(BaseModel):
             ]
             if missing:
                 raise ValueError(f"Missing host fields: {', '.join(missing)}")
+        if self.role == "traveler":
+            missing = [
+                f for f in ("travel_start", "travel_end", "adults") if getattr(self, f) is None
+            ]
+            if missing:
+                raise ValueError(f"Missing traveler fields: {', '.join(missing)}")
+        if self.travel_start is not None and self.travel_start < date.today():
+            raise PydanticCustomError("travel_start_invalid", "travel_start must be today or later")
+        if (
+            self.travel_start is not None
+            and self.travel_end is not None
+            and self.travel_end < self.travel_start
+        ):
+            raise PydanticCustomError(
+                "travel_end_invalid", "travel_end must be on or after travel_start"
+            )
         return self
 
 
