@@ -161,6 +161,7 @@ const dict = {
 
   "experience.per_person": { fr: "par personne", en: "per person" },
   "experience.duration": { fr: "durée", en: "duration" },
+  "experience.guide": { fr: "Votre guide", en: "Your guide" },
 
   "prelaunch.banner": {
     fr: "Bientôt disponible — inscrivez-vous pour être parmi les premiers.",

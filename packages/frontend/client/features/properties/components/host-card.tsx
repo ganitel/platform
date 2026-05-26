@@ -1,8 +1,21 @@
 import type { HostPublic } from "@/features/properties/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
-import { useT } from "@/shared/lib/i18n";
+import { useT, type TranslationKey } from "@/shared/lib/i18n";
 
-export function HostCard({ host }: { host: HostPublic }) {
+type HostKind = "host" | "guide";
+
+const LABEL_BY_KIND: Record<HostKind, TranslationKey> = {
+  host: "property.host",
+  guide: "experience.guide",
+};
+
+export function HostCard({
+  host,
+  kind = "host",
+}: {
+  host: HostPublic;
+  kind?: HostKind;
+}) {
   const t = useT();
   const initials = host.display_name
     .split(/\s+/)
@@ -22,7 +35,7 @@ export function HostCard({ host }: { host: HostPublic }) {
       </Avatar>
       <div>
         <p className="text-xs uppercase tracking-wide text-ganitel-text-subtitle">
-          {t("property.host")}
+          {t(LABEL_BY_KIND[kind])}
         </p>
         <p className="text-base font-semibold text-ganitel-text-title">
           {host.display_name}

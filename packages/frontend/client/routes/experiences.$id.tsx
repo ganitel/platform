@@ -190,7 +190,7 @@ export default function ExperienceDetailRoute({
               </div>
             ) : null}
 
-            <HostCard host={experience.host} />
+            <HostCard host={experience.host} kind="guide" />
           </section>
 
           <aside className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
