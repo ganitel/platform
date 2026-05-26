@@ -42,7 +42,7 @@ function Hero() {
       <div className="mx-auto max-w-7xl">
         <SectionHeader
           level="h1"
-          align="stacked"
+          align="center"
           tag={t("about.tag")}
           title={t("about.title")}
           emphasis={t("about.title_em")}
@@ -126,6 +126,7 @@ function Team({ members }: { members: TeamMember[] }) {
     <section className="px-6 pb-12 md:px-12 md:pb-16">
       <div className="mx-auto max-w-7xl">
         <SectionHeader
+          align="center"
           tag={t("about.team.tag")}
           title={t("about.team.title")}
           emphasis={t("about.team.title_em")}
@@ -154,8 +155,8 @@ function TeamMemberCard({ member }: { member: TeamMember }) {
   const initials = getInitials(member.name);
 
   return (
-    <li className="flex flex-col gap-4 rounded-2xl border border-ganitel-stroke-neutral bg-ganitel-background-secondary p-6">
-      <div className="flex items-center gap-4">
+    <li className="flex flex-col items-center gap-4 rounded-2xl border border-ganitel-stroke-neutral bg-ganitel-background-secondary p-6 text-center">
+      <div className="flex flex-col items-center gap-3">
         {member.avatar_url ? (
           <img
             src={member.avatar_url}
@@ -201,20 +202,15 @@ function Closing() {
         transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
         className="mx-auto max-w-7xl rounded-[28px] bg-ganitel-text-title px-8 py-12 md:px-16 md:py-16"
       >
-        <div className="grid gap-12 md:grid-cols-[1fr_auto] md:items-end">
+        <div className="flex flex-col items-center gap-10 text-center">
           <SectionHeader
             tag={t("about.closing.tag")}
             title={t("about.closing")}
-            align="stacked"
+            align="center"
             inverted
             animate={false}
           />
-          <PillLink
-            to="/browse"
-            variant="paper"
-            arrow
-            className="self-start md:self-end"
-          >
+          <PillLink to="/browse" variant="paper" arrow>
             {t("about.cta")}
           </PillLink>
         </div>

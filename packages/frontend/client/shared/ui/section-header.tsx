@@ -14,7 +14,7 @@ export interface SectionHeaderProps {
   title: ReactNode;
   emphasis?: ReactNode;
   lede?: ReactNode;
-  align?: "split" | "stacked";
+  align?: "split" | "stacked" | "center";
   inverted?: boolean;
   level?: "h1" | "h2";
   className?: string;
@@ -91,7 +91,9 @@ export function SectionHeader({
   const layout = cn(
     align === "split"
       ? "grid gap-x-12 gap-y-6 md:grid-cols-[1fr_minmax(0,520px)] md:items-end"
-      : "flex flex-col gap-6",
+      : align === "center"
+        ? "flex flex-col items-center gap-6 text-center"
+        : "flex flex-col gap-6",
     className,
   );
 
