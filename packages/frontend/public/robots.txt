@@ -18,7 +18,7 @@ Disallow: /complete-profile
 Disallow: /profile
 Disallow: /bookings
 Disallow: /join
-Disallow: /add-team
+Disallow: /team/add
 Disallow: /team-members/
 Disallow: /admin
 Disallow: /admin/

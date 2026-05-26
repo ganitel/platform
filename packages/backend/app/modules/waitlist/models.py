@@ -1,7 +1,18 @@
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, Uuid, func
+from sqlalchemy import (
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    SmallInteger,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -33,6 +44,10 @@ class WaitlistEntry(Base):
     host_inventory: Mapped[str | None] = mapped_column(String(16))
     host_status: Mapped[str | None] = mapped_column(String(32))
     notes: Mapped[str | None] = mapped_column(Text())
+    travel_start: Mapped[date | None] = mapped_column(Date())
+    travel_end: Mapped[date | None] = mapped_column(Date())
+    adults: Mapped[int | None] = mapped_column(SmallInteger())
+    children: Mapped[int | None] = mapped_column(SmallInteger())
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

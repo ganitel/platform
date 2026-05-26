@@ -333,11 +333,21 @@ const dict = {
   "join.interest.renting": { fr: "Locations", en: "Rentals" },
   "join.interest.experiences": { fr: "Expériences", en: "Experiences" },
   "join.interest.both": { fr: "Les deux", en: "Both" },
-  "join.headcount.label": {
-    fr: "Pour combien de personnes ?",
-    en: "For how many people?",
+  "join.travel.label": { fr: "Dates de voyage", en: "Travel dates" },
+  "join.travel.start.label": { fr: "Arrivée", en: "Arrival" },
+  "join.travel.start.placeholder": {
+    fr: "Choisir une date",
+    en: "Pick a date",
   },
-  "join.headcount.placeholder": { fr: "Ex. 2", en: "e.g. 2" },
+  "join.travel.end.label": { fr: "Départ", en: "Departure" },
+  "join.travel.end.placeholder": { fr: "Choisir une date", en: "Pick a date" },
+  "join.travelers.label": { fr: "Voyageurs", en: "Travelers" },
+  "join.travelers.adults.label": { fr: "Adultes", en: "Adults" },
+  "join.travelers.adults.hint": { fr: "13 ans et plus", en: "13 and older" },
+  "join.travelers.children.label": { fr: "Enfants", en: "Children" },
+  "join.travelers.children.hint": { fr: "2 à 12 ans", en: "2 to 12" },
+  "join.travelers.decrement": { fr: "Diminuer", en: "Decrease" },
+  "join.travelers.increment": { fr: "Augmenter", en: "Increase" },
   "join.budget.label": {
     fr: "Budget estimé par personne",
     en: "Estimated budget per person",
@@ -444,9 +454,21 @@ const dict = {
     fr: "Le numéro de téléphone n'est pas valide. Format attendu : +237612345678.",
     en: "Phone number is not valid. Expected format: +237612345678.",
   },
-  "join.error.headcount_invalid": {
-    fr: "Le nombre de personnes doit être entre 1 et 500.",
-    en: "Number of people must be between 1 and 500.",
+  "join.error.travel_start_invalid": {
+    fr: "Date d'arrivée invalide.",
+    en: "Invalid arrival date.",
+  },
+  "join.error.travel_end_invalid": {
+    fr: "La date de départ doit être après l'arrivée.",
+    en: "Departure must be after arrival.",
+  },
+  "join.error.adults_invalid": {
+    fr: "Au moins un adulte.",
+    en: "At least one adult.",
+  },
+  "join.error.children_invalid": {
+    fr: "Nombre d'enfants invalide.",
+    en: "Invalid number of children.",
   },
   "join.error.notes_too_long": {
     fr: "Le message est trop long (max 1000 caractères).",
@@ -752,6 +774,7 @@ const dict = {
   "admin.nav.overview": { fr: "Vue d'ensemble", en: "Overview" },
   "admin.nav.rentals": { fr: "Hébergements", en: "Stays" },
   "admin.nav.experiences": { fr: "Expériences", en: "Experiences" },
+  "admin.nav.team": { fr: "Équipe", en: "Team" },
 
   "admin.filter.label": { fr: "Filtrer", en: "Filter" },
   "admin.filter.reset": { fr: "Tout réinitialiser", en: "Reset filters" },

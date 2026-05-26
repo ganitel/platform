@@ -1,4 +1,4 @@
-import type { Route } from "./+types/add-team";
+import type { Route } from "./+types/team.add";
 
 import { AddTeamForm } from "@/features/team/add-team-form";
 import { localeFromAcceptLanguage, t } from "@/shared/lib/i18n";

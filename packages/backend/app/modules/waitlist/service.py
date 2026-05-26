@@ -33,6 +33,10 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> tuple[Wa
         host_inventory=body.host_inventory,
         host_status=body.host_status,
         notes=body.notes,
+        travel_start=body.travel_start,
+        travel_end=body.travel_end,
+        adults=body.adults,
+        children=body.children,
     )
     session.add(entry)
     await session.commit()

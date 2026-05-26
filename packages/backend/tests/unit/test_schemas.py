@@ -390,11 +390,6 @@ def test_waitlist_accepts_host_payload() -> None:
     assert entry.host_status == "ready"
 
 
-def test_waitlist_accepts_traveler_role() -> None:
-    entry = WaitlistEntryIn.model_validate(_waitlist(role="traveler"))
-    assert entry.role == "traveler"
-
-
 def test_waitlist_rejects_unknown_role() -> None:
     with pytest.raises(ValidationError):
         WaitlistEntryIn.model_validate(_waitlist(role="vendor"))
@@ -413,3 +408,70 @@ def test_waitlist_rejects_unknown_host_status() -> None:
 def test_waitlist_rejects_host_city_over_120_chars() -> None:
     with pytest.raises(ValidationError):
         WaitlistEntryIn.model_validate(_waitlist(host_city="x" * 121))
+
+
+def _future_iso(days: int) -> str:
+    return (date.today() + timedelta(days=days)).isoformat()
+
+
+def _traveler_payload(**overrides: Any) -> dict[str, Any]:
+    base: dict[str, Any] = {
+        "email": "trip@example.com",
+        "role": "traveler",
+        "interest": "renting",
+        "travel_start": _future_iso(7),
+        "travel_end": _future_iso(14),
+        "adults": 2,
+        "children": 1,
+        "budget_range": "50k_150k",
+        "budget_currency": "xaf",
+    }
+    base.update(overrides)
+    return base
+
+
+def test_waitlist_accepts_traveler_with_dates_and_party() -> None:
+    entry = WaitlistEntryIn.model_validate(_traveler_payload())
+    assert entry.travel_start == date.today() + timedelta(days=7)
+    assert entry.travel_end == date.today() + timedelta(days=14)
+    assert entry.adults == 2
+    assert entry.children == 1
+
+
+def test_waitlist_rejects_traveler_missing_dates() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(_traveler_payload(travel_start=None))
+
+
+def test_waitlist_rejects_traveler_missing_adults() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(_traveler_payload(adults=None))
+
+
+def test_waitlist_rejects_travel_start_in_past() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(
+            _traveler_payload(travel_start=(date.today() - timedelta(days=2)).isoformat())
+        )
+
+
+def test_waitlist_rejects_travel_end_before_start() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(
+            _traveler_payload(travel_end=_future_iso(3), travel_start=_future_iso(10))
+        )
+
+
+def test_waitlist_rejects_zero_adults() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(_traveler_payload(adults=0))
+
+
+def test_waitlist_rejects_too_many_children() -> None:
+    with pytest.raises(ValidationError):
+        WaitlistEntryIn.model_validate(_traveler_payload(children=17))
+
+
+def test_waitlist_traveler_children_defaults_optional() -> None:
+    entry = WaitlistEntryIn.model_validate(_traveler_payload(children=None))
+    assert entry.children is None
