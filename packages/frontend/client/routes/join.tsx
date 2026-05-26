@@ -14,6 +14,8 @@ import {
   useT,
   type TranslationKey,
 } from "@/shared/lib/i18n";
+import { DateRangeField } from "@/shared/components/date-range-field";
+import { TravelerStepper } from "@/shared/components/traveler-stepper";
 import { FieldError } from "@/shared/components/field-error";
 import { FormErrorAlert } from "@/shared/components/form-error-alert";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
@@ -149,7 +151,12 @@ export default function JoinPage() {
   const [role, setRole] = useState<Role>("traveler");
   const [email, setEmail] = useState("");
   const [interests, setInterests] = useState<Set<Interest>>(new Set());
-  const [headcount, setHeadcount] = useState("");
+  const [travelStart, setTravelStart] = useState("");
+  const [travelEnd, setTravelEnd] = useState("");
+  const [adults, setAdults] = useState(0);
+  const [children, setChildren] = useState(0);
+
+  const todayIso = new Date().toISOString().slice(0, 10);
   const [budgetCurrency, setBudgetCurrency] = useState<BudgetCurrency>("xaf");
   const [budgetRange, setBudgetRange] = useState<BudgetRange | "">("");
   const [phone, setPhone] = useState("");
@@ -206,7 +213,7 @@ export default function JoinPage() {
     !phoneValid ||
     (isHost
       ? !hostCity.trim() || !hostInventory || !hostStatus
-      : !headcount || !budgetRange);
+      : !travelStart || !travelEnd || adults < 1 || !budgetRange);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -231,7 +238,10 @@ export default function JoinPage() {
               host_status: hostStatus || undefined,
             }
           : {
-              headcount: headcount ? Number(headcount) : undefined,
+              travel_start: travelStart,
+              travel_end: travelEnd,
+              adults,
+              children: children > 0 ? children : undefined,
               budget_range: budgetRange || undefined,
               budget_currency: budgetRange ? budgetCurrency : undefined,
             }),
@@ -443,22 +453,54 @@ export default function JoinPage() {
               </>
             ) : (
               <>
-                {/* Headcount */}
                 <div>
-                  <label htmlFor="join-headcount" className={LABEL_CLASS}>
-                    {t("join.headcount.label")}
-                  </label>
-                  <input
-                    id="join-headcount"
-                    type="number"
-                    min={1}
-                    max={500}
-                    value={headcount}
-                    onChange={(e) => setHeadcount(e.target.value)}
-                    placeholder={t("join.headcount.placeholder")}
-                    className={INPUT_CLASS}
+                  <p className={LABEL_CLASS}>{t("join.travel.label")}</p>
+                  <DateRangeField
+                    startValue={travelStart}
+                    endValue={travelEnd}
+                    onStartChange={(v) => {
+                      setTravelStart(v);
+                      if (travelEnd && v && travelEnd < v) setTravelEnd("");
+                    }}
+                    onEndChange={setTravelEnd}
+                    startLabel={t("join.travel.start.label")}
+                    endLabel={t("join.travel.end.label")}
+                    startPlaceholder={t("join.travel.start.placeholder")}
+                    endPlaceholder={t("join.travel.end.placeholder")}
+                    todayIso={todayIso}
+                    startId="join-travel-start"
+                    endId="join-travel-end"
                   />
-                  <FieldError message={fieldErrors.headcount} />
+                  <FieldError message={fieldErrors.travel_start} />
+                  <FieldError message={fieldErrors.travel_end} />
+                </div>
+
+                <div>
+                  <p className={LABEL_CLASS}>{t("join.travelers.label")}</p>
+                  <div className="space-y-2">
+                    <TravelerStepper
+                      label={t("join.travelers.adults.label")}
+                      hint={t("join.travelers.adults.hint")}
+                      value={adults}
+                      min={0}
+                      max={16}
+                      onChange={setAdults}
+                      decrementLabel={`${t("join.travelers.decrement")} — ${t("join.travelers.adults.label")}`}
+                      incrementLabel={`${t("join.travelers.increment")} — ${t("join.travelers.adults.label")}`}
+                    />
+                    <TravelerStepper
+                      label={t("join.travelers.children.label")}
+                      hint={t("join.travelers.children.hint")}
+                      value={children}
+                      min={0}
+                      max={16}
+                      onChange={setChildren}
+                      decrementLabel={`${t("join.travelers.decrement")} — ${t("join.travelers.children.label")}`}
+                      incrementLabel={`${t("join.travelers.increment")} — ${t("join.travelers.children.label")}`}
+                    />
+                  </div>
+                  <FieldError message={fieldErrors.adults} />
+                  <FieldError message={fieldErrors.children} />
                 </div>
 
                 {/* Budget range */}
