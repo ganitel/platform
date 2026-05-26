@@ -3,7 +3,15 @@ from datetime import date
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 from pydantic_core import PydanticCustomError
 
 BudgetRange = Literal["under_50k", "50k_150k", "150k_300k", "300k_500k", "over_500k"]
@@ -54,8 +62,25 @@ class WaitlistEntryIn(BaseModel):
     adults: int | None = Field(default=None, ge=1, le=16)
     children: int | None = Field(default=None, ge=0, le=16)
 
+    @field_validator("travel_start")
+    @classmethod
+    def _travel_start_not_past(cls, value: date | None) -> date | None:
+        if value is not None and value < date.today():
+            raise PydanticCustomError("travel_start_invalid", "travel_start must be today or later")
+        return value
+
+    @field_validator("travel_end")
+    @classmethod
+    def _travel_end_after_start(cls, value: date | None, info: ValidationInfo) -> date | None:
+        start = info.data.get("travel_start")
+        if value is not None and start is not None and value < start:
+            raise PydanticCustomError(
+                "travel_end_invalid", "travel_end must be on or after travel_start"
+            )
+        return value
+
     @model_validator(mode="after")
-    def _validate_roles_and_dates(self) -> "WaitlistEntryIn":
+    def _require_role_fields(self) -> "WaitlistEntryIn":
         if self.role == "host":
             missing = [
                 f
@@ -70,18 +95,6 @@ class WaitlistEntryIn(BaseModel):
             ]
             if missing:
                 raise ValueError(f"Missing traveler fields: {', '.join(missing)}")
-            if self.travel_start is not None and self.travel_start < date.today():
-                raise PydanticCustomError(
-                    "travel_start_invalid", "travel_start must be today or later"
-                )
-            if (
-                self.travel_start is not None
-                and self.travel_end is not None
-                and self.travel_end < self.travel_start
-            ):
-                raise PydanticCustomError(
-                    "travel_end_invalid", "travel_end must be on or after travel_start"
-                )
         return self
 
 
