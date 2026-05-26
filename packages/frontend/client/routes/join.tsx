@@ -153,10 +153,10 @@ export default function JoinPage() {
   const [interests, setInterests] = useState<Set<Interest>>(new Set());
   const [travelStart, setTravelStart] = useState("");
   const [travelEnd, setTravelEnd] = useState("");
-  const [adults, setAdults] = useState(0);
+  const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
 
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = new Date().toLocaleDateString("en-CA");
   const [budgetCurrency, setBudgetCurrency] = useState<BudgetCurrency>("xaf");
   const [budgetRange, setBudgetRange] = useState<BudgetRange | "">("");
   const [phone, setPhone] = useState("");
@@ -482,7 +482,7 @@ export default function JoinPage() {
                       label={t("join.travelers.adults.label")}
                       hint={t("join.travelers.adults.hint")}
                       value={adults}
-                      min={0}
+                      min={1}
                       max={16}
                       onChange={setAdults}
                       decrementLabel={`${t("join.travelers.decrement")} — ${t("join.travelers.adults.label")}`}

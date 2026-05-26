@@ -1,5 +1,5 @@
 import re
-from datetime import date
+from datetime import date, timedelta
 from typing import Literal
 from uuid import UUID
 
@@ -65,7 +65,7 @@ class WaitlistEntryIn(BaseModel):
     @field_validator("travel_start")
     @classmethod
     def _travel_start_not_past(cls, value: date | None) -> date | None:
-        if value is not None and value < date.today():
+        if value is not None and value < date.today() - timedelta(days=1):
             raise PydanticCustomError("travel_start_invalid", "travel_start must be today or later")
         return value
 

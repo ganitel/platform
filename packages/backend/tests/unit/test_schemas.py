@@ -451,7 +451,7 @@ def test_waitlist_rejects_traveler_missing_adults() -> None:
 def test_waitlist_rejects_travel_start_in_past() -> None:
     with pytest.raises(ValidationError):
         WaitlistEntryIn.model_validate(
-            _traveler_payload(travel_start=(date.today() - timedelta(days=1)).isoformat())
+            _traveler_payload(travel_start=(date.today() - timedelta(days=2)).isoformat())
         )
 
 

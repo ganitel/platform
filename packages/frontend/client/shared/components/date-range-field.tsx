@@ -1,3 +1,4 @@
+import type { MouseEvent } from "react";
 import { Calendar } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
@@ -21,6 +22,14 @@ const DATE_INPUT_CLASS = cn(
   INPUT_CLASS,
   "pl-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer",
 );
+
+function openNativePicker(event: MouseEvent<HTMLInputElement>) {
+  try {
+    event.currentTarget.showPicker();
+  } catch {
+    // showPicker is unsupported in some browsers and in jsdom
+  }
+}
 
 export function DateRangeField({
   startValue,
@@ -54,6 +63,7 @@ export function DateRangeField({
             min={todayIso}
             placeholder={startPlaceholder}
             onChange={(e) => onStartChange(e.target.value)}
+            onClick={openNativePicker}
             className={DATE_INPUT_CLASS}
           />
         </div>
@@ -74,6 +84,7 @@ export function DateRangeField({
             min={endMin}
             placeholder={endPlaceholder}
             onChange={(e) => onEndChange(e.target.value)}
+            onClick={openNativePicker}
             className={DATE_INPUT_CLASS}
           />
         </div>
