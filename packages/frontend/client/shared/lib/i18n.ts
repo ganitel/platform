@@ -550,6 +550,62 @@ const dict = {
     en: "Come for a stay. Leave with a story.",
   },
   "about.cta": { fr: "Découvrir les séjours", en: "Browse stays" },
+  "about.hero.cta": {
+    fr: "Découvrir notre vision",
+    en: "Discover our vision",
+  },
+  "about.trust.tag": {
+    fr: "Le socle de la confiance",
+    en: "The foundation of trust",
+  },
+  "about.trust.caption": {
+    fr: "Des destinations triées sur le volet, partout au Cameroun.",
+    en: "Hand-picked destinations across Cameroon.",
+  },
+  "about.impact.card.renewal.title": {
+    fr: "Un voyage de ressourcement",
+    en: "A renewal journey",
+  },
+  "about.impact.card.renewal.body": {
+    fr: "Des séjours triés sur le volet, pensés pour le repos et la clarté d'esprit.",
+    en: "Hand-picked stays designed for rest and clarity of mind.",
+  },
+  "about.impact.card.guides.title": {
+    fr: "Guides locaux certifiés",
+    en: "Certified local guides",
+  },
+  "about.impact.card.guides.body": {
+    fr: "Des hôtes vérifiés qui connaissent leur région mieux que personne.",
+    en: "Vetted hosts who know their region better than anyone.",
+  },
+  "about.impact.card.transport.title": {
+    fr: "Transport de confiance",
+    en: "Trusted transport",
+  },
+  "about.impact.card.transport.body": {
+    fr: "Une logistique sûre, de porte à porte, du début à la fin.",
+    en: "Safe, door-to-door logistics from start to finish.",
+  },
+  "about.alt.hero": {
+    fr: "Paysage camerounais au lever du soleil",
+    en: "Cameroonian landscape at sunrise",
+  },
+  "about.alt.trust1": {
+    fr: "Une destination camerounaise",
+    en: "A Cameroonian destination",
+  },
+  "about.alt.trust2": {
+    fr: "Un guide local accompagnant des voyageurs",
+    en: "A local guide hosting travellers",
+  },
+  "about.alt.impact": {
+    fr: "Un voyageur se ressourçant en pleine nature",
+    en: "A traveller resting in nature",
+  },
+  "about.alt.vision": {
+    fr: "Coucher de soleil sur la savane africaine",
+    en: "Sunset over the African savanna",
+  },
 
   "add_team.title": {
     fr: "Rejoindre l'équipe ganitel",
