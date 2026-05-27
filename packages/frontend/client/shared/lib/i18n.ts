@@ -587,20 +587,20 @@ const dict = {
     en: "Safe, door-to-door logistics from start to finish.",
   },
   "about.alt.hero": {
-    fr: "Paysage camerounais au lever du soleil",
-    en: "Cameroonian landscape at sunrise",
+    fr: "Un arbre solitaire dans la savane africaine",
+    en: "A lone tree in the African savanna",
   },
   "about.alt.trust1": {
-    fr: "Une destination camerounaise",
-    en: "A Cameroonian destination",
+    fr: "Une destination africaine",
+    en: "An African destination",
   },
   "about.alt.trust2": {
-    fr: "Un guide local accompagnant des voyageurs",
-    en: "A local guide hosting travellers",
+    fr: "Une communauté locale accueillante",
+    en: "A welcoming local community",
   },
   "about.alt.impact": {
-    fr: "Un voyageur se ressourçant en pleine nature",
-    en: "A traveller resting in nature",
+    fr: "Un paysage africain paisible à l'heure dorée",
+    en: "A serene African landscape at golden hour",
   },
   "about.alt.vision": {
     fr: "Coucher de soleil sur la savane africaine",

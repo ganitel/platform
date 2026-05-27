@@ -20,19 +20,19 @@ const ENTRANCE_EASE = [0.2, 0.7, 0.2, 1] as const;
 // Placeholder Cameroon/African imagery — replace with owned photography before
 // launch. picsum fallback keeps the page intact if an Unsplash URL fails.
 const HERO_SOURCE =
-  "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=2000&q=80&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1741850819375-5de72125719e?w=2000&q=80&auto=format&fit=crop";
 const HERO_FALLBACK = "https://picsum.photos/seed/ganitelabouthero/1600/900";
 const TRUST1_SOURCE =
-  "https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?w=900&q=80&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1570742544137-3a469196c32b?w=900&q=80&auto=format&fit=crop";
 const TRUST1_FALLBACK = "https://picsum.photos/seed/ganiteltrust1/800/1000";
 const TRUST2_SOURCE =
-  "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=900&q=80&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1515657834497-26509e295154?w=900&q=80&auto=format&fit=crop";
 const TRUST2_FALLBACK = "https://picsum.photos/seed/ganiteltrust2/800/1000";
 const IMPACT_SOURCE =
-  "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=900&q=80&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1614531341773-3bff8b7cb3fc?w=900&q=80&auto=format&fit=crop";
 const IMPACT_FALLBACK = "https://picsum.photos/seed/ganitelimpact/800/600";
 const VISION_SOURCE =
-  "https://images.unsplash.com/photo-1535941339077-2dd1c7963098?w=2000&q=80&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1756475471671-48813cf5ea5b?w=2000&q=80&auto=format&fit=crop";
 const VISION_FALLBACK = "https://picsum.photos/seed/ganitelvision/1600/900";
 
 const TILE_SIZES = "(min-width: 1024px) 25vw, 50vw";
