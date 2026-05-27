@@ -29,6 +29,7 @@
   --font-sans:
     "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "EB Garamond", Georgia, serif;
 
   --color-ganitel-primary: #18100c;
   --color-ganitel-secondary: #d39e70;
@@ -52,6 +53,17 @@
   --color-ganitel-paper: #f6f3ea;
   --color-ganitel-paper-warm: #efe9d6;
   --color-ganitel-moss: #2e3a25;
+  --color-ganitel-surface: #fff8f6;
+  --color-ganitel-surface-2: #fceae3;
+  --color-ganitel-surface-3: #f6e5dd;
+  --color-ganitel-brown: #80552d;
+  --color-ganitel-on-tan: #5a3510;
+  --color-ganitel-tan-soft: #ffdcc1;
+  --color-ganitel-sage: #566250;
+  --color-ganitel-sage-soft: #d9e7d0;
+  --color-ganitel-olive: #5b6144;
+  --color-ganitel-olive-soft: #e0e6c1;
+  --color-ganitel-outline: #d5c3b7;
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
