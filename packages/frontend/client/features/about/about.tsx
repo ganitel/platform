@@ -98,7 +98,17 @@ function Hero() {
           lede={t("about.lede")}
         />
         <div className="mt-8 flex justify-center">
-          <PillLink to="#vision" variant="paper" arrow>
+          <PillLink
+            to="#vision"
+            variant="paper"
+            arrow
+            onClick={(event) => {
+              event.preventDefault();
+              document
+                .getElementById("vision")
+                ?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
             {t("about.hero.cta")}
           </PillLink>
         </div>
