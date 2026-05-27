@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.core.config import get_settings
 from app.core.storage import s3_client
+from app.modules.media.models import Media
 from app.modules.media.service import unattached_draft_media_query
 
 logger = logging.getLogger("sweep_orphan_media")
