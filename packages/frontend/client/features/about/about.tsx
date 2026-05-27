@@ -40,8 +40,12 @@ const IMPACT_PHOTO_SIZES = "(min-width: 768px) 33vw, 100vw";
 
 function fallbackOnError(fallback: string) {
   return (event: SyntheticEvent<HTMLImageElement>) => {
-    event.currentTarget.srcset = "";
-    event.currentTarget.src = fallback;
+    const img = event.currentTarget;
+    // Guard against an infinite error loop if the fallback itself fails to load.
+    if (img.dataset.fallbackApplied) return;
+    img.dataset.fallbackApplied = "true";
+    img.srcset = "";
+    img.src = fallback;
   };
 }
 
