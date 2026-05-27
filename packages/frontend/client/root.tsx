@@ -98,7 +98,7 @@ export function Layout({ children }: { children: ReactNode }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>
-      <body className="bg-ganitel-paper text-ganitel-text-title antialiased">
+      <body className="text-ganitel-text-title antialiased">
         <NavigationProgress />
         {children}
         <ScrollRestoration />
