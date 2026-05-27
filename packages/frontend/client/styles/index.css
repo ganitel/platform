@@ -8,15 +8,14 @@
 }
 
 .font-display {
-  font-family: "Bricolage Grotesque", "Helvetica Neue", sans-serif;
-  font-variation-settings: "wdth" 85;
+  font-family: "EB Garamond", Georgia, serif;
   font-optical-sizing: auto;
 }
 
 .font-italic-serif {
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: "EB Garamond", Georgia, serif;
   font-style: italic;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 /* Subtle film-grain overlay for atmospheric photo backdrops. */
@@ -282,8 +281,7 @@
 .ganitel-prose h3,
 .ganitel-prose h4 {
   color: var(--color-ganitel-text-title);
-  font-family: "Bricolage Grotesque", "Helvetica Neue", sans-serif;
-  font-variation-settings: "wdth" 85;
+  font-family: "EB Garamond", Georgia, serif;
   line-height: 1.2;
   margin-top: 1.6em;
 }
