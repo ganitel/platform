@@ -1,11 +1,13 @@
 """Media operations: presigned upload URL minting, draft cleanup,
 and the `to_public` mapper used by callers (listing media, avatars, …)."""
 
+from datetime import datetime
 from typing import cast
 from uuid import UUID, uuid4
 
-from sqlalchemy import exists, select
+from sqlalchemy import exists, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.core.config import get_settings
 from app.core.storage import presign_put, public_url
@@ -73,22 +75,62 @@ async def load_poster(session: AsyncSession, media: Media) -> Media | None:
     return await session.get(Media, media.poster_media_id)
 
 
+def unattached_draft_media_query(
+    *,
+    draft_id: UUID | None = None,
+    owner_user_id: UUID | None = None,
+    older_than: datetime | None = None,
+):
+    """Select draft media that is safe to delete.
+
+    Video posters are not attached through listing join tables themselves, so
+    keep any poster referenced by a video that is attached to a listing.
+    """
+    from app.modules.experiences.models import ExperienceMediaItem
+    from app.modules.properties.models import PropertyMediaItem
+
+    poster_owner = aliased(Media)
+
+    directly_attached_to_property = exists().where(PropertyMediaItem.media_id == Media.id)
+    directly_attached_to_experience = exists().where(ExperienceMediaItem.media_id == Media.id)
+    poster_owner_attached_to_property = exists().where(
+        PropertyMediaItem.media_id == poster_owner.id
+    )
+    poster_owner_attached_to_experience = exists().where(
+        ExperienceMediaItem.media_id == poster_owner.id
+    )
+    poster_for_attached_media = (
+        exists()
+        .where(poster_owner.poster_media_id == Media.id)
+        .where(or_(poster_owner_attached_to_property, poster_owner_attached_to_experience))
+    )
+
+    stmt = select(Media).where(
+        Media.draft_id.is_not(None),
+        ~directly_attached_to_property,
+        ~directly_attached_to_experience,
+        ~poster_for_attached_media,
+    )
+    if draft_id is not None:
+        stmt = stmt.where(Media.draft_id == draft_id)
+    if owner_user_id is not None:
+        stmt = stmt.where(Media.owner_user_id == owner_user_id)
+    if older_than is not None:
+        stmt = stmt.where(Media.created_at < older_than)
+    return stmt
+
+
 async def delete_unattached_draft(session: AsyncSession, user: User, draft_id: UUID) -> int:
     """Delete media tagged with this draft_id that is NOT referenced by any
     listing media. Returns the number of rows deleted. Idempotent."""
     from sqlalchemy import delete
 
-    from app.modules.experiences.models import ExperienceMediaItem
-    from app.modules.properties.models import PropertyMediaItem
-
     rows = (
         (
             await session.execute(
-                select(Media).where(
-                    Media.draft_id == draft_id,
-                    Media.owner_user_id == user.id,
-                    ~exists().where(PropertyMediaItem.media_id == Media.id),
-                    ~exists().where(ExperienceMediaItem.media_id == Media.id),
+                unattached_draft_media_query(
+                    draft_id=draft_id,
+                    owner_user_id=user.id,
                 )
             )
         )
