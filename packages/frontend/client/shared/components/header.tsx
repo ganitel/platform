@@ -36,7 +36,7 @@ export function Header() {
 
   return (
     <header
-      className="sticky top-0 z-30 border-b border-ganitel-stroke-neutral bg-ganitel-paper/85 backdrop-blur supports-backdrop-filter:bg-ganitel-paper/70"
+      className="sticky top-0 z-30 border-b border-ganitel-stroke-neutral bg-ganitel-paper/85 backdrop-blur supports-[backdrop-filter]:bg-ganitel-paper/70"
       style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
       {isPrelaunch && (
