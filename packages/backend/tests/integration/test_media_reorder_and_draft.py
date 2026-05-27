@@ -144,3 +144,30 @@ async def test_delete_draft_preserves_poster_for_attached_video(db_session):
         detail = await prop_service.to_detail(db_session, fresh, user)
 
     assert detail.media[0].poster_url == f"https://cdn.example/{poster.key}"
+
+
+@pytest.mark.asyncio
+async def test_delete_draft_does_not_delete_objects_when_commit_fails(db_session):
+    """Object storage should not be changed unless the DB cleanup commits."""
+    user = await _seed_user(db_session)
+    draft_id = uuid4()
+    media = await _request_upload(
+        db_session, user, kind="image", mime="image/jpeg", draft_id=draft_id
+    )
+
+    from unittest.mock import AsyncMock, MagicMock, patch
+
+    client = AsyncMock()
+    cm = MagicMock()
+    cm.__aenter__ = AsyncMock(return_value=client)
+    cm.__aexit__ = AsyncMock(return_value=None)
+
+    with (
+        patch.object(db_session, "commit", new=AsyncMock(side_effect=RuntimeError("db down"))),
+        patch("app.core.storage.s3_client", return_value=cm),
+        pytest.raises(RuntimeError, match="db down"),
+    ):
+        await delete_unattached_draft(db_session, user, draft_id)
+
+    assert media.key
+    client.delete_objects.assert_not_awaited()

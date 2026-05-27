@@ -141,19 +141,20 @@ async def delete_unattached_draft(session: AsyncSession, user: User, draft_id: U
     if not rows:
         return 0
 
+    ids = [m.id for m in rows]
+    keys = [m.key for m in rows]
+    await session.execute(delete(Media).where(Media.id.in_(ids)))
+    await session.commit()
+
     from app.core.storage import s3_client
 
     s = get_settings()
     async with s3_client() as client:
         # delete_objects accepts up to 1000 keys at a time
-        for batch_start in range(0, len(rows), 1000):
-            batch = rows[batch_start : batch_start + 1000]
+        for batch_start in range(0, len(keys), 1000):
+            batch = keys[batch_start : batch_start + 1000]
             await client.delete_objects(
                 Bucket=s.S3_BUCKET,
-                Delete={"Objects": [{"Key": m.key} for m in batch]},
+                Delete={"Objects": [{"Key": key} for key in batch]},
             )
-
-    ids = [m.id for m in rows]
-    await session.execute(delete(Media).where(Media.id.in_(ids)))
-    await session.commit()
     return len(rows)

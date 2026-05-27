@@ -55,6 +55,9 @@ async def _delete_orphans(max_age_hours: int) -> int:
         ids: list[UUID] = [m.id for m in rows]
         keys = [m.key for m in rows]
 
+        await session.execute(delete(Media).where(Media.id.in_(ids)))
+        await session.commit()
+
         async with s3_client() as client:
             for batch_start in range(0, len(keys), 1000):
                 batch = keys[batch_start : batch_start + 1000]
@@ -62,9 +65,6 @@ async def _delete_orphans(max_age_hours: int) -> int:
                     Bucket=s.S3_BUCKET,
                     Delete={"Objects": [{"Key": k} for k in batch]},
                 )
-
-        await session.execute(delete(Media).where(Media.id.in_(ids)))
-        await session.commit()
 
     await engine.dispose()
     logger.info("deleted %d orphan media rows", len(rows))
