@@ -5,8 +5,10 @@ import type { Route } from "./+types/properties.$id";
 import { HostCard } from "@/features/properties/components/host-card";
 import { PropertyGallery } from "@/features/properties/components/property-gallery";
 import { BookingPanel } from "@/features/properties/components/booking-panel";
+import { RoomPicker } from "@/features/properties/components/room-picker";
 import {
   useAmenityLabel,
+  useHotelCategoryLabel,
   usePropertyTypeLabel,
 } from "@/features/reference/hooks";
 import { WaitlistPanel } from "@/features/waitlist/components/waitlist-panel";
@@ -21,6 +23,7 @@ import {
   t as translate,
   useLocale,
   useT,
+  type TranslationKey,
 } from "@/shared/lib/i18n";
 import { pickPriceForLocale } from "@/shared/lib/price";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
@@ -57,7 +60,7 @@ export const meta: Route.MetaFunction = ({ data, params }) => {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "LodgingBusiness",
+    "@type": p.kind === "hotel" ? "Hotel" : "LodgingBusiness",
     "@id": absoluteUrl(`/properties/${p.id}`),
     name: p.title,
     description: p.description || undefined,
@@ -79,10 +82,17 @@ export const meta: Route.MetaFunction = ({ data, params }) => {
           }
         : undefined,
     priceRange:
-      p.prices.length > 0
-        ? `${p.prices[0].amount} ${p.prices[0].currency}`
-        : undefined,
-    numberOfRooms: p.bedrooms,
+      p.kind === "hotel"
+        ? p.summary?.min_price
+          ? `${p.summary.min_price.amount} ${p.summary.min_price.currency}`
+          : undefined
+        : p.prices.length > 0
+          ? `${p.prices[0].amount} ${p.prices[0].currency}`
+          : undefined,
+    numberOfRooms:
+      p.kind === "hotel"
+        ? (p.summary?.total_inventory ?? undefined)
+        : (p.bedrooms ?? undefined),
     petsAllowed: undefined,
     amenityFeature: p.amenities.map((a) => ({
       "@type": "LocationFeatureSpecification",
@@ -127,12 +137,23 @@ export default function PropertyDetailRoute({
   const t = useT();
   const locale = useLocale();
   const propertyTypeLabel = usePropertyTypeLabel();
+  const hotelCategoryLabel = useHotelCategoryLabel();
   const amenityLabel = useAmenityLabel();
   const isPrelaunch = usePrelaunch();
 
-  const pickedPrice = pickPriceForLocale(property.prices, locale);
+  const pickedPrice =
+    property.kind === "hotel"
+      ? (property.summary?.min_price ?? null)
+      : pickPriceForLocale(property.prices, locale);
   const priceText = pickedPrice ? formatMoney(pickedPrice, locale) : "";
-  const priceLabel = t("property.per_night");
+  const priceLabel =
+    property.kind === "hotel"
+      ? t("hotels.price.from" as TranslationKey)
+      : t("property.per_night");
+  const eyebrow =
+    property.kind === "hotel"
+      ? hotelCategoryLabel(property.property_type)
+      : propertyTypeLabel(property.property_type);
 
   const panel = isPrelaunch ? (
     <WaitlistPanel
@@ -142,6 +163,8 @@ export default function PropertyDetailRoute({
       price={pickedPrice ?? { amount: "0", currency: "XAF" }}
       priceLabel={priceLabel}
     />
+  ) : property.kind === "hotel" ? (
+    <RoomPicker property={property} />
   ) : (
     <BookingPanel property={property} />
   );
@@ -152,7 +175,7 @@ export default function PropertyDetailRoute({
         <header className="mb-5 flex flex-wrap items-start justify-between gap-4 md:mb-6">
           <div>
             <p className="text-[11px] uppercase tracking-[0.2em] text-ganitel-secondary">
-              {propertyTypeLabel(property.property_type)}
+              {eyebrow}
             </p>
             <h1 className="mt-2 font-infoma text-[28px] leading-[1.05] text-ganitel-text-title sm:text-3xl md:text-4xl">
               {property.title}
@@ -167,20 +190,22 @@ export default function PropertyDetailRoute({
 
         <div className="mt-8 grid grid-cols-1 gap-8 md:mt-10 md:gap-10 lg:grid-cols-[1fr_360px]">
           <section className="space-y-8 md:space-y-10">
-            <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-ganitel-text-subtitle">
-              <li>
-                {property.capacity} {t("property.guests")}
-              </li>
-              <li>
-                {property.bedrooms} {t("property.bedrooms")}
-              </li>
-              <li>
-                {property.beds} {t("property.beds")}
-              </li>
-              <li>
-                {property.bathrooms} {t("property.bathrooms")}
-              </li>
-            </ul>
+            {property.kind === "rental" && (
+              <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-ganitel-text-subtitle">
+                <li>
+                  {property.capacity} {t("property.guests")}
+                </li>
+                <li>
+                  {property.bedrooms} {t("property.bedrooms")}
+                </li>
+                <li>
+                  {property.beds} {t("property.beds")}
+                </li>
+                <li>
+                  {property.bathrooms} {t("property.bathrooms")}
+                </li>
+              </ul>
+            )}
 
             <div>
               <h2 className="mb-3 text-lg font-semibold text-ganitel-text-title">
