@@ -89,20 +89,18 @@ async def delete_unattached_draft(session: AsyncSession, user: User, draft_id: U
         ),
     )
 
-    deleted_rows = (
-        await session.execute(
-            delete(Media)
-            .where(
-                Media.draft_id == draft_id,
-                Media.owner_user_id == user.id,
-                ~exists().where(PropertyMediaItem.media_id == Media.id),
-                ~exists().where(ExperienceMediaItem.media_id == Media.id),
-                ~attached_video_uses_poster,
-            )
-            .returning(Media.id, Media.key)
+    result = await session.execute(
+        delete(Media)
+        .where(
+            Media.draft_id == draft_id,
+            Media.owner_user_id == user.id,
+            ~exists().where(PropertyMediaItem.media_id == Media.id),
+            ~exists().where(ExperienceMediaItem.media_id == Media.id),
+            ~attached_video_uses_poster,
         )
-        .all()
+        .returning(Media.id, Media.key)
     )
+    deleted_rows = result.all()
     await session.commit()
 
     if not deleted_rows:
