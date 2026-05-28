@@ -345,6 +345,7 @@ async def list_all_for_admin(
     session: AsyncSession,
     *,
     statuses: tuple[PropertyStatus, ...] = (),
+    kinds: tuple[PropertyKind, ...] = (),
     limit: int,
     offset: int,
 ) -> list[Property]:
@@ -357,15 +358,22 @@ async def list_all_for_admin(
     )
     if statuses:
         stmt = stmt.where(Property.status.in_(statuses))
+    if kinds:
+        stmt = stmt.where(Property.kind.in_(kinds))
     return list((await session.execute(stmt)).scalars().all())
 
 
 async def count_all_for_admin(
-    session: AsyncSession, *, statuses: tuple[PropertyStatus, ...] = ()
+    session: AsyncSession,
+    *,
+    statuses: tuple[PropertyStatus, ...] = (),
+    kinds: tuple[PropertyKind, ...] = (),
 ) -> int:
     stmt = select(func.count()).select_from(Property)
     if statuses:
         stmt = stmt.where(Property.status.in_(statuses))
+    if kinds:
+        stmt = stmt.where(Property.kind.in_(kinds))
     return int((await session.execute(stmt)).scalar_one())
 
 
