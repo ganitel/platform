@@ -3,6 +3,7 @@ import type { BookingPublic, InitiatePaymentOut } from "./types";
 
 export interface CreateBookingPayload {
   property_id: string;
+  room_type_id?: string;
   check_in_date: string;
   check_out_date: string;
   guest_count: number;
