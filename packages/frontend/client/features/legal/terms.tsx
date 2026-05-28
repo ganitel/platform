@@ -1,15 +1,13 @@
-import { motion } from "framer-motion";
-
 import { Markdown } from "@/shared/components/markdown";
 import { useT } from "@/shared/lib/i18n";
+import { useReveal } from "@/shared/hooks/use-reveal";
 import { SectionHeader } from "@/shared/ui/section-header";
 
 import { LegalFooterNotes } from "./legal-shell";
 
-const ENTRANCE_EASE = [0.2, 0.7, 0.2, 1] as const;
-
 export function Terms() {
   const t = useT();
+  const ref = useReveal<HTMLDivElement>();
   return (
     <>
       <section className="px-6 pb-8 pt-16 md:px-12 md:pb-12 md:pt-20">
@@ -26,17 +24,11 @@ export function Terms() {
       </section>
 
       <section className="px-6 pb-16 md:px-12 md:pb-20">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-10%" }}
-          transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
-          className="mx-auto max-w-3xl"
-        >
+        <div ref={ref} data-reveal="" className="mx-auto max-w-3xl">
           <LegalFooterNotes className="mb-10" />
           <Markdown source={t("terms.body")} />
           <LegalFooterNotes className="mt-12" showNotice={false} showContact />
-        </motion.div>
+        </div>
       </section>
     </>
   );

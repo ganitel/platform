@@ -1,13 +1,11 @@
 import type { CSSProperties, ReactNode } from "react";
-import { motion } from "framer-motion";
 
 import { cn } from "@/shared/lib/cn";
+import { useReveal } from "@/shared/hooks/use-reveal";
 
 const TITLE_STYLE: CSSProperties = {
   fontSize: "clamp(2.25rem, 4.4vw, 4.5rem)",
 };
-
-const ENTRANCE_EASE = [0.2, 0.7, 0.2, 1] as const;
 
 export interface SectionHeaderProps {
   tag?: ReactNode;
@@ -101,15 +99,20 @@ export function SectionHeader({
     return <header className={layout}>{content}</header>;
   }
 
+  return <AnimatedHeader className={layout}>{content}</AnimatedHeader>;
+}
+
+function AnimatedHeader({
+  className,
+  children,
+}: {
+  className: string;
+  children: ReactNode;
+}) {
+  const ref = useReveal<HTMLElement>({ rootMargin: "-15% 0px -15% 0px" });
   return (
-    <motion.header
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-15%" }}
-      transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
-      className={layout}
-    >
-      {content}
-    </motion.header>
+    <header ref={ref} data-reveal="" className={className}>
+      {children}
+    </header>
   );
 }

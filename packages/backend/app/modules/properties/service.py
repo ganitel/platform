@@ -3,6 +3,7 @@ unpublish, media attach/detach/reorder, and the `to_public` / `to_detail`
 mappers that turn ORM rows into API schemas."""
 
 from datetime import UTC, datetime
+from decimal import Decimal
 from typing import Literal, cast
 from uuid import UUID
 
@@ -18,11 +19,21 @@ from app.modules.media.models import Media, MediaKind
 from app.modules.media.schemas import MediaItemPublic, MediaPublic
 from app.modules.media.service import load_poster
 from app.modules.media.service import to_public as media_to_public
-from app.modules.properties.models import Property, PropertyMediaItem, PropertyPrice, PropertyStatus
+from app.modules.properties.models import (
+    Property,
+    PropertyKind,
+    PropertyMediaItem,
+    PropertyPrice,
+    PropertyStatus,
+    RoomType,
+    RoomTypeMediaItem,
+)
 from app.modules.properties.schemas import (
     AdminStatusSummary,
+    BedSpec,
     GeoPoint,
     HostPublic,
+    HotelSummary,
     PropertyAdminListItem,
     PropertyCreateIn,
     PropertyDetail,
@@ -30,6 +41,7 @@ from app.modules.properties.schemas import (
     PropertyPublic,
     PropertyShowcaseAmenities,
     PropertyUpdateIn,
+    RoomTypePublic,
 )
 from app.modules.users.models import User
 
@@ -128,11 +140,72 @@ async def _cover(session: AsyncSession, items: list[PropertyMediaItem]) -> Media
     return await media_to_public(first.media, poster=poster)
 
 
+async def _load_rooms(session: AsyncSession, property_id: UUID) -> list[RoomType]:
+    stmt = (
+        select(RoomType)
+        .options(
+            selectinload(RoomType.prices),
+            selectinload(RoomType.media).selectinload(RoomTypeMediaItem.media),
+        )
+        .where(RoomType.property_id == property_id)
+        .order_by(RoomType.position, RoomType.created_at)
+    )
+    return list((await session.execute(stmt)).scalars().all())
+
+
+async def _resolve_room_media(
+    session: AsyncSession, items: list[RoomTypeMediaItem]
+) -> list[MediaItemPublic]:
+    out: list[MediaItemPublic] = []
+    for it in items:
+        poster = await load_poster(session, it.media)
+        public = await media_to_public(it.media, poster=poster)
+        out.append(MediaItemPublic(**public.model_dump(), media_item_id=it.id))
+    return out
+
+
+async def room_to_public(session: AsyncSession, room: RoomType) -> RoomTypePublic:
+    media_items = await _resolve_room_media(session, room.media)
+    return RoomTypePublic(
+        id=room.id,
+        title=room.title,
+        description=room.description,
+        bed_config=[BedSpec(**b) for b in (room.bed_config or [])],
+        max_guests=room.max_guests,
+        amenities=list(room.amenities),
+        private_bathroom=room.private_bathroom,
+        inventory_count=room.inventory_count,
+        position=room.position,
+        active=room.active,
+        prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in room.prices],
+        media=media_items,
+    )
+
+
+def _summary(rooms: list[RoomType]) -> HotelSummary:
+    active = [r for r in rooms if r.active]
+    grouped: dict[str, Decimal] = {}
+    for r in active:
+        for p in r.prices:
+            if p.currency not in grouped or p.amount < grouped[p.currency]:
+                grouped[p.currency] = p.amount
+    min_price: Money | None = None
+    if grouped:
+        currency_code, amount = min(grouped.items(), key=lambda kv: kv[1])
+        min_price = Money(amount=amount, currency=Currency(currency_code))
+    return HotelSummary(
+        min_price=min_price,
+        max_capacity=max((r.max_guests for r in active), default=0),
+        total_inventory=sum(r.inventory_count for r in active),
+    )
+
+
 async def create_draft(session: AsyncSession, host: User, payload: PropertyCreateIn) -> Property:
     if not host.is_host:
         host.is_host = True
     prop = Property(
         host_id=host.id,
+        kind=payload.kind,
         title=payload.title,
         description=payload.description,
         property_type=payload.property_type,
@@ -220,10 +293,29 @@ async def publish(session: AsyncSession, property: Property, user: User) -> Prop
     issues: dict[str, str] = {}
     if not property.title.strip():
         issues["title"] = "missing"
-    if not property.prices:
-        issues["prices"] = "empty"
     if not property.media:
         issues["media"] = "empty"
+
+    if property.kind == PropertyKind.RENTAL:
+        if not property.prices:
+            issues["prices"] = "empty"
+        if property.capacity is None:
+            issues["capacity"] = "missing"
+    else:
+        rooms_stmt = (
+            select(RoomType)
+            .options(selectinload(RoomType.prices), selectinload(RoomType.media))
+            .where(RoomType.property_id == property.id, RoomType.active.is_(True))
+        )
+        rooms = list((await session.execute(rooms_stmt)).scalars().all())
+        if not rooms:
+            issues["rooms"] = "empty"
+        else:
+            if not any(r.prices for r in rooms):
+                issues["room_prices"] = "empty"
+            if not any(r.media for r in rooms):
+                issues["room_media"] = "empty"
+
     if issues:
         raise ValidationError(code="property.not_ready", extra={"issues": issues})
     property.status = PropertyStatus.PUBLISHED
@@ -359,8 +451,12 @@ async def reorder_media(
 
 async def to_detail(session: AsyncSession, property: Property, host: User) -> PropertyDetail:
     media_items = await _resolve_listing_media(session, property.media)
+    is_hotel = property.kind == PropertyKind.HOTEL
+    rooms = await _load_rooms(session, property.id) if is_hotel else []
+    room_public = [await room_to_public(session, r) for r in rooms]
     return PropertyDetail(
         id=property.id,
+        kind=property.kind,
         title=property.title,
         property_type=property.property_type,
         address=property.address,
@@ -376,6 +472,7 @@ async def to_detail(session: AsyncSession, property: Property, host: User) -> Pr
         showcase_amenities=_showcase_amenities(property),
         listing_metadata=_listing_metadata(property),
         cover_media=media_items[0] if media_items else None,
+        summary=_summary(rooms) if is_hotel else None,
         description=property.description,
         house_rules=property.house_rules,
         cancellation_policy=property.cancellation_policy,
@@ -385,12 +482,22 @@ async def to_detail(session: AsyncSession, property: Property, host: User) -> Pr
         media=media_items,
         created_at=property.created_at,
         published_at=property.published_at,
+        rooms=room_public,
     )
 
 
 async def to_admin_list_item(session: AsyncSession, property: Property) -> PropertyAdminListItem:
+    room_count = 0
+    if property.kind == PropertyKind.HOTEL:
+        count_stmt = (
+            select(func.count())
+            .select_from(RoomType)
+            .where(RoomType.property_id == property.id, RoomType.active.is_(True))
+        )
+        room_count = int((await session.execute(count_stmt)).scalar_one())
     return PropertyAdminListItem(
         id=property.id,
+        kind=property.kind,
         title=property.title,
         property_type=property.property_type,
         city=property.city,
@@ -398,6 +505,7 @@ async def to_admin_list_item(session: AsyncSession, property: Property) -> Prope
         status=property.status,
         prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in property.prices],
         cover_media=await _cover(session, property.media),
+        room_count=room_count,
         created_at=property.created_at,
         published_at=property.published_at,
     )
@@ -406,8 +514,11 @@ async def to_admin_list_item(session: AsyncSession, property: Property) -> Prope
 async def to_public(
     session: AsyncSession, property: Property, *, distance_km: float | None = None
 ) -> PropertyPublic:
+    is_hotel = property.kind == PropertyKind.HOTEL
+    rooms = await _load_rooms(session, property.id) if is_hotel else []
     return PropertyPublic(
         id=property.id,
+        kind=property.kind,
         title=property.title,
         property_type=property.property_type,
         address=property.address,
@@ -424,4 +535,5 @@ async def to_public(
         listing_metadata=_listing_metadata(property),
         cover_media=await _cover(session, property.media),
         distance_km=distance_km,
+        summary=_summary(rooms) if is_hotel else None,
     )

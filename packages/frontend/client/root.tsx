@@ -9,7 +9,7 @@ import {
   useRouteLoaderData,
 } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { useState, useSyncExternalStore, type ReactNode } from "react";
 
 import type { Route } from "./+types/root";
 
@@ -34,20 +34,15 @@ function apiOrigin(): string | null {
   }
 }
 
-const GOOGLE_FONTS_HREF =
-  "https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap";
-
 export const links: Route.LinksFunction = () => {
   const api = apiOrigin();
   return [
-    { rel: "preconnect", href: "https://fonts.googleapis.com" },
+    { rel: "stylesheet", href: indexCss },
     {
       rel: "preconnect",
-      href: "https://fonts.gstatic.com",
+      href: "https://images.unsplash.com",
       crossOrigin: "anonymous",
     },
-    { rel: "stylesheet", href: GOOGLE_FONTS_HREF },
-    { rel: "stylesheet", href: indexCss },
     ...(api
       ? [
           { rel: "preconnect", href: api, crossOrigin: "anonymous" as const },
@@ -55,7 +50,11 @@ export const links: Route.LinksFunction = () => {
         ]
       : []),
     { rel: "icon", href: "/favicon.ico", sizes: "any" },
-    { rel: "apple-touch-icon", href: "/og/default.png" },
+    {
+      rel: "apple-touch-icon",
+      href: "/icons/apple-touch-icon.png",
+      sizes: "180x180",
+    },
   ];
 };
 
@@ -108,6 +107,8 @@ export function Layout({ children }: { children: ReactNode }) {
   );
 }
 
+const NEVER_CHANGES = () => () => {};
+
 export default function App({ loaderData }: Route.ComponentProps) {
   const [queryClient] = useState(
     () =>
@@ -123,10 +124,18 @@ export default function App({ loaderData }: Route.ComponentProps) {
         },
       }),
   );
+  const locale = useSyncExternalStore<Locale>(
+    NEVER_CHANGES,
+    () =>
+      typeof navigator !== "undefined"
+        ? localeFromAcceptLanguage(navigator.language)
+        : loaderData.locale,
+    () => loaderData.locale,
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
-      <LocaleContext.Provider value={loaderData.locale}>
+      <LocaleContext.Provider value={locale}>
         <TooltipProvider delayDuration={200}>
           <Outlet />
           <Toaster />

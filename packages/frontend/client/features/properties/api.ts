@@ -4,8 +4,12 @@ import type {
   AdminStatusSummary,
   PropertyCreateInput,
   PropertyDetail,
+  PropertyKind,
   PropertyStatus,
   PropertyUpdateInput,
+  RoomTypeCreateInput,
+  RoomTypePublic,
+  RoomTypeUpdateInput,
   SearchFilters,
   SearchOut,
 } from "@/features/properties/types";
@@ -26,6 +30,7 @@ export async function getProperty(id: string): Promise<PropertyDetail> {
 
 export interface AdminListParams {
   status?: PropertyStatus[];
+  kind?: PropertyKind[];
   limit?: number;
   offset?: number;
 }
@@ -101,6 +106,57 @@ export async function reorderPropertyMedia(
   const r = await apiClient.patch<PropertyDetail>(
     `/properties/${propertyId}/media`,
     { order },
+  );
+  return r.data;
+}
+
+export interface ListPropertyRoomsParams {
+  check_in?: string;
+  check_out?: string;
+  guests?: number;
+  currency?: string;
+}
+
+export async function listPropertyRooms(
+  propertyId: string,
+  opts: ListPropertyRoomsParams = {},
+): Promise<RoomTypePublic[]> {
+  const r = await apiClient.get<RoomTypePublic[]>(
+    `/properties/${propertyId}/rooms`,
+    { params: opts as Record<string, unknown> },
+  );
+  return r.data;
+}
+
+export async function createRoom(
+  propertyId: string,
+  body: RoomTypeCreateInput,
+): Promise<RoomTypePublic> {
+  const r = await apiClient.post<RoomTypePublic>(
+    `/properties/${propertyId}/rooms`,
+    body,
+  );
+  return r.data;
+}
+
+export async function updateRoom(
+  propertyId: string,
+  roomId: string,
+  body: RoomTypeUpdateInput,
+): Promise<RoomTypePublic> {
+  const r = await apiClient.patch<RoomTypePublic>(
+    `/properties/${propertyId}/rooms/${roomId}`,
+    body,
+  );
+  return r.data;
+}
+
+export async function deleteRoom(
+  propertyId: string,
+  roomId: string,
+): Promise<RoomTypePublic> {
+  const r = await apiClient.delete<RoomTypePublic>(
+    `/properties/${propertyId}/rooms/${roomId}`,
   );
   return r.data;
 }

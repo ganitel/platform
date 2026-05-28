@@ -1,6 +1,5 @@
-import { motion } from "framer-motion";
-
 import { useT } from "@/shared/lib/i18n";
+import { useReveal } from "@/shared/hooks/use-reveal";
 import { SectionHeader } from "@/shared/ui/section-header";
 import {
   Accordion,
@@ -11,11 +10,10 @@ import {
 
 import { FAQ_ITEMS } from "./faq-items";
 
-const ENTRANCE_EASE = [0.2, 0.7, 0.2, 1] as const;
-
 export function Faq() {
   const t = useT();
   const email = t("legal.contact_email");
+  const ref = useReveal<HTMLDivElement>();
 
   return (
     <>
@@ -33,13 +31,7 @@ export function Faq() {
       </section>
 
       <section className="px-6 pb-16 md:px-12 md:pb-20">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-10%" }}
-          transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
-          className="mx-auto max-w-3xl"
-        >
+        <div ref={ref} data-reveal="" className="mx-auto max-w-3xl">
           <Accordion
             type="single"
             collapsible
@@ -70,7 +62,7 @@ export function Faq() {
               {email}
             </a>
           </p>
-        </motion.div>
+        </div>
       </section>
     </>
   );

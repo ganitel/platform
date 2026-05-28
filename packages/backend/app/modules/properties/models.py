@@ -25,7 +25,8 @@ from sqlalchemy import (
     Uuid,
     func,
 )
-from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
+from sqlalchemy import text as sa_text
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB, TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
@@ -57,13 +58,34 @@ class KitchenType(StrEnum):
     FULL = "full"
 
 
+class PropertyKind(StrEnum):
+    RENTAL = "rental"
+    HOTEL = "hotel"
+
+
 class Property(Base):
     __tablename__ = "properties"
-    __table_args__ = (CheckConstraint("capacity >= 1", name="ck_properties_capacity_positive"),)
+    __table_args__ = (
+        CheckConstraint(
+            "capacity IS NULL OR capacity >= 1",
+            name="ck_properties_capacity_positive",
+        ),
+    )
 
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
     host_id: Mapped[UUID] = mapped_column(
         Uuid(), ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    kind: Mapped[PropertyKind] = mapped_column(
+        Enum(
+            PropertyKind,
+            name="property_kind",
+            values_callable=lambda enum: [e.value for e in enum],
+        ),
+        nullable=False,
+        default=PropertyKind.RENTAL,
+        server_default=PropertyKind.RENTAL.value,
+        index=True,
     )
 
     title: Mapped[str] = mapped_column(String(180), nullable=False)
@@ -77,10 +99,10 @@ class Property(Base):
         Geography(geometry_type="POINT", srid=4326, spatial_index=False), nullable=False
     )
 
-    capacity: Mapped[int] = mapped_column(Integer, nullable=False)
-    bedrooms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    beds: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    bathrooms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    capacity: Mapped[int | None] = mapped_column(Integer)
+    bedrooms: Mapped[int | None] = mapped_column(Integer, default=0)
+    beds: Mapped[int | None] = mapped_column(Integer, default=0)
+    bathrooms: Mapped[int | None] = mapped_column(Integer, default=0)
 
     amenities: Mapped[list[str]] = mapped_column(
         ARRAY(String(40)), nullable=False, server_default="{}"
@@ -160,6 +182,11 @@ class Property(Base):
         cascade="all, delete-orphan",
         lazy="selectin",
     )
+    room_types: Mapped[list["RoomType"]] = relationship(
+        back_populates="property",
+        cascade="all, delete-orphan",
+        order_by="RoomType.position",
+    )
 
 
 class PropertyPrice(Base):
@@ -196,4 +223,99 @@ class PropertyMediaItem(Base):
     )
 
     property: Mapped[Property] = relationship(back_populates="media")
+    media: Mapped[Media] = relationship()
+
+
+class RoomType(Base):
+    __tablename__ = "room_types"
+    __table_args__ = (
+        CheckConstraint("max_guests >= 1 AND max_guests <= 16", name="ck_room_types_max_guests"),
+        CheckConstraint(
+            "inventory_count >= 1 AND inventory_count <= 500",
+            name="ck_room_types_inventory_count",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
+    property_id: Mapped[UUID] = mapped_column(
+        Uuid(),
+        ForeignKey("properties.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    title: Mapped[str] = mapped_column(String(180), nullable=False)
+    description: Mapped[str] = mapped_column(Text(), nullable=False, server_default="")
+    bed_config: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSONB, nullable=False, server_default=sa_text("'[]'::jsonb")
+    )
+    max_guests: Mapped[int] = mapped_column(Integer, nullable=False)
+    amenities: Mapped[list[str]] = mapped_column(
+        ARRAY(String(40)), nullable=False, server_default="{}"
+    )
+    private_bathroom: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    inventory_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    property: Mapped[Property] = relationship(back_populates="room_types")
+    prices: Mapped[list["RoomTypePrice"]] = relationship(
+        cascade="all, delete-orphan", lazy="selectin"
+    )
+    media: Mapped[list["RoomTypeMediaItem"]] = relationship(
+        back_populates="room_type",
+        cascade="all, delete-orphan",
+        order_by="RoomTypeMediaItem.position",
+    )
+
+
+class RoomTypePrice(Base):
+    __tablename__ = "room_type_prices"
+    __table_args__ = (
+        UniqueConstraint("room_type_id", "currency", name="uq_room_type_prices_room_currency"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
+    room_type_id: Mapped[UUID] = mapped_column(
+        Uuid(),
+        ForeignKey("room_types.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    currency: Mapped[str] = mapped_column(String(3), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Numeric(19, 4), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class RoomTypeMediaItem(Base):
+    __tablename__ = "room_type_media"
+
+    id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
+    room_type_id: Mapped[UUID] = mapped_column(
+        Uuid(),
+        ForeignKey("room_types.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    media_id: Mapped[UUID] = mapped_column(
+        Uuid(), ForeignKey("media.id", ondelete="RESTRICT"), nullable=False
+    )
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    room_type: Mapped[RoomType] = relationship(back_populates="media")
     media: Mapped[Media] = relationship()

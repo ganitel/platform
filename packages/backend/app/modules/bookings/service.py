@@ -17,7 +17,7 @@ from app.core.money import Currency, Money
 from app.modules.bookings.models import ACTIVE_STATUSES, Booking, BookingStatus
 from app.modules.bookings.schemas import BookingCreateIn, BookingPublic
 from app.modules.outbox import service as outbox_service
-from app.modules.properties.models import Property, PropertyStatus
+from app.modules.properties.models import Property, PropertyKind, PropertyStatus, RoomType
 from app.modules.users.models import User
 
 
@@ -64,7 +64,57 @@ async def create_booking(session: AsyncSession, guest: User, payload: BookingCre
         raise NotFoundError(code="property.not_found")
     if prop.host_id == guest.id:
         raise ForbiddenError(code="booking.self_booking")
-    if payload.guest_count > prop.capacity:
+
+    if prop.kind == PropertyKind.HOTEL:
+        if payload.room_type_id is None:
+            raise ValidationError(code="booking.room_required", extra={"field": "room_type_id"})
+        booking = await _create_hotel_booking(session, guest, prop, payload, nights)
+    else:
+        if payload.room_type_id is not None:
+            raise ValidationError(code="booking.room_forbidden", extra={"field": "room_type_id"})
+        booking = await _create_rental_booking(session, guest, prop, payload, nights)
+
+    try:
+        await session.flush()
+
+        await outbox_service.enqueue(
+            session,
+            event_type="booking.created",
+            aggregate_type="booking",
+            aggregate_id=booking.id,
+            payload={
+                "booking_id": str(booking.id),
+                "guest_id": str(guest.id),
+                "host_id": str(prop.host_id),
+                "property_id": str(prop.id),
+                "room_type_id": str(booking.room_type_id) if booking.room_type_id else None,
+                "subtotal_amount": str(booking.subtotal_amount),
+                "currency": booking.subtotal_currency,
+            },
+        )
+
+        await session.commit()
+    except IntegrityError as e:
+        await session.rollback()
+        if "no_overlap" in str(e.orig).lower() or "exclude" in str(e.orig).lower():
+            raise ConflictError(
+                code="booking.dates_unavailable",
+                extra={"field": "check_in_date"},
+            ) from e
+        raise
+
+    await session.refresh(booking)
+    return booking
+
+
+async def _create_rental_booking(
+    session: AsyncSession,
+    guest: User,
+    prop: Property,
+    payload: BookingCreateIn,
+    nights: int,
+) -> Booking:
+    if prop.capacity is not None and payload.guest_count > prop.capacity:
         raise ValidationError(
             code="booking.capacity_exceeded",
             extra={"field": "guest_count", "max": prop.capacity},
@@ -77,14 +127,14 @@ async def create_booking(session: AsyncSession, guest: User, payload: BookingCre
     if matching is None:
         raise ValidationError(code="booking.currency_unavailable", extra={"field": "currency"})
 
-    await expire_old_holds(session, property_id=payload.property_id)
+    await expire_old_holds(session, property_id=prop.id)
 
     settings = get_settings()
     subtotal = matching.amount * nights
 
     booking = Booking(
         guest_id=guest.id,
-        property_id=payload.property_id,
+        property_id=prop.id,
         check_in_date=payload.check_in_date,
         check_out_date=payload.check_out_date,
         guest_count=payload.guest_count,
@@ -98,34 +148,73 @@ async def create_booking(session: AsyncSession, guest: User, payload: BookingCre
         hold_expires_at=datetime.now(UTC) + timedelta(minutes=settings.BOOKING_HOLD_MINUTES),
     )
     session.add(booking)
+    return booking
 
-    await outbox_service.enqueue(
-        session,
-        event_type="booking.created",
-        aggregate_type="booking",
-        aggregate_id=booking.id,
-        payload={
-            "booking_id": str(booking.id),
-            "guest_id": str(guest.id),
-            "host_id": str(prop.host_id),
-            "property_id": str(prop.id),
-            "subtotal_amount": str(subtotal),
-            "currency": matching.currency,
-        },
+
+async def _create_hotel_booking(
+    session: AsyncSession,
+    guest: User,
+    prop: Property,
+    payload: BookingCreateIn,
+    nights: int,
+) -> Booking:
+    room_stmt = (
+        select(RoomType)
+        .options(selectinload(RoomType.prices))
+        .where(
+            RoomType.id == payload.room_type_id,
+            RoomType.property_id == prop.id,
+        )
+        .with_for_update()
     )
+    room = (await session.execute(room_stmt)).scalar_one_or_none()
+    if room is None:
+        raise NotFoundError(code="room.not_found")
+    if not room.active:
+        raise ValidationError(code="room.inactive")
+    if payload.guest_count > room.max_guests:
+        raise ValidationError(
+            code="booking.capacity_exceeded",
+            extra={"field": "guest_count", "max": room.max_guests},
+        )
+    matching = next((p for p in room.prices if p.currency == payload.currency.value), None)
+    if matching is None:
+        raise ValidationError(code="booking.currency_unavailable", extra={"field": "currency"})
 
-    try:
-        await session.commit()
-    except IntegrityError as e:
-        await session.rollback()
-        if "no_overlap" in str(e.orig).lower() or "exclude" in str(e.orig).lower():
-            raise ConflictError(
-                code="booking.dates_unavailable",
-                extra={"field": "check_in_date"},
-            ) from e
-        raise
+    await expire_old_holds(session, property_id=prop.id)
 
-    await session.refresh(booking)
+    used_stmt = select(Booking.room_slot_index).where(
+        Booking.room_type_id == room.id,
+        Booking.status.in_(ACTIVE_STATUSES),
+        Booking.check_in_date < payload.check_out_date,
+        Booking.check_out_date > payload.check_in_date,
+    )
+    used = set((await session.execute(used_stmt)).scalars().all())
+    slot = next((i for i in range(room.inventory_count) if i not in used), None)
+    if slot is None:
+        raise ConflictError(code="booking.dates_unavailable", extra={"field": "check_in_date"})
+
+    settings = get_settings()
+    subtotal = matching.amount * nights
+
+    booking = Booking(
+        guest_id=guest.id,
+        property_id=prop.id,
+        room_type_id=room.id,
+        room_slot_index=slot,
+        check_in_date=payload.check_in_date,
+        check_out_date=payload.check_out_date,
+        guest_count=payload.guest_count,
+        subtotal_amount=subtotal,
+        subtotal_currency=matching.currency,
+        total_amount=subtotal,
+        total_currency=matching.currency,
+        host_payout_amount=subtotal,
+        host_payout_currency=matching.currency,
+        status=BookingStatus.PENDING_PAYMENT,
+        hold_expires_at=datetime.now(UTC) + timedelta(minutes=settings.BOOKING_HOLD_MINUTES),
+    )
+    session.add(booking)
     return booking
 
 
@@ -223,6 +312,8 @@ def to_public(booking: Booking) -> BookingPublic:
         id=booking.id,
         property_id=booking.property_id,
         guest_id=booking.guest_id,
+        room_type_id=booking.room_type_id,
+        room_title=None,
         check_in_date=booking.check_in_date,
         check_out_date=booking.check_out_date,
         nights=nights,
@@ -237,3 +328,11 @@ def to_public(booking: Booking) -> BookingPublic:
         cancelled_at=booking.cancelled_at,
         created_at=booking.created_at,
     )
+
+
+async def to_public_with_room(session: AsyncSession, booking: Booking) -> BookingPublic:
+    public = to_public(booking)
+    if booking.room_type_id is None:
+        return public
+    room = await session.get(RoomType, booking.room_type_id)
+    return public.model_copy(update={"room_title": room.title if room else None})

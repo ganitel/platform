@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Compass, Heart, Home, Sparkles, User as UserIcon } from "lucide-react";
 import { NavLink, useLocation } from "react-router";
 
@@ -91,15 +90,9 @@ export function BottomNav() {
               {({ isActive }) => (
                 <>
                   {isActive && (
-                    <motion.span
-                      layoutId="bottom-nav-active"
+                    <span
                       aria-hidden
                       className="absolute inset-x-3 top-0 h-0.5 rounded-b-full bg-ganitel-text-title"
-                      transition={{
-                        type: "spring",
-                        stiffness: 420,
-                        damping: 36,
-                      }}
                     />
                   )}
                   <Icon

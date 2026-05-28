@@ -50,3 +50,19 @@ export async function listCancellationPolicies(): Promise<
   );
   return r.data;
 }
+
+export interface ReferenceItem {
+  code: string;
+  label_en: string;
+  label_fr: string;
+}
+
+export async function listBedTypes(): Promise<ReferenceItem[]> {
+  const r = await apiClient.get<ReferenceItem[]>("/reference/bed-types");
+  return r.data;
+}
+
+export async function listHotelCategories(): Promise<ReferenceItem[]> {
+  const r = await apiClient.get<ReferenceItem[]>("/reference/hotel-categories");
+  return r.data;
+}

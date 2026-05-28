@@ -1,7 +1,6 @@
-import { motion } from "framer-motion";
-import { ArrowDown, Play } from "lucide-react";
-import type { CSSProperties } from "react";
+import { BadgeCheck, Compass, ShieldCheck, Sparkles } from "lucide-react";
 
+import type { TranslationKey } from "@/shared/lib/i18n";
 import { useT } from "@/shared/lib/i18n";
 import {
   PropertyGrid,
@@ -10,253 +9,281 @@ import {
 import { useSearchProperties } from "@/features/properties/hooks";
 import { PillLink } from "@/shared/ui/pill-link";
 import { SectionHeader } from "@/shared/ui/section-header";
-import { useCalmMode } from "@/shared/hooks/use-connection";
+import { useReveal } from "@/shared/hooks/use-reveal";
+import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 import {
   buildSrcSet,
   fallbackOnError,
   transformImage,
-  HERO_WIDTHS,
-  HERO_SIZES,
+  CARD_WIDTHS,
 } from "@/shared/lib/image";
+import {
+  DEST_EAST_FALLBACK,
+  DEST_EAST_SOURCE,
+  DEST_HIGHLANDS_FALLBACK,
+  DEST_HIGHLANDS_SOURCE,
+  DEST_LITTORAL_FALLBACK,
+  DEST_LITTORAL_SOURCE,
+  DEST_SIZES,
+  DEST_SW_FALLBACK,
+  DEST_SW_SOURCE,
+  HERO_FALLBACK,
+  HERO_MOBILE_SRC,
+  HERO_SIZES,
+  HERO_SRCSET,
+  VISION_FALLBACK,
+  VISION_SOURCE,
+} from "./hero-source";
 
-const HERO_SOURCE =
-  "https://images.unsplash.com/photo-1756475471671-48813cf5ea5b?w=2000&q=80&auto=format&fit=crop";
-const HERO_FALLBACK = "https://picsum.photos/seed/ganitelhero/1600/1067";
-const FEATURE_SOURCE =
-  "https://images.unsplash.com/photo-1741850819375-5de72125719e?w=900&q=80&auto=format&fit=crop";
-const FEATURE_FALLBACK = "https://picsum.photos/seed/ganitelfeat/720/560";
+const HERO_CTA_DELAY = { animationDelay: "0.45s" };
 
-const ENTRANCE_EASE = [0.2, 0.7, 0.2, 1] as const;
+const PROMISES = [
+  { key: "security", labelKey: "about.promise.security", icon: ShieldCheck },
+  { key: "convenience", labelKey: "about.promise.convenience", icon: Compass },
+  { key: "verified", labelKey: "about.promise.verified", icon: BadgeCheck },
+  { key: "premium", labelKey: "about.promise.premium", icon: Sparkles },
+] as const satisfies ReadonlyArray<{
+  key: string;
+  labelKey: TranslationKey;
+  icon: typeof ShieldCheck;
+}>;
+
+interface Destination {
+  key: string;
+  source: string;
+  fallback: string;
+  titleKey: TranslationKey;
+  blurbKey: TranslationKey;
+  altKey: TranslationKey;
+}
+
+const DESTINATIONS: ReadonlyArray<Destination> = [
+  {
+    key: "sw",
+    source: DEST_SW_SOURCE,
+    fallback: DEST_SW_FALLBACK,
+    titleKey: "landing.destinations.sw.title",
+    blurbKey: "landing.destinations.sw.blurb",
+    altKey: "landing.alt.sw",
+  },
+  {
+    key: "highlands",
+    source: DEST_HIGHLANDS_SOURCE,
+    fallback: DEST_HIGHLANDS_FALLBACK,
+    titleKey: "landing.destinations.highlands.title",
+    blurbKey: "landing.destinations.highlands.blurb",
+    altKey: "landing.alt.highlands",
+  },
+  {
+    key: "east",
+    source: DEST_EAST_SOURCE,
+    fallback: DEST_EAST_FALLBACK,
+    titleKey: "landing.destinations.east.title",
+    blurbKey: "landing.destinations.east.blurb",
+    altKey: "landing.alt.east",
+  },
+  {
+    key: "littoral",
+    source: DEST_LITTORAL_SOURCE,
+    fallback: DEST_LITTORAL_FALLBACK,
+    titleKey: "landing.destinations.littoral.title",
+    blurbKey: "landing.destinations.littoral.blurb",
+    altKey: "landing.alt.littoral",
+  },
+];
+
+interface ImpactCard {
+  key: string;
+  titleKey: TranslationKey;
+  bodyKey: TranslationKey;
+}
+
+const IMPACT_CARDS: ReadonlyArray<ImpactCard> = [
+  {
+    key: "renewal",
+    titleKey: "about.impact.card.renewal.title",
+    bodyKey: "about.impact.card.renewal.body",
+  },
+  {
+    key: "guides",
+    titleKey: "about.impact.card.guides.title",
+    bodyKey: "about.impact.card.guides.body",
+  },
+  {
+    key: "transport",
+    titleKey: "about.impact.card.transport.title",
+    bodyKey: "about.impact.card.transport.body",
+  },
+];
 
 export function Landing() {
   return (
     <>
       <Hero />
-      <FeaturedSection />
-      <FinalCTA />
+      <TrustStrip />
+      <Destinations />
+      <FeaturedStays />
+      <WhyGanitel />
+      <VisionMoment />
+      <Closing />
     </>
   );
 }
 
 function Hero() {
+  const t = useT();
+  const isPrelaunch = usePrelaunch();
   return (
-    <section className="relative h-[calc(100svh-4rem)] min-h-[560px] overflow-hidden p-3 md:p-5">
-      <Stage />
-      <HeroPanel />
-      <FeatureCard />
-      <ScrollHint />
-    </section>
-  );
-}
-
-function Stage() {
-  const calm = useCalmMode();
-  const heroSrcSet = buildSrcSet(HERO_SOURCE, HERO_WIDTHS, 70);
-  const mobileSrc = transformImage(HERO_SOURCE, { width: 720, quality: 65 });
-
-  return (
-    <div className="absolute inset-3 isolate overflow-hidden rounded-[18px] bg-[#14180f] md:inset-5 md:rounded-[22px]">
-      <motion.img
-        src={mobileSrc}
-        srcSet={heroSrcSet}
+    <section className="relative flex min-h-[88vh] items-center justify-center overflow-hidden">
+      <img
+        src={HERO_MOBILE_SRC}
+        srcSet={HERO_SRCSET}
         sizes={HERO_SIZES}
-        alt=""
+        alt={t("landing.alt.hero")}
         loading="eager"
         fetchPriority="high"
         decoding="async"
         width={1440}
         height={960}
         onError={fallbackOnError(HERO_FALLBACK)}
-        className="absolute inset-[-3%] h-[106%] w-[106%] object-cover object-[50%_35%] saturate-[0.92] contrast-[1.05] brightness-[0.92]"
-        animate={
-          calm
-            ? undefined
-            : {
-                scale: [1, 1.055],
-                x: ["0%", "-1%"],
-                y: ["0%", "-1.2%"],
-              }
-        }
-        transition={
-          calm
-            ? undefined
-            : {
-                duration: 16,
-                ease: [0.4, 0, 0.4, 1],
-                repeat: Infinity,
-                repeatType: "mirror",
-              }
-        }
+        className="ganitel-anim-kenburns absolute inset-[-3%] h-[106%] w-[106%] object-cover saturate-[0.92] brightness-[0.92]"
       />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_45%_at_70%_38%,rgba(220,140,60,0.22),transparent_65%)]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent_45%,rgba(8,10,6,0.55))]"
-      />
-      <div
-        aria-hidden
-        className="paper-grain pointer-events-none absolute inset-0 opacity-55 mix-blend-overlay"
-      />
-    </div>
-  );
-}
-
-const HEADLINE_STYLE: CSSProperties = {
-  fontSize: "clamp(2.5rem, 5.6vw, 5.75rem)",
-};
-
-function HeroPanel() {
-  const t = useT();
-  return (
-    <motion.div
-      initial={{ y: 40, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 1, delay: 0.15, ease: ENTRANCE_EASE }}
-      className="absolute bottom-[38px] left-[38px] z-10 w-[min(720px,calc(100%-480px))] rounded-[22px] bg-ganitel-paper p-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_40px_80px_-40px_rgba(0,0,0,0.55)] max-md:inset-x-3 max-md:bottom-3 max-md:w-auto max-md:rounded-[18px] max-md:p-6"
-    >
-      <div className="mb-6 grid grid-cols-[104px_1px_1fr] items-start gap-6 border-b border-dashed border-ganitel-stroke-neutral pb-6 max-sm:grid-cols-1 max-sm:gap-2 max-sm:pb-5">
-        <span className="font-display pt-1 text-[12px] font-semibold uppercase leading-snug tracking-[0.18em] text-ganitel-text-title break-normal">
-          {t("landing.tag.line1")}
-          <br />
-          {t("landing.tag.line2")}
-        </span>
-        <span
-          aria-hidden
-          className="block h-full min-h-[38px] w-px bg-[rgba(20,20,14,0.18)] max-sm:hidden"
-        />
-        <p className="m-0 max-w-[44ch] text-sm leading-[1.6] text-ganitel-text-subtitle">
-          {t("landing.lede")}
-        </p>
-      </div>
-
-      <h1
-        style={HEADLINE_STYLE}
-        className="font-display mb-7 mt-0 font-bold leading-[0.96] tracking-[-0.045em] text-balance text-ganitel-text-title md:mb-9"
-      >
-        {t("landing.title.line1")}
-        <br />
-        {t("landing.title.line2_pre")}{" "}
-        <em className="font-italic-serif text-ganitel-secondary">
-          {t("landing.title.line2_em")}
-        </em>
-      </h1>
-
-      <div className="flex flex-wrap items-center gap-5">
-        <PillLink to="/browse" variant="solid" arrow>
-          {t("landing.cta")}
-        </PillLink>
-        <span className="text-xs tracking-tight text-ganitel-text-placeholder">
-          {t("landing.cta.hint")} ·{" "}
-          <b className="font-semibold text-ganitel-text-title">fr</b> /{" "}
-          <b className="font-semibold text-ganitel-text-title">en</b>
-        </span>
-      </div>
-    </motion.div>
-  );
-}
-
-function FeatureCard() {
-  const t = useT();
-  return (
-    <motion.aside
-      initial={{ y: 40, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 1, delay: 0.35, ease: ENTRANCE_EASE }}
-      className="absolute bottom-[38px] right-[38px] z-10 w-80 rounded-[22px] bg-ganitel-paper p-3.5 pb-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_40px_80px_-40px_rgba(0,0,0,0.55)] max-lg:hidden"
-      aria-label="Featured stay"
-    >
-      <div className="relative mb-4 aspect-[4/3.1] overflow-hidden rounded-[14px] bg-[#1c2218]">
-        <img
-          src={FEATURE_SOURCE}
-          srcSet={buildSrcSet(FEATURE_SOURCE, [400, 600, 900], 75)}
-          sizes="320px"
-          alt=""
-          loading="lazy"
-          decoding="async"
-          width={900}
-          height={700}
-          onError={fallbackOnError(FEATURE_FALLBACK)}
-          className="absolute inset-0 size-full object-cover saturate-[0.95] contrast-[1.05]"
+      <div aria-hidden className="absolute inset-0 bg-ganitel-primary/45" />
+      <div className="relative z-10 mx-auto w-full max-w-3xl px-6 text-center">
+        <SectionHeader
+          level="h1"
+          align="center"
+          inverted
+          animate={false}
+          tag={t("landing.hero.tag")}
+          title={t("landing.hero.title")}
+          emphasis={t("landing.hero.title_em")}
+          lede={t("landing.hero.lede")}
         />
         <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent_55%,rgba(0,0,0,0.55))]"
-        />
-
-        <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/55 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-white backdrop-blur">
-          <span
-            aria-hidden
-            className="size-1.5 animate-pulse rounded-full bg-[#f0c97a]"
-          />
-          {t("landing.feature.tour")}
-        </span>
-
-        <button
-          type="button"
-          aria-label={t("landing.play")}
-          className="absolute bottom-3 right-3 z-10 grid size-10 place-items-center rounded-full bg-ganitel-paper shadow-[0_4px_12px_rgba(0,0,0,0.35)] transition-transform hover:scale-110"
+          style={HERO_CTA_DELAY}
+          className="ganitel-anim-fade-up mt-10 flex flex-wrap items-center justify-center gap-4"
         >
-          <Play
-            className="ml-0.5 size-3.5 text-ganitel-text-title"
-            fill="currentColor"
-            strokeWidth={0}
-            aria-hidden
-          />
-        </button>
+          {isPrelaunch ? (
+            <>
+              <PillLink to="/join" variant="paper" arrow>
+                {t("join.submit")}
+              </PillLink>
+              <PillLink to="/browse" variant="ghost">
+                {t("landing.hero.cta.browse")}
+              </PillLink>
+            </>
+          ) : (
+            <PillLink to="/browse" variant="paper" arrow>
+              {t("landing.hero.cta.browse")}
+            </PillLink>
+          )}
+        </div>
       </div>
-
-      <div className="px-1.5">
-        <h3 className="font-display m-0 mb-2 inline-flex items-center gap-2 text-[19px] font-bold tracking-[-0.025em] text-ganitel-text-title">
-          {t("landing.feature.title")}
-          <span
-            title={t("landing.info")}
-            className="font-italic-serif grid size-4 cursor-help place-items-center rounded-full border border-[rgba(20,20,14,0.18)] text-[11px] text-ganitel-text-placeholder"
-          >
-            i
-          </span>
-        </h3>
-        <p className="m-0 max-w-[30ch] text-[13px] leading-[1.5] text-ganitel-text-subtitle">
-          {t("landing.feature.caption")}
-        </p>
-      </div>
-    </motion.aside>
+    </section>
   );
 }
 
-function ScrollHint() {
+function TrustStrip() {
   const t = useT();
+  const ref = useReveal<HTMLDivElement>();
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 1.4, duration: 1 }}
-      className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 max-md:hidden"
-    >
-      <motion.span
-        animate={{ y: [0, 6, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-white/65"
-      >
-        <ArrowDown className="size-3" strokeWidth={1.5} aria-hidden />
-        {t("landing.scroll")}
-      </motion.span>
-    </motion.div>
+    <section className="bg-ganitel-surface px-6 py-20 md:px-12 md:py-24">
+      <div ref={ref} data-reveal="" className="mx-auto max-w-7xl">
+        <SectionHeader
+          align="center"
+          tag={t("landing.trust.tag")}
+          title={t("landing.trust.title")}
+          emphasis={t("landing.trust.title_em")}
+        />
+        <ul className="m-0 mt-12 grid list-none grid-cols-2 gap-8 p-0 sm:grid-cols-4">
+          {PROMISES.map(({ key, labelKey, icon: Icon }) => (
+            <li
+              key={key}
+              className="flex flex-col items-center gap-3 text-center"
+            >
+              <span className="grid size-14 place-items-center rounded-full bg-ganitel-sage-soft">
+                <Icon
+                  className="size-6 text-ganitel-sage"
+                  strokeWidth={1.75}
+                  aria-hidden
+                />
+              </span>
+              <span className="font-display text-base font-semibold text-ganitel-text-title">
+                {t(labelKey)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }
 
-function FeaturedSection() {
+function Destinations() {
+  const t = useT();
+  const ref = useReveal<HTMLDivElement>();
+  return (
+    <section className="px-6 py-20 md:px-12 md:py-28">
+      <div ref={ref} data-reveal="" className="mx-auto max-w-7xl">
+        <SectionHeader
+          tag={t("landing.destinations.tag")}
+          title={t("landing.destinations.title")}
+          emphasis={t("landing.destinations.title_em")}
+          lede={t("landing.destinations.lede")}
+        />
+        <ul className="m-0 mt-12 grid list-none gap-6 p-0 sm:grid-cols-2 lg:grid-cols-4">
+          {DESTINATIONS.map((dest) => (
+            <li key={dest.key} className="m-0 p-0">
+              <a
+                href="/browse"
+                className="group block overflow-hidden rounded-2xl bg-ganitel-surface-2"
+              >
+                <div className="relative aspect-[4/5] overflow-hidden">
+                  <img
+                    src={transformImage(dest.source, {
+                      width: 600,
+                      quality: 75,
+                    })}
+                    srcSet={buildSrcSet(dest.source, CARD_WIDTHS, 75)}
+                    sizes={DEST_SIZES}
+                    alt={t(dest.altKey)}
+                    loading="lazy"
+                    decoding="async"
+                    width={900}
+                    height={1125}
+                    onError={fallbackOnError(dest.fallback)}
+                    className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                </div>
+                <div className="flex flex-col gap-2 p-6">
+                  <h3 className="font-display m-0 text-xl font-bold leading-tight tracking-[-0.02em] text-ganitel-text-title">
+                    {t(dest.titleKey)}
+                  </h3>
+                  <p className="m-0 text-sm leading-[1.5] text-ganitel-text-subtitle">
+                    {t(dest.blurbKey)}
+                  </p>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function FeaturedStays() {
   const t = useT();
   const { data, isLoading, isError } = useSearchProperties({ limit: 8 });
   const items = data?.items ?? [];
+  const revealRef = useReveal<HTMLDivElement>();
 
   if (isError) return null;
   if (!isLoading && items.length === 0) return null;
 
   return (
-    <section className="px-6 py-24 md:px-12 md:py-32">
+    <section className="bg-ganitel-surface px-6 py-20 md:px-12 md:py-28">
       <SectionHeader
         className="mx-auto max-w-7xl"
         tag={t("landing.featured.tag")}
@@ -264,22 +291,18 @@ function FeaturedSection() {
         emphasis={t("landing.featured.title_em")}
         lede={t("landing.featured.lede")}
       />
-
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-10%" }}
-        transition={{ duration: 0.8, delay: 0.1, ease: ENTRANCE_EASE }}
-        className="mx-auto mt-16 max-w-7xl md:mt-20"
+      <div
+        ref={revealRef}
+        data-reveal=""
+        className="mx-auto mt-12 max-w-7xl md:mt-16"
       >
         {isLoading ? (
           <PropertyGridSkeleton count={6} />
         ) : (
           <PropertyGrid items={items} />
         )}
-      </motion.div>
-
-      <div className="mx-auto mt-12 flex max-w-7xl justify-center md:mt-16">
+      </div>
+      <div className="mx-auto mt-10 flex max-w-7xl justify-center md:mt-14">
         <PillLink to="/browse" variant="ghost" arrow>
           {t("landing.featured.see_all")}
         </PillLink>
@@ -288,36 +311,91 @@ function FeaturedSection() {
   );
 }
 
-function FinalCTA() {
+function WhyGanitel() {
+  const t = useT();
+  const ref = useReveal<HTMLDivElement>();
+  return (
+    <section className="px-6 py-20 md:px-12 md:py-28">
+      <div ref={ref} data-reveal="" className="mx-auto max-w-7xl">
+        <SectionHeader
+          align="center"
+          tag={t("landing.why.tag")}
+          title={t("landing.why.title")}
+          emphasis={t("landing.why.title_em")}
+        />
+        <ul className="m-0 mt-12 grid list-none gap-6 p-0 md:grid-cols-3">
+          {IMPACT_CARDS.map((card) => (
+            <li
+              key={card.key}
+              className="flex flex-col gap-3 rounded-2xl bg-ganitel-surface-2 p-8"
+            >
+              <h3 className="font-display m-0 text-xl font-bold text-ganitel-text-title">
+                {t(card.titleKey)}
+              </h3>
+              <p className="m-0 text-sm leading-[1.6] text-ganitel-text-subtitle">
+                {t(card.bodyKey)}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function VisionMoment() {
   const t = useT();
   return (
-    <section className="px-6 pb-24 md:px-12 md:pb-32">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-10%" }}
-        transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
-        className="mx-auto max-w-7xl rounded-[28px] bg-ganitel-text-title px-8 py-20 md:px-16 md:py-28"
+    <section
+      id="vision"
+      className="relative flex min-h-[70vh] items-center justify-center overflow-hidden scroll-mt-16"
+    >
+      <img
+        src={transformImage(VISION_SOURCE, { width: 1440, quality: 70 })}
+        srcSet={buildSrcSet(VISION_SOURCE, [640, 960, 1440], 70)}
+        sizes={HERO_SIZES}
+        alt={t("landing.alt.vision")}
+        loading="lazy"
+        decoding="async"
+        width={1440}
+        height={810}
+        onError={fallbackOnError(VISION_FALLBACK)}
+        className="absolute inset-0 size-full object-cover"
+      />
+      <div aria-hidden className="absolute inset-0 bg-ganitel-primary/55" />
+      <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
+        <p className="font-italic-serif m-0 text-lg text-ganitel-paper-warm">
+          {t("about.vision.title")}
+        </p>
+        <p className="font-display m-0 mt-6 text-balance text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-paper md:text-5xl">
+          {t("about.vision.body")}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function Closing() {
+  const t = useT();
+  const isPrelaunch = usePrelaunch();
+  const ref = useReveal<HTMLDivElement>();
+  return (
+    <section className="px-6 pb-20 pt-8 md:px-12 md:pb-28">
+      <div
+        ref={ref}
+        data-reveal=""
+        className="mx-auto flex max-w-7xl flex-col items-center gap-7 rounded-[28px] bg-ganitel-tan-soft px-8 py-14 text-center md:px-16 md:py-20"
       >
-        <div className="grid gap-12 md:grid-cols-[1fr_auto] md:items-end">
-          <SectionHeader
-            tag={t("landing.cta_section.tag")}
-            title={t("landing.cta_section.title")}
-            emphasis={t("landing.cta_section.title_em")}
-            align="stacked"
-            inverted
-            animate={false}
-          />
-          <PillLink
-            to="/browse"
-            variant="paper"
-            arrow
-            className="self-start md:self-end"
-          >
-            {t("landing.cta")}
-          </PillLink>
-        </div>
-      </motion.div>
+        <SectionHeader
+          align="center"
+          tag={t("landing.cta_section.tag")}
+          title={t("landing.cta_section.title")}
+          emphasis={t("landing.cta_section.title_em")}
+        />
+        <PillLink to={isPrelaunch ? "/join" : "/browse"} variant="solid" arrow>
+          {t(isPrelaunch ? "join.submit" : "landing.cta")}
+        </PillLink>
+      </div>
     </section>
   );
 }
