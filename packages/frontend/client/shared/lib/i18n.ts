@@ -1482,7 +1482,7 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
   "browse.section.experiences": { fr: "Expériences", en: "Experiences" },
   "browse.meta.description.stays": {
     fr: "Logements soigneusement sélectionnés à Douala, Yaoundé, Limbé, Kribi et plus.",
-    en: "Carefully selected stays in Douala, Yaoundé, Limbé, Kribi and beyond.",
+    en: "Carefully selected stays in Douala, Yaoundé, Limbe, Kribi and beyond.",
   },
   "browse.meta.description.experiences": {
     fr: "Expériences à vivre au Cameroun autour de nos logements ou en escapade.",
