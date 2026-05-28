@@ -74,6 +74,22 @@ export function buildSrcSet(
     .join(", ");
 }
 
+/**
+ * `onError` handler for an `<img>` that swaps to a fallback URL on failure.
+ * Guards against an infinite error loop: if the fallback itself fails to
+ * load, the second `onError` short-circuits via the `data-fallback-applied`
+ * flag instead of re-applying (and re-requesting) the same broken URL.
+ */
+export function fallbackOnError(fallback: string) {
+  return (event: import("react").SyntheticEvent<HTMLImageElement>) => {
+    const img = event.currentTarget;
+    if (img.dataset.fallbackApplied) return;
+    img.dataset.fallbackApplied = "true";
+    img.srcset = "";
+    img.src = fallback;
+  };
+}
+
 /** Standard tier for property/experience card covers (1-col → 3-col grid). */
 export const CARD_WIDTHS = [400, 600, 900] as const;
 export const CARD_SIZES =

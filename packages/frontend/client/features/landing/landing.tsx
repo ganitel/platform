@@ -13,16 +13,17 @@ import { SectionHeader } from "@/shared/ui/section-header";
 import { useCalmMode } from "@/shared/hooks/use-connection";
 import {
   buildSrcSet,
+  fallbackOnError,
   transformImage,
   HERO_WIDTHS,
   HERO_SIZES,
 } from "@/shared/lib/image";
 
 const HERO_SOURCE =
-  "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=2000&q=80&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1756475471671-48813cf5ea5b?w=2000&q=80&auto=format&fit=crop";
 const HERO_FALLBACK = "https://picsum.photos/seed/ganitelhero/1600/1067";
 const FEATURE_SOURCE =
-  "https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?w=900&q=80&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1741850819375-5de72125719e?w=900&q=80&auto=format&fit=crop";
 const FEATURE_FALLBACK = "https://picsum.photos/seed/ganitelfeat/720/560";
 
 const ENTRANCE_EASE = [0.2, 0.7, 0.2, 1] as const;
@@ -65,10 +66,7 @@ function Stage() {
         decoding="async"
         width={1440}
         height={960}
-        onError={(event) => {
-          event.currentTarget.srcset = "";
-          event.currentTarget.src = HERO_FALLBACK;
-        }}
+        onError={fallbackOnError(HERO_FALLBACK)}
         className="absolute inset-[-3%] h-[106%] w-[106%] object-cover object-[50%_35%] saturate-[0.92] contrast-[1.05] brightness-[0.92]"
         animate={
           calm
@@ -180,10 +178,7 @@ function FeatureCard() {
           decoding="async"
           width={900}
           height={700}
-          onError={(event) => {
-            event.currentTarget.srcset = "";
-            event.currentTarget.src = FEATURE_FALLBACK;
-          }}
+          onError={fallbackOnError(FEATURE_FALLBACK)}
           className="absolute inset-0 size-full object-cover saturate-[0.95] contrast-[1.05]"
         />
         <div

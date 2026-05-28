@@ -1,6 +1,5 @@
 import { BadgeCheck, Compass, ShieldCheck, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
-import type { SyntheticEvent } from "react";
 
 import type { TranslationKey } from "@/shared/lib/i18n";
 import { useLocale, useT } from "@/shared/lib/i18n";
@@ -9,6 +8,7 @@ import { PillLink } from "@/shared/ui/pill-link";
 import { SectionHeader } from "@/shared/ui/section-header";
 import {
   buildSrcSet,
+  fallbackOnError,
   transformImage,
   CARD_WIDTHS,
   HERO_WIDTHS,
@@ -37,17 +37,6 @@ const VISION_FALLBACK = "https://picsum.photos/seed/ganitelvision/1600/900";
 
 const TILE_SIZES = "(min-width: 1024px) 25vw, 50vw";
 const IMPACT_PHOTO_SIZES = "(min-width: 768px) 33vw, 100vw";
-
-function fallbackOnError(fallback: string) {
-  return (event: SyntheticEvent<HTMLImageElement>) => {
-    const img = event.currentTarget;
-    // Guard against an infinite error loop if the fallback itself fails to load.
-    if (img.dataset.fallbackApplied) return;
-    img.dataset.fallbackApplied = "true";
-    img.srcset = "";
-    img.src = fallback;
-  };
-}
 
 const PROMISES = [
   { key: "security", labelKey: "about.promise.security", icon: ShieldCheck },
