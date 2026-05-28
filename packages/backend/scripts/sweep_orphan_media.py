@@ -37,12 +37,12 @@ async def _delete_orphans(max_age_hours: int) -> int:
     cutoff = datetime.now(UTC) - timedelta(hours=max_age_hours)
 
     async with session_factory() as session:
-        PosterConsumer = aliased(Media)
+        poster_consumer = aliased(Media)
         attached_video_uses_poster = exists().where(
-            PosterConsumer.poster_media_id == Media.id,
+            poster_consumer.poster_media_id == Media.id,
             or_(
-                exists().where(PropertyMediaItem.media_id == PosterConsumer.id),
-                exists().where(ExperienceMediaItem.media_id == PosterConsumer.id),
+                exists().where(PropertyMediaItem.media_id == poster_consumer.id),
+                exists().where(ExperienceMediaItem.media_id == poster_consumer.id),
             ),
         )
 

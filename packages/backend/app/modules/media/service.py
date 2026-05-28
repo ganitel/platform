@@ -80,12 +80,12 @@ async def delete_unattached_draft(session: AsyncSession, user: User, draft_id: U
     from app.modules.experiences.models import ExperienceMediaItem
     from app.modules.properties.models import PropertyMediaItem
 
-    PosterConsumer = aliased(Media)
+    poster_consumer = aliased(Media)
     attached_video_uses_poster = exists().where(
-        PosterConsumer.poster_media_id == Media.id,
+        poster_consumer.poster_media_id == Media.id,
         or_(
-            exists().where(PropertyMediaItem.media_id == PosterConsumer.id),
-            exists().where(ExperienceMediaItem.media_id == PosterConsumer.id),
+            exists().where(PropertyMediaItem.media_id == poster_consumer.id),
+            exists().where(ExperienceMediaItem.media_id == poster_consumer.id),
         ),
     )
 
