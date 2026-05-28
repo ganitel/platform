@@ -34,15 +34,8 @@ import type {
 import { AdminGuard } from "@/shared/components/admin-guard";
 import { transformImage } from "@/shared/lib/image";
 import { thumbnailUrl } from "@/shared/lib/media";
-import {
-  localeFromAcceptLanguage,
-  t,
-  type TranslationKey,
-  useT,
-} from "@/shared/lib/i18n";
+import { localeFromAcceptLanguage, t, useT } from "@/shared/lib/i18n";
 import type { Route } from "./+types/admin.hotels";
-
-const k = (key: string) => key as TranslationKey;
 
 export async function loader({ request }: Route.LoaderArgs) {
   return {
@@ -51,7 +44,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export const meta: Route.MetaFunction = ({ data }) => [
-  { title: t(k("admin.meta.hotels"), data?.locale ?? "fr") },
+  { title: t("admin.meta.hotels", data?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 
@@ -92,21 +85,21 @@ function AdminHotelsPage() {
 
   const columns: AdminColumn[] = useMemo(
     () => [
-      { key: "title", label: tr(k("admin.hotels.col.title")), width: "auto" },
+      { key: "title", label: tr("admin.hotels.col.title"), width: "auto" },
       {
         key: "location",
-        label: tr(k("admin.hotels.col.location")),
+        label: tr("admin.hotels.col.location"),
         width: "180px",
       },
-      { key: "rooms", label: tr(k("admin.hotels.col.rooms")), width: "120px" },
+      { key: "rooms", label: tr("admin.hotels.col.rooms"), width: "120px" },
       {
         key: "status",
-        label: tr(k("admin.hotels.col.status")),
+        label: tr("admin.hotels.col.status"),
         width: "130px",
       },
       {
         key: "actions",
-        label: tr(k("admin.hotels.col.actions")),
+        label: tr("admin.hotels.col.actions"),
         width: "360px",
         align: "right",
       },
@@ -123,16 +116,16 @@ function AdminHotelsPage() {
 
   return (
     <AdminShell
-      eyebrow={tr(k("admin.hotels.eyebrow"))}
-      title={tr(k("admin.hotels.title"))}
-      description={tr(k("admin.hotels.description"))}
+      eyebrow={tr("admin.hotels.eyebrow")}
+      title={tr("admin.hotels.title")}
+      description={tr("admin.hotels.description")}
       actions={
         <ActionLink
           to="/admin/hotels/new"
           tone="primary"
           icon={<Plus className="size-3.5" strokeWidth={2} />}
         >
-          {tr(k("admin.hotels.add"))}
+          {tr("admin.hotels.add")}
         </ActionLink>
       }
     >
@@ -181,15 +174,15 @@ function AdminHotelsPage() {
         </AdminCard>
       ) : query.data.total === 0 ? (
         <EmptyState
-          title={tr(k("admin.hotels.empty.title"))}
-          description={tr(k("admin.hotels.empty.description"))}
+          title={tr("admin.hotels.empty.title")}
+          description={tr("admin.hotels.empty.description")}
           action={
             <ActionLink
               to="/admin/hotels/new"
               tone="primary"
               icon={<Plus className="size-3.5" strokeWidth={2} />}
             >
-              {tr(k("admin.hotels.add"))}
+              {tr("admin.hotels.add")}
             </ActionLink>
           }
         />
@@ -269,7 +262,7 @@ function HotelRow({ item }: { item: PropertyAdminListItem }) {
             to={`/admin/hotels/${item.id}/rooms`}
             icon={<LayoutGrid className="size-3.5" strokeWidth={1.75} />}
           >
-            {tr(k("admin.hotels.action.manage_rooms"))}
+            {tr("admin.hotels.action.manage_rooms")}
           </ActionLink>
           <ActionLink
             to={`/admin/hotels/${item.id}/edit`}

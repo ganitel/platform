@@ -10,15 +10,8 @@ import {
   itemFromServerMedia,
   type UploaderItem,
 } from "@/shared/components/media-uploader.types";
-import {
-  localeFromAcceptLanguage,
-  t,
-  type TranslationKey,
-  useT,
-} from "@/shared/lib/i18n";
+import { localeFromAcceptLanguage, t, useT } from "@/shared/lib/i18n";
 import type { Route } from "./+types/admin.hotels.$id.edit";
-
-const k = (key: string) => key as TranslationKey;
 
 export async function loader({ request }: Route.LoaderArgs) {
   return {
@@ -27,7 +20,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export const meta: Route.MetaFunction = ({ data }) => [
-  { title: t(k("admin.hotels.edit.meta.title"), data?.locale ?? "fr") },
+  { title: t("admin.hotels.edit.meta.title", data?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 
@@ -67,7 +60,7 @@ function AdminHotelsEditPage() {
       <header className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-ganitel-text-title">
-            {tr(k("admin.hotels.edit.title"))}
+            {tr("admin.hotels.edit.title")}
           </h1>
           {detail.data && (
             <p className="mt-1 text-sm text-ganitel-text-body">
@@ -96,8 +89,8 @@ function AdminHotelsEditPage() {
       ) : (
         <HotelForm
           initial={detail.data}
-          submitLabel={tr(k("admin.hotels.edit.submit"))}
-          pendingLabel={tr(k("admin.hotels.edit.submitting"))}
+          submitLabel={tr("admin.hotels.edit.submit")}
+          pendingLabel={tr("admin.hotels.edit.submitting")}
           isPending={update.isPending}
           error={update.error}
           onSubmit={(payload) => update.mutate(payload)}

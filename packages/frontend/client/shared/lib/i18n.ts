@@ -893,6 +893,7 @@ const dict = {
   "admin.shell.exit": { fr: "Quitter vers le site", en: "Back to the site" },
   "admin.nav.overview": { fr: "Vue d'ensemble", en: "Overview" },
   "admin.nav.rentals": { fr: "Hébergements", en: "Stays" },
+  "admin.nav.hotels": { fr: "Hôtels", en: "Hotels" },
   "admin.nav.experiences": { fr: "Expériences", en: "Experiences" },
   "admin.nav.team": { fr: "Équipe", en: "Team" },
 
@@ -925,6 +926,10 @@ const dict = {
   "admin.meta.rentals": {
     fr: "Admin — Hébergements",
     en: "Admin — Stays",
+  },
+  "admin.meta.hotels": {
+    fr: "Admin — Hôtels",
+    en: "Admin — Hotels",
   },
   "admin.meta.experiences": {
     fr: "Admin — Expériences",
@@ -1595,6 +1600,119 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
     fr: "Enregistrement…",
     en: "Saving…",
   },
+
+  // Public-facing hotels
+  "hotels.price.from": { fr: "À partir de", en: "From" },
+  "hotels.room.choose_yours": {
+    fr: "Choisissez votre chambre",
+    en: "Choose your room",
+  },
+  "hotels.room.choose": {
+    fr: "Réserver cette chambre",
+    en: "Reserve this room",
+  },
+  "hotels.room.selected": { fr: "Chambre sélectionnée", en: "Room selected" },
+  "hotels.room.sleeps": {
+    fr: "Jusqu'à {n} voyageurs",
+    en: "Sleeps up to {n}",
+  },
+  "hotels.room.total": { fr: "Total : {amount}", en: "Total: {amount}" },
+  "hotels.room.sold_out": { fr: "Complet", en: "Sold out" },
+  "hotels.empty": {
+    fr: "Aucune chambre disponible pour le moment.",
+    en: "No rooms available right now.",
+  },
+
+  // Bed types
+  "reference.bed_type.single": { fr: "lit simple", en: "single" },
+  "reference.bed_type.double": { fr: "lit double", en: "double" },
+  "reference.bed_type.queen": { fr: "lit queen", en: "queen" },
+  "reference.bed_type.king": { fr: "lit king", en: "king" },
+  "reference.bed_type.sofa_bed": { fr: "canapé-lit", en: "sofa bed" },
+  "reference.bed_type.bunk": { fr: "lits superposés", en: "bunk bed" },
+  "reference.bed_type.crib": { fr: "lit bébé", en: "crib" },
+
+  // Admin hotels list
+  "admin.hotels.eyebrow": { fr: "Catalogue", en: "Catalog" },
+  "admin.hotels.title": { fr: "Hôtels", en: "Hotels" },
+  "admin.hotels.description": {
+    fr: "Gérez vos hôtels et leurs chambres.",
+    en: "Manage your hotels and their rooms.",
+  },
+  "admin.hotels.add": { fr: "Nouvel hôtel", en: "New hotel" },
+  "admin.hotels.empty.title": { fr: "Aucun hôtel", en: "No hotels yet" },
+  "admin.hotels.empty.description": {
+    fr: "Créez votre premier hôtel pour commencer.",
+    en: "Create your first hotel to get started.",
+  },
+  "admin.hotels.col.title": { fr: "Hôtel", en: "Hotel" },
+  "admin.hotels.col.location": { fr: "Lieu", en: "Location" },
+  "admin.hotels.col.rooms": { fr: "Chambres", en: "Rooms" },
+  "admin.hotels.col.status": { fr: "Statut", en: "Status" },
+  "admin.hotels.col.actions": { fr: "Actions", en: "Actions" },
+  "admin.hotels.action.manage_rooms": { fr: "Chambres", en: "Rooms" },
+
+  // Admin hotels create / edit
+  "admin.hotels.new.meta.title": {
+    fr: "Admin — Nouvel hôtel",
+    en: "Admin — New hotel",
+  },
+  "admin.hotels.new.title": { fr: "Nouvel hôtel", en: "New hotel" },
+  "admin.hotels.new.subtitle": {
+    fr: "Commencez par décrire l'hôtel — vous ajouterez les chambres ensuite.",
+    en: "Start by describing the hotel — you'll add rooms next.",
+  },
+  "admin.hotels.new.submit": { fr: "Créer", en: "Create" },
+  "admin.hotels.new.submitting": { fr: "Création…", en: "Creating…" },
+  "admin.hotels.edit.meta.title": {
+    fr: "Admin — Modifier l'hôtel",
+    en: "Admin — Edit hotel",
+  },
+  "admin.hotels.edit.title": { fr: "Modifier l'hôtel", en: "Edit hotel" },
+  "admin.hotels.edit.submit": {
+    fr: "Enregistrer les modifications",
+    en: "Save changes",
+  },
+  "admin.hotels.edit.submitting": {
+    fr: "Enregistrement…",
+    en: "Saving…",
+  },
+  "admin.hotels.form.category.label": { fr: "Catégorie", en: "Category" },
+
+  // Admin hotels — rooms manager (T22 surface)
+  "admin.hotels.rooms.eyebrow": { fr: "Hôtels", en: "Hotels" },
+  "admin.hotels.rooms.title": { fr: "Chambres", en: "Rooms" },
+  "admin.hotels.rooms.description": {
+    fr: "Ajoutez et organisez les types de chambres de cet hôtel.",
+    en: "Add and organise the room types for this hotel.",
+  },
+  "admin.hotels.rooms.meta_title": {
+    fr: "Admin — Chambres",
+    en: "Admin — Rooms",
+  },
+  "admin.rooms.add": { fr: "Ajouter une chambre", en: "Add a room" },
+  "admin.rooms.submit_create": { fr: "Créer la chambre", en: "Create room" },
+  "admin.rooms.submit_update": { fr: "Enregistrer", en: "Save" },
+  "admin.rooms.inventory_label": { fr: "{n} unités", en: "{n} units" },
+  "admin.rooms.inactive_tag": { fr: "désactivée", en: "inactive" },
+  "admin.rooms.confirm_delete": {
+    fr: "Supprimer la chambre « {title} » ?",
+    en: 'Delete the room "{title}"?',
+  },
+  "admin.rooms.form.title": { fr: "Nom", en: "Name" },
+  "admin.rooms.form.description": { fr: "Description", en: "Description" },
+  "admin.rooms.form.bed_config": { fr: "Lits", en: "Beds" },
+  "admin.rooms.form.bed_config_add": { fr: "Ajouter un lit", en: "Add a bed" },
+  "admin.rooms.form.max_guests": { fr: "Voyageurs max.", en: "Max guests" },
+  "admin.rooms.form.inventory_count": {
+    fr: "Nombre d'unités",
+    en: "Number of units",
+  },
+  "admin.rooms.form.private_bathroom": {
+    fr: "Salle de bain privée",
+    en: "Private bathroom",
+  },
+  "admin.rooms.form.active": { fr: "Active", en: "Active" },
 
   "admin.experiences.new.meta.title": {
     fr: "Admin — Nouvelle expérience",

@@ -23,7 +23,6 @@ import {
   t as translate,
   useLocale,
   useT,
-  type TranslationKey,
 } from "@/shared/lib/i18n";
 import { pickPriceForLocale } from "@/shared/lib/price";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
@@ -148,7 +147,7 @@ export default function PropertyDetailRoute({
   const priceText = pickedPrice ? formatMoney(pickedPrice, locale) : "";
   const priceLabel =
     property.kind === "hotel"
-      ? t("hotels.price.from" as TranslationKey)
+      ? t("hotels.price.from")
       : t("property.per_night");
   const eyebrow =
     property.kind === "hotel"

@@ -21,10 +21,8 @@ import type {
   UploaderOnChange,
 } from "@/shared/components/media-uploader.types";
 import { INPUT_CLASS, LABEL_CLASS } from "@/shared/lib/form-styles";
-import { type TranslationKey, useLocale, useT } from "@/shared/lib/i18n";
+import { useLocale, useT } from "@/shared/lib/i18n";
 import type { LocationPick } from "@/shared/lib/location";
-
-const k = (key: string) => key as TranslationKey;
 
 interface FormState {
   title: string;
@@ -228,7 +226,7 @@ export function HotelForm({
             onChange={(v) => update("description", v)}
           />
         </Field>
-        <Field label={tr(k("admin.hotels.form.category.label"))}>
+        <Field label={tr("admin.hotels.form.category.label")}>
           <select
             required
             value={form.hotel_category}

@@ -31,11 +31,7 @@ const NAV: NavItem[] = [
     end: true,
   },
   { to: "/admin/rentals", labelKey: "admin.nav.rentals", icon: Home },
-  {
-    to: "/admin/hotels",
-    labelKey: "admin.nav.hotels" as TranslationKey,
-    icon: Building2,
-  },
+  { to: "/admin/hotels", labelKey: "admin.nav.hotels", icon: Building2 },
   {
     to: "/admin/experiences",
     labelKey: "admin.nav.experiences",

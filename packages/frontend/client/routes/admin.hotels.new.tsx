@@ -7,15 +7,8 @@ import { HotelForm } from "@/features/properties/components/hotel-form";
 import type { PropertyCreateInput } from "@/features/properties/types";
 import { AdminGuard } from "@/shared/components/admin-guard";
 import type { UploaderItem } from "@/shared/components/media-uploader.types";
-import {
-  localeFromAcceptLanguage,
-  t,
-  type TranslationKey,
-  useT,
-} from "@/shared/lib/i18n";
+import { localeFromAcceptLanguage, t, useT } from "@/shared/lib/i18n";
 import type { Route } from "./+types/admin.hotels.new";
-
-const k = (key: string) => key as TranslationKey;
 
 export async function loader({ request }: Route.LoaderArgs) {
   return {
@@ -24,7 +17,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export const meta: Route.MetaFunction = ({ data }) => [
-  { title: t(k("admin.hotels.new.meta.title"), data?.locale ?? "fr") },
+  { title: t("admin.hotels.new.meta.title", data?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 
@@ -51,10 +44,10 @@ function AdminHotelsNewPage() {
       <header className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-ganitel-text-title">
-            {tr(k("admin.hotels.new.title"))}
+            {tr("admin.hotels.new.title")}
           </h1>
           <p className="mt-1 text-sm text-ganitel-text-body">
-            {tr(k("admin.hotels.new.subtitle"))}
+            {tr("admin.hotels.new.subtitle")}
           </p>
         </div>
         <Link
@@ -67,8 +60,8 @@ function AdminHotelsNewPage() {
 
       <HotelForm
         initial={null}
-        submitLabel={tr(k("admin.hotels.new.submit"))}
-        pendingLabel={tr(k("admin.hotels.new.submitting"))}
+        submitLabel={tr("admin.hotels.new.submit")}
+        pendingLabel={tr("admin.hotels.new.submitting")}
         isPending={create.isPending}
         error={create.error}
         onSubmit={(payload) => create.mutate(payload)}
