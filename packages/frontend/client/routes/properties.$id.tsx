@@ -2,6 +2,7 @@ import { data } from "react-router";
 
 import type { Route } from "./+types/properties.$id";
 
+import { AMENITY_ICONS } from "@/features/reference/amenity-icons";
 import { HostCard } from "@/features/properties/components/host-card";
 import { PropertyGallery } from "@/features/properties/components/property-gallery";
 import { BookingPanel } from "@/features/properties/components/booking-panel";
@@ -225,9 +226,21 @@ export default function PropertyDetailRoute({
                   {t("property.amenities")}
                 </h2>
                 <ul className="grid grid-cols-2 gap-y-2 text-sm text-ganitel-text-subtitle md:grid-cols-3">
-                  {property.amenities.map((a) => (
-                    <li key={a}>{amenityLabel(a)}</li>
-                  ))}
+                  {property.amenities.map((a) => {
+                    const Icon = AMENITY_ICONS[a];
+                    return (
+                      <li key={a} className="flex items-center gap-2">
+                        {Icon ? (
+                          <Icon
+                            className="size-4 shrink-0 text-ganitel-text-placeholder"
+                            strokeWidth={1.75}
+                            aria-hidden="true"
+                          />
+                        ) : null}
+                        <span>{amenityLabel(a)}</span>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ) : null}
