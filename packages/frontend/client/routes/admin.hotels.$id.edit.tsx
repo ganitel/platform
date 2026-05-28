@@ -4,7 +4,10 @@ import { Link, useNavigate, useParams } from "react-router";
 
 import { getProperty, updateProperty } from "@/features/properties/api";
 import { HotelForm } from "@/features/properties/components/hotel-form";
-import type { PropertyCreateInput } from "@/features/properties/types";
+import type {
+  PropertyCreateInput,
+  PropertyDetail,
+} from "@/features/properties/types";
 import { AdminGuard } from "@/shared/components/admin-guard";
 import {
   itemFromServerMedia,
@@ -35,24 +38,11 @@ export default function AdminHotelsEditRoute() {
 function AdminHotelsEditPage() {
   const tr = useT();
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
   const detail = useQuery({
     queryKey: ["properties", "detail", id],
     queryFn: () => getProperty(id!),
     enabled: !!id,
-  });
-
-  const [mediaItems, setMediaItems] = useState<UploaderItem[]>([]);
-  const [seededId, setSeededId] = useState<string | null>(null);
-  if (detail.data && seededId !== detail.data.id) {
-    setSeededId(detail.data.id);
-    setMediaItems(detail.data.media.map((m) => itemFromServerMedia(m)));
-  }
-
-  const update = useMutation({
-    mutationFn: (body: PropertyCreateInput) => updateProperty(id!, body),
-    onSuccess: () => navigate("/admin/hotels"),
   });
 
   return (
@@ -87,21 +77,36 @@ function AdminHotelsEditPage() {
             : String(detail.error)}
         </p>
       ) : (
-        <HotelForm
-          initial={detail.data}
-          submitLabel={tr("admin.hotels.edit.submit")}
-          pendingLabel={tr("admin.hotels.edit.submitting")}
-          isPending={update.isPending}
-          error={update.error}
-          onSubmit={(payload) => update.mutate(payload)}
-          mediaState={{
-            mode: "listing",
-            listingId: id!,
-            items: mediaItems,
-            setItems: setMediaItems,
-          }}
-        />
+        <HotelEditFormContainer key={detail.data.id} detail={detail.data} />
       )}
     </div>
+  );
+}
+
+function HotelEditFormContainer({ detail }: { detail: PropertyDetail }) {
+  const tr = useT();
+  const navigate = useNavigate();
+  const [mediaItems, setMediaItems] = useState<UploaderItem[]>(() =>
+    detail.media.map((m) => itemFromServerMedia(m)),
+  );
+  const update = useMutation({
+    mutationFn: (body: PropertyCreateInput) => updateProperty(detail.id, body),
+    onSuccess: () => navigate("/admin/hotels"),
+  });
+  return (
+    <HotelForm
+      initial={detail}
+      submitLabel={tr("admin.hotels.edit.submit")}
+      pendingLabel={tr("admin.hotels.edit.submitting")}
+      isPending={update.isPending}
+      error={update.error}
+      onSubmit={(payload) => update.mutate(payload)}
+      mediaState={{
+        mode: "listing",
+        listingId: detail.id,
+        items: mediaItems,
+        setItems: setMediaItems,
+      }}
+    />
   );
 }

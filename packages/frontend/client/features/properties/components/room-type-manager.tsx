@@ -256,6 +256,7 @@ function RoomDrawer({ state, propertyId, onClose }: RoomDrawerProps) {
             )}
             {state.mode === "edit" && (
               <EditRoomForm
+                key={state.room.id}
                 propertyId={propertyId}
                 room={state.room}
                 onSuccess={() => {
@@ -344,7 +345,9 @@ function EditRoomForm({
   );
 }
 
-function useBedSummary(bedConfig: { type: string; count: number }[]): string {
+function useBedSummary(
+  bedConfig: { type: string; count: number }[] | null | undefined,
+): string {
   const tr = useT();
   const locale = useLocale();
   const bedTypes = useQuery({
@@ -354,7 +357,7 @@ function useBedSummary(bedConfig: { type: string; count: number }[]): string {
   const labelByCode = new Map(
     (bedTypes.data ?? []).map((option) => [option.code, option]),
   );
-  return bedConfig
+  return (bedConfig ?? [])
     .map((bed) => {
       const ref = labelByCode.get(bed.type);
       const label = ref

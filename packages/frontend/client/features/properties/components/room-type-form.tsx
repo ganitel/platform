@@ -43,12 +43,13 @@ const BLANK: FormState = {
 };
 
 function fromRoom(room: RoomTypePublic): FormState {
+  const beds = room.bed_config ?? [];
   return {
     title: room.title,
     description: room.description ?? "",
     bed_config:
-      room.bed_config.length > 0
-        ? room.bed_config.map((bed) => ({ type: bed.type, count: bed.count }))
+      beds.length > 0
+        ? beds.map((bed) => ({ type: bed.type, count: bed.count }))
         : [{ type: "double", count: 1 }],
     max_guests: String(room.max_guests),
     amenities: new Set(room.amenities),
@@ -155,14 +156,17 @@ export function RoomTypeForm({
       private_bathroom: form.private_bathroom,
       inventory_count: Number(form.inventory_count),
       prices: form.prices
-        .filter((price) => price.amount.trim() !== "")
-        .map((price) => ({ amount: price.amount, currency: price.currency })),
+        .filter((price) => String(price.amount).trim() !== "")
+        .map((price) => ({
+          amount: String(price.amount),
+          currency: price.currency,
+        })),
       active: form.active,
       position: Number(form.position),
       media_ids:
         mediaState.mode === "draft"
           ? mediaState.items
-              .filter((it) => it.mediaId !== null)
+              .filter((it) => it.mediaId != null)
               .map((it) => it.mediaId as string)
           : undefined,
     };

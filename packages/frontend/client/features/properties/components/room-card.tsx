@@ -40,7 +40,7 @@ export function RoomCard({
   const nightly = room.availability?.nightly ?? fallbackPrice ?? null;
   const total = room.availability?.total ?? null;
   const isSoldOut = showAvailability && room.availability?.available === false;
-  const bedSummary = room.bed_config
+  const bedSummary = (room.bed_config ?? [])
     .map((b) => {
       const key = BED_TYPE_KEYS[b.type as keyof typeof BED_TYPE_KEYS];
       return `${b.count} ${key ? t(key) : b.type}`;

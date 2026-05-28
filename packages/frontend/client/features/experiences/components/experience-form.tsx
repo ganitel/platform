@@ -134,7 +134,7 @@ export function ExperienceForm({
       media_ids:
         mediaState.mode === "draft"
           ? mediaState.items
-              .filter((it) => it.mediaId !== null)
+              .filter((it) => it.mediaId != null)
               .map((it) => it.mediaId as string)
           : undefined,
     };
