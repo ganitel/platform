@@ -115,7 +115,25 @@ PROPERTY_TYPES: list[dict[str, str]] = [
     {"code": "room", "label_en": "Private room", "label_fr": "Chambre privée"},
     {"code": "studio", "label_en": "Studio", "label_fr": "Studio"},
     {"code": "guesthouse", "label_en": "Guesthouse", "label_fr": "Maison d'hôtes"},
-    {"code": "hotel", "label_en": "Hotel", "label_fr": "Hôtel"},
+]
+
+HOTEL_CATEGORIES: list[dict[str, str]] = [
+    {"code": "boutique", "label_en": "Boutique", "label_fr": "Boutique"},
+    {"code": "resort", "label_en": "Resort", "label_fr": "Resort"},
+    {"code": "business", "label_en": "Business hotel", "label_fr": "Hôtel d'affaires"},
+    {"code": "eco_lodge", "label_en": "Eco-lodge", "label_fr": "Éco-lodge"},
+    {"code": "guesthouse", "label_en": "Guesthouse", "label_fr": "Maison d'hôtes"},
+    {"code": "hostel", "label_en": "Hostel", "label_fr": "Auberge"},
+]
+
+BED_TYPES: list[dict[str, str]] = [
+    {"code": "single", "label_en": "Single", "label_fr": "Lit simple"},
+    {"code": "double", "label_en": "Double", "label_fr": "Lit double"},
+    {"code": "queen", "label_en": "Queen", "label_fr": "Lit queen"},
+    {"code": "king", "label_en": "King", "label_fr": "Lit king"},
+    {"code": "sofa_bed", "label_en": "Sofa bed", "label_fr": "Canapé-lit"},
+    {"code": "bunk", "label_en": "Bunk bed", "label_fr": "Lits superposés"},
+    {"code": "crib", "label_en": "Crib", "label_fr": "Lit bébé"},
 ]
 
 CANCELLATION_POLICIES: list[dict[str, str]] = [
