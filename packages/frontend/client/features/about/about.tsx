@@ -18,10 +18,10 @@ import {
 // Placeholder Cameroon/African imagery — replace with owned photography before
 // launch. picsum fallback keeps the page intact if an Unsplash URL fails.
 const HERO_SOURCE =
-  "https://images.unsplash.com/photo-1741850819375-5de72125719e?w=2000&q=80&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1615463669098-521a22047a1e?w=2000&q=80&auto=format&fit=crop";
 const HERO_FALLBACK = "https://picsum.photos/seed/ganitelabouthero/1600/900";
 const TRUST1_SOURCE =
-  "https://images.unsplash.com/photo-1570742544137-3a469196c32b?w=900&q=80&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1615463531521-201b9e68ae96?w=900&q=80&auto=format&fit=crop";
 const TRUST1_FALLBACK = "https://picsum.photos/seed/ganiteltrust1/800/1000";
 const TRUST2_SOURCE =
   "https://images.unsplash.com/photo-1515657834497-26509e295154?w=900&q=80&auto=format&fit=crop";

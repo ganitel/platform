@@ -651,12 +651,12 @@ const dict = {
     en: "Safe, door-to-door logistics from start to finish.",
   },
   "about.alt.hero": {
-    fr: "Un arbre solitaire dans la savane africaine",
-    en: "A lone tree in the African savanna",
+    fr: "Vue aérienne de maisons et d'arbres dans les hauts plateaux camerounais",
+    en: "Aerial view of houses and trees in the Cameroonian highlands",
   },
   "about.alt.trust1": {
-    fr: "Une destination africaine",
-    en: "An African destination",
+    fr: "Arbres camerounais sous un ciel nuageux",
+    en: "Cameroonian trees under a cloudy sky",
   },
   "about.alt.trust2": {
     fr: "Une communauté locale accueillante",
