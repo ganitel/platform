@@ -1,4 +1,4 @@
-import { ArrowDown, Play } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 import type { CSSProperties } from "react";
 
 import { useT } from "@/shared/lib/i18n";
@@ -11,14 +11,12 @@ import { PillLink } from "@/shared/ui/pill-link";
 import { SectionHeader } from "@/shared/ui/section-header";
 import { useCalmMode } from "@/shared/hooks/use-connection";
 import { useReveal } from "@/shared/hooks/use-reveal";
-import { buildSrcSet, fallbackOnError } from "@/shared/lib/image";
+import { fallbackOnError } from "@/shared/lib/image";
 import {
   HERO_FALLBACK,
   HERO_MOBILE_SRC,
   HERO_SIZES,
   HERO_SRCSET,
-  FEATURE_FALLBACK,
-  FEATURE_SOURCE,
 } from "./hero-source";
 
 export function Landing() {
@@ -84,7 +82,6 @@ const HEADLINE_STYLE: CSSProperties = {
 };
 
 const HERO_PANEL_DELAY: CSSProperties = { animationDelay: "0.15s" };
-const FEATURE_CARD_DELAY: CSSProperties = { animationDelay: "0.35s" };
 const SCROLL_HINT_DELAY: CSSProperties = { animationDelay: "1.4s" };
 
 function HeroPanel() {
@@ -136,69 +133,7 @@ function HeroPanel() {
 }
 
 function FeatureCard() {
-  const t = useT();
-  return (
-    <aside
-      style={FEATURE_CARD_DELAY}
-      className="ganitel-anim-fade-up absolute bottom-[38px] right-[38px] z-10 w-80 rounded-[22px] bg-ganitel-paper p-3.5 pb-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_40px_80px_-40px_rgba(0,0,0,0.55)] max-lg:hidden"
-      aria-label="Featured stay"
-    >
-      <div className="relative mb-4 aspect-[4/3.1] overflow-hidden rounded-[14px] bg-[#1c2218]">
-        <img
-          src={FEATURE_SOURCE}
-          srcSet={buildSrcSet(FEATURE_SOURCE, [400, 600, 900], 75)}
-          sizes="320px"
-          alt=""
-          loading="lazy"
-          decoding="async"
-          width={900}
-          height={700}
-          onError={fallbackOnError(FEATURE_FALLBACK)}
-          className="absolute inset-0 size-full object-cover saturate-[0.95] contrast-[1.05]"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent_55%,rgba(0,0,0,0.55))]"
-        />
-
-        <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/55 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-white backdrop-blur">
-          <span
-            aria-hidden
-            className="size-1.5 animate-pulse rounded-full bg-[#f0c97a]"
-          />
-          {t("landing.feature.tour")}
-        </span>
-
-        <button
-          type="button"
-          aria-label={t("landing.play")}
-          className="absolute bottom-3 right-3 z-10 grid size-10 place-items-center rounded-full bg-ganitel-paper shadow-[0_4px_12px_rgba(0,0,0,0.35)] transition-transform hover:scale-110"
-        >
-          <Play
-            className="ml-0.5 size-3.5 text-ganitel-text-title"
-            fill="currentColor"
-            strokeWidth={0}
-            aria-hidden
-          />
-        </button>
-      </div>
-
-      <div className="px-1.5">
-        <h3 className="font-display m-0 mb-2 inline-flex items-center gap-2 text-[19px] font-bold tracking-[-0.025em] text-ganitel-text-title">
-          {t("landing.feature.title")}
-          <span
-            title={t("landing.info")}
-            className="font-italic-serif grid size-4 cursor-help place-items-center rounded-full border border-[rgba(20,20,14,0.18)] text-[11px] text-ganitel-text-placeholder"
-          >
-            i
-          </span>
-        </h3>
-        <p className="m-0 max-w-[30ch] text-[13px] leading-[1.5] text-ganitel-text-subtitle">
-          {t("landing.feature.caption")}
-        </p>
-      </div>
-    </aside>
-  );
+  return null;
 }
 
 function ScrollHint() {
