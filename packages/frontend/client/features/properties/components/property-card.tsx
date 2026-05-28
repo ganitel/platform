@@ -58,7 +58,7 @@ export function PropertyCard({ property, priority }: Props) {
           <h3 className="font-display line-clamp-2 flex-1 text-balance text-[20px] font-semibold leading-[1.1] tracking-[-0.025em] text-ganitel-text-title transition-colors group-hover:text-ganitel-text-subtitle">
             {property.title}
           </h3>
-          <span className="font-italic-serif shrink-0 text-[15px] leading-tight text-ganitel-text-placeholder">
+          <span className="font-italic-emphasis shrink-0 text-[15px] leading-tight text-ganitel-text-placeholder">
             {property.city}
           </span>
         </div>

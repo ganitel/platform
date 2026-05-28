@@ -49,6 +49,7 @@ export const links: Route.LinksFunction = () => {
           { rel: "dns-prefetch", href: api },
         ]
       : []),
+    { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
     { rel: "icon", href: "/favicon.ico", sizes: "any" },
     {
       rel: "apple-touch-icon",

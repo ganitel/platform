@@ -11,6 +11,8 @@ const VARIANTS = {
     "bg-ganitel-paper text-ganitel-text-title shadow-[0_18px_36px_-16px_rgba(0,0,0,0.45)] hover:bg-white hover:-translate-y-0.5",
   ghost:
     "border border-ganitel-text-title text-ganitel-text-title hover:bg-ganitel-text-title hover:text-ganitel-paper",
+  "ghost-inverted":
+    "border border-ganitel-paper text-ganitel-paper hover:bg-ganitel-paper hover:text-ganitel-text-title hover:-translate-y-0.5",
   outline:
     "border border-[rgba(20,20,14,0.18)] text-ganitel-text-title hover:border-ganitel-text-title hover:bg-[rgba(20,20,14,0.05)]",
 } as const;

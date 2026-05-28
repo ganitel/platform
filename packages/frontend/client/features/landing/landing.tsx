@@ -169,7 +169,7 @@ function Hero() {
               <PillLink to="/join" variant="paper" arrow>
                 {t("join.submit")}
               </PillLink>
-              <PillLink to="/browse" variant="ghost">
+              <PillLink to="/browse" variant="ghost-inverted">
                 {t("landing.hero.cta.browse")}
               </PillLink>
             </>
@@ -364,7 +364,7 @@ function VisionMoment() {
       />
       <div aria-hidden className="absolute inset-0 bg-ganitel-primary/55" />
       <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
-        <p className="font-italic-serif m-0 text-lg text-ganitel-paper-warm">
+        <p className="font-italic-emphasis m-0 text-lg text-ganitel-paper-warm">
           {t("about.vision.title")}
         </p>
         <p className="font-display m-0 mt-6 text-balance text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-paper md:text-5xl">

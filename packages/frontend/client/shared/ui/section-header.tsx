@@ -66,7 +66,7 @@ export function SectionHeader({
           {emphasis ? (
             <>
               {" "}
-              <em className="font-italic-serif text-ganitel-secondary">
+              <em className="font-italic-emphasis text-ganitel-secondary">
                 {emphasis}
               </em>
             </>

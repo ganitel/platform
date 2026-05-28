@@ -1,28 +1,22 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
-@import "@fontsource-variable/inter/wght.css";
-@import "@fontsource/eb-garamond/400.css";
-@import "@fontsource/eb-garamond/500.css";
-@import "@fontsource/eb-garamond/600.css";
-@import "@fontsource/eb-garamond/700.css";
-@import "@fontsource/eb-garamond/400-italic.css";
-@import "@fontsource/eb-garamond/500-italic.css";
-@import "@fontsource/eb-garamond/600-italic.css";
+@import "@fontsource-variable/geist/wght.css";
+@import "@fontsource-variable/geist/wght-italic.css";
 
 .font-infoma {
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: "Geist Variable", system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
 .font-display {
-  font-family: "EB Garamond", Georgia, serif;
-  font-optical-sizing: auto;
+  font-family: "Geist Variable", system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
-.font-italic-serif {
-  font-family: "EB Garamond", Georgia, serif;
+.font-italic-emphasis {
+  font-family: "Geist Variable", system-ui, sans-serif;
   font-style: italic;
   font-weight: 500;
 }
@@ -44,9 +38,8 @@
 
 @theme {
   --font-sans:
-    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  --font-serif: "EB Garamond", Georgia, serif;
+    "Geist Variable", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
 
   --color-ganitel-primary: #18100c;
   --color-ganitel-secondary: #d39e70;
@@ -382,7 +375,8 @@
 .ganitel-prose h3,
 .ganitel-prose h4 {
   color: var(--color-ganitel-text-title);
-  font-family: "EB Garamond", Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.2;
   margin-top: 1.6em;
 }
