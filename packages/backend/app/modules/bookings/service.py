@@ -64,7 +64,7 @@ async def create_booking(session: AsyncSession, guest: User, payload: BookingCre
         raise NotFoundError(code="property.not_found")
     if prop.host_id == guest.id:
         raise ForbiddenError(code="booking.self_booking")
-    if payload.guest_count > prop.capacity:
+    if prop.capacity is not None and payload.guest_count > prop.capacity:
         raise ValidationError(
             code="booking.capacity_exceeded",
             extra={"field": "guest_count", "max": prop.capacity},
