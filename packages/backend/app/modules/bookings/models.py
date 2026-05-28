@@ -47,6 +47,10 @@ class Booking(Base):
         CheckConstraint("check_out_date > check_in_date", name="ck_bookings_dates_ordered"),
         CheckConstraint("guest_count >= 1", name="ck_bookings_guest_count_positive"),
         CheckConstraint("subtotal_amount >= 0", name="ck_bookings_subtotal_non_negative"),
+        CheckConstraint(
+            "(room_type_id IS NULL) = (room_slot_index IS NULL)",
+            name="ck_bookings_room_pair",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
@@ -56,6 +60,13 @@ class Booking(Base):
     property_id: Mapped[UUID] = mapped_column(
         Uuid(), ForeignKey("properties.id", ondelete="RESTRICT"), nullable=False, index=True
     )
+    room_type_id: Mapped[UUID | None] = mapped_column(
+        Uuid(),
+        ForeignKey("room_types.id", ondelete="RESTRICT"),
+        nullable=True,
+        index=True,
+    )
+    room_slot_index: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     check_in_date: Mapped[date] = mapped_column(Date, nullable=False)
     check_out_date: Mapped[date] = mapped_column(Date, nullable=False)
