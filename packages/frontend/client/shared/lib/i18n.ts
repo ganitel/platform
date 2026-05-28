@@ -28,29 +28,7 @@ const dict = {
 
   "landing.nav.properties": { fr: "Logements", en: "Properties" },
   "landing.nav.experiences": { fr: "Expériences", en: "Experiences" },
-  "landing.tag.line1": { fr: "Logements", en: "Properties" },
-  "landing.tag.line2": { fr: "& Séjours", en: "& Stays" },
-  "landing.lede": {
-    fr: "Des logements choisis dans des lieux calmes, et les expériences qui les entourent. Du Cameroun à la Côte d'Ivoire — trouvez où poser vos valises.",
-    en: "Curated stays in quiet places, paired with the experiences that come with them. From Cameroon to Côte d'Ivoire — find where to settle in.",
-  },
-  "landing.title.line1": { fr: "Là où la lumière", en: "Stay where the" },
-  "landing.title.line2_pre": { fr: "prend son", en: "light moves" },
-  "landing.title.line2_em": { fr: "temps.", en: "slowly." },
   "landing.cta": { fr: "Découvrir les séjours", en: "Browse stays" },
-  "landing.cta.hint": { fr: "Réservation immédiate", en: "Instant booking" },
-  "landing.feature.tour": { fr: "Visite live", en: "Live tour" },
-  "landing.feature.title": { fr: "Cabane Belledonne", en: "Belledonne Cabin" },
-  "landing.feature.caption": {
-    fr: "Une visite de douze minutes dans notre logement le plus aimé — perché au-dessus de la vallée, construit autour d'une seule fenêtre.",
-    en: "A twelve-minute tour of our most-loved stay — perched above the valley, built around a single window.",
-  },
-  "landing.play": { fr: "Lancer la visite", en: "Play tour" },
-  "landing.info": {
-    fr: "Lire l'histoire de l'hôte",
-    en: "Read the host story",
-  },
-  "landing.scroll": { fr: "Faire défiler", en: "Scroll" },
   "landing.featured.tag": { fr: "Sélection · 2026", en: "Selection · 2026" },
   "landing.featured.title": { fr: "Une sélection,", en: "A short list," },
   "landing.featured.title_em": { fr: "un seul ton.", en: "one tone." },
@@ -70,6 +48,92 @@ const dict = {
   "landing.cta_section.title_em": {
     fr: "à votre rythme.",
     en: "at your own pace.",
+  },
+  "landing.hero.tag": {
+    fr: "L'Afrique, pour se ressourcer.",
+    en: "Africa, for renewal.",
+  },
+  "landing.hero.title": { fr: "Bienvenue chez", en: "Welcome to" },
+  "landing.hero.title_em": { fr: "ganitel.", en: "ganitel." },
+  "landing.hero.lede": {
+    fr: "ganitel est la marketplace de loisirs à haute confiance d'Afrique — pensée pour les professionnels en quête d'un vrai repos, pour la diaspora qui veut renouer avec le continent, et pour les voyageurs en quête de leur prochaine destination inoubliable.",
+    en: "ganitel is Africa's high-trust leisure marketplace — built for professionals seeking true rest, for the African diaspora reconnecting with the continent, and for travellers chasing their next unforgettable destination.",
+  },
+  "landing.hero.cta.browse": {
+    fr: "Découvrir les séjours",
+    en: "Browse stays",
+  },
+  "landing.trust.tag": {
+    fr: "Le socle de la confiance",
+    en: "The foundation of trust",
+  },
+  "landing.trust.title": { fr: "Quatre promesses,", en: "Four promises," },
+  "landing.trust.title_em": {
+    fr: "tenues à chaque étape.",
+    en: "kept at every step.",
+  },
+  "landing.destinations.tag": { fr: "Destinations", en: "Destinations" },
+  "landing.destinations.title": {
+    fr: "Un pays, plusieurs",
+    en: "One country, many",
+  },
+  "landing.destinations.title_em": { fr: "visages.", en: "faces." },
+  "landing.destinations.lede": {
+    fr: "De la côte volcanique du Sud-Ouest aux plateaux de l'Ouest, des forêts de l'Est à la côte du Littoral — choisissez votre Cameroun.",
+    en: "From the volcanic South-West coast to the Western highlands, the Eastern forests to the Littoral shore — pick your Cameroon.",
+  },
+  "landing.destinations.sw.title": { fr: "Sud-Ouest", en: "South-West" },
+  "landing.destinations.sw.blurb": {
+    fr: "Le mont Cameroun et la côte volcanique de Buea à Limbé.",
+    en: "Mount Cameroon and the volcanic coast from Buea to Limbe.",
+  },
+  "landing.destinations.highlands.title": {
+    fr: "Hauts plateaux de l'Ouest",
+    en: "Western highlands",
+  },
+  "landing.destinations.highlands.blurb": {
+    fr: "Dschang, Bafang, Bangang — collines vertes et chefferies bamiléké.",
+    en: "Dschang, Bafang, Bangang — green hills and Bamileke chiefdoms.",
+  },
+  "landing.destinations.east.title": {
+    fr: "Forêts de l'Est",
+    en: "Eastern forests",
+  },
+  "landing.destinations.east.blurb": {
+    fr: "La grande forêt équatoriale, intacte et profonde.",
+    en: "The great equatorial rainforest, deep and untouched.",
+  },
+  "landing.destinations.littoral.title": { fr: "Littoral", en: "Littoral" },
+  "landing.destinations.littoral.blurb": {
+    fr: "Douala et la côte atlantique, l'autre Cameroun.",
+    en: "Douala and the Atlantic coast, the other Cameroon.",
+  },
+  "landing.why.tag": { fr: "Pourquoi ganitel", en: "Why ganitel" },
+  "landing.why.title": { fr: "Voyager sans", en: "Travel with no" },
+  "landing.why.title_em": { fr: "compromis.", en: "compromises." },
+  "landing.alt.hero": {
+    fr: "Route en terre traversant la forêt camerounaise",
+    en: "A dirt road through the Cameroonian forest",
+  },
+  "landing.alt.vision": {
+    fr: "Arbres camerounais sous un ciel nuageux, en noir et blanc",
+    en: "Cameroonian trees under a cloudy sky, in black and white",
+  },
+  "landing.alt.sw": {
+    fr: "Versant vert du mont Cameroun",
+    en: "Green slope of Mount Cameroon",
+  },
+  "landing.alt.highlands": {
+    fr: "Vue aérienne de maisons et d'arbres dans les hauts plateaux camerounais",
+    en: "Aerial view of houses and trees in the Cameroonian highlands",
+  },
+  "landing.alt.east": {
+    fr: "Arbres verts sous des nuages blancs, forêt camerounaise",
+    en: "Green trees under white clouds, Cameroonian forest",
+  },
+  "landing.alt.littoral": {
+    fr: "Ville côtière camerounaise au bord de l'eau",
+    en: "A Cameroonian coastal town by the water",
   },
   "footer.regions": {
     fr: "Cameroun · Sénégal · Côte d'Ivoire",
