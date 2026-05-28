@@ -80,7 +80,7 @@ export function WaitlistPanel({
         <p className="text-xs uppercase tracking-[0.18em] text-ganitel-text-placeholder">
           {t("waitlist.price_note")}
         </p>
-        <p className="mt-1 font-infoma text-2xl text-ganitel-text-title">
+        <p className="mt-1 text-2xl font-semibold tracking-tight text-ganitel-text-title">
           {formatMoney(price, locale)}
           <span className="ml-1.5 text-sm font-normal text-ganitel-text-subtitle">
             / {priceLabel}
@@ -103,7 +103,7 @@ export function WaitlistPanel({
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <p className="font-display text-xl font-bold leading-tight text-ganitel-text-title">
+              <p className="text-xl font-bold leading-tight tracking-tight text-ganitel-text-title">
                 {t("waitlist.headline")}
               </p>
               <p className="mt-1.5 text-sm leading-relaxed text-ganitel-text-subtitle">
@@ -173,7 +173,7 @@ function SuccessState({
   return (
     <div className="ganitel-anim-fade-up flex flex-col items-center py-6 text-center">
       <FormSuccessIcon size="md" />
-      <p className="font-display text-xl font-bold text-ganitel-text-title">
+      <p className="text-xl font-bold tracking-tight text-ganitel-text-title">
         {t("waitlist.success.title")}
       </p>
       <p className="mt-2 text-sm leading-relaxed text-ganitel-text-subtitle">

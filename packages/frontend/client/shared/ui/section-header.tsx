@@ -48,7 +48,7 @@ export function SectionHeader({
         {tag ? (
           <span
             className={cn(
-              "font-display text-[12px] font-semibold uppercase tracking-[0.18em]",
+              "text-[12px] font-semibold uppercase tracking-[0.18em]",
               tagColor,
             )}
           >
@@ -58,7 +58,7 @@ export function SectionHeader({
         <Heading
           style={TITLE_STYLE}
           className={cn(
-            "font-display mt-4 text-balance font-bold leading-[1.02] tracking-[-0.04em]",
+            "mt-4 text-balance font-bold leading-[1.02] tracking-[-0.04em]",
             titleColor,
           )}
         >
@@ -66,7 +66,7 @@ export function SectionHeader({
           {emphasis ? (
             <>
               {" "}
-              <em className="font-italic-emphasis text-ganitel-secondary">
+              <em className="font-medium italic text-ganitel-secondary">
                 {emphasis}
               </em>
             </>

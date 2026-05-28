@@ -144,7 +144,7 @@ export function ReviewForm({
               <Trash2 className="size-8 text-red-600" aria-hidden />
             </div>
           )}
-          <p className="font-display text-2xl font-bold text-ganitel-text-title">
+          <p className="text-2xl font-bold tracking-tight text-ganitel-text-title">
             {isApproved
               ? t("review.approved.title")
               : t("review.rejected.title")}

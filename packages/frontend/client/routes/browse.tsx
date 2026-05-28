@@ -214,7 +214,7 @@ function BrowseTab({
     <Link
       to={to}
       className={cn(
-        "font-display relative pb-3 pt-2 text-[15px] tracking-tight transition-colors duration-200",
+        "relative pb-3 pt-2 text-[15px] tracking-tight transition-colors duration-200",
         active
           ? "font-semibold text-ganitel-text-title"
           : "font-medium text-ganitel-text-placeholder hover:text-ganitel-text-title",

@@ -43,7 +43,7 @@ export function Faq() {
                 value={item.id}
                 className="border-ganitel-stroke-neutral"
               >
-                <AccordionTrigger className="font-display text-left text-base font-bold tracking-[-0.02em] text-ganitel-text-title md:text-lg">
+                <AccordionTrigger className="text-left text-base font-bold tracking-[-0.02em] text-ganitel-text-title md:text-lg">
                   {t(item.questionKey)}
                 </AccordionTrigger>
                 <AccordionContent className="text-[15px] leading-[1.7] text-ganitel-text-subtitle md:text-base">

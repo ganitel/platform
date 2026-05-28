@@ -114,7 +114,7 @@ export default function MyBookingsRoute() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-12 md:px-8">
-      <h1 className="font-infoma text-3xl text-ganitel-text-title">
+      <h1 className="text-3xl font-semibold tracking-tight text-ganitel-text-title">
         {t("nav.bookings")}
       </h1>
 

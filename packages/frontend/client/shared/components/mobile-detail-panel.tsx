@@ -37,7 +37,7 @@ export function MobileDetailPanel({
           <p className="text-[10px] uppercase tracking-[0.16em] text-ganitel-text-placeholder">
             {priceLabel}
           </p>
-          <p className="truncate font-display text-[20px] font-semibold text-ganitel-text-title">
+          <p className="truncate text-[20px] font-semibold tracking-tight text-ganitel-text-title">
             {priceText}
           </p>
         </div>
@@ -55,7 +55,7 @@ export function MobileDetailPanel({
           <DrawerContent className="max-h-[92svh] overflow-y-auto bg-ganitel-paper">
             {drawerTitle && (
               <DrawerHeader className="border-b border-ganitel-stroke-neutral text-left">
-                <DrawerTitle className="font-display text-ganitel-text-title">
+                <DrawerTitle className="font-semibold tracking-tight text-ganitel-text-title">
                   {drawerTitle}
                 </DrawerTitle>
               </DrawerHeader>

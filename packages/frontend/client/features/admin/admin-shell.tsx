@@ -80,7 +80,7 @@ function AdminSidebar() {
     <aside className="hidden w-60 shrink-0 flex-col lg:flex">
       <div className="sticky top-24 flex flex-col gap-8 rounded-3xl border border-ganitel-stroke-neutral/70 bg-ganitel-primary p-6 text-ganitel-paper shadow-[0_30px_80px_-40px_rgba(24,16,12,0.35)]">
         <div className="flex flex-col gap-1">
-          <span className="font-italic-emphasis text-2xl leading-none text-ganitel-secondary">
+          <span className="text-2xl font-medium italic leading-none text-ganitel-secondary">
             {t("admin.brand")}
           </span>
           <span className="text-xs uppercase tracking-[0.28em] text-ganitel-paper/60">
@@ -163,7 +163,7 @@ function PageHeader({
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="font-display text-[2.4rem] leading-[1.05] text-ganitel-text-title sm:text-[2.75rem]">
+        <h1 className="text-[2.4rem] font-semibold leading-[1.05] tracking-tight text-ganitel-text-title sm:text-[2.75rem]">
           {title}
         </h1>
         {description ? (

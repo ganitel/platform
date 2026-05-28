@@ -37,7 +37,7 @@ export function AuthLayout({
 
         <Link
           to="/"
-          className="relative z-10 inline-flex w-fit font-infoma text-3xl tracking-tight text-ganitel-text-button"
+          className="relative z-10 inline-flex w-fit text-3xl font-semibold tracking-tight text-ganitel-text-button"
         >
           ganitel
         </Link>
@@ -46,7 +46,7 @@ export function AuthLayout({
           <p className="text-xs uppercase tracking-[0.3em] text-ganitel-secondary">
             {subtitle}
           </p>
-          <h1 className="mt-3 font-infoma text-4xl leading-tight md:text-5xl">
+          <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
             {title}
           </h1>
           <p className="mt-4 text-sm text-ganitel-text-button/70">

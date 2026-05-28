@@ -52,7 +52,7 @@ export function Header() {
           aria-label="ganitel"
         >
           <LogoMark />
-          <span className="font-display text-[24px] font-bold leading-none tracking-[-0.01em]">
+          <span className="text-[24px] font-bold leading-none tracking-[-0.01em]">
             ganitel
           </span>
         </Link>

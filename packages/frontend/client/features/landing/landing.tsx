@@ -209,7 +209,7 @@ function TrustStrip() {
                   aria-hidden
                 />
               </span>
-              <span className="font-display text-base font-semibold text-ganitel-text-title">
+              <span className="text-base font-semibold tracking-tight text-ganitel-text-title">
                 {t(labelKey)}
               </span>
             </li>
@@ -257,7 +257,7 @@ function Destinations() {
                   />
                 </div>
                 <div className="flex flex-col gap-2 p-6">
-                  <h3 className="font-display m-0 text-xl font-bold leading-tight tracking-[-0.02em] text-ganitel-text-title">
+                  <h3 className="m-0 text-xl font-bold leading-tight tracking-[-0.02em] text-ganitel-text-title">
                     {t(dest.titleKey)}
                   </h3>
                   <p className="m-0 text-sm leading-[1.5] text-ganitel-text-subtitle">
@@ -329,7 +329,7 @@ function WhyGanitel() {
               key={card.key}
               className="flex flex-col gap-3 rounded-2xl bg-ganitel-surface-2 p-8"
             >
-              <h3 className="font-display m-0 text-xl font-bold text-ganitel-text-title">
+              <h3 className="m-0 text-xl font-bold tracking-tight text-ganitel-text-title">
                 {t(card.titleKey)}
               </h3>
               <p className="m-0 text-sm leading-[1.6] text-ganitel-text-subtitle">
@@ -364,10 +364,10 @@ function VisionMoment() {
       />
       <div aria-hidden className="absolute inset-0 bg-ganitel-primary/55" />
       <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
-        <p className="font-italic-emphasis m-0 text-lg text-ganitel-paper-warm">
+        <p className="m-0 text-lg font-medium italic text-ganitel-paper-warm">
           {t("about.vision.title")}
         </p>
-        <p className="font-display m-0 mt-6 text-balance text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-paper md:text-5xl">
+        <p className="m-0 mt-6 text-balance text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-paper md:text-5xl">
           {t("about.vision.body")}
         </p>
       </div>

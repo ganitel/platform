@@ -161,7 +161,7 @@ export function AddTeamForm() {
       {state === "done" ? (
         <div className="flex flex-col items-center py-8 text-center">
           <FormSuccessIcon />
-          <p className="font-display text-2xl font-bold text-ganitel-text-title">
+          <p className="text-2xl font-bold tracking-tight text-ganitel-text-title">
             {t("add_team.success.title")}
           </p>
           <p className="mt-3 text-sm leading-relaxed text-ganitel-text-subtitle">

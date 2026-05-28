@@ -166,7 +166,7 @@ function StatCard({
           {label}
         </span>
       </div>
-      <p className="font-display text-4xl leading-none tabular-nums">
+      <p className="text-4xl font-semibold leading-none tracking-tight tabular-nums">
         {loading ? <span className="opacity-30">—</span> : value}
       </p>
       <p className={cn("text-xs", ACCENT_SUB[accent])}>{sub}</p>
@@ -240,7 +240,7 @@ function SectionCard({
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-ganitel-secondary">
               {eyebrow}
             </p>
-            <h2 className="font-display text-2xl leading-tight text-ganitel-text-title">
+            <h2 className="text-2xl font-semibold leading-tight tracking-tight text-ganitel-text-title">
               {title}
             </h2>
           </div>
@@ -309,7 +309,7 @@ function Stat({
         {tr(labelKey)}
         {icon}
       </dt>
-      <dd className="font-display text-2xl leading-none tabular-nums text-ganitel-text-title">
+      <dd className="text-2xl font-semibold leading-none tracking-tight tabular-nums text-ganitel-text-title">
         {value === null ? <span className="opacity-30">—</span> : value}
       </dd>
     </div>
