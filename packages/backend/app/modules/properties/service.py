@@ -361,21 +361,23 @@ async def to_detail(session: AsyncSession, property: Property, host: User) -> Pr
     media_items = await _resolve_listing_media(session, property.media)
     return PropertyDetail(
         id=property.id,
+        kind=property.kind,
         title=property.title,
         property_type=property.property_type,
         address=property.address,
         city=property.city,
         country_code=property.country_code,
         location=_point_out(property.location),
-        capacity=property.capacity or 0,
-        bedrooms=property.bedrooms or 0,
-        beds=property.beds or 0,
-        bathrooms=property.bathrooms or 0,
+        capacity=property.capacity,
+        bedrooms=property.bedrooms,
+        beds=property.beds,
+        bathrooms=property.bathrooms,
         prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in property.prices],
         amenities=list(property.amenities),
         showcase_amenities=_showcase_amenities(property),
         listing_metadata=_listing_metadata(property),
         cover_media=media_items[0] if media_items else None,
+        summary=None,
         description=property.description,
         house_rules=property.house_rules,
         cancellation_policy=property.cancellation_policy,
@@ -385,12 +387,14 @@ async def to_detail(session: AsyncSession, property: Property, host: User) -> Pr
         media=media_items,
         created_at=property.created_at,
         published_at=property.published_at,
+        rooms=[],
     )
 
 
 async def to_admin_list_item(session: AsyncSession, property: Property) -> PropertyAdminListItem:
     return PropertyAdminListItem(
         id=property.id,
+        kind=property.kind,
         title=property.title,
         property_type=property.property_type,
         city=property.city,
@@ -398,6 +402,7 @@ async def to_admin_list_item(session: AsyncSession, property: Property) -> Prope
         status=property.status,
         prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in property.prices],
         cover_media=await _cover(session, property.media),
+        room_count=0,
         created_at=property.created_at,
         published_at=property.published_at,
     )
@@ -408,20 +413,22 @@ async def to_public(
 ) -> PropertyPublic:
     return PropertyPublic(
         id=property.id,
+        kind=property.kind,
         title=property.title,
         property_type=property.property_type,
         address=property.address,
         city=property.city,
         country_code=property.country_code,
         location=_point_out(property.location),
-        capacity=property.capacity or 0,
-        bedrooms=property.bedrooms or 0,
-        beds=property.beds or 0,
-        bathrooms=property.bathrooms or 0,
+        capacity=property.capacity,
+        bedrooms=property.bedrooms,
+        beds=property.beds,
+        bathrooms=property.bathrooms,
         prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in property.prices],
         amenities=list(property.amenities),
         showcase_amenities=_showcase_amenities(property),
         listing_metadata=_listing_metadata(property),
         cover_media=await _cover(session, property.media),
         distance_km=distance_km,
+        summary=None,
     )

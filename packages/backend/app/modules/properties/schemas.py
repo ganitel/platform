@@ -15,6 +15,7 @@ from app.modules.properties.models import (
     CancellationPolicy,
     KitchenType,
     ParkingAvailability,
+    PropertyKind,
     PropertyStatus,
 )
 
@@ -28,9 +29,95 @@ class GeoPoint(BaseModel):
     lng: float = Field(..., ge=-180, le=180)
 
 
+class BedSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    type: str = Field(..., min_length=1, max_length=40)
+    count: int = Field(..., ge=1, le=16)
+
+
+class RoomTypeCreateIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: str = Field(..., min_length=2, max_length=180)
+    description: str = Field(default="", max_length=10_000)
+    bed_config: list[BedSpec] = Field(default_factory=list, max_length=8)
+    max_guests: int = Field(..., ge=1, le=16)
+    amenities: list[str] = Field(default_factory=list, max_length=64)
+    private_bathroom: bool = True
+    inventory_count: int = Field(..., ge=1, le=500)
+    prices: list[Money] = Field(..., min_length=1, max_length=10)
+    active: bool = True
+    position: int = Field(default=0, ge=0, le=1000)
+    media_ids: list[UUID] = Field(default_factory=list, max_length=20)
+
+    @model_validator(mode="after")
+    def _unique_currencies(self) -> Self:
+        currencies = [p.currency for p in self.prices]
+        if len(currencies) != len(set(currencies)):
+            raise ValueError("prices must not contain duplicate currencies")
+        return self
+
+
+class RoomTypeUpdateIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: str = Field(default="", min_length=0, max_length=180)
+    description: str = Field(default="", max_length=10_000)
+    bed_config: list[BedSpec] | None = None
+    max_guests: int = Field(default=0, ge=0, le=16)
+    amenities: list[str] = Field(default_factory=list, max_length=64)
+    private_bathroom: bool = True
+    inventory_count: int = Field(default=0, ge=0, le=500)
+    prices: list[Money] | None = None
+    active: bool = True
+    position: int = Field(default=0, ge=0, le=1000)
+
+    @model_validator(mode="after")
+    def _validate_prices(self) -> Self:
+        if self.prices is not None:
+            currencies = [p.currency for p in self.prices]
+            if len(currencies) != len(set(currencies)):
+                raise ValueError("prices must not contain duplicate currencies")
+            if len(self.prices) == 0:
+                raise ValueError("prices must not be empty when provided")
+        return self
+
+
+class RoomTypeAvailability(BaseModel):
+    units_available: int
+    available: bool
+    nights: int
+    nightly: Money | None
+    total: Money | None
+
+
+class RoomTypePublic(BaseModel):
+    id: UUID
+    title: str
+    description: str
+    bed_config: list[BedSpec]
+    max_guests: int
+    amenities: list[str]
+    private_bathroom: bool
+    inventory_count: int
+    position: int
+    active: bool
+    prices: list[Money]
+    media: list[MediaItemPublic]
+    availability: RoomTypeAvailability | None = None
+
+
+class HotelSummary(BaseModel):
+    min_price: Money | None
+    max_capacity: int
+    total_inventory: int
+
+
 class PropertyCreateIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    kind: PropertyKind = PropertyKind.RENTAL
     title: str = Field(..., min_length=3, max_length=180)
     description: str = Field(default="", max_length=10_000)
     property_type: str = Field(..., min_length=2, max_length=40)
@@ -38,10 +125,10 @@ class PropertyCreateIn(BaseModel):
     city: str = Field(..., min_length=1, max_length=120)
     country_code: CountryCode
     location: GeoPoint
-    capacity: int = Field(..., ge=1, le=64)
-    bedrooms: int = Field(default=0, ge=0, le=32)
-    beds: int = Field(default=0, ge=0, le=64)
-    bathrooms: int = Field(default=0, ge=0, le=32)
+    capacity: int | None = Field(default=None, ge=1, le=64)
+    bedrooms: int | None = Field(default=0, ge=0, le=32)
+    beds: int | None = Field(default=0, ge=0, le=64)
+    bathrooms: int | None = Field(default=0, ge=0, le=32)
     amenities: list[str] = Field(default_factory=list, max_length=64)
     parking_available: ParkingAvailability = ParkingAvailability.NONE
     elevator: bool = False
@@ -57,15 +144,26 @@ class PropertyCreateIn(BaseModel):
     check_out_time: time | None = None
     house_rules: str | None = Field(default=None, max_length=4000)
     cancellation_policy: CancellationPolicy = CancellationPolicy.MODERATE
-    prices: list[Money] = Field(..., min_length=1, max_length=10)
+    prices: list[Money] = Field(default_factory=list, max_length=10)
     content_language: ContentLanguage = "fr"
     media_ids: list[UUID] = Field(default_factory=list, max_length=20)
 
     @model_validator(mode="after")
     def _unique_currencies(self) -> Self:
+        if not self.prices:
+            return self
         currencies = [p.currency for p in self.prices]
         if len(currencies) != len(set(currencies)):
             raise ValueError("prices must not contain duplicate currencies")
+        return self
+
+    @model_validator(mode="after")
+    def _validate_kind_fields(self) -> Self:
+        if self.kind == PropertyKind.RENTAL:
+            if self.capacity is None:
+                raise ValueError("capacity is required for rentals")
+            if not self.prices:
+                raise ValueError("prices must not be empty for rentals")
         return self
 
 
@@ -87,10 +185,10 @@ class PropertyUpdateIn(BaseModel):
     city: str = ""
     country_code: CountryCode = "CM"
     location: GeoPoint | None = None
-    capacity: int = Field(default=0, ge=1, le=64)
-    bedrooms: int = Field(default=0, ge=0, le=32)
-    beds: int = Field(default=0, ge=0, le=64)
-    bathrooms: int = Field(default=0, ge=0, le=32)
+    capacity: int | None = Field(default=None, ge=1, le=64)
+    bedrooms: int | None = Field(default=0, ge=0, le=32)
+    beds: int | None = Field(default=0, ge=0, le=64)
+    bathrooms: int | None = Field(default=0, ge=0, le=32)
     amenities: list[str] = Field(default_factory=list)
     parking_available: ParkingAvailability = ParkingAvailability.NONE
     elevator: bool = False
@@ -165,22 +263,24 @@ class PropertyPublic(BaseModel):
     """Returned in search results — leaner than detail."""
 
     id: UUID
+    kind: PropertyKind
     title: str
     property_type: str
     address: str | None
     city: str
     country_code: CountryCode
     location: GeoPoint
-    capacity: int
-    bedrooms: int
-    beds: int
-    bathrooms: int
+    capacity: int | None
+    bedrooms: int | None
+    beds: int | None
+    bathrooms: int | None
     prices: list[Money]
     amenities: list[str]
     showcase_amenities: PropertyShowcaseAmenities
     listing_metadata: PropertyListingMetadata
     cover_media: MediaPublic | None
     distance_km: float | None = None
+    summary: HotelSummary | None = None
 
 
 class PropertyDetail(PropertyPublic):
@@ -193,6 +293,7 @@ class PropertyDetail(PropertyPublic):
     media: list[MediaItemPublic]
     created_at: datetime
     published_at: datetime | None
+    rooms: list[RoomTypePublic] = Field(default_factory=list)
 
 
 class AttachMediaIn(BaseModel):
@@ -229,6 +330,7 @@ class SearchOut(BaseModel):
 
 class PropertyAdminListItem(BaseModel):
     id: UUID
+    kind: PropertyKind
     title: str
     property_type: str
     city: str
@@ -236,6 +338,7 @@ class PropertyAdminListItem(BaseModel):
     status: PropertyStatus
     prices: list[Money]
     cover_media: MediaPublic | None
+    room_count: int = 0
     created_at: datetime
     published_at: datetime | None
 
