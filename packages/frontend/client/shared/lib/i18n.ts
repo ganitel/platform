@@ -1713,6 +1713,61 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
     en: "Private bathroom",
   },
   "admin.rooms.form.active": { fr: "Active", en: "Active" },
+  "admin.rooms.form.position": { fr: "Position", en: "Position" },
+  "admin.rooms.form.bed_type": { fr: "Type de lit", en: "Bed type" },
+  "admin.rooms.form.bed_count": { fr: "Nombre", en: "Count" },
+  "admin.rooms.form.amenities": { fr: "Équipements", en: "Amenities" },
+  "admin.rooms.form.section.info": { fr: "Informations", en: "Details" },
+  "admin.rooms.form.section.beds": { fr: "Couchages", en: "Beds" },
+  "admin.rooms.form.section.capacity": {
+    fr: "Capacité & stock",
+    en: "Capacity & inventory",
+  },
+  "admin.rooms.form.section.amenities": {
+    fr: "Équipements",
+    en: "Amenities",
+  },
+  "admin.rooms.form.section.price": { fr: "Tarif", en: "Pricing" },
+  "admin.rooms.form.section.status": { fr: "Statut", en: "Status" },
+  "admin.rooms.form.section.media": {
+    fr: "Photos & vidéos",
+    en: "Photos & videos",
+  },
+  "admin.rooms.form.media.read_only_note": {
+    fr: "Les photos d'une chambre existante sont en lecture seule pour le moment. Supprimez et recréez la chambre pour changer les médias.",
+    en: "Photos for an existing room are read-only for now. Delete and recreate the room to change the media.",
+  },
+  "admin.rooms.form.media.empty_existing": {
+    fr: "Aucune photo. Supprimez et recréez la chambre pour ajouter des médias.",
+    en: "No photos yet. Delete and recreate the room to add media.",
+  },
+  "admin.rooms.submitting_create": { fr: "Création…", en: "Creating…" },
+  "admin.rooms.submitting_update": {
+    fr: "Enregistrement…",
+    en: "Saving…",
+  },
+  "admin.rooms.drawer.add_title": {
+    fr: "Ajouter une chambre",
+    en: "Add a room",
+  },
+  "admin.rooms.drawer.edit_title": {
+    fr: "Modifier la chambre",
+    en: "Edit room",
+  },
+  "admin.rooms.empty.title": {
+    fr: "Pas encore de chambres",
+    en: "No rooms yet",
+  },
+  "admin.rooms.empty.description": {
+    fr: "Ajoutez votre première chambre pour permettre aux voyageurs de réserver cet hôtel.",
+    en: "Add your first room so travellers can book this hotel.",
+  },
+  "admin.rooms.bed_summary.row": {
+    fr: "{count}× {label}",
+    en: "{count}× {label}",
+  },
+  "admin.rooms.guests_label": { fr: "{n} voyageurs", en: "{n} guests" },
+  "admin.rooms.list.aria": { fr: "Chambres", en: "Rooms" },
 
   "admin.experiences.new.meta.title": {
     fr: "Admin — Nouvelle expérience",

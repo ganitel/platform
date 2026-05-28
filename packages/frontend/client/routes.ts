@@ -36,6 +36,7 @@ export default [
   route("admin/hotels", "routes/admin.hotels.tsx"),
   route("admin/hotels/new", "routes/admin.hotels.new.tsx"),
   route("admin/hotels/:id/edit", "routes/admin.hotels.$id.edit.tsx"),
+  route("admin/hotels/:id/rooms", "routes/admin.hotels.$id.rooms.tsx"),
   route("admin/experiences", "routes/admin.experiences.tsx"),
   route("admin/experiences/new", "routes/admin.experiences.new.tsx"),
   route("admin/experiences/:id/edit", "routes/admin.experiences.$id.edit.tsx"),
