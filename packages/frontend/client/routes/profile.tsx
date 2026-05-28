@@ -67,7 +67,7 @@ export default function ProfileRoute({ loaderData }: Route.ComponentProps) {
           <AvatarFallback>{initials || "?"}</AvatarFallback>
         </Avatar>
         <div>
-          <h1 className="font-infoma text-3xl text-ganitel-text-title">
+          <h1 className="text-3xl font-semibold tracking-tight text-ganitel-text-title">
             {me.display_name}
           </h1>
           <p className="text-sm text-ganitel-text-subtitle">

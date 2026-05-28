@@ -189,7 +189,7 @@ export function EmptyState({
   return (
     <AdminCard>
       <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
-        <h3 className="font-display text-xl text-ganitel-text-title">
+        <h3 className="text-xl font-semibold tracking-tight text-ganitel-text-title">
           {title}
         </h3>
         {description ? (

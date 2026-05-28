@@ -21,7 +21,7 @@ export function Footer() {
           <span className="grid size-4 rotate-[-4deg] place-items-center rounded-md bg-ganitel-text-title text-[9px] font-extrabold leading-none text-ganitel-paper">
             G
           </span>
-          <span className="font-display text-[15px] font-bold tracking-[-0.01em]">
+          <span className="text-[15px] font-bold tracking-[-0.01em]">
             ganitel
           </span>
           <span>· {year}</span>
@@ -52,7 +52,7 @@ export function Footer() {
           <span className="grid size-5 rotate-[-4deg] place-items-center rounded-md bg-ganitel-text-title text-[10px] font-extrabold leading-none text-ganitel-paper">
             G
           </span>
-          <span className="font-display text-[16px] font-bold tracking-[-0.01em]">
+          <span className="text-[16px] font-bold tracking-[-0.01em]">
             ganitel
           </span>
           <span className="text-ganitel-text-placeholder">· {year}</span>

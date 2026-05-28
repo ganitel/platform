@@ -55,10 +55,10 @@ export function PropertyCard({ property, priority }: Props) {
 
       <div className="flex flex-col gap-3 px-1">
         <div className="flex items-baseline justify-between gap-4">
-          <h3 className="font-display line-clamp-2 flex-1 text-balance text-[20px] font-semibold leading-[1.1] tracking-[-0.025em] text-ganitel-text-title transition-colors group-hover:text-ganitel-text-subtitle">
+          <h3 className="line-clamp-2 flex-1 text-balance text-[20px] font-semibold leading-[1.1] tracking-[-0.025em] text-ganitel-text-title transition-colors group-hover:text-ganitel-text-subtitle">
             {property.title}
           </h3>
-          <span className="font-italic-serif shrink-0 text-[15px] leading-tight text-ganitel-text-placeholder">
+          <span className="shrink-0 text-[15px] font-medium italic leading-tight text-ganitel-text-placeholder">
             {property.city}
           </span>
         </div>
@@ -72,7 +72,7 @@ export function PropertyCard({ property, priority }: Props) {
         </p>
 
         {price && (
-          <p className="font-display text-[15px] leading-snug">
+          <p className="text-[15px] leading-snug tracking-tight">
             <span className="font-semibold text-ganitel-text-title">
               {price}
             </span>

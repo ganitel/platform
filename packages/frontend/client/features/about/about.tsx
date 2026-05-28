@@ -145,10 +145,10 @@ function Trust() {
           />
         </div>
         <div className="flex flex-col gap-7">
-          <span className="font-display text-xs font-semibold uppercase tracking-[0.18em] text-ganitel-brown break-normal">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ganitel-brown break-normal">
             {t("about.trust.tag")}
           </span>
-          <p className="font-display m-0 text-2xl leading-snug tracking-[-0.01em] text-ganitel-text-title md:text-3xl">
+          <p className="m-0 text-2xl leading-snug tracking-[-0.01em] text-ganitel-text-title md:text-3xl">
             {t("about.statement")}
           </p>
           <p className="m-0 text-sm text-ganitel-text-placeholder">
@@ -164,7 +164,7 @@ function Trust() {
                     aria-hidden
                   />
                 </span>
-                <span className="font-display text-base font-semibold text-ganitel-text-title">
+                <span className="text-base font-semibold tracking-tight text-ganitel-text-title">
                   {t(labelKey)}
                 </span>
               </li>
@@ -183,7 +183,7 @@ function Impact() {
     <section className="bg-ganitel-olive-soft px-6 py-20 md:px-12 md:py-28">
       <div ref={ref} data-reveal="" className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="font-display m-0 text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-olive md:text-4xl">
+          <h2 className="m-0 text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-olive md:text-4xl">
             {t("about.impact.title")}
           </h2>
           <p className="m-0 mt-6 text-[15px] leading-[1.7] text-ganitel-text-subtitle md:text-base">
@@ -205,7 +205,7 @@ function Impact() {
               className="h-56 w-full object-cover md:h-auto md:w-1/2"
             />
             <div className="flex flex-col gap-3 p-8">
-              <h3 className="font-display m-0 text-xl font-bold text-ganitel-text-title">
+              <h3 className="m-0 text-xl font-bold tracking-tight text-ganitel-text-title">
                 {t("about.impact.card.renewal.title")}
               </h3>
               <p className="m-0 text-sm leading-[1.6] text-ganitel-text-subtitle">
@@ -214,7 +214,7 @@ function Impact() {
             </div>
           </li>
           <li className="flex flex-col gap-3 rounded-2xl bg-ganitel-surface p-8">
-            <h3 className="font-display m-0 text-xl font-bold text-ganitel-text-title">
+            <h3 className="m-0 text-xl font-bold tracking-tight text-ganitel-text-title">
               {t("about.impact.card.guides.title")}
             </h3>
             <p className="m-0 text-sm leading-[1.6] text-ganitel-text-subtitle">
@@ -222,7 +222,7 @@ function Impact() {
             </p>
           </li>
           <li className="flex flex-col gap-3 rounded-2xl bg-ganitel-surface p-8 md:col-span-3">
-            <h3 className="font-display m-0 text-xl font-bold text-ganitel-text-title">
+            <h3 className="m-0 text-xl font-bold tracking-tight text-ganitel-text-title">
               {t("about.impact.card.transport.title")}
             </h3>
             <p className="m-0 text-sm leading-[1.6] text-ganitel-text-subtitle">
@@ -283,13 +283,13 @@ function TeamMemberCard({ member }: { member: TeamMember }) {
         ) : (
           <span
             aria-hidden
-            className="font-display grid size-14 place-items-center rounded-full bg-ganitel-text-title text-base font-bold text-ganitel-paper"
+            className="grid size-14 place-items-center rounded-full bg-ganitel-text-title text-base font-bold tracking-tight text-ganitel-paper"
           >
             {initials}
           </span>
         )}
         <div className="min-w-0">
-          <p className="font-display m-0 text-lg font-bold leading-tight tracking-[-0.02em] text-ganitel-text-title">
+          <p className="m-0 text-lg font-bold leading-tight tracking-[-0.02em] text-ganitel-text-title">
             {member.name}
           </p>
           <p className="m-0 text-[13px] uppercase tracking-[0.12em] text-ganitel-text-placeholder">
@@ -327,10 +327,10 @@ function Vision() {
       />
       <div aria-hidden className="absolute inset-0 bg-ganitel-primary/45" />
       <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
-        <p className="font-italic-serif m-0 text-lg text-ganitel-paper-warm">
+        <p className="m-0 text-lg font-medium italic text-ganitel-paper-warm">
           {t("about.vision.title")}
         </p>
-        <p className="font-display m-0 mt-6 text-balance text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-paper md:text-5xl">
+        <p className="m-0 mt-6 text-balance text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-paper md:text-5xl">
           {t("about.vision.body")}
         </p>
       </div>
@@ -348,10 +348,10 @@ function Closing() {
         data-reveal=""
         className="mx-auto flex max-w-7xl flex-col items-center gap-7 rounded-[28px] bg-ganitel-tan-soft px-8 py-14 text-center md:px-16 md:py-20"
       >
-        <span className="font-display text-xs font-semibold uppercase tracking-[0.18em] text-ganitel-brown">
+        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ganitel-brown">
           {t("about.closing.tag")}
         </span>
-        <h2 className="font-display m-0 max-w-2xl text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-on-tan md:text-4xl">
+        <h2 className="m-0 max-w-2xl text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-on-tan md:text-4xl">
           {t("about.closing")}
         </h2>
         <PillLink to="/browse" variant="solid" arrow>

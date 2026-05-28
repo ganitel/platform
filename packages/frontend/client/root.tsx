@@ -49,6 +49,7 @@ export const links: Route.LinksFunction = () => {
           { rel: "dns-prefetch", href: api },
         ]
       : []),
+    { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
     { rel: "icon", href: "/favicon.ico", sizes: "any" },
     {
       rel: "apple-touch-icon",
@@ -161,7 +162,9 @@ export function ErrorBoundary() {
 
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-6 text-center">
-      <p className="font-infoma text-7xl text-ganitel-text-title">{status}</p>
+      <p className="text-7xl font-semibold tracking-tight text-ganitel-text-title">
+        {status}
+      </p>
       <h1 className="mt-4 text-xl font-semibold text-ganitel-text-title">
         {heading}
       </h1>

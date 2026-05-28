@@ -161,7 +161,7 @@ export default function ExperienceDetailRoute({
             <p className="text-[11px] uppercase tracking-[0.2em] text-ganitel-secondary">
               {experienceTypeLabel(experience.experience_type)}
             </p>
-            <h1 className="mt-2 font-infoma text-[28px] leading-[1.05] text-ganitel-text-title sm:text-3xl md:text-4xl">
+            <h1 className="mt-2 text-[28px] font-semibold leading-[1.05] tracking-tight text-ganitel-text-title sm:text-3xl md:text-4xl">
               {experience.title}
             </h1>
             <p className="mt-1.5 text-sm text-ganitel-text-subtitle">

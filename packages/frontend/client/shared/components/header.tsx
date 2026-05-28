@@ -6,6 +6,7 @@ import { cn } from "@/shared/lib/cn";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 import { PillLink } from "@/shared/ui/pill-link";
+import { LogoMark } from "@/shared/components/logo-mark";
 
 const UserMenu = lazy(() =>
   import("@/features/auth/components/user-menu").then((m) => ({
@@ -50,10 +51,8 @@ export function Header() {
           className="inline-flex items-center gap-2 text-ganitel-text-title"
           aria-label="ganitel"
         >
-          <span className="grid size-7 rotate-[-4deg] place-items-center rounded-lg bg-ganitel-text-title text-[13px] font-extrabold leading-none text-ganitel-paper">
-            G
-          </span>
-          <span className="font-display text-[24px] font-bold leading-none tracking-[-0.01em]">
+          <LogoMark />
+          <span className="text-[24px] font-bold leading-none tracking-[-0.01em]">
             ganitel
           </span>
         </Link>
