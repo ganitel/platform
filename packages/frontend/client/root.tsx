@@ -126,7 +126,10 @@ export default function App({ loaderData }: Route.ComponentProps) {
   );
   const locale = useSyncExternalStore<Locale>(
     NEVER_CHANGES,
-    () => localeFromAcceptLanguage(navigator.language),
+    () =>
+      typeof navigator !== "undefined"
+        ? localeFromAcceptLanguage(navigator.language)
+        : loaderData.locale,
     () => loaderData.locale,
   );
 
