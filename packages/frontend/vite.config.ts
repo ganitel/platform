@@ -29,6 +29,29 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./client"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return undefined;
+          if (id.includes("/react-router/") || id.includes("/@remix-run/"))
+            return "vendor-router";
+          if (
+            id.includes("/react-dom/") ||
+            id.includes("/react/") ||
+            id.includes("/scheduler/")
+          )
+            return "vendor-react";
+          if (id.includes("/@radix-ui/")) return "vendor-radix";
+          if (id.includes("/@tanstack/")) return "vendor-tanstack";
+          if (id.includes("/lucide-react/")) return "vendor-lucide";
+          if (id.includes("/date-fns/")) return "vendor-date-fns";
+          if (id.includes("/zod/")) return "vendor-zod";
+          return undefined;
+        },
+      },
+    },
+  },
   test: {
     environment: "jsdom",
     setupFiles: "./client/shared/test/setup.ts",

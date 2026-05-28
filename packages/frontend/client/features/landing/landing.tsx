@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ArrowDown, Play } from "lucide-react";
 import type { CSSProperties } from "react";
 
@@ -11,22 +10,16 @@ import { useSearchProperties } from "@/features/properties/hooks";
 import { PillLink } from "@/shared/ui/pill-link";
 import { SectionHeader } from "@/shared/ui/section-header";
 import { useCalmMode } from "@/shared/hooks/use-connection";
+import { useReveal } from "@/shared/hooks/use-reveal";
+import { buildSrcSet, fallbackOnError } from "@/shared/lib/image";
 import {
-  buildSrcSet,
-  fallbackOnError,
-  transformImage,
-  HERO_WIDTHS,
+  HERO_FALLBACK,
+  HERO_MOBILE_SRC,
   HERO_SIZES,
-} from "@/shared/lib/image";
-
-const HERO_SOURCE =
-  "https://images.unsplash.com/photo-1756475471671-48813cf5ea5b?w=2000&q=80&auto=format&fit=crop";
-const HERO_FALLBACK = "https://picsum.photos/seed/ganitelhero/1600/1067";
-const FEATURE_SOURCE =
-  "https://images.unsplash.com/photo-1741850819375-5de72125719e?w=900&q=80&auto=format&fit=crop";
-const FEATURE_FALLBACK = "https://picsum.photos/seed/ganitelfeat/720/560";
-
-const ENTRANCE_EASE = [0.2, 0.7, 0.2, 1] as const;
+  HERO_SRCSET,
+  FEATURE_FALLBACK,
+  FEATURE_SOURCE,
+} from "./hero-source";
 
 export function Landing() {
   return (
@@ -51,14 +44,12 @@ function Hero() {
 
 function Stage() {
   const calm = useCalmMode();
-  const heroSrcSet = buildSrcSet(HERO_SOURCE, HERO_WIDTHS, 70);
-  const mobileSrc = transformImage(HERO_SOURCE, { width: 720, quality: 65 });
 
   return (
     <div className="absolute inset-3 isolate overflow-hidden rounded-[18px] bg-[#14180f] md:inset-5 md:rounded-[22px]">
-      <motion.img
-        src={mobileSrc}
-        srcSet={heroSrcSet}
+      <img
+        src={HERO_MOBILE_SRC}
+        srcSet={HERO_SRCSET}
         sizes={HERO_SIZES}
         alt=""
         loading="eager"
@@ -67,25 +58,9 @@ function Stage() {
         width={1440}
         height={960}
         onError={fallbackOnError(HERO_FALLBACK)}
-        className="absolute inset-[-3%] h-[106%] w-[106%] object-cover object-[50%_35%] saturate-[0.92] contrast-[1.05] brightness-[0.92]"
-        animate={
-          calm
-            ? undefined
-            : {
-                scale: [1, 1.055],
-                x: ["0%", "-1%"],
-                y: ["0%", "-1.2%"],
-              }
-        }
-        transition={
-          calm
-            ? undefined
-            : {
-                duration: 16,
-                ease: [0.4, 0, 0.4, 1],
-                repeat: Infinity,
-                repeatType: "mirror",
-              }
+        className={
+          "absolute inset-[-3%] h-[106%] w-[106%] object-cover object-[50%_35%] saturate-[0.92] contrast-[1.05] brightness-[0.92]" +
+          (calm ? "" : " ganitel-anim-kenburns")
         }
       />
       <div
@@ -108,14 +83,16 @@ const HEADLINE_STYLE: CSSProperties = {
   fontSize: "clamp(2.5rem, 5.6vw, 5.75rem)",
 };
 
+const HERO_PANEL_DELAY: CSSProperties = { animationDelay: "0.15s" };
+const FEATURE_CARD_DELAY: CSSProperties = { animationDelay: "0.35s" };
+const SCROLL_HINT_DELAY: CSSProperties = { animationDelay: "1.4s" };
+
 function HeroPanel() {
   const t = useT();
   return (
-    <motion.div
-      initial={{ y: 40, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 1, delay: 0.15, ease: ENTRANCE_EASE }}
-      className="absolute bottom-[38px] left-[38px] z-10 w-[min(720px,calc(100%-480px))] rounded-[22px] bg-ganitel-paper p-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_40px_80px_-40px_rgba(0,0,0,0.55)] max-md:inset-x-3 max-md:bottom-3 max-md:w-auto max-md:rounded-[18px] max-md:p-6"
+    <div
+      style={HERO_PANEL_DELAY}
+      className="ganitel-anim-fade-up absolute bottom-[38px] left-[38px] z-10 w-[min(720px,calc(100%-480px))] rounded-[22px] bg-ganitel-paper p-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_40px_80px_-40px_rgba(0,0,0,0.55)] max-md:inset-x-3 max-md:bottom-3 max-md:w-auto max-md:rounded-[18px] max-md:p-6"
     >
       <div className="mb-6 grid grid-cols-[104px_1px_1fr] items-start gap-6 border-b border-dashed border-ganitel-stroke-neutral pb-6 max-sm:grid-cols-1 max-sm:gap-2 max-sm:pb-5">
         <span className="font-display pt-1 text-[12px] font-semibold uppercase leading-snug tracking-[0.18em] text-ganitel-text-title break-normal">
@@ -154,18 +131,16 @@ function HeroPanel() {
           <b className="font-semibold text-ganitel-text-title">en</b>
         </span>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 function FeatureCard() {
   const t = useT();
   return (
-    <motion.aside
-      initial={{ y: 40, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 1, delay: 0.35, ease: ENTRANCE_EASE }}
-      className="absolute bottom-[38px] right-[38px] z-10 w-80 rounded-[22px] bg-ganitel-paper p-3.5 pb-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_40px_80px_-40px_rgba(0,0,0,0.55)] max-lg:hidden"
+    <aside
+      style={FEATURE_CARD_DELAY}
+      className="ganitel-anim-fade-up absolute bottom-[38px] right-[38px] z-10 w-80 rounded-[22px] bg-ganitel-paper p-3.5 pb-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_40px_80px_-40px_rgba(0,0,0,0.55)] max-lg:hidden"
       aria-label="Featured stay"
     >
       <div className="relative mb-4 aspect-[4/3.1] overflow-hidden rounded-[14px] bg-[#1c2218]">
@@ -222,28 +197,22 @@ function FeatureCard() {
           {t("landing.feature.caption")}
         </p>
       </div>
-    </motion.aside>
+    </aside>
   );
 }
 
 function ScrollHint() {
   const t = useT();
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 1.4, duration: 1 }}
-      className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 max-md:hidden"
+    <div
+      style={SCROLL_HINT_DELAY}
+      className="ganitel-anim-fade-in pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 max-md:hidden"
     >
-      <motion.span
-        animate={{ y: [0, 6, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-white/65"
-      >
+      <span className="ganitel-anim-scroll-hint inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-white/65">
         <ArrowDown className="size-3" strokeWidth={1.5} aria-hidden />
         {t("landing.scroll")}
-      </motion.span>
-    </motion.div>
+      </span>
+    </div>
   );
 }
 
@@ -251,6 +220,7 @@ function FeaturedSection() {
   const t = useT();
   const { data, isLoading, isError } = useSearchProperties({ limit: 8 });
   const items = data?.items ?? [];
+  const revealRef = useReveal<HTMLDivElement>();
 
   if (isError) return null;
   if (!isLoading && items.length === 0) return null;
@@ -265,11 +235,9 @@ function FeaturedSection() {
         lede={t("landing.featured.lede")}
       />
 
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-10%" }}
-        transition={{ duration: 0.8, delay: 0.1, ease: ENTRANCE_EASE }}
+      <div
+        ref={revealRef}
+        data-reveal=""
         className="mx-auto mt-16 max-w-7xl md:mt-20"
       >
         {isLoading ? (
@@ -277,7 +245,7 @@ function FeaturedSection() {
         ) : (
           <PropertyGrid items={items} />
         )}
-      </motion.div>
+      </div>
 
       <div className="mx-auto mt-12 flex max-w-7xl justify-center md:mt-16">
         <PillLink to="/browse" variant="ghost" arrow>
@@ -290,13 +258,12 @@ function FeaturedSection() {
 
 function FinalCTA() {
   const t = useT();
+  const revealRef = useReveal<HTMLDivElement>();
   return (
     <section className="px-6 pb-24 md:px-12 md:pb-32">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-10%" }}
-        transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
+      <div
+        ref={revealRef}
+        data-reveal=""
         className="mx-auto max-w-7xl rounded-[28px] bg-ganitel-text-title px-8 py-20 md:px-16 md:py-28"
       >
         <div className="grid gap-12 md:grid-cols-[1fr_auto] md:items-end">
@@ -317,7 +284,7 @@ function FinalCTA() {
             {t("landing.cta")}
           </PillLink>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

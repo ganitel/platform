@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { motion, AnimatePresence } from "framer-motion";
 import { Mail, MapPin } from "lucide-react";
 import type { Route } from "./+types/join";
 
@@ -266,320 +265,294 @@ export default function JoinPage() {
 
   return (
     <AuthLayout title={t("join.title")} subtitle={t("join.subtitle")}>
-      <AnimatePresence mode="wait">
-        {state === "done" ? (
-          <motion.div
-            key="success"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col items-center py-8 text-center"
-          >
-            <FormSuccessIcon />
-            <p className="font-display text-2xl font-bold text-ganitel-text-title">
-              {t("join.success.title")}
+      {state === "done" ? (
+        <div className="ganitel-anim-fade-up flex flex-col items-center py-8 text-center">
+          <FormSuccessIcon />
+          <p className="font-display text-2xl font-bold text-ganitel-text-title">
+            {t("join.success.title")}
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-ganitel-text-subtitle">
+            {t("join.success.detail")}
+          </p>
+          {emailSent && (
+            <p className="mt-3 text-xs text-ganitel-text-placeholder">
+              {t("join.success.email")}
             </p>
-            <p className="mt-3 text-sm leading-relaxed text-ganitel-text-subtitle">
-              {t("join.success.detail")}
-            </p>
-            {emailSent && (
-              <p className="mt-3 text-xs text-ganitel-text-placeholder">
-                {t("join.success.email")}
-              </p>
-            )}
-            <Link
-              to="/"
-              className="mt-8 inline-flex items-center rounded-full bg-ganitel-text-title px-6 py-3 text-sm font-semibold text-ganitel-paper transition-all hover:bg-ganitel-moss"
-            >
-              {t("join.success.back")}
-            </Link>
-          </motion.div>
-        ) : (
-          <motion.form
-            key="form"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            onSubmit={handleSubmit}
-            className="space-y-5"
+          )}
+          <Link
+            to="/"
+            className="mt-8 inline-flex items-center rounded-full bg-ganitel-text-title px-6 py-3 text-sm font-semibold text-ganitel-paper transition-all hover:bg-ganitel-moss"
           >
-            {/* Role toggle */}
-            <div>
-              <p className={LABEL_CLASS}>{t("join.role.label")}</p>
-              <div className="flex gap-3">
-                {ROLES.map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setRole(r)}
-                    className={cn(
-                      "flex-1 rounded-xl border py-3 text-sm font-medium transition-all",
-                      role === r
-                        ? "border-ganitel-secondary bg-ganitel-secondary/10 text-ganitel-secondary"
-                        : "border-ganitel-stroke-neutral bg-ganitel-neutral-1 text-ganitel-text-subtitle hover:border-ganitel-text-title hover:text-ganitel-text-title",
-                    )}
-                  >
-                    {t(ROLE_LABEL_KEY[r])}
-                  </button>
-                ))}
+            {t("join.success.back")}
+          </Link>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Role toggle */}
+          <div>
+            <p className={LABEL_CLASS}>{t("join.role.label")}</p>
+            <div className="flex gap-3">
+              {ROLES.map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRole(r)}
+                  className={cn(
+                    "flex-1 rounded-xl border py-3 text-sm font-medium transition-all",
+                    role === r
+                      ? "border-ganitel-secondary bg-ganitel-secondary/10 text-ganitel-secondary"
+                      : "border-ganitel-stroke-neutral bg-ganitel-neutral-1 text-ganitel-text-subtitle hover:border-ganitel-text-title hover:text-ganitel-text-title",
+                  )}
+                >
+                  {t(ROLE_LABEL_KEY[r])}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Email */}
+          <div>
+            <label htmlFor="join-email" className={LABEL_CLASS}>
+              {t("join.email")}
+            </label>
+            <IconInput
+              id="join-email"
+              icon={Mail}
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="exemple@gmail.com"
+            />
+            <FieldError message={fieldErrors.email} />
+          </div>
+
+          <div>
+            <PhoneInput
+              id="join-phone"
+              label={t("join.phone")}
+              onChange={(value, isValid) => {
+                setPhone(value);
+                setPhoneValid(isValid);
+              }}
+            />
+            <FieldError message={fieldErrors.phone} />
+          </div>
+
+          {/* Interest toggle */}
+          <div>
+            <p className={LABEL_CLASS}>
+              {t(isHost ? "join.host.interest.label" : "join.interest.label")}
+            </p>
+            <div className="flex gap-3">
+              {INTEREST_OPTIONS.map((val) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => onInterestOptionClick(val)}
+                  className={cn(
+                    "flex-1 rounded-xl border py-3 text-sm font-medium transition-all",
+                    interestOptionActive(val)
+                      ? "border-ganitel-secondary bg-ganitel-secondary/10 text-ganitel-secondary"
+                      : "border-ganitel-stroke-neutral bg-ganitel-neutral-1 text-ganitel-text-subtitle hover:border-ganitel-text-title hover:text-ganitel-text-title",
+                  )}
+                >
+                  {t(INTEREST_LABEL_KEY[val])}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {isHost ? (
+            <>
+              {/* Host city */}
+              <div>
+                <label htmlFor="join-host-city" className={LABEL_CLASS}>
+                  {t("join.host.city.label")}
+                </label>
+                <IconInput
+                  id="join-host-city"
+                  icon={MapPin}
+                  type="text"
+                  maxLength={120}
+                  value={hostCity}
+                  onChange={(e) => setHostCity(e.target.value)}
+                  placeholder={t("join.host.city.placeholder")}
+                />
+                <FieldError message={fieldErrors.host_city} />
               </div>
-            </div>
 
-            {/* Email */}
-            <div>
-              <label htmlFor="join-email" className={LABEL_CLASS}>
-                {t("join.email")}
-              </label>
-              <IconInput
-                id="join-email"
-                icon={Mail}
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="exemple@gmail.com"
-              />
-              <FieldError message={fieldErrors.email} />
-            </div>
-
-            <div>
-              <PhoneInput
-                id="join-phone"
-                label={t("join.phone")}
-                onChange={(value, isValid) => {
-                  setPhone(value);
-                  setPhoneValid(isValid);
-                }}
-              />
-              <FieldError message={fieldErrors.phone} />
-            </div>
-
-            {/* Interest toggle */}
-            <div>
-              <p className={LABEL_CLASS}>
-                {t(isHost ? "join.host.interest.label" : "join.interest.label")}
-              </p>
-              <div className="flex gap-3">
-                {INTEREST_OPTIONS.map((val) => (
-                  <button
-                    key={val}
-                    type="button"
-                    onClick={() => onInterestOptionClick(val)}
-                    className={cn(
-                      "flex-1 rounded-xl border py-3 text-sm font-medium transition-all",
-                      interestOptionActive(val)
-                        ? "border-ganitel-secondary bg-ganitel-secondary/10 text-ganitel-secondary"
-                        : "border-ganitel-stroke-neutral bg-ganitel-neutral-1 text-ganitel-text-subtitle hover:border-ganitel-text-title hover:text-ganitel-text-title",
-                    )}
-                  >
-                    {t(INTEREST_LABEL_KEY[val])}
-                  </button>
-                ))}
+              {/* Host inventory */}
+              <div>
+                <label htmlFor="join-host-inventory" className={LABEL_CLASS}>
+                  {t("join.host.inventory.label")}
+                </label>
+                <select
+                  id="join-host-inventory"
+                  value={hostInventory}
+                  onChange={(e) =>
+                    setHostInventory(e.target.value as HostInventory | "")
+                  }
+                  className={cn(INPUT_CLASS, "appearance-none cursor-pointer")}
+                >
+                  <option value="">
+                    {t("join.host.inventory.placeholder")}
+                  </option>
+                  {HOST_INVENTORIES.map((inv) => (
+                    <option key={inv} value={inv}>
+                      {t(HOST_INVENTORY_LABEL_KEY[inv])}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </div>
 
-            {isHost ? (
-              <>
-                {/* Host city */}
-                <div>
-                  <label htmlFor="join-host-city" className={LABEL_CLASS}>
-                    {t("join.host.city.label")}
-                  </label>
-                  <IconInput
-                    id="join-host-city"
-                    icon={MapPin}
-                    type="text"
-                    maxLength={120}
-                    value={hostCity}
-                    onChange={(e) => setHostCity(e.target.value)}
-                    placeholder={t("join.host.city.placeholder")}
-                  />
-                  <FieldError message={fieldErrors.host_city} />
-                </div>
-
-                {/* Host inventory */}
-                <div>
-                  <label htmlFor="join-host-inventory" className={LABEL_CLASS}>
-                    {t("join.host.inventory.label")}
-                  </label>
-                  <select
-                    id="join-host-inventory"
-                    value={hostInventory}
-                    onChange={(e) =>
-                      setHostInventory(e.target.value as HostInventory | "")
-                    }
-                    className={cn(
-                      INPUT_CLASS,
-                      "appearance-none cursor-pointer",
-                    )}
-                  >
-                    <option value="">
-                      {t("join.host.inventory.placeholder")}
+              {/* Host status */}
+              <div>
+                <label htmlFor="join-host-status" className={LABEL_CLASS}>
+                  {t("join.host.status.label")}
+                </label>
+                <select
+                  id="join-host-status"
+                  value={hostStatus}
+                  onChange={(e) =>
+                    setHostStatus(e.target.value as HostStatus | "")
+                  }
+                  className={cn(INPUT_CLASS, "appearance-none cursor-pointer")}
+                >
+                  <option value="">{t("join.host.status.placeholder")}</option>
+                  {HOST_STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {t(HOST_STATUS_LABEL_KEY[s])}
                     </option>
-                    {HOST_INVENTORIES.map((inv) => (
-                      <option key={inv} value={inv}>
-                        {t(HOST_INVENTORY_LABEL_KEY[inv])}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                  ))}
+                </select>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <p className={LABEL_CLASS}>{t("join.travel.label")}</p>
+                <DateRangeField
+                  startValue={travelStart}
+                  endValue={travelEnd}
+                  onStartChange={(v) => {
+                    setTravelStart(v);
+                    if (travelEnd && v && travelEnd < v) setTravelEnd("");
+                  }}
+                  onEndChange={setTravelEnd}
+                  startLabel={t("join.travel.start.label")}
+                  endLabel={t("join.travel.end.label")}
+                  startPlaceholder={t("join.travel.start.placeholder")}
+                  endPlaceholder={t("join.travel.end.placeholder")}
+                  todayIso={todayIso}
+                  startId="join-travel-start"
+                  endId="join-travel-end"
+                />
+                <FieldError message={fieldErrors.travel_start} />
+                <FieldError message={fieldErrors.travel_end} />
+              </div>
 
-                {/* Host status */}
-                <div>
-                  <label htmlFor="join-host-status" className={LABEL_CLASS}>
-                    {t("join.host.status.label")}
-                  </label>
-                  <select
-                    id="join-host-status"
-                    value={hostStatus}
-                    onChange={(e) =>
-                      setHostStatus(e.target.value as HostStatus | "")
-                    }
-                    className={cn(
-                      INPUT_CLASS,
-                      "appearance-none cursor-pointer",
-                    )}
-                  >
-                    <option value="">
-                      {t("join.host.status.placeholder")}
-                    </option>
-                    {HOST_STATUSES.map((s) => (
-                      <option key={s} value={s}>
-                        {t(HOST_STATUS_LABEL_KEY[s])}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </>
-            ) : (
-              <>
-                <div>
-                  <p className={LABEL_CLASS}>{t("join.travel.label")}</p>
-                  <DateRangeField
-                    startValue={travelStart}
-                    endValue={travelEnd}
-                    onStartChange={(v) => {
-                      setTravelStart(v);
-                      if (travelEnd && v && travelEnd < v) setTravelEnd("");
-                    }}
-                    onEndChange={setTravelEnd}
-                    startLabel={t("join.travel.start.label")}
-                    endLabel={t("join.travel.end.label")}
-                    startPlaceholder={t("join.travel.start.placeholder")}
-                    endPlaceholder={t("join.travel.end.placeholder")}
-                    todayIso={todayIso}
-                    startId="join-travel-start"
-                    endId="join-travel-end"
+              <div>
+                <p className={LABEL_CLASS}>{t("join.travelers.label")}</p>
+                <div className="space-y-2">
+                  <TravelerStepper
+                    label={t("join.travelers.adults.label")}
+                    hint={t("join.travelers.adults.hint")}
+                    value={adults}
+                    min={1}
+                    max={16}
+                    onChange={setAdults}
+                    decrementLabel={`${t("join.travelers.decrement")} — ${t("join.travelers.adults.label")}`}
+                    incrementLabel={`${t("join.travelers.increment")} — ${t("join.travelers.adults.label")}`}
                   />
-                  <FieldError message={fieldErrors.travel_start} />
-                  <FieldError message={fieldErrors.travel_end} />
+                  <TravelerStepper
+                    label={t("join.travelers.children.label")}
+                    hint={t("join.travelers.children.hint")}
+                    value={children}
+                    min={0}
+                    max={16}
+                    onChange={setChildren}
+                    decrementLabel={`${t("join.travelers.decrement")} — ${t("join.travelers.children.label")}`}
+                    incrementLabel={`${t("join.travelers.increment")} — ${t("join.travelers.children.label")}`}
+                  />
                 </div>
+                <FieldError message={fieldErrors.adults} />
+                <FieldError message={fieldErrors.children} />
+              </div>
 
-                <div>
-                  <p className={LABEL_CLASS}>{t("join.travelers.label")}</p>
-                  <div className="space-y-2">
-                    <TravelerStepper
-                      label={t("join.travelers.adults.label")}
-                      hint={t("join.travelers.adults.hint")}
-                      value={adults}
-                      min={1}
-                      max={16}
-                      onChange={setAdults}
-                      decrementLabel={`${t("join.travelers.decrement")} — ${t("join.travelers.adults.label")}`}
-                      incrementLabel={`${t("join.travelers.increment")} — ${t("join.travelers.adults.label")}`}
-                    />
-                    <TravelerStepper
-                      label={t("join.travelers.children.label")}
-                      hint={t("join.travelers.children.hint")}
-                      value={children}
-                      min={0}
-                      max={16}
-                      onChange={setChildren}
-                      decrementLabel={`${t("join.travelers.decrement")} — ${t("join.travelers.children.label")}`}
-                      incrementLabel={`${t("join.travelers.increment")} — ${t("join.travelers.children.label")}`}
-                    />
-                  </div>
-                  <FieldError message={fieldErrors.adults} />
-                  <FieldError message={fieldErrors.children} />
+              {/* Budget range */}
+              <div>
+                <label htmlFor="join-budget" className={LABEL_CLASS}>
+                  {t("join.budget.label")}
+                </label>
+                <p className="mb-2 text-xs text-ganitel-text-subtitle">
+                  {t("join.budget.currency.label")}
+                </p>
+                <div className="mb-3 flex gap-2">
+                  {BUDGET_CURRENCIES.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setBudgetCurrency(c)}
+                      className={cn(
+                        "flex-1 rounded-xl border py-2.5 text-xs font-medium transition-all",
+                        budgetCurrency === c
+                          ? "border-ganitel-secondary bg-ganitel-secondary/10 text-ganitel-secondary"
+                          : "border-ganitel-stroke-neutral bg-ganitel-neutral-1 text-ganitel-text-subtitle hover:border-ganitel-text-title hover:text-ganitel-text-title",
+                      )}
+                    >
+                      {t(BUDGET_CURRENCY_LABEL_KEY[c])}
+                    </button>
+                  ))}
                 </div>
+                <select
+                  id="join-budget"
+                  value={budgetRange}
+                  onChange={(e) =>
+                    setBudgetRange(e.target.value as BudgetRange | "")
+                  }
+                  className={cn(INPUT_CLASS, "appearance-none cursor-pointer")}
+                >
+                  <option value="">{t("join.budget.placeholder")}</option>
+                  {BUDGET_RANGES.map((r) => (
+                    <option key={r} value={r}>
+                      {t(BUDGET_LABEL_KEYS[budgetCurrency][r])}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
 
-                {/* Budget range */}
-                <div>
-                  <label htmlFor="join-budget" className={LABEL_CLASS}>
-                    {t("join.budget.label")}
-                  </label>
-                  <p className="mb-2 text-xs text-ganitel-text-subtitle">
-                    {t("join.budget.currency.label")}
-                  </p>
-                  <div className="mb-3 flex gap-2">
-                    {BUDGET_CURRENCIES.map((c) => (
-                      <button
-                        key={c}
-                        type="button"
-                        onClick={() => setBudgetCurrency(c)}
-                        className={cn(
-                          "flex-1 rounded-xl border py-2.5 text-xs font-medium transition-all",
-                          budgetCurrency === c
-                            ? "border-ganitel-secondary bg-ganitel-secondary/10 text-ganitel-secondary"
-                            : "border-ganitel-stroke-neutral bg-ganitel-neutral-1 text-ganitel-text-subtitle hover:border-ganitel-text-title hover:text-ganitel-text-title",
-                        )}
-                      >
-                        {t(BUDGET_CURRENCY_LABEL_KEY[c])}
-                      </button>
-                    ))}
-                  </div>
-                  <select
-                    id="join-budget"
-                    value={budgetRange}
-                    onChange={(e) =>
-                      setBudgetRange(e.target.value as BudgetRange | "")
-                    }
-                    className={cn(
-                      INPUT_CLASS,
-                      "appearance-none cursor-pointer",
-                    )}
-                  >
-                    <option value="">{t("join.budget.placeholder")}</option>
-                    {BUDGET_RANGES.map((r) => (
-                      <option key={r} value={r}>
-                        {t(BUDGET_LABEL_KEYS[budgetCurrency][r])}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </>
-            )}
+          {/* Notes */}
+          <div>
+            <label htmlFor="join-notes" className={LABEL_CLASS}>
+              {t("join.notes.label")}
+            </label>
+            <textarea
+              id="join-notes"
+              rows={3}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder={t("join.notes.placeholder")}
+              className={cn(INPUT_CLASS, "resize-none")}
+            />
+            <FieldError message={fieldErrors.notes} />
+          </div>
 
-            {/* Notes */}
-            <div>
-              <label htmlFor="join-notes" className={LABEL_CLASS}>
-                {t("join.notes.label")}
-              </label>
-              <textarea
-                id="join-notes"
-                rows={3}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder={t("join.notes.placeholder")}
-                className={cn(INPUT_CLASS, "resize-none")}
-              />
-              <FieldError message={fieldErrors.notes} />
-            </div>
+          {state === "error" && (
+            <FormErrorAlert message={errorMessage} detail={errorDetail} />
+          )}
 
-            {state === "error" && (
-              <FormErrorAlert message={errorMessage} detail={errorDetail} />
-            )}
-
-            <FormSubmitButton
-              disabled={submitDisabled}
-              isSubmitting={state === "submitting"}
-              submittingLabel={t("join.submitting")}
-            >
-              {t("join.submit")}
-            </FormSubmitButton>
-          </motion.form>
-        )}
-      </AnimatePresence>
+          <FormSubmitButton
+            disabled={submitDisabled}
+            isSubmitting={state === "submitting"}
+            submittingLabel={t("join.submitting")}
+          >
+            {t("join.submit")}
+          </FormSubmitButton>
+        </form>
+      )}
     </AuthLayout>
   );
 }

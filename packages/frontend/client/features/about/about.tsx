@@ -1,11 +1,11 @@
 import { BadgeCheck, Compass, ShieldCheck, Sparkles } from "lucide-react";
-import { motion } from "framer-motion";
 
 import type { TranslationKey } from "@/shared/lib/i18n";
 import { useLocale, useT } from "@/shared/lib/i18n";
 import type { TeamMember } from "@/features/about/types";
 import { PillLink } from "@/shared/ui/pill-link";
 import { SectionHeader } from "@/shared/ui/section-header";
+import { useReveal } from "@/shared/hooks/use-reveal";
 import {
   buildSrcSet,
   fallbackOnError,
@@ -14,8 +14,6 @@ import {
   HERO_WIDTHS,
   HERO_SIZES,
 } from "@/shared/lib/image";
-
-const ENTRANCE_EASE = [0.2, 0.7, 0.2, 1] as const;
 
 // Placeholder Cameroon/African imagery — replace with owned photography before
 // launch. picsum fallback keeps the page intact if an Unsplash URL fails.
@@ -112,13 +110,12 @@ function Hero() {
 
 function Trust() {
   const t = useT();
+  const ref = useReveal<HTMLDivElement>();
   return (
     <section className="px-6 py-20 md:px-12 md:py-28">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-10%" }}
-        transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
+      <div
+        ref={ref}
+        data-reveal=""
         className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2"
       >
         <div className="grid grid-cols-2 gap-4">
@@ -174,22 +171,17 @@ function Trust() {
             ))}
           </ul>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
 
 function Impact() {
   const t = useT();
+  const ref = useReveal<HTMLDivElement>();
   return (
     <section className="bg-ganitel-olive-soft px-6 py-20 md:px-12 md:py-28">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-10%" }}
-        transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
-        className="mx-auto max-w-7xl"
-      >
+      <div ref={ref} data-reveal="" className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="font-display m-0 text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-olive md:text-4xl">
             {t("about.impact.title")}
@@ -238,13 +230,14 @@ function Impact() {
             </p>
           </li>
         </ul>
-      </motion.div>
+      </div>
     </section>
   );
 }
 
 function Team({ members }: { members: TeamMember[] }) {
   const t = useT();
+  const ref = useReveal<HTMLUListElement>();
   if (members.length === 0) return null;
   return (
     <section className="px-6 py-20 md:px-12 md:py-28">
@@ -256,17 +249,15 @@ function Team({ members }: { members: TeamMember[] }) {
           emphasis={t("about.team.title_em")}
           lede={t("about.team.lede")}
         />
-        <motion.ul
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-10%" }}
-          transition={{ duration: 0.8, delay: 0.1, ease: ENTRANCE_EASE }}
+        <ul
+          ref={ref}
+          data-reveal=""
           className="m-0 mt-12 grid list-none gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3"
         >
           {members.map((member) => (
             <TeamMemberCard key={member.id} member={member} />
           ))}
-        </motion.ul>
+        </ul>
       </div>
     </section>
   );
@@ -349,13 +340,12 @@ function Vision() {
 
 function Closing() {
   const t = useT();
+  const ref = useReveal<HTMLDivElement>();
   return (
     <section className="px-6 pb-20 pt-8 md:px-12 md:pb-28">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-10%" }}
-        transition={{ duration: 0.8, ease: ENTRANCE_EASE }}
+      <div
+        ref={ref}
+        data-reveal=""
         className="mx-auto flex max-w-7xl flex-col items-center gap-7 rounded-[28px] bg-ganitel-tan-soft px-8 py-14 text-center md:px-16 md:py-20"
       >
         <span className="font-display text-xs font-semibold uppercase tracking-[0.18em] text-ganitel-brown">
@@ -367,7 +357,7 @@ function Closing() {
         <PillLink to="/browse" variant="solid" arrow>
           {t("about.cta")}
         </PillLink>
-      </motion.div>
+      </div>
     </section>
   );
 }

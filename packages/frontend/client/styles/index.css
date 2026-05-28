@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource/eb-garamond/400.css";
+@import "@fontsource/eb-garamond/500.css";
+@import "@fontsource/eb-garamond/600.css";
+@import "@fontsource/eb-garamond/700.css";
+@import "@fontsource/eb-garamond/400-italic.css";
+@import "@fontsource/eb-garamond/500-italic.css";
+@import "@fontsource/eb-garamond/600-italic.css";
+
 .font-infoma {
   font-family: "Inter", system-ui, sans-serif;
   font-weight: 600;
@@ -120,6 +129,90 @@
   }
   to {
     height: 0;
+  }
+}
+
+@keyframes ganitel-kenburns {
+  from {
+    transform: scale(1) translate(0, 0);
+  }
+  to {
+    transform: scale(1.055) translate(-1%, -1.2%);
+  }
+}
+
+@keyframes ganitel-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ganitel-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ganitel-scroll-hint {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+.ganitel-anim-kenburns {
+  animation: ganitel-kenburns 16s cubic-bezier(0.4, 0, 0.4, 1) infinite
+    alternate;
+}
+
+.ganitel-anim-fade-up {
+  animation: ganitel-fade-up 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.ganitel-anim-fade-in {
+  animation: ganitel-fade-in 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.ganitel-anim-scroll-hint {
+  animation: ganitel-scroll-hint 2s ease-in-out infinite;
+}
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+[data-reveal="visible"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ganitel-anim-kenburns,
+  .ganitel-anim-fade-up,
+  .ganitel-anim-fade-in,
+  .ganitel-anim-scroll-hint {
+    animation: none;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
 

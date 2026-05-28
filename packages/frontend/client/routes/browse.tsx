@@ -1,5 +1,4 @@
 import { Link, useNavigate, useSearchParams } from "react-router";
-import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
 import type { Route } from "./+types/browse";
@@ -223,11 +222,9 @@ function BrowseTab({
     >
       {children}
       {active ? (
-        <motion.span
-          layoutId="browse-tab-underline"
+        <span
           aria-hidden
           className="absolute inset-x-0 -bottom-px h-0.5 bg-ganitel-text-title"
-          transition={{ type: "spring", stiffness: 380, damping: 32 }}
         />
       ) : null}
     </Link>

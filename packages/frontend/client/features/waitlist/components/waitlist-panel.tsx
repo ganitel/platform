@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Sparkles } from "lucide-react";
 
 import { joinWaitlist } from "@/features/waitlist/api";
@@ -99,74 +98,65 @@ export function WaitlistPanel({
 
       {/* Body */}
       <div className="px-6 pb-6 pt-4">
-        <AnimatePresence mode="wait">
-          {state === "done" ? (
-            <SuccessState kind={kind} emailSent={emailSent} />
-          ) : (
-            <motion.form
-              key="form"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-              onSubmit={handleSubmit}
-              className="space-y-4"
-            >
-              <div>
-                <p className="font-display text-xl font-bold leading-tight text-ganitel-text-title">
-                  {t("waitlist.headline")}
-                </p>
-                <p className="mt-1.5 text-sm leading-relaxed text-ganitel-text-subtitle">
-                  {t("waitlist.sub")}
-                </p>
-              </div>
-
-              <div className="space-y-2.5">
-                <IconInput
-                  icon={Mail}
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t("waitlist.email")}
-                />
-
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder={t("waitlist.name")}
-                  className={INPUT_CLASS}
-                />
-
-                <PhoneInput
-                  id="waitlist-phone"
-                  label={t("waitlist.phone")}
-                  hideLabel
-                  onChange={(value, isValid) => {
-                    setPhone(value);
-                    setPhoneValid(isValid);
-                  }}
-                />
-              </div>
-
-              {state === "error" && (
-                <FormErrorAlert message={errorMessage} detail={errorDetail} />
-              )}
-
-              <FormSubmitButton
-                disabled={!email || !phoneValid}
-                isSubmitting={state === "submitting"}
-                submittingLabel={t("waitlist.submitting")}
-              >
-                {t("waitlist.submit")}
-              </FormSubmitButton>
-
-              <p className="text-center text-xs text-ganitel-text-placeholder">
-                {title}
+        {state === "done" ? (
+          <SuccessState kind={kind} emailSent={emailSent} />
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <p className="font-display text-xl font-bold leading-tight text-ganitel-text-title">
+                {t("waitlist.headline")}
               </p>
-            </motion.form>
-          )}
-        </AnimatePresence>
+              <p className="mt-1.5 text-sm leading-relaxed text-ganitel-text-subtitle">
+                {t("waitlist.sub")}
+              </p>
+            </div>
+
+            <div className="space-y-2.5">
+              <IconInput
+                icon={Mail}
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t("waitlist.email")}
+              />
+
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t("waitlist.name")}
+                className={INPUT_CLASS}
+              />
+
+              <PhoneInput
+                id="waitlist-phone"
+                label={t("waitlist.phone")}
+                hideLabel
+                onChange={(value, isValid) => {
+                  setPhone(value);
+                  setPhoneValid(isValid);
+                }}
+              />
+            </div>
+
+            {state === "error" && (
+              <FormErrorAlert message={errorMessage} detail={errorDetail} />
+            )}
+
+            <FormSubmitButton
+              disabled={!email || !phoneValid}
+              isSubmitting={state === "submitting"}
+              submittingLabel={t("waitlist.submitting")}
+            >
+              {t("waitlist.submit")}
+            </FormSubmitButton>
+
+            <p className="text-center text-xs text-ganitel-text-placeholder">
+              {title}
+            </p>
+          </form>
+        )}
       </div>
     </div>
   );
@@ -181,13 +171,7 @@ function SuccessState({
 }) {
   const t = useT();
   return (
-    <motion.div
-      key="success"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="flex flex-col items-center py-6 text-center"
-    >
+    <div className="ganitel-anim-fade-up flex flex-col items-center py-6 text-center">
       <FormSuccessIcon size="md" />
       <p className="font-display text-xl font-bold text-ganitel-text-title">
         {t("waitlist.success.title")}
@@ -202,6 +186,6 @@ function SuccessState({
           {t("waitlist.success.email")}
         </p>
       )}
-    </motion.div>
+    </div>
   );
 }
