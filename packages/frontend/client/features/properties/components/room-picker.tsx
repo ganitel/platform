@@ -23,8 +23,6 @@ import { useLocale, useT } from "@/shared/lib/i18n";
 import { Button } from "@/shared/ui/button";
 import { Calendar } from "@/shared/ui/calendar";
 
-const k = (key: string) => key as TranslationKey;
-
 function toIsoDate(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -109,8 +107,8 @@ export function RoomPicker({ property }: Props) {
       const code: TranslationKey =
         e instanceof ApiError &&
         e.message.toLowerCase().includes("no longer available")
-          ? k("booking.conflict")
-          : k("common.error.generic");
+          ? "booking.conflict"
+          : "common.error.generic";
       setErrorKey(code);
       setStep("error");
     }
@@ -121,22 +119,22 @@ export function RoomPicker({ property }: Props) {
       <div className="space-y-4 rounded-2xl border border-ganitel-stroke-neutral bg-ganitel-background-secondary p-6 shadow-sm">
         <div className="flex items-center gap-2 text-green-600">
           <CheckCircle2 className="h-5 w-5 shrink-0" />
-          <span className="font-semibold">{t(k("booking.confirmed"))}</span>
+          <span className="font-semibold">{t("booking.confirmed")}</span>
         </div>
         <p className="text-sm text-ganitel-text-subtitle">
-          {t(k("booking.confirmed.detail"))}
+          {t("booking.confirmed.detail")}
         </p>
         {checkIn && checkOut && (
           <p className="text-sm text-ganitel-text-subtitle">
             {formatDate(checkIn, locale)} → {formatDate(checkOut, locale)} ·{" "}
-            {guests} {t(k("property.guests"))}
+            {guests} {t("property.guests")}
           </p>
         )}
         <Link
           to="/bookings"
           className="block w-full rounded-xl bg-ganitel-primary py-3 text-center text-sm font-medium text-ganitel-text-button hover:bg-ganitel-primary/90"
         >
-          {t(k("nav.bookings"))}
+          {t("nav.bookings")}
         </Link>
       </div>
     );
@@ -156,12 +154,12 @@ export function RoomPicker({ property }: Props) {
 
         <div className="flex items-center justify-between">
           <span className="text-sm text-ganitel-text-subtitle">
-            {t(k("property.guests"))}
+            {t("property.guests")}
           </span>
           <div className="flex items-center gap-3">
             <button
               type="button"
-              aria-label={t(k("booking.remove_guest"))}
+              aria-label={t("booking.remove_guest")}
               onClick={() => setGuests((g) => Math.max(1, g - 1))}
               disabled={guests <= 1}
               className="flex h-8 w-8 items-center justify-center rounded-full border border-ganitel-stroke-neutral text-base disabled:opacity-40"
@@ -173,7 +171,7 @@ export function RoomPicker({ property }: Props) {
             </span>
             <button
               type="button"
-              aria-label={t(k("booking.add_guest"))}
+              aria-label={t("booking.add_guest")}
               onClick={() =>
                 setGuests((g) =>
                   Math.min(property.summary?.max_capacity ?? 1, g + 1),
@@ -189,7 +187,7 @@ export function RoomPicker({ property }: Props) {
 
       <div>
         <h2 className="mb-3 text-lg font-semibold text-ganitel-text-title">
-          {t(k("hotels.room.choose_yours"))}
+          {t("hotels.room.choose_yours")}
         </h2>
         <div className="space-y-3">
           {rooms.map((room) => (
@@ -203,7 +201,7 @@ export function RoomPicker({ property }: Props) {
           ))}
           {rooms.length === 0 && (
             <p className="rounded-2xl border border-dashed border-ganitel-stroke-neutral p-6 text-center text-sm text-ganitel-text-subtitle">
-              {t(k("hotels.empty"))}
+              {t("hotels.empty")}
             </p>
           )}
         </div>
@@ -222,14 +220,14 @@ export function RoomPicker({ property }: Props) {
           }
           className="h-12 w-full rounded-xl bg-ganitel-primary text-ganitel-text-button hover:bg-ganitel-primary/90 disabled:opacity-50"
         >
-          {step === "booking" ? t(k("common.loading")) : t(k("property.book"))}
+          {step === "booking" ? t("common.loading") : t("property.book")}
         </Button>
       ) : (
         <Link
           to="/sign-in"
           className="flex h-12 w-full items-center justify-center rounded-xl bg-ganitel-primary text-sm font-medium text-ganitel-text-button hover:bg-ganitel-primary/90"
         >
-          {t(k("booking.signin_to_book"))}
+          {t("booking.signin_to_book")}
         </Link>
       )}
     </div>

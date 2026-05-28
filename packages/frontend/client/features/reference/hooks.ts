@@ -3,14 +3,16 @@ import { useQuery } from "@tanstack/react-query";
 import {
   listAmenities,
   listExperienceTypes,
+  listHotelCategories,
   listPropertyTypes,
   type AmenityRef,
   type ExperienceTypeRef,
   type PropertyTypeRef,
+  type ReferenceItem,
 } from "@/features/reference/api";
 import { useLocale, type Locale } from "@/shared/lib/i18n";
 
-type Ref = PropertyTypeRef | ExperienceTypeRef | AmenityRef;
+type Ref = PropertyTypeRef | ExperienceTypeRef | AmenityRef | ReferenceItem;
 
 function labelOf(ref: Ref, locale: Locale): string {
   return locale === "en" ? ref.label_en : ref.label_fr;
@@ -40,6 +42,19 @@ export function useExperienceTypeLabel(): (code: string) => string {
   const { data } = useQuery({
     queryKey: ["reference", "experience-types"],
     queryFn: listExperienceTypes,
+    staleTime: 5 * 60 * 1000,
+  });
+  return (code: string) => {
+    const match = data?.find((r) => r.code === code);
+    return match ? labelOf(match, locale) : code;
+  };
+}
+
+export function useHotelCategoryLabel(): (code: string) => string {
+  const locale = useLocale();
+  const { data } = useQuery({
+    queryKey: ["reference", "hotel-categories"],
+    queryFn: listHotelCategories,
     staleTime: 5 * 60 * 1000,
   });
   return (code: string) => {

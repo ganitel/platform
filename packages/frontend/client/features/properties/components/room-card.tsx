@@ -8,7 +8,15 @@ import { transformImage } from "@/shared/lib/image";
 import { thumbnailUrl } from "@/shared/lib/media";
 import { pickPriceForLocale } from "@/shared/lib/price";
 
-const k = (key: string) => key as TranslationKey;
+const BED_TYPE_KEYS = {
+  single: "reference.bed_type.single",
+  double: "reference.bed_type.double",
+  queen: "reference.bed_type.queen",
+  king: "reference.bed_type.king",
+  sofa_bed: "reference.bed_type.sofa_bed",
+  bunk: "reference.bed_type.bunk",
+  crib: "reference.bed_type.crib",
+} as const satisfies Record<string, TranslationKey>;
 
 interface Props {
   room: RoomTypePublic;
@@ -32,8 +40,11 @@ export function RoomCard({
   const nightly = room.availability?.nightly ?? fallbackPrice ?? null;
   const total = room.availability?.total ?? null;
   const isSoldOut = showAvailability && room.availability?.available === false;
-  const bedSummary = room.bed_config
-    .map((b) => `${b.count} ${t(k(`reference.bed_type.${b.type}`))}`)
+  const bedSummary = (room.bed_config ?? [])
+    .map((b) => {
+      const key = BED_TYPE_KEYS[b.type as keyof typeof BED_TYPE_KEYS];
+      return `${b.count} ${key ? t(key) : b.type}`;
+    })
     .join(" · ");
 
   return (
@@ -70,10 +81,7 @@ export function RoomCard({
             )}
             <p className="mt-1 flex items-center gap-1.5 text-xs text-ganitel-text-subtitle">
               <Users className="size-3.5" />
-              {t(k("hotels.room.sleeps")).replace(
-                "{n}",
-                String(room.max_guests),
-              )}
+              {t("hotels.room.sleeps").replace("{n}", String(room.max_guests))}
             </p>
           </div>
           <div className="text-right">
@@ -83,11 +91,11 @@ export function RoomCard({
               </p>
             )}
             <p className="text-[11px] uppercase tracking-[0.2em] text-ganitel-text-placeholder">
-              {t(k("property.per_night"))}
+              {t("property.per_night")}
             </p>
             {total && (
               <p className="mt-1 text-xs text-ganitel-text-subtitle">
-                {t(k("hotels.room.total")).replace(
+                {t("hotels.room.total").replace(
                   "{amount}",
                   formatMoney(total, locale),
                 )}
@@ -105,7 +113,7 @@ export function RoomCard({
         <footer className="mt-auto flex items-center justify-end gap-2">
           {isSoldOut ? (
             <span className="rounded-full bg-ganitel-neutral-2 px-3 py-1 text-xs font-medium text-ganitel-text-placeholder">
-              {t(k("hotels.room.sold_out"))}
+              {t("hotels.room.sold_out")}
             </span>
           ) : (
             <button
@@ -113,9 +121,7 @@ export function RoomCard({
               onClick={onSelect}
               className="rounded-xl bg-ganitel-primary px-4 py-2 text-sm font-medium text-ganitel-text-button hover:bg-ganitel-primary/90"
             >
-              {selected
-                ? t(k("hotels.room.selected"))
-                : t(k("hotels.room.choose"))}
+              {selected ? t("hotels.room.selected") : t("hotels.room.choose")}
             </button>
           )}
         </footer>

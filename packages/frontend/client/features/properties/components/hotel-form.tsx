@@ -11,7 +11,7 @@ import type {
 import {
   listAmenities,
   listCancellationPolicies,
-  listPropertyTypes,
+  listHotelCategories,
 } from "@/features/reference/api";
 import { LocationPicker } from "@/shared/components/location-picker";
 import { MarkdownEditor } from "@/shared/components/markdown-editor";
@@ -27,12 +27,8 @@ import type { LocationPick } from "@/shared/lib/location";
 interface FormState {
   title: string;
   description: string;
-  property_type: string;
+  hotel_category: string;
   location: LocationPick | null;
-  capacity: string;
-  bedrooms: string;
-  beds: string;
-  bathrooms: string;
   amenities: Set<string>;
   parking_available: ParkingAvailability;
   elevator: boolean;
@@ -48,19 +44,14 @@ interface FormState {
   check_out_time: string;
   house_rules: string;
   cancellation_policy: CancellationPolicy;
-  prices: { amount: string; currency: string }[];
   content_language: "fr" | "en";
 }
 
 const BLANK: FormState = {
   title: "",
   description: "",
-  property_type: "",
+  hotel_category: "",
   location: null,
-  capacity: "2",
-  bedrooms: "1",
-  beds: "1",
-  bathrooms: "1",
   amenities: new Set(),
   parking_available: "none",
   elevator: false,
@@ -76,18 +67,16 @@ const BLANK: FormState = {
   check_out_time: "",
   house_rules: "",
   cancellation_policy: "moderate",
-  prices: [{ amount: "", currency: "XAF" }],
   content_language: "fr",
 };
 
 function fromDetail(d: PropertyDetail): FormState {
-  // Time values come back as "HH:MM:SS" from a Python `time`; the <input type="time">
-  // expects "HH:MM". Strip the trailing seconds so the picker pre-fills correctly.
-  const trimTime = (t: string | null) => (t ? t.slice(0, 5) : "");
+  const trimTime = (timeValue: string | null) =>
+    timeValue ? timeValue.slice(0, 5) : "";
   return {
     title: d.title,
     description: d.description ?? "",
-    property_type: d.property_type,
+    hotel_category: d.property_type,
     location: {
       address: d.address ?? `${d.city}, ${d.country_code}`,
       city: d.city,
@@ -96,10 +85,6 @@ function fromDetail(d: PropertyDetail): FormState {
       lat: d.location.lat,
       lng: d.location.lng,
     },
-    capacity: String(d.capacity),
-    bedrooms: String(d.bedrooms),
-    beds: String(d.beds),
-    bathrooms: String(d.bathrooms),
     amenities: new Set(d.amenities),
     parking_available: d.listing_metadata.parking_available,
     elevator: d.listing_metadata.elevator,
@@ -115,12 +100,11 @@ function fromDetail(d: PropertyDetail): FormState {
     check_out_time: trimTime(d.listing_metadata.check_out_time),
     house_rules: d.house_rules ?? "",
     cancellation_policy: d.cancellation_policy,
-    prices: d.prices.map((p) => ({ amount: p.amount, currency: p.currency })),
     content_language: (d.content_language as "fr" | "en") ?? "fr",
   };
 }
 
-interface RentalFormMediaState {
+interface HotelFormMediaState {
   mode: "draft" | "listing";
   draftId?: string;
   listingId?: string;
@@ -128,17 +112,17 @@ interface RentalFormMediaState {
   setItems: UploaderOnChange;
 }
 
-interface RentalFormProps {
+interface HotelFormProps {
   initial: PropertyDetail | null;
   submitLabel: string;
   pendingLabel: string;
   isPending: boolean;
   error: unknown;
   onSubmit: (payload: PropertyCreateInput) => void;
-  mediaState: RentalFormMediaState;
+  mediaState: HotelFormMediaState;
 }
 
-export function RentalForm({
+export function HotelForm({
   initial,
   submitLabel,
   pendingLabel,
@@ -146,16 +130,16 @@ export function RentalForm({
   error,
   onSubmit,
   mediaState,
-}: RentalFormProps) {
+}: HotelFormProps) {
   const tr = useT();
   const locale = useLocale();
   const [form, setForm] = useState<FormState>(() =>
     initial ? fromDetail(initial) : BLANK,
   );
 
-  const propertyTypes = useQuery({
-    queryKey: ["reference", "property-types"],
-    queryFn: listPropertyTypes,
+  const hotelCategories = useQuery({
+    queryKey: ["reference", "hotel-categories"],
+    queryFn: listHotelCategories,
   });
   const amenities = useQuery({
     queryKey: ["reference", "amenities"],
@@ -183,17 +167,14 @@ export function RentalForm({
     e.preventDefault();
     if (!form.location) return;
     const payload: PropertyCreateInput = {
+      kind: "hotel",
       title: form.title,
       description: form.description,
-      property_type: form.property_type,
+      property_type: form.hotel_category,
       address: form.location.address,
       city: form.location.city,
       country_code: form.location.country_code,
       location: { lat: form.location.lat, lng: form.location.lng },
-      capacity: Number(form.capacity),
-      bedrooms: Number(form.bedrooms),
-      beds: Number(form.beds),
-      bathrooms: Number(form.bathrooms),
       amenities: Array.from(form.amenities),
       parking_available: form.parking_available,
       elevator: form.elevator,
@@ -209,10 +190,7 @@ export function RentalForm({
       check_out_time: form.check_out_time || null,
       house_rules: form.house_rules || null,
       cancellation_policy: form.cancellation_policy,
-      prices: form.prices.map((p) => ({
-        amount: p.amount,
-        currency: p.currency,
-      })),
+      prices: [],
       content_language: form.content_language,
       media_ids:
         mediaState.mode === "draft"
@@ -248,17 +226,17 @@ export function RentalForm({
             onChange={(v) => update("description", v)}
           />
         </Field>
-        <Field label={tr("admin.form.type.label")}>
+        <Field label={tr("admin.hotels.form.category.label")}>
           <select
             required
-            value={form.property_type}
-            onChange={(e) => update("property_type", e.target.value)}
+            value={form.hotel_category}
+            onChange={(e) => update("hotel_category", e.target.value)}
             className={INPUT_CLASS}
           >
             <option value="">{tr("admin.form.select.placeholder")}</option>
-            {propertyTypes.data?.map((p) => (
-              <option key={p.code} value={p.code}>
-                {labelOf(p)}
+            {hotelCategories.data?.map((category) => (
+              <option key={category.code} value={category.code}>
+                {labelOf(category)}
               </option>
             ))}
           </select>
@@ -282,52 +260,6 @@ export function RentalForm({
           initial={form.location}
           onChange={(pick) => update("location", pick)}
         />
-      </Section>
-
-      <Section title={tr("admin.form.section.capacity")}>
-        <div className="grid grid-cols-4 gap-4">
-          <Field label={tr("admin.form.capacity.label")}>
-            <input
-              required
-              type="number"
-              min={1}
-              max={64}
-              value={form.capacity}
-              onChange={(e) => update("capacity", e.target.value)}
-              className={INPUT_CLASS}
-            />
-          </Field>
-          <Field label={tr("admin.form.bedrooms.label")}>
-            <input
-              type="number"
-              min={0}
-              max={32}
-              value={form.bedrooms}
-              onChange={(e) => update("bedrooms", e.target.value)}
-              className={INPUT_CLASS}
-            />
-          </Field>
-          <Field label={tr("admin.form.beds.label")}>
-            <input
-              type="number"
-              min={0}
-              max={64}
-              value={form.beds}
-              onChange={(e) => update("beds", e.target.value)}
-              className={INPUT_CLASS}
-            />
-          </Field>
-          <Field label={tr("admin.form.bathrooms.label")}>
-            <input
-              type="number"
-              min={0}
-              max={32}
-              value={form.bathrooms}
-              onChange={(e) => update("bathrooms", e.target.value)}
-              className={INPUT_CLASS}
-            />
-          </Field>
-        </div>
       </Section>
 
       <Section title={tr("admin.form.section.amenities")}>
@@ -470,72 +402,6 @@ export function RentalForm({
             ))}
           </select>
         </Field>
-      </Section>
-
-      <Section title={tr("admin.form.section.price")}>
-        <div className="space-y-2">
-          {form.prices.map((p, idx) => (
-            <div key={idx} className="flex items-end gap-2">
-              <Field label={tr("admin.form.price.amount")}>
-                <input
-                  type="number"
-                  required
-                  min={0}
-                  step="any"
-                  value={p.amount}
-                  onChange={(e) => {
-                    const next = [...form.prices];
-                    next[idx] = { ...next[idx], amount: e.target.value };
-                    update("prices", next);
-                  }}
-                  className={INPUT_CLASS}
-                />
-              </Field>
-              <Field label={tr("admin.form.price.currency")}>
-                <select
-                  value={p.currency}
-                  onChange={(e) => {
-                    const next = [...form.prices];
-                    next[idx] = { ...next[idx], currency: e.target.value };
-                    update("prices", next);
-                  }}
-                  className={INPUT_CLASS}
-                >
-                  <option value="XAF">XAF</option>
-                  <option value="XOF">XOF</option>
-                  <option value="EUR">EUR</option>
-                  <option value="USD">USD</option>
-                </select>
-              </Field>
-              {form.prices.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    update(
-                      "prices",
-                      form.prices.filter((_, i) => i !== idx),
-                    );
-                  }}
-                  className="cursor-pointer rounded border px-3 py-2 text-sm"
-                >
-                  ×
-                </button>
-              )}
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() => {
-              update("prices", [
-                ...form.prices,
-                { amount: "", currency: "XAF" },
-              ]);
-            }}
-            className="cursor-pointer rounded-md border border-dashed px-4 py-2 text-sm"
-          >
-            {tr("admin.form.price.add")}
-          </button>
-        </div>
       </Section>
 
       {error != null && (

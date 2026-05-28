@@ -34,6 +34,7 @@ class SearchFilters:
     max_price: Decimal | None = None
     currency: str | None = None
     property_types: tuple[str, ...] = ()
+    kinds: tuple[str, ...] = ()
     amenities: tuple[str, ...] = ()
     sort: SortKey = "relevance"
     limit: int = 20
@@ -66,6 +67,8 @@ def _apply_filters(stmt: Select, f: SearchFilters):
             stmt = stmt.where(price_join.c.amount <= f.max_price)
     if f.property_types:
         stmt = stmt.where(Property.property_type.in_(f.property_types))
+    if f.kinds:
+        stmt = stmt.where(Property.kind.in_(f.kinds))
     if f.amenities:
         # require ALL listed amenities (`@>` = "contains")
         stmt = stmt.where(Property.amenities.op("@>")(list(f.amenities)))
