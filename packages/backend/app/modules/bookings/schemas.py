@@ -19,6 +19,7 @@ class BookingCreateIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     property_id: UUID
+    room_type_id: UUID | None = None
     check_in_date: date
     check_out_date: date
     guest_count: int = Field(..., ge=1, le=64)
@@ -37,6 +38,8 @@ class BookingPublic(BaseModel):
     id: UUID
     property_id: UUID
     guest_id: UUID
+    room_type_id: UUID | None
+    room_title: str | None
     check_in_date: date
     check_out_date: date
     nights: int
