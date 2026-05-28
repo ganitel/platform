@@ -14,11 +14,11 @@ from __future__ import annotations
 import asyncio
 import logging
 from datetime import UTC, datetime, timedelta
-from uuid import UUID
 
 import typer
-from sqlalchemy import delete, exists, select
+from sqlalchemy import delete, exists, or_
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.orm import aliased
 
 from app.core.config import get_settings
 from app.core.storage import s3_client
@@ -37,42 +37,45 @@ async def _delete_orphans(max_age_hours: int) -> int:
     cutoff = datetime.now(UTC) - timedelta(hours=max_age_hours)
 
     async with session_factory() as session:
-        rows = (
-            (
-                await session.execute(
-                    select(Media).where(
-                        Media.draft_id.is_not(None),
-                        Media.created_at < cutoff,
-                        ~exists().where(PropertyMediaItem.media_id == Media.id),
-                        ~exists().where(ExperienceMediaItem.media_id == Media.id),
-                    )
-                )
-            )
-            .scalars()
-            .all()
+        PosterConsumer = aliased(Media)
+        attached_video_uses_poster = exists().where(
+            PosterConsumer.poster_media_id == Media.id,
+            or_(
+                exists().where(PropertyMediaItem.media_id == PosterConsumer.id),
+                exists().where(ExperienceMediaItem.media_id == PosterConsumer.id),
+            ),
         )
 
-        if not rows:
+        deleted_rows = (
+            await session.execute(
+                delete(Media)
+                .where(
+                    Media.draft_id.is_not(None),
+                    Media.created_at < cutoff,
+                    ~exists().where(PropertyMediaItem.media_id == Media.id),
+                    ~exists().where(ExperienceMediaItem.media_id == Media.id),
+                    ~attached_video_uses_poster,
+                )
+                .returning(Media.id, Media.key)
+            )
+        ).all()
+        await session.commit()
+
+        if not deleted_rows:
             logger.info("no orphans found")
             return 0
 
-        ids: list[UUID] = [m.id for m in rows]
-        keys = [m.key for m in rows]
-
         async with s3_client() as client:
-            for batch_start in range(0, len(keys), 1000):
-                batch = keys[batch_start : batch_start + 1000]
+            for batch_start in range(0, len(deleted_rows), 1000):
+                batch = deleted_rows[batch_start : batch_start + 1000]
                 await client.delete_objects(
                     Bucket=s.S3_BUCKET,
-                    Delete={"Objects": [{"Key": k} for k in batch]},
+                    Delete={"Objects": [{"Key": row.key} for row in batch]},
                 )
 
-        await session.execute(delete(Media).where(Media.id.in_(ids)))
-        await session.commit()
-
     await engine.dispose()
-    logger.info("deleted %d orphan media rows", len(rows))
-    return len(rows)
+    logger.info("deleted %d orphan media rows", len(deleted_rows))
+    return len(deleted_rows)
 
 
 app = typer.Typer(add_completion=False)

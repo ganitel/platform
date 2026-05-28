@@ -4,8 +4,9 @@ and the `to_public` mapper used by callers (listing media, avatars, …)."""
 from typing import cast
 from uuid import UUID, uuid4
 
-from sqlalchemy import exists, select
+from sqlalchemy import delete, exists, or_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.core.config import get_settings
 from app.core.storage import presign_put, public_url
@@ -76,27 +77,35 @@ async def load_poster(session: AsyncSession, media: Media) -> Media | None:
 async def delete_unattached_draft(session: AsyncSession, user: User, draft_id: UUID) -> int:
     """Delete media tagged with this draft_id that is NOT referenced by any
     listing media. Returns the number of rows deleted. Idempotent."""
-    from sqlalchemy import delete
-
     from app.modules.experiences.models import ExperienceMediaItem
     from app.modules.properties.models import PropertyMediaItem
 
-    rows = (
-        (
-            await session.execute(
-                select(Media).where(
-                    Media.draft_id == draft_id,
-                    Media.owner_user_id == user.id,
-                    ~exists().where(PropertyMediaItem.media_id == Media.id),
-                    ~exists().where(ExperienceMediaItem.media_id == Media.id),
-                )
-            )
-        )
-        .scalars()
-        .all()
+    PosterConsumer = aliased(Media)
+    attached_video_uses_poster = exists().where(
+        PosterConsumer.poster_media_id == Media.id,
+        or_(
+            exists().where(PropertyMediaItem.media_id == PosterConsumer.id),
+            exists().where(ExperienceMediaItem.media_id == PosterConsumer.id),
+        ),
     )
 
-    if not rows:
+    deleted_rows = (
+        await session.execute(
+            delete(Media)
+            .where(
+                Media.draft_id == draft_id,
+                Media.owner_user_id == user.id,
+                ~exists().where(PropertyMediaItem.media_id == Media.id),
+                ~exists().where(ExperienceMediaItem.media_id == Media.id),
+                ~attached_video_uses_poster,
+            )
+            .returning(Media.id, Media.key)
+        )
+        .all()
+    )
+    await session.commit()
+
+    if not deleted_rows:
         return 0
 
     from app.core.storage import s3_client
@@ -104,14 +113,11 @@ async def delete_unattached_draft(session: AsyncSession, user: User, draft_id: U
     s = get_settings()
     async with s3_client() as client:
         # delete_objects accepts up to 1000 keys at a time
-        for batch_start in range(0, len(rows), 1000):
-            batch = rows[batch_start : batch_start + 1000]
+        for batch_start in range(0, len(deleted_rows), 1000):
+            batch = deleted_rows[batch_start : batch_start + 1000]
             await client.delete_objects(
                 Bucket=s.S3_BUCKET,
-                Delete={"Objects": [{"Key": m.key} for m in batch]},
+                Delete={"Objects": [{"Key": row.key} for row in batch]},
             )
 
-    ids = [m.id for m in rows]
-    await session.execute(delete(Media).where(Media.id.in_(ids)))
-    await session.commit()
-    return len(rows)
+    return len(deleted_rows)
