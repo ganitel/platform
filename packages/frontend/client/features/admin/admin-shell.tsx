@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, NavLink } from "react-router";
 import {
+  Building2,
   Compass,
   Home,
   LayoutGrid,
@@ -30,6 +31,11 @@ const NAV: NavItem[] = [
     end: true,
   },
   { to: "/admin/rentals", labelKey: "admin.nav.rentals", icon: Home },
+  {
+    to: "/admin/hotels",
+    labelKey: "admin.nav.hotels" as TranslationKey,
+    icon: Building2,
+  },
   {
     to: "/admin/experiences",
     labelKey: "admin.nav.experiences",
