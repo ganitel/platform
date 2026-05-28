@@ -58,7 +58,7 @@ def _render(entry: WaitlistEntry) -> tuple[str, str]:
   <p style="font-size:13px;color:#666">Inscription enregistrée en tant que {escape(audience)} ({escape(audience_en)}).</p>
   <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
   <p style="font-size:12px;color:#888">
-    ganitel — séjours et expériences soigneusement choisis au Cameroun, au Sénégal et en Côte d'Ivoire.
+    ganitel — séjours et expériences soigneusement choisis au Cameroun.
   </p>
 </body></html>
 """.strip()

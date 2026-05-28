@@ -136,16 +136,16 @@ const dict = {
     en: "A Cameroonian coastal town by the water",
   },
   "footer.regions": {
-    fr: "Cameroun · Sénégal · Côte d'Ivoire",
-    en: "Cameroon · Senegal · Côte d'Ivoire",
+    fr: "Cameroun",
+    en: "Cameroon",
   },
 
   "browse.title": { fr: "Explorer", en: "Explore" },
   "browse.tabs.stays": { fr: "Logements", en: "Stays" },
   "browse.tabs.experiences": { fr: "Expériences", en: "Experiences" },
   "browse.lede.stays": {
-    fr: "Logements soigneusement sélectionnés au Cameroun, au Sénégal et en Côte d'Ivoire.",
-    en: "Stays carefully selected in Cameroon, Senegal and Côte d'Ivoire.",
+    fr: "Logements soigneusement sélectionnés au Cameroun.",
+    en: "Stays carefully selected in Cameroon.",
   },
   "browse.lede.experiences": {
     fr: "Des expériences à vivre autour de nos logements ou en escapade.",
@@ -1057,8 +1057,8 @@ const dict = {
     en: "Terms of Service — ganitel",
   },
   "terms.meta.description": {
-    fr: "Règles d'utilisation de ganitel pour les voyageurs et les hôtes au Cameroun, au Sénégal et en Côte d'Ivoire.",
-    en: "Rules for using ganitel as a traveler or host in Cameroon, Senegal, and Côte d'Ivoire.",
+    fr: "Règles d'utilisation de ganitel pour les voyageurs et les hôtes au Cameroun.",
+    en: "Rules for using ganitel as a traveler or host in Cameroon.",
   },
   "terms.tag": { fr: "Conditions", en: "Terms" },
   "terms.title": { fr: "Conditions", en: "Terms of" },
@@ -1070,7 +1070,7 @@ const dict = {
   "terms.body": {
     fr: `## 1. Qui sommes-nous ?
 
-ganitel ("ganitel", "nous") est une place de marché qui met en relation des voyageurs et des hôtes de logements et d'expériences au Cameroun, au Sénégal et en Côte d'Ivoire. Les présentes conditions régissent l'accès au site **ganitel.com** ainsi qu'à tous les services associés.
+ganitel ("ganitel", "nous") est une place de marché qui met en relation des voyageurs et des hôtes de logements et d'expériences au Cameroun. Les présentes conditions régissent l'accès au site **ganitel.com** ainsi qu'à tous les services associés.
 
 ## 2. Éligibilité et compte
 
@@ -1125,7 +1125,7 @@ Nous pouvons faire évoluer les présentes conditions. Les changements significa
 Pour toute question relative aux présentes conditions, écrivez-nous à **hello@ganitel.com**.`,
     en: `## 1. Who we are
 
-ganitel ("ganitel", "we") is a marketplace that connects travelers with hosts of stays and experiences in Cameroon, Senegal, and Côte d'Ivoire. These terms govern access to **ganitel.com** and all related services.
+ganitel ("ganitel", "we") is a marketplace that connects travelers with hosts of stays and experiences in Cameroon. These terms govern access to **ganitel.com** and all related services.
 
 ## 2. Eligibility and account
 
@@ -1366,8 +1366,8 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
     en: "Which payment methods do you accept?",
   },
   "faq.q.payment_methods.answer": {
-    fr: "Nous acceptons Mobile Money (MTN et Orange), Wave et les cartes bancaires Visa et Mastercard. Les paiements sont traités par Flutterwave en franc CFA (XAF au Cameroun, XOF au Sénégal et en Côte d'Ivoire).",
-    en: "We accept Mobile Money (MTN and Orange), Wave, and Visa/Mastercard. Payments are processed by Flutterwave in CFA francs (XAF in Cameroon, XOF in Senegal and Côte d'Ivoire).",
+    fr: "Nous acceptons Mobile Money (MTN et Orange), Wave et les cartes bancaires Visa et Mastercard. Les paiements sont traités par Flutterwave en franc CFA (XAF).",
+    en: "We accept Mobile Money (MTN and Orange), Wave, and Visa/Mastercard. Payments are processed by Flutterwave in CFA francs (XAF).",
   },
 
   "faq.q.cancellation.question": {
@@ -1384,8 +1384,8 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
     en: "Where is ganitel available?",
   },
   "faq.q.regions.answer": {
-    fr: "Au lancement : Cameroun, Sénégal et Côte d'Ivoire. D'autres pays d'Afrique francophone et anglophone suivront.",
-    en: "At launch: Cameroon, Senegal, and Côte d'Ivoire. More countries across French- and English-speaking Africa will follow.",
+    fr: "Au lancement : Cameroun. D'autres pays d'Afrique francophone et anglophone suivront.",
+    en: "At launch: Cameroon. More countries across French- and English-speaking Africa will follow.",
   },
 
   "faq.q.host_listing.question": {
@@ -1449,8 +1449,8 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
     en: "ganitel — Stay where the light moves slowly",
   },
   "index.meta.description": {
-    fr: "Logements et expériences soigneusement sélectionnés au Cameroun, au Sénégal et en Côte d'Ivoire.",
-    en: "Carefully selected stays and experiences in Cameroon, Senegal and Côte d'Ivoire.",
+    fr: "Logements et expériences soigneusement sélectionnés au Cameroun.",
+    en: "Carefully selected stays and experiences in Cameroon.",
   },
 
   "bookings.meta.title": {
@@ -1463,8 +1463,8 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
     en: "Join ganitel — waitlist",
   },
   "join.meta.description": {
-    fr: "Rejoignez la liste d'attente de ganitel. Soyez parmi les premiers à découvrir nos logements et expériences au Cameroun, Sénégal et Côte d'Ivoire.",
-    en: "Join the ganitel waitlist. Be among the first to discover our stays and experiences in Cameroon, Senegal and Côte d'Ivoire.",
+    fr: "Rejoignez la liste d'attente de ganitel. Soyez parmi les premiers à découvrir nos logements et expériences au Cameroun.",
+    en: "Join the ganitel waitlist. Be among the first to discover our stays and experiences in Cameroon.",
   },
   "join.meta.og_alt": { fr: "Rejoindre ganitel", en: "Join ganitel" },
 
@@ -1481,12 +1481,12 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
   "browse.section.stays": { fr: "Logements", en: "Stays" },
   "browse.section.experiences": { fr: "Expériences", en: "Experiences" },
   "browse.meta.description.stays": {
-    fr: "Logements soigneusement sélectionnés à Douala, Yaoundé, Dakar, Abidjan et plus.",
-    en: "Carefully selected stays in Douala, Yaoundé, Dakar, Abidjan and beyond.",
+    fr: "Logements soigneusement sélectionnés à Douala, Yaoundé, Limbé, Kribi et plus.",
+    en: "Carefully selected stays in Douala, Yaoundé, Limbe, Kribi and beyond.",
   },
   "browse.meta.description.experiences": {
-    fr: "Expériences à vivre au Cameroun, au Sénégal et en Côte d'Ivoire autour de nos logements ou en escapade.",
-    en: "Experiences to live in Cameroon, Senegal and Côte d'Ivoire — around our stays or as a getaway.",
+    fr: "Expériences à vivre au Cameroun autour de nos logements ou en escapade.",
+    en: "Experiences to live in Cameroon — around our stays or as a getaway.",
   },
 
   "property.not_found.title": {
