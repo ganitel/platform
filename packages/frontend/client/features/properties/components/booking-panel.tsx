@@ -145,8 +145,10 @@ export function BookingPanel({ property }: Props) {
           <button
             type="button"
             aria-label={t("booking.add_guest")}
-            onClick={() => setGuests((g) => Math.min(property.capacity, g + 1))}
-            disabled={guests >= property.capacity}
+            onClick={() =>
+              setGuests((g) => Math.min(property.capacity ?? Infinity, g + 1))
+            }
+            disabled={property.capacity != null && guests >= property.capacity}
             className="flex h-8 w-8 items-center justify-center rounded-full border border-ganitel-stroke-neutral text-base disabled:opacity-40"
           >
             +

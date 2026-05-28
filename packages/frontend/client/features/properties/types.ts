@@ -65,22 +65,24 @@ export interface PropertyListingMetadata {
 
 export interface PropertyPublic {
   id: string;
+  kind: PropertyKind;
   title: string;
   property_type: string;
   address: string | null;
   city: string;
   country_code: string;
   location: GeoPoint;
-  capacity: number;
-  bedrooms: number;
-  beds: number;
-  bathrooms: number;
+  capacity: number | null;
+  bedrooms: number | null;
+  beds: number | null;
+  bathrooms: number | null;
   prices: Money[];
   amenities: string[];
   showcase_amenities: PropertyShowcaseAmenities;
   listing_metadata: PropertyListingMetadata;
   cover_media: MediaPublic | null;
   distance_km: number | null;
+  summary?: HotelSummary | null;
 }
 
 export interface PropertyDetail extends PropertyPublic {
@@ -93,6 +95,7 @@ export interface PropertyDetail extends PropertyPublic {
   media: MediaItemPublic[];
   created_at: string;
   published_at: string | null;
+  rooms: RoomTypePublic[];
 }
 
 export interface SearchOut {
@@ -103,6 +106,7 @@ export interface SearchOut {
 }
 
 export interface PropertyCreateInput {
+  kind?: PropertyKind;
   title: string;
   description?: string;
   property_type: string;
@@ -110,10 +114,10 @@ export interface PropertyCreateInput {
   city: string;
   country_code: string;
   location: GeoPoint;
-  capacity: number;
-  bedrooms?: number;
-  beds?: number;
-  bathrooms?: number;
+  capacity?: number | null;
+  bedrooms?: number | null;
+  beds?: number | null;
+  bathrooms?: number | null;
   amenities?: string[];
   parking_available?: ParkingAvailability;
   elevator?: boolean;
@@ -129,13 +133,14 @@ export interface PropertyCreateInput {
   check_out_time?: string | null;
   house_rules?: string | null;
   cancellation_policy?: CancellationPolicy;
-  prices: Money[];
+  prices?: Money[];
   content_language?: "fr" | "en";
   media_ids?: string[];
 }
 
 export interface PropertyAdminListItem {
   id: string;
+  kind: PropertyKind;
   title: string;
   property_type: string;
   city: string;
@@ -145,6 +150,7 @@ export interface PropertyAdminListItem {
   cover_media: MediaPublic | null;
   created_at: string;
   published_at: string | null;
+  room_count: number;
 }
 
 export interface AdminStatusSummary {
@@ -178,3 +184,56 @@ export interface SearchFilters {
   limit?: number;
   offset?: number;
 }
+
+export type PropertyKind = "rental" | "hotel";
+
+export interface BedSpec {
+  type: string;
+  count: number;
+}
+
+export interface RoomTypeAvailability {
+  units_available: number;
+  available: boolean;
+  nights: number;
+  nightly: Money | null;
+  total: Money | null;
+}
+
+export interface RoomTypePublic {
+  id: string;
+  title: string;
+  description: string;
+  bed_config: BedSpec[];
+  max_guests: number;
+  amenities: string[];
+  private_bathroom: boolean;
+  inventory_count: number;
+  position: number;
+  active: boolean;
+  prices: Money[];
+  media: MediaItemPublic[];
+  availability?: RoomTypeAvailability | null;
+}
+
+export interface HotelSummary {
+  min_price: Money | null;
+  max_capacity: number;
+  total_inventory: number;
+}
+
+export interface RoomTypeCreateInput {
+  title: string;
+  description?: string;
+  bed_config?: BedSpec[];
+  max_guests: number;
+  amenities?: string[];
+  private_bathroom?: boolean;
+  inventory_count: number;
+  prices: Money[];
+  active?: boolean;
+  position?: number;
+  media_ids?: string[];
+}
+
+export type RoomTypeUpdateInput = Partial<RoomTypeCreateInput>;
