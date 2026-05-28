@@ -53,7 +53,7 @@ export function Header() {
           <span className="grid size-7 rotate-[-4deg] place-items-center rounded-lg bg-ganitel-text-title text-[13px] font-extrabold leading-none text-ganitel-paper">
             G
           </span>
-          <span className="font-display text-[22px] font-extrabold leading-none tracking-[-0.045em]">
+          <span className="font-display text-[24px] font-bold leading-none tracking-[-0.01em]">
             ganitel
           </span>
         </Link>
