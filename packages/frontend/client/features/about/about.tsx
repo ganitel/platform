@@ -1,6 +1,6 @@
-import { BadgeCheck, Compass, ShieldCheck, Sparkles } from "lucide-react";
-
 import type { TranslationKey } from "@/shared/lib/i18n";
+
+import { cn } from "@/shared/lib/cn";
 import { useLocale, useT } from "@/shared/lib/i18n";
 import type { TeamMember } from "@/features/about/types";
 import { PillLink } from "@/shared/ui/pill-link";
@@ -36,15 +36,31 @@ const VISION_FALLBACK = "https://picsum.photos/seed/ganitelvision/1600/900";
 const TILE_SIZES = "(min-width: 1024px) 25vw, 50vw";
 const IMPACT_PHOTO_SIZES = "(min-width: 768px) 33vw, 100vw";
 
-const PROMISES = [
-  { key: "security", labelKey: "about.promise.security", icon: ShieldCheck },
-  { key: "convenience", labelKey: "about.promise.convenience", icon: Compass },
-  { key: "verified", labelKey: "about.promise.verified", icon: BadgeCheck },
-  { key: "premium", labelKey: "about.promise.premium", icon: Sparkles },
+const PROMISE_SECTIONS = [
+  {
+    num: "01",
+    titleKey: "about.promise.01.title",
+    bodyKey: "about.promise.01.body",
+  },
+  {
+    num: "02",
+    titleKey: "about.promise.02.title",
+    bodyKey: "about.promise.02.body",
+  },
+  {
+    num: "03",
+    titleKey: "about.promise.03.title",
+    bodyKey: "about.promise.03.body",
+  },
+  {
+    num: "04",
+    titleKey: "about.promise.04.title",
+    bodyKey: "about.promise.04.body",
+  },
 ] as const satisfies ReadonlyArray<{
-  key: string;
-  labelKey: TranslationKey;
-  icon: typeof ShieldCheck;
+  num: string;
+  titleKey: TranslationKey;
+  bodyKey: TranslationKey;
 }>;
 
 export function About({ team }: { team: TeamMember[] }) {
@@ -52,6 +68,7 @@ export function About({ team }: { team: TeamMember[] }) {
     <>
       <Hero />
       <Trust />
+      <PromiseSections />
       <Impact />
       <Team members={team} />
       <Vision />
@@ -154,23 +171,52 @@ function Trust() {
           <p className="m-0 text-sm text-ganitel-text-placeholder">
             {t("about.trust.caption")}
           </p>
-          <ul className="m-0 grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2">
-            {PROMISES.map(({ key, labelKey, icon: Icon }) => (
-              <li key={key} className="flex items-center gap-3">
-                <span className="grid size-11 shrink-0 place-items-center rounded-full bg-ganitel-sage-soft">
-                  <Icon
-                    className="size-5 text-ganitel-sage"
-                    strokeWidth={1.75}
-                    aria-hidden
-                  />
-                </span>
-                <span className="text-base font-semibold tracking-tight text-ganitel-text-title">
-                  {t(labelKey)}
-                </span>
-              </li>
-            ))}
-          </ul>
         </div>
+      </div>
+    </section>
+  );
+}
+
+function PromiseSections() {
+  const t = useT();
+  return (
+    <section className="mx-auto w-full max-w-6xl px-6 py-16 md:py-24">
+      <div className="flex flex-col gap-12 md:gap-20">
+        {PROMISE_SECTIONS.map((item, index) => {
+          const reverse = index % 2 === 1;
+          return (
+            <article
+              key={item.num}
+              data-reveal=""
+              className="grid items-center gap-8 md:grid-cols-2 md:gap-16"
+            >
+              <div className={cn("flex flex-col", reverse && "md:order-2")}>
+                <p
+                  className="text-[22px] leading-none text-ganitel-brown"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  {item.num}
+                </p>
+                <h3
+                  className="mt-3 text-[26px] leading-[1.1] text-ganitel-text-title md:text-[32px]"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  {t(item.titleKey)}
+                </h3>
+                <p className="mt-4 text-[15px] leading-[1.6] text-ganitel-text-subtitle md:text-base">
+                  {t(item.bodyKey)}
+                </p>
+              </div>
+              <div
+                className={cn(
+                  "image-frame-warm aspect-[5/4] overflow-hidden rounded-lg bg-ganitel-paper-warm",
+                  reverse && "md:order-1",
+                )}
+                aria-hidden
+              />
+            </article>
+          );
+        })}
       </div>
     </section>
   );

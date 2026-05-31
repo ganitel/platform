@@ -78,6 +78,29 @@ const dict = {
     fr: "tenues à chaque étape.",
     en: "kept at every step.",
   },
+  "about.promise.01.title": { fr: "Sécurité d'abord", en: "Security first" },
+  "about.promise.01.body": {
+    fr: "Chaque adresse et chaque hôte sont vérifiés avant d'apparaître sur la plateforme.",
+    en: "Every property and host vetted before listing.",
+  },
+  "about.promise.02.title": { fr: "Des mains locales", en: "Local hands" },
+  "about.promise.02.body": {
+    fr: "Guides, chauffeurs et partenaires que nous connaissons depuis des années.",
+    en: "Guides, drivers and partners we've worked with for years.",
+  },
+  "about.promise.03.title": { fr: "Séjours vérifiés", en: "Verified stays" },
+  "about.promise.03.body": {
+    fr: "Photos, équipements et tarifs contrôlés sur place.",
+    en: "Photos, amenities and pricing checked on site.",
+  },
+  "about.promise.04.title": {
+    fr: "Une sélection mesurée",
+    en: "Hand-picked",
+  },
+  "about.promise.04.body": {
+    fr: "Une sélection volontairement réduite — pas un annuaire.",
+    en: "A small, considered selection — not a directory.",
+  },
   "landing.statement.eyebrow": { fr: "Notre promesse", en: "Our promise" },
   "landing.statement.body": {
     fr: "Un réseau choisi d'hôtes, de guides et de chauffeurs au Cameroun — sélectionnés parce qu'on y enverrait notre propre famille.",
