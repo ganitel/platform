@@ -78,6 +78,14 @@ const dict = {
     fr: "tenues à chaque étape.",
     en: "kept at every step.",
   },
+  "about.promises.eyebrow": {
+    fr: "Quatre engagements",
+    en: "Four commitments",
+  },
+  "about.promises.title": {
+    fr: "Ce qui guide chaque sélection.",
+    en: "What guides every selection.",
+  },
   "about.promise.01.title": { fr: "Sécurité d'abord", en: "Security first" },
   "about.promise.01.body": {
     fr: "Chaque adresse et chaque hôte sont vérifiés avant d'apparaître sur la plateforme.",

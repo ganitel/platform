@@ -180,32 +180,41 @@ function PromiseSections() {
   const t = useT();
   return (
     <section className="px-6 pb-20 md:px-12 md:pb-24">
-      <div
-        className="mx-auto grid max-w-7xl gap-10 md:grid-cols-2 md:gap-x-16 md:gap-y-14"
-        data-reveal=""
-      >
-        {PROMISE_SECTIONS.map((item) => (
-          <article
-            key={item.num}
-            className="border-t border-ganitel-stroke-neutral pt-6"
-          >
-            <p
-              className="text-[20px] leading-none text-ganitel-brown"
-              style={{ fontFamily: "var(--font-display)" }}
+      <div className="mx-auto max-w-7xl" data-reveal="">
+        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ganitel-brown">
+          {t("about.promises.eyebrow")}
+        </p>
+        <h2 className="mt-3 max-w-3xl text-[28px] leading-[1.06] tracking-[-0.02em] text-ganitel-text-title md:text-[40px]">
+          {t("about.promises.title")}
+        </h2>
+        <span
+          aria-hidden
+          className="ganitel-rule-grow mt-5 mb-10 block h-px w-12 bg-ganitel-rule md:mb-14"
+        />
+        <div className="grid gap-10 md:grid-cols-2 md:gap-x-16 md:gap-y-14">
+          {PROMISE_SECTIONS.map((item) => (
+            <article
+              key={item.num}
+              className="border-t border-ganitel-stroke-neutral pt-6"
             >
-              {item.num}
-            </p>
-            <h3
-              className="mt-3 text-[22px] leading-[1.15] text-ganitel-text-title md:text-[26px]"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {t(item.titleKey)}
-            </h3>
-            <p className="mt-3 text-[14.5px] leading-[1.6] text-ganitel-text-subtitle md:text-[15px]">
-              {t(item.bodyKey)}
-            </p>
-          </article>
-        ))}
+              <p
+                className="text-[20px] leading-none text-ganitel-brown"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {item.num}
+              </p>
+              <h3
+                className="mt-3 text-[22px] leading-[1.15] text-ganitel-text-title md:text-[26px]"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {t(item.titleKey)}
+              </h3>
+              <p className="mt-3 text-[14.5px] leading-[1.6] text-ganitel-text-subtitle md:text-[15px]">
+                {t(item.bodyKey)}
+              </p>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -218,7 +227,7 @@ function Impact() {
     <section className="bg-ganitel-olive-soft px-6 py-20 md:px-12 md:py-28">
       <div ref={ref} data-reveal="" className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="m-0 text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-olive md:text-4xl">
+          <h2 className="m-0 text-[28px] leading-tight tracking-[-0.02em] text-ganitel-olive md:text-[36px]">
             {t("about.impact.title")}
           </h2>
           <p className="m-0 mt-6 text-[15px] leading-[1.7] text-ganitel-text-subtitle md:text-base">
@@ -365,7 +374,10 @@ function Vision() {
         <p className="m-0 text-lg font-medium italic text-ganitel-paper-warm">
           {t("about.vision.title")}
         </p>
-        <p className="m-0 mt-6 text-balance text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-paper md:text-5xl">
+        <p
+          className="m-0 mt-6 text-balance text-[32px] leading-[1.06] tracking-[-0.02em] text-ganitel-paper md:text-[52px]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
           {t("about.vision.body")}
         </p>
       </div>
@@ -386,7 +398,7 @@ function Closing() {
         <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ganitel-brown">
           {t("about.closing.tag")}
         </span>
-        <h2 className="m-0 max-w-2xl text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-on-tan md:text-4xl">
+        <h2 className="m-0 max-w-2xl text-[28px] leading-tight tracking-[-0.02em] text-ganitel-on-tan md:text-[36px]">
           {t("about.closing")}
         </h2>
         <PillLink to="/browse" variant="solid" arrow>

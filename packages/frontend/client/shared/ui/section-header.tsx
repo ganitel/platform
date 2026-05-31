@@ -58,7 +58,7 @@ export function SectionHeader({
         <Heading
           style={TITLE_STYLE}
           className={cn(
-            "mt-4 text-balance font-bold leading-[1.02] tracking-[-0.04em]",
+            "mt-4 text-balance leading-[1.02] tracking-[-0.02em]",
             titleColor,
           )}
         >
