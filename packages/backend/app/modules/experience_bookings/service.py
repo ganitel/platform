@@ -168,6 +168,120 @@ async def _refresh_lazy_expirations(
     return booking
 
 
+async def decline_as_host(
+    session: AsyncSession, *, booking_id: UUID, host: User
+) -> ExperienceBooking:
+    booking = await session.get(ExperienceBooking, booking_id)
+    if booking is None:
+        raise NotFoundError(code="experience_booking.not_found")
+    if booking.host_id != host.id and not host.is_admin:
+        raise ForbiddenError(code="experience_booking.not_host")
+    if booking.status != ExperienceBookingStatus.REQUESTED:
+        raise ConflictError(
+            code="experience_booking.not_declinable",
+            extra={"current_status": booking.status.value},
+        )
+
+    booking.status = ExperienceBookingStatus.HOST_DECLINED
+    booking.cancelled_at = datetime.now(UTC)
+    await outbox_service.enqueue(
+        session,
+        event_type="experience_booking.host_declined",
+        aggregate_type="experience_booking",
+        aggregate_id=booking.id,
+        payload={"experience_booking_id": str(booking.id)},
+    )
+    await session.commit()
+    await session.refresh(booking)
+    return booking
+
+
+async def cancel_as_guest(
+    session: AsyncSession, *, booking_id: UUID, guest: User
+) -> ExperienceBooking:
+    booking = await session.get(ExperienceBooking, booking_id)
+    if booking is None:
+        raise NotFoundError(code="experience_booking.not_found")
+    if booking.guest_id != guest.id and not guest.is_admin:
+        raise ForbiddenError(code="experience_booking.not_guest")
+    if booking.status not in NON_TERMINAL_STATUSES:
+        raise ConflictError(
+            code="experience_booking.not_cancellable",
+            extra={"current_status": booking.status.value},
+        )
+
+    booking.status = ExperienceBookingStatus.CANCELLED_BY_GUEST
+    booking.cancelled_at = datetime.now(UTC)
+    booking.hold_expires_at = None
+    await outbox_service.enqueue(
+        session,
+        event_type="experience_booking.cancelled_by_guest",
+        aggregate_type="experience_booking",
+        aggregate_id=booking.id,
+        payload={"experience_booking_id": str(booking.id)},
+    )
+    await session.commit()
+    await session.refresh(booking)
+    return booking
+
+
+async def cancel_as_host(
+    session: AsyncSession, *, booking_id: UUID, host: User
+) -> ExperienceBooking:
+    booking = await session.get(ExperienceBooking, booking_id)
+    if booking is None:
+        raise NotFoundError(code="experience_booking.not_found")
+    if booking.host_id != host.id and not host.is_admin:
+        raise ForbiddenError(code="experience_booking.not_host")
+    if booking.status != ExperienceBookingStatus.CONFIRMED:
+        raise ConflictError(
+            code="experience_booking.not_cancellable_by_host",
+            extra={"current_status": booking.status.value},
+        )
+
+    booking.status = ExperienceBookingStatus.CANCELLED_BY_HOST
+    booking.cancelled_at = datetime.now(UTC)
+    await outbox_service.enqueue(
+        session,
+        event_type="experience_booking.cancelled_by_host",
+        aggregate_type="experience_booking",
+        aggregate_id=booking.id,
+        payload={"experience_booking_id": str(booking.id)},
+    )
+    await session.commit()
+    await session.refresh(booking)
+    return booking
+
+
+async def list_for_guest(
+    session: AsyncSession, *, guest: User, limit: int = 50, offset: int = 0
+) -> list[ExperienceBooking]:
+    stmt = (
+        select(ExperienceBooking)
+        .where(ExperienceBooking.guest_id == guest.id)
+        .order_by(ExperienceBooking.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    return list((await session.execute(stmt)).scalars().all())
+
+
+async def list_pending_for_host(
+    session: AsyncSession, *, host: User, limit: int = 50, offset: int = 0
+) -> list[ExperienceBooking]:
+    stmt = (
+        select(ExperienceBooking)
+        .where(
+            ExperienceBooking.host_id == host.id,
+            ExperienceBooking.status == ExperienceBookingStatus.REQUESTED,
+        )
+        .order_by(ExperienceBooking.confirm_deadline_at.asc())
+        .limit(limit)
+        .offset(offset)
+    )
+    return list((await session.execute(stmt)).scalars().all())
+
+
 def to_public(booking: ExperienceBooking, *, experience_title: str) -> ExperienceBookingPublic:
     return ExperienceBookingPublic(
         id=booking.id,
