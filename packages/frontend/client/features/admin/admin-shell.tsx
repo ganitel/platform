@@ -13,6 +13,7 @@ import {
 import { Header } from "@/shared/components/header";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { cn } from "@/shared/lib/cn";
+import { PageHeader } from "@/shared/ui/page-header";
 
 type NavItem = {
   to: string;
@@ -141,42 +142,5 @@ function AdminSidebar() {
         </div>
       </div>
     </aside>
-  );
-}
-
-function PageHeader({
-  eyebrow,
-  title,
-  description,
-  actions,
-}: {
-  eyebrow?: string;
-  title: string;
-  description?: string;
-  actions?: ReactNode;
-}) {
-  return (
-    <header className="mb-8 flex flex-col gap-6 border-b border-ganitel-stroke-neutral pb-8 sm:flex-row sm:items-end sm:justify-between">
-      <div className="min-w-0">
-        {eyebrow ? (
-          <p className="mb-2 text-xs font-medium uppercase tracking-[0.28em] text-ganitel-secondary">
-            {eyebrow}
-          </p>
-        ) : null}
-        <h1 className="text-[2.4rem] font-semibold leading-[1.05] tracking-tight text-ganitel-text-title sm:text-[2.75rem]">
-          {title}
-        </h1>
-        {description ? (
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ganitel-text-subtitle">
-            {description}
-          </p>
-        ) : null}
-      </div>
-      {actions ? (
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-          {actions}
-        </div>
-      ) : null}
-    </header>
   );
 }
