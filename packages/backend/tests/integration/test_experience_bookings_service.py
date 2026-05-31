@@ -12,6 +12,7 @@ import pytest
 from geoalchemy2.shape import from_shape
 from shapely.geometry import Point
 
+from app.core.errors import ForbiddenError, NotFoundError, ValidationError
 from app.core.money import Currency
 from app.modules.experience_bookings import service as eb_service
 from app.modules.experience_bookings.models import ExperienceBookingStatus
@@ -98,3 +99,102 @@ async def test_create_request_happy_path(session):
     assert booking.confirm_deadline_at is not None
     assert booking.hold_expires_at is None
     assert booking.payment_id is None
+
+
+@pytest.mark.asyncio
+async def test_create_request_rejects_past_date(session):
+    host = await _make_user(session, is_host=True)
+    guest = await _make_user(session)
+    exp = await _make_experience(session, host)
+
+    with pytest.raises(ValidationError) as e:
+        await eb_service.create_request(
+            session,
+            guest=guest,
+            payload=ExperienceBookingCreateIn(
+                experience_id=exp.id,
+                requested_date=date.today() - timedelta(days=1),
+                party_size=1,
+                currency=Currency.XAF,
+            ),
+        )
+    assert e.value.code == "experience.date_past"
+
+
+@pytest.mark.asyncio
+async def test_create_request_rejects_unpublished_experience(session):
+    host = await _make_user(session, is_host=True)
+    guest = await _make_user(session)
+    exp = await _make_experience(session, host, status=ExperienceStatus.DRAFT)
+
+    with pytest.raises(NotFoundError) as e:
+        await eb_service.create_request(
+            session,
+            guest=guest,
+            payload=ExperienceBookingCreateIn(
+                experience_id=exp.id,
+                requested_date=date.today() + timedelta(days=3),
+                party_size=1,
+                currency=Currency.XAF,
+            ),
+        )
+    assert e.value.code == "experience.not_found"
+
+
+@pytest.mark.asyncio
+async def test_create_request_rejects_self_booking(session):
+    host = await _make_user(session, is_host=True)
+    exp = await _make_experience(session, host)
+
+    with pytest.raises(ForbiddenError) as e:
+        await eb_service.create_request(
+            session,
+            guest=host,
+            payload=ExperienceBookingCreateIn(
+                experience_id=exp.id,
+                requested_date=date.today() + timedelta(days=3),
+                party_size=1,
+                currency=Currency.XAF,
+            ),
+        )
+    assert e.value.code == "experience.self_booking"
+
+
+@pytest.mark.asyncio
+async def test_create_request_rejects_party_size_above_capacity(session):
+    host = await _make_user(session, is_host=True)
+    guest = await _make_user(session)
+    exp = await _make_experience(session, host, capacity=4)
+
+    with pytest.raises(ValidationError) as e:
+        await eb_service.create_request(
+            session,
+            guest=guest,
+            payload=ExperienceBookingCreateIn(
+                experience_id=exp.id,
+                requested_date=date.today() + timedelta(days=3),
+                party_size=5,
+                currency=Currency.XAF,
+            ),
+        )
+    assert e.value.code == "experience.party_size_invalid"
+
+
+@pytest.mark.asyncio
+async def test_create_request_rejects_unavailable_currency(session):
+    host = await _make_user(session, is_host=True)
+    guest = await _make_user(session)
+    exp = await _make_experience(session, host, currency="XAF")
+
+    with pytest.raises(ValidationError) as e:
+        await eb_service.create_request(
+            session,
+            guest=guest,
+            payload=ExperienceBookingCreateIn(
+                experience_id=exp.id,
+                requested_date=date.today() + timedelta(days=3),
+                party_size=1,
+                currency=Currency.XOF,
+            ),
+        )
+    assert e.value.code == "experience.currency_unavailable"
