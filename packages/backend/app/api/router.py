@@ -2,6 +2,10 @@ from fastapi import APIRouter
 
 from app.modules.auth.routes import router as auth_webhooks_router
 from app.modules.bookings.routes import router as bookings_router
+from app.modules.experience_bookings.admin_routes import (
+    router as experience_bookings_admin_router,
+)
+from app.modules.experience_bookings.routes import router as experience_bookings_router
 from app.modules.experiences.admin_routes import router as experiences_admin_router
 from app.modules.experiences.routes import router as experiences_router
 from app.modules.media.routes import router as media_router
@@ -30,6 +34,8 @@ api_router.include_router(properties_admin_router)
 api_router.include_router(experiences_router)
 api_router.include_router(experiences_admin_router)
 api_router.include_router(bookings_router)
+api_router.include_router(experience_bookings_router)
+api_router.include_router(experience_bookings_admin_router)
 api_router.include_router(webhooks_router)
 api_router.include_router(waitlist_router)
 api_router.include_router(auth_webhooks_router)
