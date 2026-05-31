@@ -25,7 +25,6 @@ interface NavLinkSpec {
 const DESKTOP_NAV: NavLinkSpec[] = [
   { to: "/browse", labelKey: "nav.browse" },
   { to: "/about", labelKey: "nav.about" },
-  { to: "/faq", labelKey: "nav.faq" },
 ];
 
 const DRAWER_BROWSE: NavLinkSpec[] = [
@@ -38,10 +37,7 @@ const DRAWER_ACCOUNT: NavLinkSpec[] = [
   { to: "/profile", labelKey: "nav.profile", hideInPrelaunch: true },
 ];
 
-const DRAWER_GANITEL: NavLinkSpec[] = [
-  { to: "/about", labelKey: "nav.about" },
-  { to: "/faq", labelKey: "nav.faq" },
-];
+const DRAWER_GANITEL: NavLinkSpec[] = [{ to: "/about", labelKey: "nav.about" }];
 
 export function Header() {
   const t = useT();
