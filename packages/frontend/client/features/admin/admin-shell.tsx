@@ -4,9 +4,9 @@ import {
   Building2,
   Compass,
   Home,
+  KeyRound,
   LayoutGrid,
   LogOut,
-  Sparkles,
   UserPlus,
 } from "lucide-react";
 
@@ -81,7 +81,10 @@ function AdminSidebar() {
     <aside className="hidden w-60 shrink-0 flex-col lg:flex">
       <div className="sticky top-24 flex flex-col gap-8 rounded-3xl border border-ganitel-stroke-neutral/70 bg-ganitel-primary p-6 text-ganitel-paper shadow-[0_30px_80px_-40px_rgba(24,16,12,0.35)]">
         <div className="flex flex-col gap-1">
-          <span className="text-2xl font-medium italic leading-none text-ganitel-secondary">
+          <span
+            className="text-[26px] leading-none text-ganitel-secondary"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
             {t("admin.brand")}
           </span>
           <span className="text-xs uppercase tracking-[0.28em] text-ganitel-paper/60">
@@ -127,7 +130,7 @@ function AdminSidebar() {
 
         <div className="mt-auto flex flex-col gap-3 border-t border-white/[0.08] pt-5">
           <div className="flex items-center gap-2 text-xs text-ganitel-paper/55">
-            <Sparkles className="size-3.5" strokeWidth={1.75} />
+            <KeyRound className="size-3.5" strokeWidth={1.75} />
             <span className="font-medium uppercase tracking-[0.18em]">
               {t("admin.shell.mode")}
             </span>
