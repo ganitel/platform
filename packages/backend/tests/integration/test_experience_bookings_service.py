@@ -198,3 +198,48 @@ async def test_create_request_rejects_unavailable_currency(session):
             ),
         )
     assert e.value.code == "experience.currency_unavailable"
+
+
+@pytest.mark.asyncio
+async def test_get_returns_for_guest_and_host(session):
+    host = await _make_user(session, is_host=True)
+    guest = await _make_user(session)
+    exp = await _make_experience(session, host)
+
+    booking = await eb_service.create_request(
+        session,
+        guest=guest,
+        payload=ExperienceBookingCreateIn(
+            experience_id=exp.id,
+            requested_date=date.today() + timedelta(days=5),
+            party_size=1,
+            currency=Currency.XAF,
+        ),
+    )
+
+    fetched_as_guest = await eb_service.get(session, booking.id, viewer=guest)
+    fetched_as_host = await eb_service.get(session, booking.id, viewer=host)
+    assert fetched_as_guest.id == booking.id
+    assert fetched_as_host.id == booking.id
+
+
+@pytest.mark.asyncio
+async def test_get_denies_third_party(session):
+    host = await _make_user(session, is_host=True)
+    guest = await _make_user(session)
+    other = await _make_user(session)
+    exp = await _make_experience(session, host)
+
+    booking = await eb_service.create_request(
+        session,
+        guest=guest,
+        payload=ExperienceBookingCreateIn(
+            experience_id=exp.id,
+            requested_date=date.today() + timedelta(days=5),
+            party_size=1,
+            currency=Currency.XAF,
+        ),
+    )
+
+    with pytest.raises(ForbiddenError):
+        await eb_service.get(session, booking.id, viewer=other)

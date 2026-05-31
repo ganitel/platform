@@ -5,6 +5,7 @@ two booking surfaces feel uniform.
 
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
+from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -105,6 +106,65 @@ async def create_request(
     )
     await session.commit()
     await session.refresh(booking)
+    return booking
+
+
+async def get(
+    session: AsyncSession,
+    booking_id: UUID,
+    *,
+    viewer: User,
+) -> ExperienceBooking:
+    booking = await session.get(ExperienceBooking, booking_id)
+    if booking is None:
+        raise NotFoundError(code="experience_booking.not_found")
+
+    booking = await _refresh_lazy_expirations(session, booking)
+
+    if viewer.is_admin:
+        return booking
+    if viewer.id in (booking.guest_id, booking.host_id):
+        return booking
+    raise ForbiddenError(code="experience_booking.access_denied")
+
+
+async def _refresh_lazy_expirations(
+    session: AsyncSession, booking: ExperienceBooking
+) -> ExperienceBooking:
+    """Mirrors `bookings.get_booking`: if a deadline has elapsed, flip the row to
+    `cancelled_expired` lazily on read so frontends don't see stale state.
+    """
+    now = datetime.now(UTC)
+    flipped = False
+
+    if (
+        booking.status == ExperienceBookingStatus.REQUESTED
+        and booking.confirm_deadline_at is not None
+        and booking.confirm_deadline_at < now
+    ):
+        booking.status = ExperienceBookingStatus.CANCELLED_EXPIRED
+        booking.cancelled_at = now
+        flipped = True
+    elif (
+        booking.status == ExperienceBookingStatus.PENDING_PAYMENT
+        and booking.hold_expires_at is not None
+        and booking.hold_expires_at < now
+    ):
+        booking.status = ExperienceBookingStatus.CANCELLED_EXPIRED
+        booking.cancelled_at = now
+        booking.hold_expires_at = None
+        flipped = True
+
+    if flipped:
+        await outbox_service.enqueue(
+            session,
+            event_type="experience_booking.cancelled_expired",
+            aggregate_type="experience_booking",
+            aggregate_id=booking.id,
+            payload={"experience_booking_id": str(booking.id)},
+        )
+        await session.commit()
+        await session.refresh(booking)
     return booking
 
 
