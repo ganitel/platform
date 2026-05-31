@@ -37,16 +37,17 @@ export function AuthLayout({
 
         <Link
           to="/"
-          className="relative z-10 inline-flex w-fit text-3xl font-semibold tracking-tight text-ganitel-text-button"
+          className="relative z-10 inline-flex w-fit text-[32px] leading-none tracking-[-0.01em] text-ganitel-text-button"
+          style={{ fontFamily: "var(--font-display)" }}
         >
           ganitel
         </Link>
 
         <div className="relative z-10 max-w-md">
-          <p className="text-xs uppercase tracking-[0.3em] text-ganitel-secondary">
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ganitel-secondary">
             {subtitle}
           </p>
-          <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
+          <h1 className="mt-4 text-[36px] leading-[1.04] tracking-[-0.01em] md:text-[52px]">
             {title}
           </h1>
           <p className="mt-4 text-sm text-ganitel-text-button/70">
