@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, Sparkles } from "lucide-react";
+import { BadgeCheck, Mail } from "lucide-react";
 
 import { joinWaitlist } from "@/features/waitlist/api";
 import { WAITLIST_FIELD_ERROR_KEYS } from "@/features/waitlist/error-keys";
@@ -91,7 +91,7 @@ export function WaitlistPanel({
       {/* Badge */}
       <div className="px-6 pt-5">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-ganitel-secondary/15 px-3 py-1 text-xs font-medium text-ganitel-secondary">
-          <Sparkles className="size-3" aria-hidden />
+          <BadgeCheck className="size-3" aria-hidden />
           {t("waitlist.badge")}
         </span>
       </div>
