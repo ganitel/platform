@@ -14,13 +14,15 @@ describe("FormField", () => {
     expect(label).toHaveAttribute("for", "email");
   });
 
-  it("renders required indicator when required=true", () => {
-    render(
+  it("renders a visual required indicator hidden from screen readers", () => {
+    const { container } = render(
       <FormField label="Name" htmlFor="name" required>
-        <input id="name" />
+        <input id="name" aria-required="true" required />
       </FormField>,
     );
-    expect(screen.getByLabelText("required")).toBeInTheDocument();
+    const star = container.querySelector("[aria-hidden='true']");
+    expect(star).not.toBeNull();
+    expect(star?.textContent).toBe("*");
   });
 
   it("renders error text when provided", () => {

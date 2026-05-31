@@ -7,7 +7,12 @@ import { MobileDrawer } from "./mobile-drawer";
 describe("MobileDrawer", () => {
   it("renders children when open", () => {
     render(
-      <MobileDrawer open onOpenChange={() => {}} title="Menu">
+      <MobileDrawer
+        open
+        onOpenChange={() => {}}
+        title="Menu"
+        closeLabel="Close menu"
+      >
         <a href="/about">About</a>
       </MobileDrawer>,
     );
@@ -16,27 +21,44 @@ describe("MobileDrawer", () => {
 
   it("renders the title", () => {
     render(
-      <MobileDrawer open onOpenChange={() => {}} title="Menu">
+      <MobileDrawer
+        open
+        onOpenChange={() => {}}
+        title="Menu"
+        closeLabel="Close menu"
+      >
         <a href="/about">About</a>
       </MobileDrawer>,
     );
     expect(screen.getByText("Menu")).toBeInTheDocument();
   });
 
-  it("calls onOpenChange(false) when close button is clicked", async () => {
+  it("uses the provided closeLabel on the close button", async () => {
     const onOpenChange = vi.fn();
     render(
-      <MobileDrawer open onOpenChange={onOpenChange} title="Menu">
+      <MobileDrawer
+        open
+        onOpenChange={onOpenChange}
+        title="Menu"
+        closeLabel="Fermer le menu"
+      >
         <a href="/about">About</a>
       </MobileDrawer>,
     );
-    await userEvent.click(screen.getByRole("button", { name: /close menu/i }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Fermer le menu" }),
+    );
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it("does not render content when closed", () => {
     render(
-      <MobileDrawer open={false} onOpenChange={() => {}} title="Menu">
+      <MobileDrawer
+        open={false}
+        onOpenChange={() => {}}
+        title="Menu"
+        closeLabel="Close menu"
+      >
         <a href="/about">About</a>
       </MobileDrawer>,
     );

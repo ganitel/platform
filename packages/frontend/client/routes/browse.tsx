@@ -187,8 +187,7 @@ function BrowseTabs({ kind, q }: { kind: BrowseKind; q: string | null }) {
   };
 
   return (
-    <div
-      role="tablist"
+    <nav
       aria-label={t("nav.browse")}
       className="mb-10 flex gap-8 border-b border-ganitel-stroke-neutral md:mb-12"
     >
@@ -198,7 +197,7 @@ function BrowseTabs({ kind, q }: { kind: BrowseKind; q: string | null }) {
       <BrowseTab to={hrefFor("experiences")} active={kind === "experiences"}>
         {t("browse.tabs.experiences")}
       </BrowseTab>
-    </div>
+    </nav>
   );
 }
 
@@ -214,8 +213,7 @@ function BrowseTab({
   return (
     <Link
       to={to}
-      role="tab"
-      aria-selected={active}
+      aria-current={active ? "page" : undefined}
       className={cn(
         "relative -mb-px pb-3 text-sm transition-colors duration-150",
         active

@@ -30,7 +30,7 @@ export function FormField({
         {label}
         {required ? (
           <span
-            aria-label="required"
+            aria-hidden="true"
             className="ml-1 italic text-ganitel-brown"
             style={{ fontFamily: "var(--font-display)" }}
           >

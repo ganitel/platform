@@ -27,6 +27,7 @@ const dict = {
   "nav.profile": { fr: "Profil", en: "Profile" },
   "nav.faq": { fr: "FAQ", en: "FAQ" },
   "nav.open_menu": { fr: "Ouvrir le menu", en: "Open menu" },
+  "nav.close_menu": { fr: "Fermer le menu", en: "Close menu" },
   "nav.brand_long": { fr: "Ganitel", en: "Ganitel" },
   "nav.group.browse": { fr: "Explorer", en: "Browse" },
   "nav.group.account": { fr: "Compte", en: "Account" },

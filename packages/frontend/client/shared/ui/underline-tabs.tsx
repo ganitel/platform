@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
+import { useRef } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -22,6 +23,20 @@ export function UnderlineTabs<T extends string = string>({
   className,
   ariaLabel,
 }: UnderlineTabsProps<T>) {
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  const handleKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    currentIndex: number,
+  ) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    const offset = event.key === "ArrowRight" ? 1 : -1;
+    const nextIndex = (currentIndex + offset + items.length) % items.length;
+    event.preventDefault();
+    onChange(items[nextIndex].value);
+    tabRefs.current[nextIndex]?.focus();
+  };
+
   return (
     <div
       role="tablist"
@@ -31,16 +46,20 @@ export function UnderlineTabs<T extends string = string>({
         className,
       )}
     >
-      {items.map((item) => {
+      {items.map((item, index) => {
         const active = item.value === value;
         return (
           <button
             key={item.value}
+            ref={(el) => {
+              tabRefs.current[index] = el;
+            }}
             type="button"
             role="tab"
             aria-selected={active}
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(item.value)}
+            onKeyDown={(event) => handleKeyDown(event, index)}
             className={cn(
               "relative -mb-px pb-3 text-sm transition-colors duration-150",
               active

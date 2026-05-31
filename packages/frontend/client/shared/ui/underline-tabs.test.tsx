@@ -29,6 +29,26 @@ describe("UnderlineTabs", () => {
     expect(onChange).toHaveBeenCalledWith("experiences");
   });
 
+  it("ArrowRight from stays activates experiences", async () => {
+    const onChange = vi.fn();
+    render(<UnderlineTabs items={items} value="stays" onChange={onChange} />);
+    const stays = screen.getByRole("tab", { name: "Stays" });
+    stays.focus();
+    await userEvent.keyboard("{ArrowRight}");
+    expect(onChange).toHaveBeenCalledWith("experiences");
+  });
+
+  it("ArrowLeft from experiences activates stays", async () => {
+    const onChange = vi.fn();
+    render(
+      <UnderlineTabs items={items} value="experiences" onChange={onChange} />,
+    );
+    const exp = screen.getByRole("tab", { name: "Experiences" });
+    exp.focus();
+    await userEvent.keyboard("{ArrowLeft}");
+    expect(onChange).toHaveBeenCalledWith("stays");
+  });
+
   it("applies ariaLabel to the tablist", () => {
     render(
       <UnderlineTabs

@@ -6,6 +6,7 @@ export interface MobileDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: ReactNode;
+  closeLabel: string;
   children: ReactNode;
 }
 
@@ -13,6 +14,7 @@ export function MobileDrawer({
   open,
   onOpenChange,
   title,
+  closeLabel,
   children,
 }: MobileDrawerProps) {
   return (
@@ -36,7 +38,7 @@ export function MobileDrawer({
             </DrawerPrimitive.Title>
             <button
               type="button"
-              aria-label="Close menu"
+              aria-label={closeLabel}
               onClick={() => onOpenChange(false)}
               className="rounded-full p-2 text-ganitel-text-subtitle transition-colors hover:bg-ganitel-stroke-neutral/40 hover:text-ganitel-text-title"
             >

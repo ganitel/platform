@@ -23,12 +23,9 @@ export function Statement({ eyebrow, body, sub, className }: StatementProps) {
         aria-hidden
         className="ganitel-rule-grow mb-6 block h-px w-12 bg-ganitel-rule"
       />
-      <p
-        className="text-3xl leading-[1.18] text-ganitel-text-title md:text-4xl"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
+      <h2 className="text-3xl leading-[1.18] text-ganitel-text-title md:text-4xl">
         {body}
-      </p>
+      </h2>
       {sub ? (
         <p className="mt-5 max-w-prose text-sm leading-[1.55] text-ganitel-text-subtitle">
           {sub}

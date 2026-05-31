@@ -135,6 +135,7 @@ export function Header() {
         open={open}
         onOpenChange={setOpen}
         title={t("nav.brand_long")}
+        closeLabel={t("nav.close_menu")}
       >
         <DrawerGroup
           label={t("nav.group.browse")}

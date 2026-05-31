@@ -1,7 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
+
+// Header uses useDeferredSession → calls Supabase, which requires env vars
+// that aren't set in CI. Mock the hook so the test stays env-free.
+vi.mock("@/features/auth/hooks/use-deferred-session", () => ({
+  useDeferredSession: () => ({ session: null, isPending: false }),
+}));
 
 import { Header } from "./header";
 
@@ -29,7 +35,7 @@ describe("Header", () => {
     await userEvent.click(trigger);
     // Drawer shows the close button when open
     expect(
-      await screen.findByRole("button", { name: /close menu/i }),
+      await screen.findByRole("button", { name: /close menu|fermer le menu/i }),
     ).toBeInTheDocument();
   });
 
