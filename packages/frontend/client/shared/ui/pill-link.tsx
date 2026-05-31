@@ -23,7 +23,7 @@ type Variant = keyof typeof VARIANTS;
 type Size = "sm" | "md";
 
 const SIZES: Record<Size, string> = {
-  sm: "px-4 py-2.5 text-[13px] gap-2",
+  sm: "px-4 py-2.5 text-sm gap-2",
   md: "px-7 py-4 text-sm gap-3",
 };
 

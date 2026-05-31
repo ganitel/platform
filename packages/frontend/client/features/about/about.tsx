@@ -161,16 +161,16 @@ function Trust() {
           />
         </div>
         <div className="flex flex-col gap-5 lg:pt-10">
-          <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-ganitel-brown">
+          <span className="text-xs font-medium uppercase tracking-[0.18em] text-ganitel-brown">
             {t("about.trust.tag")}
           </span>
           <p
-            className="m-0 text-[26px] leading-[1.1] tracking-[-0.01em] text-ganitel-text-title md:text-[34px]"
+            className="m-0 text-2xl leading-[1.1] tracking-[-0.01em] text-ganitel-text-title md:text-3xl"
             style={{ fontFamily: "var(--font-display)" }}
           >
             {t("about.statement")}
           </p>
-          <p className="m-0 text-[13.5px] text-ganitel-text-placeholder">
+          <p className="m-0 text-sm text-ganitel-text-placeholder">
             {t("about.trust.caption")}
           </p>
         </div>
@@ -184,10 +184,10 @@ function PromiseSections() {
   return (
     <section className="px-6 pb-20 md:px-12 md:pb-24">
       <div className="mx-auto max-w-7xl" data-reveal="">
-        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ganitel-brown">
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-ganitel-brown">
           {t("about.promises.eyebrow")}
         </p>
-        <h2 className="mt-3 max-w-3xl text-[28px] leading-[1.06] tracking-[-0.02em] text-ganitel-text-title md:text-[40px]">
+        <h2 className="mt-3 max-w-3xl text-3xl leading-[1.06] tracking-[-0.02em] text-ganitel-text-title md:text-4xl">
           {t("about.promises.title")}
         </h2>
         <span
@@ -201,18 +201,18 @@ function PromiseSections() {
               className="border-t border-ganitel-stroke-neutral pt-6"
             >
               <p
-                className="text-[20px] leading-none text-ganitel-brown"
+                className="text-xl leading-none text-ganitel-brown"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 {item.num}
               </p>
               <h3
-                className="mt-3 text-[22px] leading-[1.15] text-ganitel-text-title md:text-[26px]"
+                className="mt-3 text-xl leading-[1.15] text-ganitel-text-title md:text-2xl"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 {t(item.titleKey)}
               </h3>
-              <p className="mt-3 text-[14.5px] leading-[1.6] text-ganitel-text-subtitle md:text-[15px]">
+              <p className="mt-3 text-sm leading-[1.6] text-ganitel-text-subtitle">
                 {t(item.bodyKey)}
               </p>
             </article>
@@ -230,10 +230,10 @@ function Impact() {
     <section className="bg-ganitel-olive-soft px-6 py-20 md:px-12 md:py-28">
       <div ref={ref} data-reveal="" className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="m-0 text-[28px] leading-tight tracking-[-0.02em] text-ganitel-olive md:text-[36px]">
+          <h2 className="m-0 text-3xl leading-tight tracking-[-0.02em] text-ganitel-olive md:text-4xl">
             {t("about.impact.title")}
           </h2>
-          <p className="m-0 mt-6 text-[15px] leading-[1.7] text-ganitel-text-subtitle md:text-base">
+          <p className="m-0 mt-6 text-sm leading-[1.7] text-ganitel-text-subtitle md:text-base">
             {t("about.impact.body")}
           </p>
         </div>
@@ -339,7 +339,7 @@ function TeamMemberCard({ member }: { member: TeamMember }) {
           <p className="m-0 text-lg font-bold leading-tight tracking-[-0.02em] text-ganitel-text-title">
             {member.name}
           </p>
-          <p className="m-0 text-[13px] uppercase tracking-[0.12em] text-ganitel-text-placeholder">
+          <p className="m-0 text-sm uppercase tracking-[0.12em] text-ganitel-text-placeholder">
             {title}
           </p>
         </div>
@@ -378,7 +378,7 @@ function Vision() {
           {t("about.vision.title")}
         </p>
         <p
-          className="m-0 mt-6 text-balance text-[32px] leading-[1.06] tracking-[-0.02em] text-ganitel-paper md:text-[52px]"
+          className="m-0 mt-6 text-balance text-3xl leading-[1.06] tracking-[-0.02em] text-ganitel-paper md:text-5xl"
           style={{ fontFamily: "var(--font-display)" }}
         >
           {t("about.vision.body")}
@@ -401,7 +401,7 @@ function Closing() {
         <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ganitel-brown">
           {t("about.closing.tag")}
         </span>
-        <h2 className="m-0 max-w-2xl text-[28px] leading-tight tracking-[-0.02em] text-ganitel-on-tan md:text-[36px]">
+        <h2 className="m-0 max-w-2xl text-3xl leading-tight tracking-[-0.02em] text-ganitel-on-tan md:text-4xl">
           {t("about.closing")}
         </h2>
         <PillLink to="/browse" variant="solid" arrow>

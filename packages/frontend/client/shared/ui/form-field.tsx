@@ -25,7 +25,7 @@ export function FormField({
     <div className={cn("flex flex-col gap-1.5", className)}>
       <label
         htmlFor={htmlFor}
-        className="text-[13px] font-medium text-ganitel-text-label"
+        className="text-sm font-medium text-ganitel-text-label"
       >
         {label}
         {required ? (
@@ -40,9 +40,9 @@ export function FormField({
       </label>
       {children}
       {hint && !error ? (
-        <p className="text-[12px] text-ganitel-text-placeholder">{hint}</p>
+        <p className="text-xs text-ganitel-text-placeholder">{hint}</p>
       ) : null}
-      {error ? <p className="text-[12px] text-destructive">{error}</p> : null}
+      {error ? <p className="text-xs text-destructive">{error}</p> : null}
     </div>
   );
 }

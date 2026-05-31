@@ -1,0 +1,138 @@
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  body { font-family: "Inter", sans-serif; }
+  .canvas { background: #f6f3ea; border: 1px solid #d5c3b7; border-radius: 18px; padding: 36px 28px; margin: 0; }
+  .row-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #80552d; font-weight: 500; margin-bottom: 20px; }
+  .hero-eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #80552d; font-weight: 500; }
+  .hero-title { font-family: "Instrument Serif", serif; font-size: 36px; line-height: 1.04; color: #18100c; margin: 10px 0 0; letter-spacing: -0.01em; }
+  .hero-title em { color: #80552d; }
+
+  /* Option C — photo strip */
+  .photo-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 24px; }
+  @media (max-width: 700px) { .photo-strip { grid-template-columns: repeat(2, 1fr); } }
+  .photo-tile { aspect-ratio: 4/5; border-radius: 10px; position: relative; overflow: hidden; }
+  .photo-tile .label {
+    position: absolute; left: 12px; bottom: 12px; right: 12px;
+    color: #f6f3ea; font-family: "Instrument Serif", serif; font-size: 18px; line-height: 1.05;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+  }
+  .photo-tile .meta {
+    position: absolute; left: 12px; top: 10px; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(246,243,234,0.9); font-weight: 500;
+  }
+  .pt-1 { background: linear-gradient(160deg, #2e3a25, #566250 55%, #80552d); }
+  .pt-2 { background: linear-gradient(160deg, #80552d, #d39e70 70%, #ffdcc1); }
+  .pt-3 { background: linear-gradient(160deg, #5b6144, #80552d 60%, #d39e70); }
+  .pt-4 { background: linear-gradient(160deg, #18100c, #80552d 70%, #ffdcc1); }
+
+  /* Option D — single statement */
+  .statement-block { margin-top: 28px; max-width: 60ch; }
+  .statement {
+    font-family: "Instrument Serif", serif; font-size: 32px; line-height: 1.18; color: #18100c;
+    letter-spacing: -0.005em;
+  }
+  .statement em { color: #80552d; font-style: italic; }
+  .statement-sub { margin-top: 14px; font-size: 13px; color: #4d4744; line-height: 1.55; max-width: 48ch; }
+  .statement-rule { width: 48px; height: 1px; background: #80552d; margin-top: 18px; }
+
+  /* Option E — cut section */
+  .cut-section {
+    margin-top: 24px; padding: 18px 0;
+    border-top: 1px dashed rgba(128,85,45,0.35);
+    border-bottom: 1px dashed rgba(128,85,45,0.35);
+    color: #80552d; text-align: center;
+    font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 500;
+  }
+  .next-section { margin-top: 28px; }
+  .next-eyebrow { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #80552d; font-weight: 500; margin-bottom: 6px; }
+  .next-title { font-family: "Instrument Serif", serif; font-size: 26px; color: #18100c; line-height: 1.1; letter-spacing: -0.005em; }
+  .dest-strip { margin-top: 12px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .dest-tile { aspect-ratio: 4/3; border-radius: 10px; background: linear-gradient(160deg, #566250, #d39e70); }
+
+  /* Card descriptors */
+  .card-desc { background: #fff; border-radius: 14px; padding: 18px; border: 1px solid #edecec; }
+  .card-desc h3 { margin: 0 0 6px; font-size: 16px; color: #18100c; font-family: "Inter", sans-serif; font-weight: 600; }
+  .card-desc p { font-size: 13px; line-height: 1.5; color: #4d4744; margin: 0; }
+  .card-desc .nb { font-size: 12px; color: #67615f; margin-top: 8px; }
+  .card-desc b { color: #18100c; }
+
+  .card .card-image { padding: 0 !important; background: transparent !important; }
+  .cards { gap: 18px; }
+</style>
+
+<h2>Try again — three new directions</h2>
+<p class="subtitle">Earlier I tried to redesign the icon row. Maybe the row itself is wrong. Three new takes — drop the icon row entirely, in three different ways.</p>
+
+<div class="cards">
+  <!-- Option C: photo strip -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="canvas">
+        <div class="row-label">Option C — photo strip</div>
+        <div class="hero-eyebrow">Cameroon · Curated</div>
+        <h1 class="hero-title">Where the volcano <em>meets</em> the sea.</h1>
+        <div class="photo-strip">
+          <div class="photo-tile pt-1"><div class="meta">01 · Stays</div><div class="label">Coastal lodges</div></div>
+          <div class="photo-tile pt-2"><div class="meta">02 · Experiences</div><div class="label">Cocoa & coffee farms</div></div>
+          <div class="photo-tile pt-3"><div class="meta">03 · Guides</div><div class="label">Mountain trails</div></div>
+          <div class="photo-tile pt-4"><div class="meta">04 · Crafts</div><div class="label">Artisan markets</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-desc">
+      <h3>C — Photo strip</h3>
+      <p>Replace the icon row with 4 small photo tiles. Concrete (a coastline, a farm, a trail, a market) beats abstract (a shield, a compass). Lets imagery do the brand work.</p>
+      <div class="nb"><b>Cost:</b> needs 4 quality photos and alt copy in 2 languages.</div>
+    </div>
+  </div>
+
+  <!-- Option D: single statement -->
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="canvas">
+        <div class="row-label">Option D — single statement</div>
+        <div class="hero-eyebrow">Cameroon · Curated</div>
+        <h1 class="hero-title">Where the volcano <em>meets</em> the sea.</h1>
+        <div class="statement-block">
+          <div class="statement-rule"></div>
+          <p class="statement" style="margin-top:18px">A small, vetted network of <em>hosts</em>, <em>guides</em> and <em>drivers</em> across Cameroon — chosen because we'd send our own family to them.</p>
+          <p class="statement-sub">No directory. No filler. Each property visited, each host known by name.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card-desc">
+      <h3>D — One bold statement</h3>
+      <p>Replace 4 vague pills with one strong claim. Set in Instrument Serif at large size with a thin rule. Confident, no list-feel.</p>
+      <div class="nb"><b>Cost:</b> a 2-line copy decision and i18n update.</div>
+    </div>
+  </div>
+
+  <!-- Option E: cut entirely -->
+  <div class="card" data-choice="e" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="canvas">
+        <div class="row-label">Option E — remove the section</div>
+        <div class="hero-eyebrow">Cameroon · Curated</div>
+        <h1 class="hero-title">Where the volcano <em>meets</em> the sea.</h1>
+        <div class="cut-section">— promise row removed —</div>
+        <div class="next-section">
+          <div class="next-eyebrow">Destinations</div>
+          <div class="next-title">The South-West coast, the Highlands, the East.</div>
+          <div class="dest-strip">
+            <div class="dest-tile"></div>
+            <div class="dest-tile"></div>
+            <div class="dest-tile"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-desc">
+      <h3>E — Cut the section</h3>
+      <p>Don't replace it — remove it. Hero → destinations → properties → vision is enough. The promise is implied by the curation itself, not declared.</p>
+      <div class="nb"><b>Cost:</b> shortest landing page, less to maintain. About page can still carry the promises.</div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top: 24px"><b>Admin shell + waitlist badge:</b> separate from this — both are isolated single-icon uses. I'll just swap Sparkles → KeyRound (admin) and Sparkles → BadgeCheck (waitlist). Tell me if you want different icons for those.</p>

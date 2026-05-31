@@ -174,10 +174,10 @@ export default function PropertyDetailRoute({
       <article className="mx-auto w-full max-w-6xl px-4 pt-6 pb-32 md:px-8 md:pt-12 lg:pb-12">
         <header className="mb-5 flex flex-wrap items-start justify-between gap-4 md:mb-6">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ganitel-brown">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-ganitel-brown">
               {eyebrow}
             </p>
-            <h1 className="mt-3 text-[32px] leading-[1.04] tracking-[-0.01em] text-ganitel-text-title md:text-[44px]">
+            <h1 className="mt-3 text-3xl leading-[1.04] tracking-[-0.01em] text-ganitel-text-title md:text-5xl">
               {property.title}
             </h1>
             <p className="mt-1.5 text-sm text-ganitel-text-subtitle">
@@ -208,7 +208,7 @@ export default function PropertyDetailRoute({
             )}
 
             <div>
-              <h2 className="mb-3 text-[20px] text-ganitel-text-title">
+              <h2 className="mb-3 text-xl text-ganitel-text-title">
                 {t("property.description")}
               </h2>
               {property.description ? (
@@ -222,7 +222,7 @@ export default function PropertyDetailRoute({
 
             {property.amenities.length > 0 ? (
               <div>
-                <h2 className="mb-3 text-[20px] text-ganitel-text-title">
+                <h2 className="mb-3 text-xl text-ganitel-text-title">
                   {t("property.amenities")}
                 </h2>
                 <ul className="grid grid-cols-2 gap-y-2 text-sm text-ganitel-text-subtitle md:grid-cols-3">

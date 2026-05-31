@@ -28,11 +28,11 @@ export function PageHeader({
     >
       <div className="min-w-0">
         {eyebrow ? (
-          <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.18em] text-ganitel-brown">
+          <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-ganitel-brown">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="text-[32px] leading-[1.04] tracking-[-0.01em] text-ganitel-text-title md:text-[48px]">
+        <h1 className="text-3xl leading-[1.04] tracking-[-0.01em] text-ganitel-text-title md:text-5xl">
           {title}
           {emphasis ? (
             <>
@@ -42,7 +42,7 @@ export function PageHeader({
           ) : null}
         </h1>
         {description ? (
-          <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-ganitel-text-subtitle md:text-base">
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ganitel-text-subtitle md:text-base">
             {description}
           </p>
         ) : null}

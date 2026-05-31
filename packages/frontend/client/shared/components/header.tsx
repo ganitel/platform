@@ -67,7 +67,7 @@ export function Header() {
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
         {isPrelaunch && (
-          <div className="border-b border-ganitel-secondary/20 bg-ganitel-secondary/10 px-4 py-1.5 text-center text-[11px] leading-snug text-ganitel-text-subtitle md:py-2 md:text-xs">
+          <div className="border-b border-ganitel-secondary/20 bg-ganitel-secondary/10 px-4 py-1.5 text-center text-xs leading-snug text-ganitel-text-subtitle md:py-2">
             {t("prelaunch.banner")}
           </div>
         )}
@@ -191,7 +191,7 @@ function DrawerGroup({
               onClick={onNavigate}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center justify-between border-b border-ganitel-stroke-neutral/60 py-3 text-[15px] transition-colors",
+                  "flex items-center justify-between border-b border-ganitel-stroke-neutral/60 py-3 text-sm transition-colors",
                   isActive
                     ? "font-medium text-ganitel-text-title"
                     : "font-normal text-ganitel-text-subtitle hover:text-ganitel-text-title",

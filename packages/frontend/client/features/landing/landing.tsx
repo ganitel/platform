@@ -334,7 +334,7 @@ function VisionMoment() {
           {t("about.vision.title")}
         </p>
         <p
-          className="m-0 mt-6 text-balance text-[32px] leading-[1.06] tracking-[-0.02em] text-ganitel-paper md:text-[52px]"
+          className="m-0 mt-6 text-balance text-3xl leading-[1.06] tracking-[-0.02em] text-ganitel-paper md:text-5xl"
           style={{ fontFamily: "var(--font-display)" }}
         >
           {t("about.vision.body")}

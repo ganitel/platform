@@ -82,7 +82,7 @@ function AdminSidebar() {
       <div className="sticky top-24 flex flex-col gap-8 rounded-3xl border border-ganitel-stroke-neutral/70 bg-ganitel-primary p-6 text-ganitel-paper shadow-[0_30px_80px_-40px_rgba(24,16,12,0.35)]">
         <div className="flex flex-col gap-1">
           <span
-            className="text-[26px] leading-none text-ganitel-secondary"
+            className="text-2xl leading-none text-ganitel-secondary"
             style={{ fontFamily: "var(--font-display)" }}
           >
             {t("admin.brand")}

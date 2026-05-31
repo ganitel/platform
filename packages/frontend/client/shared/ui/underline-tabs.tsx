@@ -42,7 +42,7 @@ export function UnderlineTabs<T extends string = string>({
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(item.value)}
             className={cn(
-              "relative -mb-px pb-3 text-[14px] transition-colors duration-150",
+              "relative -mb-px pb-3 text-sm transition-colors duration-150",
               active
                 ? "font-medium text-ganitel-text-title"
                 : "font-medium text-ganitel-text-placeholder hover:text-ganitel-text-title",
