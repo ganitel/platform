@@ -6,9 +6,11 @@ from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Header, status
+from sqlalchemy import select
 
 from app.core.deps import CurrentUser, DbSession
 from app.core.idempotency import replay_or_run
+from app.core.money import Currency, Money
 from app.modules.bookings import service
 from app.modules.bookings.schemas import (
     BookingCreateIn,
@@ -17,7 +19,10 @@ from app.modules.bookings.schemas import (
     InitiatePaymentIn,
     InitiatePaymentOut,
 )
+from app.modules.experience_bookings.schemas import SuggestedExperience
+from app.modules.experiences.models import Experience, ExperienceStatus
 from app.modules.payments import service as payment_service
+from app.modules.properties.models import Property
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
 
@@ -66,6 +71,55 @@ async def cancel_as_host(
     booking = await service.get_booking(session, booking_id, viewer=user)
     cancelled = await service.cancel_as_host(session, booking, user)
     return service.to_public(cancelled)
+
+
+@router.get(
+    "/{booking_id}/suggested-experiences",
+    response_model=list[SuggestedExperience],
+)
+async def suggested_experiences(
+    booking_id: UUID,
+    user: CurrentUser,
+    session: DbSession,
+    limit: int = 20,
+    offset: int = 0,
+) -> list[SuggestedExperience]:
+    stay = await service.get_booking(session, booking_id, viewer=user)
+    prop = await session.get(Property, stay.property_id)
+    if prop is None:
+        return []
+
+    stmt = (
+        select(Experience)
+        .where(
+            Experience.status == ExperienceStatus.PUBLISHED,
+            Experience.city == prop.city,
+            Experience.country_code == prop.country_code,
+        )
+        .order_by(Experience.title.asc())
+        .limit(limit)
+        .offset(offset)
+    )
+    rows = list((await session.execute(stmt)).scalars().all())
+
+    def first_price(experience: Experience) -> Money | None:
+        if not experience.prices:
+            return None
+        p = experience.prices[0]
+        return Money(amount=p.amount, currency=Currency(p.currency))
+
+    return [
+        SuggestedExperience(
+            experience_id=e.id,
+            title=e.title,
+            city=e.city,
+            country_code=e.country_code,
+            duration_minutes=e.duration_minutes,
+            capacity=e.capacity,
+            price=first_price(e),
+        )
+        for e in rows
+    ]
 
 
 @router.post("/{booking_id}/initiate-payment", response_model=InitiatePaymentOut)

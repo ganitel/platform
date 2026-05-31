@@ -7,10 +7,13 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Query, Response, status
+from sqlalchemy import select
 
 from app.core.cache import PUBLIC_CDN_CACHE
 from app.core.deps import CurrentUser, DbSession, OptionalUser
 from app.core.errors import NotFoundError
+from app.core.money import Currency, Money
+from app.modules.experience_bookings.schemas import SuggestedStay
 from app.modules.experiences import search as search_mod
 from app.modules.experiences import service
 from app.modules.experiences.models import Experience, ExperienceStatus
@@ -23,6 +26,7 @@ from app.modules.experiences.schemas import (
     ReorderMediaIn,
     SearchOut,
 )
+from app.modules.properties.models import Property, PropertyStatus
 from app.modules.users.models import User
 
 PRIVATE_DETAIL_CACHE = "private, no-store"
@@ -109,6 +113,48 @@ async def search_experiences(
     items = [await service.to_public(session, e, distance_km=d) for e, d in rows]
     response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
     return SearchOut(items=items, total=total, limit=limit, offset=offset)
+
+
+@router.get(
+    "/{experience_id}/suggested-stays",
+    response_model=list[SuggestedStay],
+)
+async def suggested_stays(
+    experience_id: UUID,
+    session: DbSession,
+    limit: int = 20,
+    offset: int = 0,
+) -> list[SuggestedStay]:
+    exp = await service.get(session, experience_id)
+    stmt = (
+        select(Property)
+        .where(
+            Property.status == PropertyStatus.PUBLISHED,
+            Property.city == exp.city,
+            Property.country_code == exp.country_code,
+        )
+        .order_by(Property.title.asc())
+        .limit(limit)
+        .offset(offset)
+    )
+    rows = list((await session.execute(stmt)).scalars().all())
+    out: list[SuggestedStay] = []
+    for p in rows:
+        price = None
+        if p.prices:
+            cheapest = min(p.prices, key=lambda pr: pr.amount)
+            price = Money(amount=cheapest.amount, currency=Currency(cheapest.currency))
+        out.append(
+            SuggestedStay(
+                property_id=p.id,
+                title=p.title,
+                city=p.city,
+                country_code=p.country_code,
+                kind=p.kind.value,
+                price_from=price,
+            )
+        )
+    return out
 
 
 @router.get("/{experience_id}", response_model=ExperienceDetail)
