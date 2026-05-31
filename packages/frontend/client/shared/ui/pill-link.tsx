@@ -15,6 +15,8 @@ const VARIANTS = {
     "border border-ganitel-paper text-ganitel-paper hover:bg-ganitel-paper hover:text-ganitel-text-title hover:-translate-y-0.5",
   outline:
     "border border-[rgba(20,20,14,0.18)] text-ganitel-text-title hover:border-ganitel-text-title hover:bg-[rgba(20,20,14,0.05)]",
+  editorial:
+    "text-ganitel-text-title underline decoration-ganitel-rule decoration-[1px] underline-offset-[6px] hover:decoration-[1.5px] hover:decoration-ganitel-text-title !px-0 !py-0",
 } as const;
 
 type Variant = keyof typeof VARIANTS;
