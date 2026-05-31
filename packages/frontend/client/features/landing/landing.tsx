@@ -1,5 +1,3 @@
-import { BadgeCheck, Compass, ShieldCheck, Sparkles } from "lucide-react";
-
 import type { TranslationKey } from "@/shared/lib/i18n";
 import { useT } from "@/shared/lib/i18n";
 import {
@@ -9,6 +7,7 @@ import {
 import { useSearchProperties } from "@/features/properties/hooks";
 import { PillLink } from "@/shared/ui/pill-link";
 import { SectionHeader } from "@/shared/ui/section-header";
+import { Statement } from "@/shared/ui/statement";
 import { useReveal } from "@/shared/hooks/use-reveal";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 import {
@@ -36,17 +35,6 @@ import {
 } from "./hero-source";
 
 const HERO_CTA_DELAY = { animationDelay: "0.45s" };
-
-const PROMISES = [
-  { key: "security", labelKey: "about.promise.security", icon: ShieldCheck },
-  { key: "convenience", labelKey: "about.promise.convenience", icon: Compass },
-  { key: "verified", labelKey: "about.promise.verified", icon: BadgeCheck },
-  { key: "premium", labelKey: "about.promise.premium", icon: Sparkles },
-] as const satisfies ReadonlyArray<{
-  key: string;
-  labelKey: TranslationKey;
-  icon: typeof ShieldCheck;
-}>;
 
 interface Destination {
   key: string;
@@ -188,34 +176,12 @@ function TrustStrip() {
   const t = useT();
   const ref = useReveal<HTMLDivElement>();
   return (
-    <section className="bg-ganitel-surface px-6 py-20 md:px-12 md:py-24">
-      <div ref={ref} data-reveal="" className="mx-auto max-w-7xl">
-        <SectionHeader
-          align="center"
-          tag={t("landing.trust.tag")}
-          title={t("landing.trust.title")}
-          emphasis={t("landing.trust.title_em")}
-        />
-        <ul className="m-0 mt-12 grid list-none grid-cols-2 gap-8 p-0 sm:grid-cols-4">
-          {PROMISES.map(({ key, labelKey, icon: Icon }) => (
-            <li
-              key={key}
-              className="flex flex-col items-center gap-3 text-center"
-            >
-              <span className="grid size-14 place-items-center rounded-full bg-ganitel-sage-soft">
-                <Icon
-                  className="size-6 text-ganitel-sage"
-                  strokeWidth={1.75}
-                  aria-hidden
-                />
-              </span>
-              <span className="text-base font-semibold tracking-tight text-ganitel-text-title">
-                {t(labelKey)}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <section className="bg-ganitel-surface" ref={ref} data-reveal="">
+      <Statement
+        eyebrow={t("landing.statement.eyebrow")}
+        body={t("landing.statement.body")}
+        sub={t("landing.statement.sub")}
+      />
     </section>
   );
 }

@@ -78,6 +78,15 @@ const dict = {
     fr: "tenues à chaque étape.",
     en: "kept at every step.",
   },
+  "landing.statement.eyebrow": { fr: "Notre promesse", en: "Our promise" },
+  "landing.statement.body": {
+    fr: "Un réseau choisi d'hôtes, de guides et de chauffeurs au Cameroun — sélectionnés parce qu'on y enverrait notre propre famille.",
+    en: "A vetted network of hosts, guides and drivers across Cameroon — chosen because we'd send our own family to them.",
+  },
+  "landing.statement.sub": {
+    fr: "Aucun annuaire. Aucun remplissage. Chaque adresse visitée, chaque hôte connu de nom.",
+    en: "No directory. No filler. Each property visited, each host known by name.",
+  },
   "landing.destinations.tag": { fr: "Destinations", en: "Destinations" },
   "landing.destinations.title": {
     fr: "Un pays, plusieurs",
