@@ -124,7 +124,7 @@
 @keyframes ganitel-fade-up {
   from {
     opacity: 0;
-    transform: translateY(40px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -168,12 +168,26 @@
   animation: ganitel-scroll-hint 2s ease-in-out infinite;
 }
 
+@keyframes ganitel-rule-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.ganitel-rule-grow {
+  transform-origin: left center;
+  animation: ganitel-rule-grow 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
 [data-reveal] {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(16px);
   transition:
-    opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
-    transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+    opacity 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 [data-reveal="visible"] {
@@ -185,8 +199,12 @@
   .ganitel-anim-kenburns,
   .ganitel-anim-fade-up,
   .ganitel-anim-fade-in,
-  .ganitel-anim-scroll-hint {
+  .ganitel-anim-scroll-hint,
+  .ganitel-rule-grow {
     animation: none;
+  }
+  .ganitel-rule-grow {
+    transform: none;
   }
   [data-reveal] {
     opacity: 1;
@@ -265,10 +283,17 @@
   }
 
   body {
-    @apply bg-ganitel-surface text-ganitel-text-title font-sans;
+    @apply bg-ganitel-surface text-ganitel-text-title;
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: contain;
+  }
+
+  :where(h1, h2):not([data-no-serif]) {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
   }
 
   :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
@@ -315,6 +340,11 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .image-frame-warm {
+    border: 1px solid var(--color-ganitel-outline);
+    box-shadow: 2px 2px 0 var(--color-ganitel-paper-warm);
   }
 
   .pb-safe {
