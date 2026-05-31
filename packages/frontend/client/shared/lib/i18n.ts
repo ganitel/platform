@@ -613,16 +613,6 @@ const dict = {
     fr: "En collaborant avec des partenaires locaux d'élite à travers des destinations triées sur le volet, un réseau de guides certifiés et des leaders du transport de confiance, nous garantissons sécurité, confort et une expérience unique sans égal.",
     en: "By collaborating with elite local partners across hand-picked destinations, a network of certified tour guides, and trusted transportation leaders, we guarantee security, convenience, and a unique experience that is second to none.",
   },
-  "about.promise.security": { fr: "Sécurité", en: "Security" },
-  "about.promise.convenience": { fr: "Confort", en: "Convenience" },
-  "about.promise.verified": {
-    fr: "Partenaires vérifiés",
-    en: "Verified Partners",
-  },
-  "about.promise.premium": {
-    fr: "Expériences d'exception",
-    en: "Premium Experiences",
-  },
   "about.impact.title": {
     fr: "Un impact centré sur l'humain",
     en: "Human-Centric Impact",
