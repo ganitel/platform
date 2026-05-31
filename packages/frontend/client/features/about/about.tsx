@@ -177,18 +177,25 @@ function Trust() {
   );
 }
 
+const PROMISE_TILE_GRADIENTS = [
+  "linear-gradient(140deg, #2e3a25 0%, #566250 55%, #80552d 100%)",
+  "linear-gradient(140deg, #80552d 0%, #d39e70 60%, #ffdcc1 100%)",
+  "linear-gradient(140deg, #5b6144 0%, #80552d 60%, #d39e70 100%)",
+  "linear-gradient(140deg, #18100c 0%, #80552d 65%, #ffdcc1 100%)",
+] as const;
+
 function PromiseSections() {
   const t = useT();
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 py-16 md:py-24">
-      <div className="flex flex-col gap-12 md:gap-20">
+    <section className="mx-auto w-full max-w-6xl px-6 pb-16 md:pb-24">
+      <div className="flex flex-col gap-10 md:gap-14">
         {PROMISE_SECTIONS.map((item, index) => {
           const reverse = index % 2 === 1;
           return (
             <article
               key={item.num}
               data-reveal=""
-              className="grid items-center gap-8 md:grid-cols-2 md:gap-16"
+              className="grid items-center gap-6 md:grid-cols-2 md:gap-12"
             >
               <div className={cn("flex flex-col", reverse && "md:order-2")}>
                 <p
@@ -208,12 +215,20 @@ function PromiseSections() {
                 </p>
               </div>
               <div
+                aria-hidden
                 className={cn(
-                  "image-frame-warm aspect-[5/4] overflow-hidden rounded-lg bg-ganitel-paper-warm",
+                  "image-frame-warm relative aspect-[5/4] overflow-hidden rounded-lg paper-grain",
                   reverse && "md:order-1",
                 )}
-                aria-hidden
-              />
+                style={{ background: PROMISE_TILE_GRADIENTS[index] }}
+              >
+                <span
+                  className="absolute right-6 bottom-4 text-[120px] leading-none text-ganitel-paper/30 md:text-[160px]"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  {item.num}
+                </span>
+              </div>
             </article>
           );
         })}
