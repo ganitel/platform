@@ -8,6 +8,7 @@ import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 import { PillLink } from "@/shared/ui/pill-link";
 import { MobileDrawer } from "@/shared/components/mobile-drawer";
+import { LogoMark } from "@/shared/components/logo-mark";
 
 const UserMenu = lazy(() =>
   import("@/features/auth/components/user-menu").then((m) => ({
@@ -85,12 +86,7 @@ export function Header() {
               className="hidden items-center text-ganitel-text-title md:inline-flex"
               aria-label="ganitel"
             >
-              <span
-                className="text-[24px] leading-none tracking-[-0.01em]"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                ganitel
-              </span>
+              <LogoMark />
             </Link>
           </div>
 
@@ -100,12 +96,7 @@ export function Header() {
               className="text-ganitel-text-title md:hidden"
               aria-label="ganitel"
             >
-              <span
-                className="text-[22px] leading-none tracking-[-0.01em]"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                ganitel
-              </span>
+              <LogoMark />
             </Link>
             <nav className="hidden gap-9 md:inline-flex" aria-label="Primary">
               {desktopItems.map(({ to, labelKey }) => (
