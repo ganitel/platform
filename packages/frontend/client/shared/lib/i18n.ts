@@ -25,6 +25,12 @@ const dict = {
   "nav.browse": { fr: "Découvrir", en: "Browse" },
   "nav.bookings": { fr: "Mes réservations", en: "My bookings" },
   "nav.profile": { fr: "Profil", en: "Profile" },
+  "nav.faq": { fr: "FAQ", en: "FAQ" },
+  "nav.open_menu": { fr: "Ouvrir le menu", en: "Open menu" },
+  "nav.brand_long": { fr: "Ganitel", en: "Ganitel" },
+  "nav.group.browse": { fr: "Explorer", en: "Browse" },
+  "nav.group.account": { fr: "Compte", en: "Account" },
+  "nav.group.ganitel": { fr: "Ganitel", en: "Ganitel" },
 
   "landing.nav.properties": { fr: "Logements", en: "Properties" },
   "landing.nav.experiences": { fr: "Expériences", en: "Experiences" },
