@@ -10,6 +10,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.core.errors import ConflictError, ForbiddenError, NotFoundError, ValidationError
 from app.core.money import Currency, Money
 from app.modules.experience_bookings.models import (
@@ -23,6 +24,7 @@ from app.modules.experience_bookings.schemas import (
 )
 from app.modules.experiences.models import Experience, ExperienceStatus
 from app.modules.outbox import service as outbox_service
+from app.modules.payments import service as payments_service
 from app.modules.users.models import User
 
 DEFAULT_CONFIRM_DEADLINE_HOURS = 48
@@ -165,6 +167,56 @@ async def _refresh_lazy_expirations(
         )
         await session.commit()
         await session.refresh(booking)
+    return booking
+
+
+async def confirm_as_host(
+    session: AsyncSession,
+    *,
+    booking_id: UUID,
+    host: User,
+    provider_name: str,
+    idempotency_key: str,
+    start_time=None,
+) -> ExperienceBooking:
+    booking = await session.get(ExperienceBooking, booking_id)
+    if booking is None:
+        raise NotFoundError(code="experience_booking.not_found")
+    if booking.host_id != host.id and not host.is_admin:
+        raise ForbiddenError(code="experience_booking.not_host")
+    if booking.status != ExperienceBookingStatus.REQUESTED:
+        raise ConflictError(
+            code="experience_booking.not_confirmable",
+            extra={"current_status": booking.status.value},
+        )
+
+    settings = get_settings()
+    booking.status = ExperienceBookingStatus.PENDING_PAYMENT
+    booking.host_confirmed_at = datetime.now(UTC)
+    booking.hold_expires_at = datetime.now(UTC) + timedelta(minutes=settings.BOOKING_HOLD_MINUTES)
+    if start_time is not None:
+        booking.start_time = start_time
+
+    intent = await payments_service.initiate_experience_payment(
+        session,
+        experience_booking=booking,
+        provider_name=provider_name,
+        idempotency_key=idempotency_key,
+    )
+    booking.payment_id = intent.payment_id
+
+    await outbox_service.enqueue(
+        session,
+        event_type="experience_booking.host_confirmed",
+        aggregate_type="experience_booking",
+        aggregate_id=booking.id,
+        payload={
+            "experience_booking_id": str(booking.id),
+            "payment_id": str(intent.payment_id),
+        },
+    )
+    await session.commit()
+    await session.refresh(booking)
     return booking
 
 
