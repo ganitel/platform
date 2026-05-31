@@ -128,11 +128,11 @@ function Trust() {
   const t = useT();
   const ref = useReveal<HTMLDivElement>();
   return (
-    <section className="px-6 pt-20 pb-10 md:px-12 md:pt-28 md:pb-12">
+    <section className="px-6 pt-16 pb-0 md:px-12 md:pt-24">
       <div
         ref={ref}
         data-reveal=""
-        className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2"
+        className="mx-auto grid max-w-7xl items-start gap-10 lg:grid-cols-2 lg:gap-16"
       >
         <div className="grid grid-cols-2 gap-4">
           <img
@@ -160,14 +160,17 @@ function Trust() {
             className="h-full w-full rounded-2xl object-cover"
           />
         </div>
-        <div className="flex flex-col gap-7">
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ganitel-brown break-normal">
+        <div className="flex flex-col gap-5 lg:pt-10">
+          <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-ganitel-brown">
             {t("about.trust.tag")}
           </span>
-          <p className="m-0 text-2xl leading-snug tracking-[-0.01em] text-ganitel-text-title md:text-3xl">
+          <p
+            className="m-0 text-[26px] leading-[1.1] tracking-[-0.01em] text-ganitel-text-title md:text-[34px]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
             {t("about.statement")}
           </p>
-          <p className="m-0 text-sm text-ganitel-text-placeholder">
+          <p className="m-0 text-[13.5px] text-ganitel-text-placeholder">
             {t("about.trust.caption")}
           </p>
         </div>
