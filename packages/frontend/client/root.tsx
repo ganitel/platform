@@ -24,6 +24,8 @@ import { organizationJsonLd, websiteJsonLd } from "@/shared/lib/seo";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 import { Toaster } from "@/shared/ui/sonner";
 import indexCss from "@/styles/index.css?url";
+import interFontUrl from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
+import serifFontUrl from "@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url";
 
 function apiOrigin(): string | null {
   if (!/^https?:\/\//.test(env.apiBaseUrl)) return null;
@@ -49,6 +51,20 @@ export const links: Route.LinksFunction = () => {
           { rel: "dns-prefetch", href: api },
         ]
       : []),
+    {
+      rel: "preload",
+      as: "font",
+      type: "font/woff2",
+      crossOrigin: "anonymous",
+      href: interFontUrl,
+    },
+    {
+      rel: "preload",
+      as: "font",
+      type: "font/woff2",
+      crossOrigin: "anonymous",
+      href: serifFontUrl,
+    },
     { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
     { rel: "icon", href: "/favicon.ico", sizes: "any" },
     {

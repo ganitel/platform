@@ -1,11 +1,13 @@
-import { lazy, Suspense } from "react";
-import { Link, NavLink } from "react-router";
+import { lazy, Suspense, useState } from "react";
+import { Link, NavLink, useLocation } from "react-router";
+import { Menu } from "lucide-react";
 
 import { useDeferredSession } from "@/features/auth/hooks/use-deferred-session";
 import { cn } from "@/shared/lib/cn";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 import { PillLink } from "@/shared/ui/pill-link";
+import { MobileDrawer } from "@/shared/components/mobile-drawer";
 import { LogoMark } from "@/shared/components/logo-mark";
 
 const UserMenu = lazy(() =>
@@ -14,84 +16,191 @@ const UserMenu = lazy(() =>
   })),
 );
 
-const NAV_ITEMS: {
+interface NavLinkSpec {
   to: string;
   labelKey: TranslationKey;
   hideInPrelaunch?: boolean;
-}[] = [
-  { to: "/", labelKey: "nav.home" },
+}
+
+const DESKTOP_NAV: NavLinkSpec[] = [
   { to: "/browse", labelKey: "nav.browse" },
   { to: "/about", labelKey: "nav.about" },
+];
+
+const DRAWER_BROWSE: NavLinkSpec[] = [
+  { to: "/", labelKey: "nav.home" },
+  { to: "/browse", labelKey: "nav.browse" },
+];
+
+const DRAWER_ACCOUNT: NavLinkSpec[] = [
   { to: "/bookings", labelKey: "nav.bookings", hideInPrelaunch: true },
   { to: "/profile", labelKey: "nav.profile", hideInPrelaunch: true },
 ];
+
+const DRAWER_GANITEL: NavLinkSpec[] = [{ to: "/about", labelKey: "nav.about" }];
 
 export function Header() {
   const t = useT();
   const isPrelaunch = usePrelaunch();
   const { session, isPending } = useDeferredSession();
+  const location = useLocation();
+  // Derive open from location: the drawer is open only while the user is on the
+  // path it was opened from. Any navigation away resets it, no effect required.
+  const [openOnPath, setOpenOnPath] = useState<string | null>(null);
+  const open = openOnPath === location.pathname;
+  const setOpen = (next: boolean) =>
+    setOpenOnPath(next ? location.pathname : null);
 
-  const visibleItems = isPrelaunch
-    ? NAV_ITEMS.filter(({ hideInPrelaunch }) => !hideInPrelaunch)
-    : NAV_ITEMS;
+  const filter = (items: NavLinkSpec[]) =>
+    isPrelaunch ? items.filter((it) => !it.hideInPrelaunch) : items;
+
+  const desktopItems = filter(DESKTOP_NAV);
 
   return (
-    <header
-      className="sticky top-0 z-30 border-b border-ganitel-stroke-neutral bg-ganitel-paper/85 backdrop-blur supports-[backdrop-filter]:bg-ganitel-paper/70"
-      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
-    >
-      {isPrelaunch && (
-        <div className="border-b border-ganitel-secondary/20 bg-ganitel-secondary/10 px-4 py-1.5 text-center text-[11px] leading-snug text-ganitel-text-subtitle md:py-2 md:text-xs">
-          {t("prelaunch.banner")}
-        </div>
-      )}
-      <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-3 px-4 md:h-16 md:gap-6 md:px-8">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-ganitel-text-title"
-          aria-label="ganitel"
-        >
-          <LogoMark />
-          <span className="text-[24px] font-bold leading-none tracking-[-0.01em]">
-            ganitel
-          </span>
-        </Link>
+    <>
+      <header
+        className="sticky top-0 z-30 border-b border-ganitel-stroke-neutral bg-ganitel-paper/95 backdrop-blur supports-[backdrop-filter]:bg-ganitel-paper/85"
+        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+      >
+        {isPrelaunch && (
+          <div className="border-b border-ganitel-secondary/20 bg-ganitel-secondary/10 px-4 py-1.5 text-center text-xs leading-snug text-ganitel-text-subtitle md:py-2">
+            {t("prelaunch.banner")}
+          </div>
+        )}
+        <div className="mx-auto grid h-14 w-full max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 md:h-16 md:px-8">
+          <div className="flex items-center">
+            <button
+              type="button"
+              aria-label={t("nav.open_menu")}
+              onClick={() => setOpen(true)}
+              className="inline-flex size-10 items-center justify-center rounded-full text-ganitel-text-title transition-colors hover:bg-ganitel-stroke-neutral/40 md:hidden"
+            >
+              <Menu className="size-5" strokeWidth={1.7} />
+            </button>
+            <Link
+              to="/"
+              className="hidden items-center text-ganitel-text-title md:inline-flex"
+              aria-label="ganitel"
+            >
+              <LogoMark />
+            </Link>
+          </div>
 
-        <nav className="hidden gap-9 md:inline-flex" aria-label="Primary">
-          {visibleItems.map(({ to, labelKey }) => (
-            <HeaderNavItem key={to} to={to}>
+          <div className="flex items-center justify-center md:justify-start md:gap-9">
+            <Link
+              to="/"
+              className="text-ganitel-text-title md:hidden"
+              aria-label="ganitel"
+            >
+              <LogoMark />
+            </Link>
+            <nav className="hidden gap-9 md:inline-flex" aria-label="Primary">
+              {desktopItems.map(({ to, labelKey }) => (
+                <HeaderNavItem key={to} to={to}>
+                  {t(labelKey)}
+                </HeaderNavItem>
+              ))}
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {!isPending && session ? (
+              <Suspense fallback={null}>
+                <UserMenu session={session} />
+              </Suspense>
+            ) : isPrelaunch ? (
+              <PillLink to="/join" size="sm" variant="solid">
+                {t("join.submit")}
+              </PillLink>
+            ) : (
+              <>
+                <PillLink to="/sign-in" size="sm" variant="outline">
+                  {t("common.signin")}
+                </PillLink>
+                <PillLink
+                  to="/sign-in"
+                  size="sm"
+                  variant="solid"
+                  className="hidden sm:inline-flex"
+                >
+                  {t("common.signup")}
+                </PillLink>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <MobileDrawer
+        open={open}
+        onOpenChange={setOpen}
+        title={t("nav.brand_long")}
+        closeLabel={t("nav.close_menu")}
+      >
+        <DrawerGroup
+          label={t("nav.group.browse")}
+          items={filter(DRAWER_BROWSE)}
+          t={t}
+          onNavigate={() => setOpen(false)}
+        />
+        {!isPrelaunch && (
+          <DrawerGroup
+            label={t("nav.group.account")}
+            items={filter(DRAWER_ACCOUNT)}
+            t={t}
+            onNavigate={() => setOpen(false)}
+          />
+        )}
+        <DrawerGroup
+          label={t("nav.group.ganitel")}
+          items={filter(DRAWER_GANITEL)}
+          t={t}
+          onNavigate={() => setOpen(false)}
+        />
+      </MobileDrawer>
+    </>
+  );
+}
+
+function DrawerGroup({
+  label,
+  items,
+  t,
+  onNavigate,
+}: {
+  label: string;
+  items: NavLinkSpec[];
+  t: (k: TranslationKey) => string;
+  onNavigate: () => void;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <div className="mb-4">
+      <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-ganitel-brown">
+        {label}
+      </p>
+      <ul className="flex flex-col">
+        {items.map(({ to, labelKey }) => (
+          <li key={to}>
+            <NavLink
+              to={to}
+              end={to === "/"}
+              onClick={onNavigate}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center justify-between border-b border-ganitel-stroke-neutral/60 py-3 text-sm transition-colors",
+                  isActive
+                    ? "font-medium text-ganitel-text-title"
+                    : "font-normal text-ganitel-text-subtitle hover:text-ganitel-text-title",
+                )
+              }
+            >
               {t(labelKey)}
-            </HeaderNavItem>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-2">
-          {!isPending && session ? (
-            <Suspense fallback={null}>
-              <UserMenu session={session} />
-            </Suspense>
-          ) : isPrelaunch ? (
-            <PillLink to="/join" size="sm" variant="solid">
-              {t("join.submit")}
-            </PillLink>
-          ) : (
-            <>
-              <PillLink to="/sign-in" size="sm" variant="outline">
-                {t("common.signin")}
-              </PillLink>
-              <PillLink
-                to="/sign-in"
-                size="sm"
-                variant="solid"
-                className="hidden sm:inline-flex"
-              >
-                {t("common.signup")}
-              </PillLink>
-            </>
-          )}
-        </div>
-      </div>
-    </header>
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

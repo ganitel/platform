@@ -1,4 +1,4 @@
-import { Compass, Heart, Home, Sparkles, User as UserIcon } from "lucide-react";
+import { CalendarDays, Compass, House, User as UserIcon } from "lucide-react";
 import { NavLink, useLocation } from "react-router";
 
 import { cn } from "@/shared/lib/cn";
@@ -17,7 +17,7 @@ const ITEMS: NavItem[] = [
   {
     to: "/",
     labelKey: "nav.home",
-    icon: Home,
+    icon: House,
     showInPrelaunch: true,
     showAfterLaunch: true,
   },
@@ -29,16 +29,9 @@ const ITEMS: NavItem[] = [
     showAfterLaunch: true,
   },
   {
-    to: "/about",
-    labelKey: "nav.about",
-    icon: Sparkles,
-    showInPrelaunch: true,
-    showAfterLaunch: false,
-  },
-  {
     to: "/bookings",
     labelKey: "nav.bookings",
-    icon: Heart,
+    icon: CalendarDays,
     showInPrelaunch: false,
     showAfterLaunch: true,
   },

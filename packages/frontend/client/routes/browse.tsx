@@ -21,7 +21,7 @@ import { cn } from "@/shared/lib/cn";
 import { serverFetch } from "@/shared/api/server";
 import { PUBLIC_CDN_CACHE } from "@/shared/lib/cache";
 import { seo } from "@/shared/lib/seo";
-import { SectionHeader } from "@/shared/ui/section-header";
+import { PageHeader } from "@/shared/ui/page-header";
 import type { PropertyPublic, SearchOut } from "@/features/properties/types";
 import type {
   ExperiencePublic,
@@ -150,13 +150,10 @@ export default function BrowseRoute({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-20">
-      <SectionHeader
-        level="h1"
-        tag={t("nav.browse")}
+      <PageHeader
+        eyebrow={t("nav.browse")}
         title={t(TITLE_KEY[kind])}
-        lede={t(LEDE_KEY[kind])}
-        animate={false}
-        className="mb-10 md:mb-14"
+        description={t(LEDE_KEY[kind])}
       />
 
       <BrowseTabs kind={kind} q={q} />
@@ -190,14 +187,17 @@ function BrowseTabs({ kind, q }: { kind: BrowseKind; q: string | null }) {
   };
 
   return (
-    <div className="mb-10 flex flex-wrap items-center gap-x-8 border-b border-ganitel-stroke-neutral md:mb-12">
+    <nav
+      aria-label={t("nav.browse")}
+      className="mb-10 flex gap-8 border-b border-ganitel-stroke-neutral md:mb-12"
+    >
       <BrowseTab to={hrefFor("stays")} active={kind === "stays"}>
         {t("browse.tabs.stays")}
       </BrowseTab>
       <BrowseTab to={hrefFor("experiences")} active={kind === "experiences"}>
         {t("browse.tabs.experiences")}
       </BrowseTab>
-    </div>
+    </nav>
   );
 }
 
@@ -213,20 +213,22 @@ function BrowseTab({
   return (
     <Link
       to={to}
+      aria-current={active ? "page" : undefined}
       className={cn(
-        "relative pb-3 pt-2 text-[15px] tracking-tight transition-colors duration-200",
+        "relative -mb-px pb-3 text-sm transition-colors duration-150",
         active
-          ? "font-semibold text-ganitel-text-title"
+          ? "font-medium text-ganitel-text-title"
           : "font-medium text-ganitel-text-placeholder hover:text-ganitel-text-title",
       )}
     >
       {children}
-      {active ? (
-        <span
-          aria-hidden
-          className="absolute inset-x-0 -bottom-px h-0.5 bg-ganitel-text-title"
-        />
-      ) : null}
+      <span
+        aria-hidden
+        className={cn(
+          "absolute inset-x-0 -bottom-px h-[2px] origin-left rounded-full bg-ganitel-rule transition-transform duration-200",
+          active ? "scale-x-100" : "scale-x-0",
+        )}
+      />
     </Link>
   );
 }

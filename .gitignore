@@ -59,6 +59,7 @@ Thumbs.db
 
 # AI tools
 superpowers/
+.superpowers/
 docs/superpowers/
 
 **/.vercel/*

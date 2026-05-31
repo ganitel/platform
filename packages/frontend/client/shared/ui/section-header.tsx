@@ -48,7 +48,7 @@ export function SectionHeader({
         {tag ? (
           <span
             className={cn(
-              "text-[12px] font-semibold uppercase tracking-[0.18em]",
+              "text-xs font-semibold uppercase tracking-[0.18em]",
               tagColor,
             )}
           >
@@ -58,7 +58,7 @@ export function SectionHeader({
         <Heading
           style={TITLE_STYLE}
           className={cn(
-            "mt-4 text-balance font-bold leading-[1.02] tracking-[-0.04em]",
+            "mt-4 text-balance leading-[1.02] tracking-[-0.02em]",
             titleColor,
           )}
         >
@@ -74,12 +74,7 @@ export function SectionHeader({
         </Heading>
       </div>
       {lede ? (
-        <p
-          className={cn(
-            "m-0 max-w-prose text-sm leading-[1.6] md:text-[15px]",
-            ledeColor,
-          )}
-        >
+        <p className={cn("m-0 max-w-prose text-sm leading-[1.6]", ledeColor)}>
           {lede}
         </p>
       ) : null}

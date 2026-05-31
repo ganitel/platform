@@ -158,10 +158,10 @@ export default function ExperienceDetailRoute({
       <article className="mx-auto w-full max-w-6xl px-4 pt-6 pb-32 md:px-8 md:pt-12 lg:pb-12">
         <header className="mb-5 flex flex-wrap items-start justify-between gap-4 md:mb-6">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-ganitel-secondary">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-ganitel-brown">
               {experienceTypeLabel(experience.experience_type)}
             </p>
-            <h1 className="mt-2 text-[28px] font-semibold leading-[1.05] tracking-tight text-ganitel-text-title sm:text-3xl md:text-4xl">
+            <h1 className="mt-3 text-3xl leading-[1.04] tracking-[-0.01em] text-ganitel-text-title md:text-5xl">
               {experience.title}
             </h1>
             <p className="mt-1.5 text-sm text-ganitel-text-subtitle">
@@ -183,7 +183,7 @@ export default function ExperienceDetailRoute({
 
             {experience.description ? (
               <div>
-                <h2 className="mb-3 text-lg font-semibold text-ganitel-text-title">
+                <h2 className="mb-3 text-xl text-ganitel-text-title">
                   {t("property.description")}
                 </h2>
                 <Markdown source={experience.description} />

@@ -114,9 +114,13 @@ export default function MyBookingsRoute() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-12 md:px-8">
-      <h1 className="text-3xl font-semibold tracking-tight text-ganitel-text-title">
+      <h1 className="text-3xl leading-[1.04] tracking-[-0.01em] text-ganitel-text-title md:text-5xl">
         {t("nav.bookings")}
       </h1>
+      <span
+        aria-hidden
+        className="ganitel-rule-grow mt-4 mb-8 block h-px w-12 bg-ganitel-rule"
+      />
 
       {isLoading && (
         <p className="mt-6 text-sm text-ganitel-text-subtitle">

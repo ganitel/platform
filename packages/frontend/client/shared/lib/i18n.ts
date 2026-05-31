@@ -25,6 +25,13 @@ const dict = {
   "nav.browse": { fr: "Découvrir", en: "Browse" },
   "nav.bookings": { fr: "Mes réservations", en: "My bookings" },
   "nav.profile": { fr: "Profil", en: "Profile" },
+  "nav.faq": { fr: "FAQ", en: "FAQ" },
+  "nav.open_menu": { fr: "Ouvrir le menu", en: "Open menu" },
+  "nav.close_menu": { fr: "Fermer le menu", en: "Close menu" },
+  "nav.brand_long": { fr: "Ganitel", en: "Ganitel" },
+  "nav.group.browse": { fr: "Explorer", en: "Browse" },
+  "nav.group.account": { fr: "Compte", en: "Account" },
+  "nav.group.ganitel": { fr: "Ganitel", en: "Ganitel" },
 
   "landing.nav.properties": { fr: "Logements", en: "Properties" },
   "landing.nav.experiences": { fr: "Expériences", en: "Experiences" },
@@ -71,6 +78,46 @@ const dict = {
   "landing.trust.title_em": {
     fr: "tenues à chaque étape.",
     en: "kept at every step.",
+  },
+  "about.promises.eyebrow": {
+    fr: "Quatre engagements",
+    en: "Four commitments",
+  },
+  "about.promises.title": {
+    fr: "Ce qui guide chaque sélection.",
+    en: "What guides every selection.",
+  },
+  "about.promise.01.title": { fr: "Sécurité d'abord", en: "Security first" },
+  "about.promise.01.body": {
+    fr: "Chaque adresse et chaque hôte sont vérifiés avant d'apparaître sur la plateforme.",
+    en: "Every property and host vetted before listing.",
+  },
+  "about.promise.02.title": { fr: "Des mains locales", en: "Local hands" },
+  "about.promise.02.body": {
+    fr: "Guides, chauffeurs et partenaires que nous connaissons depuis des années.",
+    en: "Guides, drivers and partners we've worked with for years.",
+  },
+  "about.promise.03.title": { fr: "Séjours vérifiés", en: "Verified stays" },
+  "about.promise.03.body": {
+    fr: "Photos, équipements et tarifs contrôlés sur place.",
+    en: "Photos, amenities and pricing checked on site.",
+  },
+  "about.promise.04.title": {
+    fr: "Une sélection mesurée",
+    en: "Hand-picked",
+  },
+  "about.promise.04.body": {
+    fr: "Une sélection volontairement réduite — pas un annuaire.",
+    en: "A small, considered selection — not a directory.",
+  },
+  "landing.statement.eyebrow": { fr: "Notre promesse", en: "Our promise" },
+  "landing.statement.body": {
+    fr: "Un réseau choisi d'hôtes, de guides et de chauffeurs au Cameroun — sélectionnés parce qu'on y enverrait notre propre famille.",
+    en: "A vetted network of hosts, guides and drivers across Cameroon — chosen because we'd send our own family to them.",
+  },
+  "landing.statement.sub": {
+    fr: "Aucun annuaire. Aucun remplissage. Chaque adresse visitée, chaque hôte connu de nom.",
+    en: "No directory. No filler. Each property visited, each host known by name.",
   },
   "landing.destinations.tag": { fr: "Destinations", en: "Destinations" },
   "landing.destinations.title": {
@@ -574,16 +621,6 @@ const dict = {
   "about.statement": {
     fr: "En collaborant avec des partenaires locaux d'élite à travers des destinations triées sur le volet, un réseau de guides certifiés et des leaders du transport de confiance, nous garantissons sécurité, confort et une expérience unique sans égal.",
     en: "By collaborating with elite local partners across hand-picked destinations, a network of certified tour guides, and trusted transportation leaders, we guarantee security, convenience, and a unique experience that is second to none.",
-  },
-  "about.promise.security": { fr: "Sécurité", en: "Security" },
-  "about.promise.convenience": { fr: "Confort", en: "Convenience" },
-  "about.promise.verified": {
-    fr: "Partenaires vérifiés",
-    en: "Verified Partners",
-  },
-  "about.promise.premium": {
-    fr: "Expériences d'exception",
-    en: "Premium Experiences",
   },
   "about.impact.title": {
     fr: "Un impact centré sur l'humain",

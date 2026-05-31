@@ -1,6 +1,5 @@
-import { BadgeCheck, Compass, ShieldCheck, Sparkles } from "lucide-react";
-
 import type { TranslationKey } from "@/shared/lib/i18n";
+
 import { useLocale, useT } from "@/shared/lib/i18n";
 import type { TeamMember } from "@/features/about/types";
 import { PillLink } from "@/shared/ui/pill-link";
@@ -36,15 +35,31 @@ const VISION_FALLBACK = "https://picsum.photos/seed/ganitelvision/1600/900";
 const TILE_SIZES = "(min-width: 1024px) 25vw, 50vw";
 const IMPACT_PHOTO_SIZES = "(min-width: 768px) 33vw, 100vw";
 
-const PROMISES = [
-  { key: "security", labelKey: "about.promise.security", icon: ShieldCheck },
-  { key: "convenience", labelKey: "about.promise.convenience", icon: Compass },
-  { key: "verified", labelKey: "about.promise.verified", icon: BadgeCheck },
-  { key: "premium", labelKey: "about.promise.premium", icon: Sparkles },
+const PROMISE_SECTIONS = [
+  {
+    num: "01",
+    titleKey: "about.promise.01.title",
+    bodyKey: "about.promise.01.body",
+  },
+  {
+    num: "02",
+    titleKey: "about.promise.02.title",
+    bodyKey: "about.promise.02.body",
+  },
+  {
+    num: "03",
+    titleKey: "about.promise.03.title",
+    bodyKey: "about.promise.03.body",
+  },
+  {
+    num: "04",
+    titleKey: "about.promise.04.title",
+    bodyKey: "about.promise.04.body",
+  },
 ] as const satisfies ReadonlyArray<{
-  key: string;
-  labelKey: TranslationKey;
-  icon: typeof ShieldCheck;
+  num: string;
+  titleKey: TranslationKey;
+  bodyKey: TranslationKey;
 }>;
 
 export function About({ team }: { team: TeamMember[] }) {
@@ -52,6 +67,7 @@ export function About({ team }: { team: TeamMember[] }) {
     <>
       <Hero />
       <Trust />
+      <PromiseSections />
       <Impact />
       <Team members={team} />
       <Vision />
@@ -112,11 +128,11 @@ function Trust() {
   const t = useT();
   const ref = useReveal<HTMLDivElement>();
   return (
-    <section className="px-6 py-20 md:px-12 md:py-28">
+    <section className="px-6 pt-16 pb-0 md:px-12 md:pt-24">
       <div
         ref={ref}
         data-reveal=""
-        className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2"
+        className="mx-auto grid max-w-7xl items-start gap-10 lg:grid-cols-2 lg:gap-16"
       >
         <div className="grid grid-cols-2 gap-4">
           <img
@@ -144,32 +160,63 @@ function Trust() {
             className="h-full w-full rounded-2xl object-cover"
           />
         </div>
-        <div className="flex flex-col gap-7">
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ganitel-brown break-normal">
+        <div className="flex flex-col gap-5 lg:pt-10">
+          <span className="text-xs font-medium uppercase tracking-[0.18em] text-ganitel-brown">
             {t("about.trust.tag")}
           </span>
-          <p className="m-0 text-2xl leading-snug tracking-[-0.01em] text-ganitel-text-title md:text-3xl">
+          <p
+            className="m-0 text-2xl leading-[1.1] tracking-[-0.01em] text-ganitel-text-title md:text-3xl"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
             {t("about.statement")}
           </p>
           <p className="m-0 text-sm text-ganitel-text-placeholder">
             {t("about.trust.caption")}
           </p>
-          <ul className="m-0 grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2">
-            {PROMISES.map(({ key, labelKey, icon: Icon }) => (
-              <li key={key} className="flex items-center gap-3">
-                <span className="grid size-11 shrink-0 place-items-center rounded-full bg-ganitel-sage-soft">
-                  <Icon
-                    className="size-5 text-ganitel-sage"
-                    strokeWidth={1.75}
-                    aria-hidden
-                  />
-                </span>
-                <span className="text-base font-semibold tracking-tight text-ganitel-text-title">
-                  {t(labelKey)}
-                </span>
-              </li>
-            ))}
-          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PromiseSections() {
+  const t = useT();
+  return (
+    <section className="px-6 pb-20 md:px-12 md:pb-24">
+      <div className="mx-auto max-w-7xl" data-reveal="">
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-ganitel-brown">
+          {t("about.promises.eyebrow")}
+        </p>
+        <h2 className="mt-3 max-w-3xl text-3xl leading-[1.06] tracking-[-0.02em] text-ganitel-text-title md:text-4xl">
+          {t("about.promises.title")}
+        </h2>
+        <span
+          aria-hidden
+          className="ganitel-rule-grow mt-5 mb-10 block h-px w-12 bg-ganitel-rule md:mb-14"
+        />
+        <div className="grid gap-10 md:grid-cols-2 md:gap-x-16 md:gap-y-14">
+          {PROMISE_SECTIONS.map((item) => (
+            <article
+              key={item.num}
+              className="border-t border-ganitel-stroke-neutral pt-6"
+            >
+              <p
+                className="text-xl leading-none text-ganitel-brown"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {item.num}
+              </p>
+              <h3
+                className="mt-3 text-xl leading-[1.15] text-ganitel-text-title md:text-2xl"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {t(item.titleKey)}
+              </h3>
+              <p className="mt-3 text-sm leading-[1.6] text-ganitel-text-subtitle">
+                {t(item.bodyKey)}
+              </p>
+            </article>
+          ))}
         </div>
       </div>
     </section>
@@ -183,10 +230,10 @@ function Impact() {
     <section className="bg-ganitel-olive-soft px-6 py-20 md:px-12 md:py-28">
       <div ref={ref} data-reveal="" className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="m-0 text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-olive md:text-4xl">
+          <h2 className="m-0 text-3xl leading-tight tracking-[-0.02em] text-ganitel-olive md:text-4xl">
             {t("about.impact.title")}
           </h2>
-          <p className="m-0 mt-6 text-[15px] leading-[1.7] text-ganitel-text-subtitle md:text-base">
+          <p className="m-0 mt-6 text-sm leading-[1.7] text-ganitel-text-subtitle md:text-base">
             {t("about.impact.body")}
           </p>
         </div>
@@ -292,7 +339,7 @@ function TeamMemberCard({ member }: { member: TeamMember }) {
           <p className="m-0 text-lg font-bold leading-tight tracking-[-0.02em] text-ganitel-text-title">
             {member.name}
           </p>
-          <p className="m-0 text-[13px] uppercase tracking-[0.12em] text-ganitel-text-placeholder">
+          <p className="m-0 text-sm uppercase tracking-[0.12em] text-ganitel-text-placeholder">
             {title}
           </p>
         </div>
@@ -330,7 +377,10 @@ function Vision() {
         <p className="m-0 text-lg font-medium italic text-ganitel-paper-warm">
           {t("about.vision.title")}
         </p>
-        <p className="m-0 mt-6 text-balance text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-paper md:text-5xl">
+        <p
+          className="m-0 mt-6 text-balance text-3xl leading-[1.06] tracking-[-0.02em] text-ganitel-paper md:text-5xl"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
           {t("about.vision.body")}
         </p>
       </div>
@@ -351,7 +401,7 @@ function Closing() {
         <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ganitel-brown">
           {t("about.closing.tag")}
         </span>
-        <h2 className="m-0 max-w-2xl text-3xl font-bold leading-tight tracking-[-0.03em] text-ganitel-on-tan md:text-4xl">
+        <h2 className="m-0 max-w-2xl text-3xl leading-tight tracking-[-0.02em] text-ganitel-on-tan md:text-4xl">
           {t("about.closing")}
         </h2>
         <PillLink to="/browse" variant="solid" arrow>

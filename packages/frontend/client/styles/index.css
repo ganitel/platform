@@ -1,8 +1,9 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
-@import "@fontsource-variable/geist/wght.css";
-@import "@fontsource-variable/geist/wght-italic.css";
+@import "@fontsource/instrument-serif/400.css";
+@import "@fontsource/instrument-serif/400-italic.css";
+@import "@fontsource-variable/inter/wght.css";
 
 /* Subtle film-grain overlay for atmospheric photo backdrops. */
 .paper-grain {
@@ -13,16 +14,17 @@
 .image-scrim {
   background-image: linear-gradient(
     to top,
-    rgb(0 0 0 / 0.65) 0%,
-    rgb(0 0 0 / 0.2) 45%,
-    rgb(0 0 0 / 0) 100%
+    rgba(24, 16, 12, 0.65) 0%,
+    rgba(24, 16, 12, 0.22) 45%,
+    rgba(24, 16, 12, 0) 100%
   );
 }
 
 @theme {
+  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
   --font-sans:
-    "Geist Variable", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
+    "Inter Variable", "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   --color-ganitel-primary: #18100c;
   --color-ganitel-secondary: #d39e70;
@@ -57,6 +59,8 @@
   --color-ganitel-olive: #5b6144;
   --color-ganitel-olive-soft: #e0e6c1;
   --color-ganitel-outline: #d5c3b7;
+  --color-ganitel-rule: #80552d;
+  --color-ganitel-overlay-warm: rgba(24, 16, 12, 0.5);
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -120,7 +124,7 @@
 @keyframes ganitel-fade-up {
   from {
     opacity: 0;
-    transform: translateY(40px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -164,12 +168,26 @@
   animation: ganitel-scroll-hint 2s ease-in-out infinite;
 }
 
+@keyframes ganitel-rule-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.ganitel-rule-grow {
+  transform-origin: left center;
+  animation: ganitel-rule-grow 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
 [data-reveal] {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(16px);
   transition:
-    opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
-    transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+    opacity 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 [data-reveal="visible"] {
@@ -181,8 +199,12 @@
   .ganitel-anim-kenburns,
   .ganitel-anim-fade-up,
   .ganitel-anim-fade-in,
-  .ganitel-anim-scroll-hint {
+  .ganitel-anim-scroll-hint,
+  .ganitel-rule-grow {
     animation: none;
+  }
+  .ganitel-rule-grow {
+    transform: none;
   }
   [data-reveal] {
     opacity: 1;
@@ -261,10 +283,17 @@
   }
 
   body {
-    @apply bg-ganitel-surface text-ganitel-text-title font-sans;
+    @apply bg-ganitel-surface text-ganitel-text-title;
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: contain;
+  }
+
+  :where(h1, h2):not([data-no-serif]) {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
   }
 
   :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
@@ -311,6 +340,11 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .image-frame-warm {
+    border: 1px solid var(--color-ganitel-outline);
+    box-shadow: 2px 2px 0 var(--color-ganitel-paper-warm);
   }
 
   .pb-safe {
