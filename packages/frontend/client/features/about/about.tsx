@@ -1,6 +1,5 @@
 import type { TranslationKey } from "@/shared/lib/i18n";
 
-import { cn } from "@/shared/lib/cn";
 import { useLocale, useT } from "@/shared/lib/i18n";
 import type { TeamMember } from "@/features/about/types";
 import { PillLink } from "@/shared/ui/pill-link";
@@ -129,7 +128,7 @@ function Trust() {
   const t = useT();
   const ref = useReveal<HTMLDivElement>();
   return (
-    <section className="px-6 py-20 md:px-12 md:py-28">
+    <section className="px-6 pt-20 pb-10 md:px-12 md:pt-28 md:pb-12">
       <div
         ref={ref}
         data-reveal=""
@@ -177,61 +176,36 @@ function Trust() {
   );
 }
 
-const PROMISE_TILE_GRADIENTS = [
-  "linear-gradient(140deg, #2e3a25 0%, #566250 55%, #80552d 100%)",
-  "linear-gradient(140deg, #80552d 0%, #d39e70 60%, #ffdcc1 100%)",
-  "linear-gradient(140deg, #5b6144 0%, #80552d 60%, #d39e70 100%)",
-  "linear-gradient(140deg, #18100c 0%, #80552d 65%, #ffdcc1 100%)",
-] as const;
-
 function PromiseSections() {
   const t = useT();
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 pb-16 md:pb-24">
-      <div className="flex flex-col gap-10 md:gap-14">
-        {PROMISE_SECTIONS.map((item, index) => {
-          const reverse = index % 2 === 1;
-          return (
-            <article
-              key={item.num}
-              data-reveal=""
-              className="grid items-center gap-6 md:grid-cols-2 md:gap-12"
+    <section className="px-6 pb-20 md:px-12 md:pb-24">
+      <div
+        className="mx-auto grid max-w-7xl gap-10 md:grid-cols-2 md:gap-x-16 md:gap-y-14"
+        data-reveal=""
+      >
+        {PROMISE_SECTIONS.map((item) => (
+          <article
+            key={item.num}
+            className="border-t border-ganitel-stroke-neutral pt-6"
+          >
+            <p
+              className="text-[20px] leading-none text-ganitel-brown"
+              style={{ fontFamily: "var(--font-display)" }}
             >
-              <div className={cn("flex flex-col", reverse && "md:order-2")}>
-                <p
-                  className="text-[22px] leading-none text-ganitel-brown"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {item.num}
-                </p>
-                <h3
-                  className="mt-3 text-[26px] leading-[1.1] text-ganitel-text-title md:text-[32px]"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {t(item.titleKey)}
-                </h3>
-                <p className="mt-4 text-[15px] leading-[1.6] text-ganitel-text-subtitle md:text-base">
-                  {t(item.bodyKey)}
-                </p>
-              </div>
-              <div
-                aria-hidden
-                className={cn(
-                  "image-frame-warm relative aspect-[5/4] overflow-hidden rounded-lg paper-grain",
-                  reverse && "md:order-1",
-                )}
-                style={{ background: PROMISE_TILE_GRADIENTS[index] }}
-              >
-                <span
-                  className="absolute right-6 bottom-4 text-[120px] leading-none text-ganitel-paper/30 md:text-[160px]"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {item.num}
-                </span>
-              </div>
-            </article>
-          );
-        })}
+              {item.num}
+            </p>
+            <h3
+              className="mt-3 text-[22px] leading-[1.15] text-ganitel-text-title md:text-[26px]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              {t(item.titleKey)}
+            </h3>
+            <p className="mt-3 text-[14.5px] leading-[1.6] text-ganitel-text-subtitle md:text-[15px]">
+              {t(item.bodyKey)}
+            </p>
+          </article>
+        ))}
       </div>
     </section>
   );
