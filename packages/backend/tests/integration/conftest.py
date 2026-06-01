@@ -100,6 +100,11 @@ async def db_session(integration_engine: AsyncEngine) -> AsyncGenerator[AsyncSes
         yield session
 
 
+@pytest_asyncio.fixture
+async def session(db_session: AsyncSession) -> AsyncGenerator[AsyncSession, None]:
+    yield db_session
+
+
 @pytest.fixture(autouse=True)
 def _mark_integration(request: pytest.FixtureRequest) -> None:
     request.node.add_marker(pytest.mark.integration)

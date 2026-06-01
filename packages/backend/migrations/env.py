@@ -11,6 +11,7 @@ from app.core.db import Base
 # Import models so Base.metadata is populated for autogenerate.
 # Each module's models.py is added here as features land.
 from app.modules.bookings import models as _bookings_models  # noqa: F401
+from app.modules.experience_bookings import models as _experience_bookings_models  # noqa: F401
 from app.modules.idempotency import models as _idempotency_models  # noqa: F401
 from app.modules.media import models as _media_models  # noqa: F401
 from app.modules.outbox import models as _outbox_models  # noqa: F401

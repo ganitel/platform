@@ -4,7 +4,7 @@ from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Numeric, String, Uuid, func
+from sqlalchemy import CheckConstraint, DateTime, Enum, ForeignKey, Numeric, String, Uuid, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -21,10 +21,22 @@ class PaymentStatus(StrEnum):
 
 class Payment(Base):
     __tablename__ = "payments"
+    __table_args__ = (
+        CheckConstraint(
+            "(booking_id IS NOT NULL)::int + (experience_booking_id IS NOT NULL)::int = 1",
+            name="ck_payments_target_xor",
+        ),
+    )
 
     id: Mapped[UUID] = mapped_column(Uuid(), primary_key=True, default=uuid4)
-    booking_id: Mapped[UUID] = mapped_column(
-        Uuid(), ForeignKey("bookings.id", ondelete="RESTRICT"), nullable=False, index=True
+    booking_id: Mapped[UUID | None] = mapped_column(
+        Uuid(), ForeignKey("bookings.id", ondelete="RESTRICT"), nullable=True, index=True
+    )
+    experience_booking_id: Mapped[UUID | None] = mapped_column(
+        Uuid(),
+        ForeignKey("experience_bookings.id", ondelete="RESTRICT"),
+        nullable=True,
+        index=True,
     )
     provider: Mapped[str] = mapped_column(String(40), nullable=False)
     provider_intent_id: Mapped[str | None] = mapped_column(String(255), index=True, unique=True)
