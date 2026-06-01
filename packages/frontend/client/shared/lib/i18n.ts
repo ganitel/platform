@@ -16,6 +16,26 @@ const dict = {
     fr: "Une erreur s'est produite. Veuillez réessayer.",
     en: "Something went wrong. Please try again.",
   },
+  "common.error.heading": {
+    fr: "Une erreur s'est produite",
+    en: "Something went wrong",
+  },
+  "common.error.detail": {
+    fr: "Veuillez réessayer plus tard.",
+    en: "Please try again later.",
+  },
+  "error.outdated.heading": {
+    fr: "Mise à jour disponible",
+    en: "Update available",
+  },
+  "error.outdated.detail": {
+    fr: "Rechargez la page pour obtenir la dernière version.",
+    en: "Reload the page to get the latest version.",
+  },
+  "error.outdated.cta": {
+    fr: "Recharger",
+    en: "Reload",
+  },
   "common.retry": { fr: "Réessayer", en: "Retry" },
   "common.signin": { fr: "Se connecter", en: "Sign in" },
   "common.signup": { fr: "S'inscrire", en: "Sign up" },

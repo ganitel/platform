@@ -16,8 +16,10 @@ import type { Route } from "./+types/root";
 import {
   LocaleContext,
   localeFromAcceptLanguage,
+  t as translate,
   type Locale,
 } from "@/shared/lib/i18n";
+import { forceReload, isChunkLoadError } from "@/shared/lib/chunk-reload";
 import { NavigationProgress } from "@/shared/components/navigation-progress";
 import { env } from "@/shared/lib/env";
 import { organizationJsonLd, websiteJsonLd } from "@/shared/lib/seo";
@@ -164,17 +166,44 @@ export default function App({ loaderData }: Route.ComponentProps) {
 
 export function ErrorBoundary() {
   const error = useRouteError();
+  const rootData = useRouteLoaderData("root") as
+    | { locale?: Locale }
+    | undefined;
+  const locale: Locale = rootData?.locale ?? "fr";
   const isResponse = isRouteErrorResponse(error);
+  const isChunkError = !isResponse && isChunkLoadError(error);
+
+  if (isChunkError) {
+    return (
+      <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-6 text-center">
+        <h1 className="text-xl font-semibold text-ganitel-text-title">
+          {translate("error.outdated.heading", locale)}
+        </h1>
+        <p className="mt-2 text-sm text-ganitel-text-subtitle">
+          {translate("error.outdated.detail", locale)}
+        </p>
+        <button
+          type="button"
+          onClick={forceReload}
+          className="mt-6 inline-flex h-10 items-center justify-center rounded-full bg-ganitel-text-title px-5 text-sm font-medium text-ganitel-paper transition-colors hover:bg-ganitel-text-title/90"
+        >
+          {translate("error.outdated.cta", locale)}
+        </button>
+      </main>
+    );
+  }
+
   const status = isResponse ? error.status : 500;
   const heading = isResponse
-    ? error.statusText || `Erreur ${status}`
-    : "Une erreur s'est produite";
+    ? error.statusText ||
+      `${translate("common.error.heading", locale)} ${status}`
+    : translate("common.error.heading", locale);
   const detail =
     isResponse && typeof error.data === "string"
       ? error.data
       : import.meta.env.DEV && error instanceof Error
         ? error.message
-        : "Veuillez réessayer plus tard.";
+        : translate("common.error.detail", locale);
 
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-6 text-center">
