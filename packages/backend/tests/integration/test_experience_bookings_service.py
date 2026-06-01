@@ -4,7 +4,7 @@ Each test sets up an experience with prices and a guest, then exercises
 one service path. Real Postgres via the integration conftest.
 """
 
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from uuid import uuid4
 
@@ -412,3 +412,45 @@ async def test_list_pending_for_host_returns_only_requested(session):
     rows = await eb_service.list_pending_for_host(session, host=host)
     assert len(rows) == 1
     assert rows[0].id == pending.id
+
+
+@pytest.mark.asyncio
+async def test_sweep_expired_transitions_stale_rows(session):
+    host = await _make_user(session, is_host=True)
+    guest = await _make_user(session)
+    exp = await _make_experience(session, host)
+
+    b1 = await eb_service.create_request(
+        session,
+        guest=guest,
+        payload=ExperienceBookingCreateIn(
+            experience_id=exp.id,
+            requested_date=date.today() + timedelta(days=5),
+            party_size=1,
+            currency=Currency.XAF,
+        ),
+    )
+    b1.confirm_deadline_at = datetime.now(UTC) - timedelta(hours=1)
+    await session.commit()
+
+    b2 = await eb_service.create_request(
+        session,
+        guest=guest,
+        payload=ExperienceBookingCreateIn(
+            experience_id=exp.id,
+            requested_date=date.today() + timedelta(days=6),
+            party_size=1,
+            currency=Currency.XAF,
+        ),
+    )
+    b2.status = ExperienceBookingStatus.PENDING_PAYMENT
+    b2.hold_expires_at = datetime.now(UTC) - timedelta(minutes=5)
+    await session.commit()
+
+    swept = await eb_service.sweep_expired(session)
+    assert swept == 2
+
+    await session.refresh(b1)
+    await session.refresh(b2)
+    assert b1.status == ExperienceBookingStatus.CANCELLED_EXPIRED
+    assert b2.status == ExperienceBookingStatus.CANCELLED_EXPIRED

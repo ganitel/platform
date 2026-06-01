@@ -7,7 +7,7 @@ from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -332,6 +332,44 @@ async def list_pending_for_host(
         .offset(offset)
     )
     return list((await session.execute(stmt)).scalars().all())
+
+
+async def sweep_expired(session: AsyncSession) -> int:
+    """Bulk-flip rows whose deadlines have elapsed to `cancelled_expired`.
+    Returns the total number of rows updated. Designed to be called by a
+    scheduled worker, mirroring `bookings.expire_old_holds`.
+    """
+    now = datetime.now(UTC)
+    total = 0
+
+    requested_stmt = (
+        update(ExperienceBooking)
+        .where(
+            ExperienceBooking.status == ExperienceBookingStatus.REQUESTED,
+            ExperienceBooking.confirm_deadline_at < now,
+        )
+        .values(status=ExperienceBookingStatus.CANCELLED_EXPIRED, cancelled_at=now)
+    )
+    result = await session.execute(requested_stmt)
+    total += getattr(result, "rowcount", 0) or 0
+
+    pending_stmt = (
+        update(ExperienceBooking)
+        .where(
+            ExperienceBooking.status == ExperienceBookingStatus.PENDING_PAYMENT,
+            ExperienceBooking.hold_expires_at < now,
+        )
+        .values(
+            status=ExperienceBookingStatus.CANCELLED_EXPIRED,
+            cancelled_at=now,
+            hold_expires_at=None,
+        )
+    )
+    result = await session.execute(pending_stmt)
+    total += getattr(result, "rowcount", 0) or 0
+
+    await session.commit()
+    return total
 
 
 def to_public(booking: ExperienceBooking, *, experience_title: str) -> ExperienceBookingPublic:
