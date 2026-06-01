@@ -9,6 +9,7 @@ from uuid import UUID
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.config import get_settings
 from app.core.errors import ConflictError, ForbiddenError, NotFoundError, ValidationError
@@ -30,6 +31,31 @@ from app.modules.users.models import User
 DEFAULT_CONFIRM_DEADLINE_HOURS = 48
 
 
+def _active_capacity_clause(now: datetime):
+    """Bookings that still consume capacity: confirmed always counts; requested
+    and pending_payment count only while their deadline hasn't elapsed. Lets the
+    capacity check ignore stale rows that the sweep hasn't terminated yet."""
+    from sqlalchemy import and_, or_
+
+    return or_(
+        ExperienceBooking.status == ExperienceBookingStatus.CONFIRMED,
+        and_(
+            ExperienceBooking.status == ExperienceBookingStatus.REQUESTED,
+            or_(
+                ExperienceBooking.confirm_deadline_at.is_(None),
+                ExperienceBooking.confirm_deadline_at > now,
+            ),
+        ),
+        and_(
+            ExperienceBooking.status == ExperienceBookingStatus.PENDING_PAYMENT,
+            or_(
+                ExperienceBooking.hold_expires_at.is_(None),
+                ExperienceBooking.hold_expires_at > now,
+            ),
+        ),
+    )
+
+
 async def create_request(
     session: AsyncSession,
     *,
@@ -40,7 +66,12 @@ async def create_request(
     if payload.requested_date < today:
         raise ValidationError(code="experience.date_past", extra={"field": "requested_date"})
 
-    exp_stmt = select(Experience).where(Experience.id == payload.experience_id).with_for_update()
+    exp_stmt = (
+        select(Experience)
+        .options(selectinload(Experience.prices))
+        .where(Experience.id == payload.experience_id)
+        .with_for_update()
+    )
     exp = (await session.execute(exp_stmt)).scalar_one_or_none()
     if exp is None or exp.status != ExperienceStatus.PUBLISHED:
         raise NotFoundError(code="experience.not_found")
@@ -56,10 +87,11 @@ async def create_request(
     if price is None:
         raise ValidationError(code="experience.currency_unavailable", extra={"field": "currency"})
 
+    now = datetime.now(UTC)
     used_stmt = select(func.coalesce(func.sum(ExperienceBooking.party_size), 0)).where(
         ExperienceBooking.experience_id == exp.id,
         ExperienceBooking.requested_date == payload.requested_date,
-        ExperienceBooking.status.in_(NON_TERMINAL_STATUSES),
+        _active_capacity_clause(now),
     )
     used = (await session.execute(used_stmt)).scalar_one()
     if used + payload.party_size > exp.capacity:

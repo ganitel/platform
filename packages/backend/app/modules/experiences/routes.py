@@ -8,6 +8,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Query, Response, status
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.core.cache import PUBLIC_CDN_CACHE
 from app.core.deps import CurrentUser, DbSession, OptionalUser
@@ -126,8 +127,11 @@ async def suggested_stays(
     offset: int = 0,
 ) -> list[SuggestedStay]:
     exp = await service.get(session, experience_id)
+    exp_currency = exp.prices[0].currency if exp.prices else None
+
     stmt = (
         select(Property)
+        .options(selectinload(Property.prices))
         .where(
             Property.status == PropertyStatus.PUBLISHED,
             Property.city == exp.city,
@@ -142,7 +146,9 @@ async def suggested_stays(
     for p in rows:
         price = None
         if p.prices:
-            cheapest = min(p.prices, key=lambda pr: pr.amount)
+            same_currency = [pr for pr in p.prices if pr.currency == exp_currency]
+            pool = same_currency or p.prices
+            cheapest = min(pool, key=lambda pr: pr.amount)
             price = Money(amount=cheapest.amount, currency=Currency(cheapest.currency))
         out.append(
             SuggestedStay(

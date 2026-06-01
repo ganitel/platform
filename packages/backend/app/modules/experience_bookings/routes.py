@@ -1,13 +1,14 @@
 """Guest-facing routes for experience bookings."""
 
-from typing import cast
+from typing import Annotated, cast
 from uuid import UUID
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Header, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import CurrentUser, DbSession
 from app.core.errors import ConflictError, ForbiddenError, NotFoundError
+from app.core.idempotency import replay_or_run
 from app.modules.bookings.schemas import InitiatePaymentOut, PaymentProvider
 from app.modules.experience_bookings import service
 from app.modules.experience_bookings.models import ExperienceBooking, ExperienceBookingStatus
@@ -29,10 +30,16 @@ async def _to_public(session: AsyncSession, booking: ExperienceBooking) -> Exper
 
 @router.post("", response_model=ExperienceBookingPublic, status_code=status.HTTP_201_CREATED)
 async def create_request(
-    payload: ExperienceBookingCreateIn, user: CurrentUser, session: DbSession
+    payload: ExperienceBookingCreateIn,
+    user: CurrentUser,
+    session: DbSession,
+    idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
 ) -> ExperienceBookingPublic:
-    booking = await service.create_request(session, guest=user, payload=payload)
-    return await _to_public(session, booking)
+    async def _do():
+        booking = await service.create_request(session, guest=user, payload=payload)
+        return await _to_public(session, booking)
+
+    return await replay_or_run(session, user_id=user.id, key=idempotency_key, fn=_do)
 
 
 @router.get("/me", response_model=list[ExperienceBookingPublic])

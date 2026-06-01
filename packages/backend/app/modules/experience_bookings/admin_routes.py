@@ -6,6 +6,7 @@ from uuid import UUID
 from fastapi import APIRouter, Header
 
 from app.core.deps import CurrentUser, DbSession
+from app.core.idempotency import replay_or_run
 from app.modules.experience_bookings import service
 from app.modules.experience_bookings.routes import _to_public
 from app.modules.experience_bookings.schemas import (
@@ -33,15 +34,20 @@ async def confirm(
     idempotency_key: str = Header(default="", alias="Idempotency-Key"),
     provider: str = "noop",
 ) -> ExperienceBookingPublic:
-    booking = await service.confirm_as_host(
-        session,
-        booking_id=booking_id,
-        host=user,
-        provider_name=provider,
-        idempotency_key=idempotency_key or f"confirm-{booking_id}",
-        start_time=payload.start_time,
-    )
-    return await _to_public(session, booking)
+    key = idempotency_key or f"confirm-{booking_id}"
+
+    async def _do():
+        booking = await service.confirm_as_host(
+            session,
+            booking_id=booking_id,
+            host=user,
+            provider_name=provider,
+            idempotency_key=key,
+            start_time=payload.start_time,
+        )
+        return await _to_public(session, booking)
+
+    return await replay_or_run(session, user_id=user.id, key=key, fn=_do)
 
 
 @router.post("/{booking_id}/decline", response_model=ExperienceBookingPublic)

@@ -7,6 +7,7 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Header, status
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.core.deps import CurrentUser, DbSession
 from app.core.idempotency import replay_or_run
@@ -91,6 +92,7 @@ async def suggested_experiences(
 
     stmt = (
         select(Experience)
+        .options(selectinload(Experience.prices))
         .where(
             Experience.status == ExperienceStatus.PUBLISHED,
             Experience.city == prop.city,
