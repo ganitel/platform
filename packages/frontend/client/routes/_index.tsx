@@ -1,7 +1,7 @@
 import type { Route } from "./+types/_index";
 
 import { Landing } from "@/features/landing/landing";
-import { PUBLIC_HTML_CACHE_LONG } from "@/shared/lib/cache";
+import { PUBLIC_HTML_CACHE } from "@/shared/lib/cache";
 import {
   HERO_MOBILE_SRC,
   HERO_SIZES,
@@ -11,7 +11,7 @@ import { localeFromAcceptLanguage, t } from "@/shared/lib/i18n";
 import { seo } from "@/shared/lib/seo";
 
 export const headers: Route.HeadersFunction = () => ({
-  "Cache-Control": PUBLIC_HTML_CACHE_LONG,
+  "Cache-Control": PUBLIC_HTML_CACHE,
 });
 
 export const links: Route.LinksFunction = () => [

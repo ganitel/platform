@@ -10,8 +10,6 @@
 // Skew Protection or Cache-Tag purge-on-deploy, not raw s-maxage.
 export const PUBLIC_HTML_CACHE = "public, max-age=0, must-revalidate";
 
-export const PUBLIC_HTML_CACHE_LONG = "public, max-age=0, must-revalidate";
-
 // Detail pages can flip between public and private (host unpublishes a
 // listing). The backend already responds with `private, no-store` in that
 // case; mirror it at the route layer so the rendered SSR HTML never lands
