@@ -25,11 +25,12 @@ const CHUNK_ERROR_PATTERNS: readonly RegExp[] = [
   /Loading CSS chunk/i,
   /Unable to preload CSS/i,
   // A stale chunk path that falls through to the 200-HTML SPA fallback never
-  // 404s, so the browser rejects it on MIME grounds instead. Chrome:
-  // "Failed to load module script: Expected a JavaScript … MIME type of text/html".
-  // Firefox: "… blocked because of a disallowed MIME type".
-  /Failed to load module script/i,
-  /disallowed MIME type/i,
+  // 404s, so the browser rejects it on MIME grounds instead. Scoped to the
+  // text/html mismatch (our SPA fallback) so unrelated third-party module
+  // failures don't trigger a reload. Chrome: "Failed to load module script:
+  // … MIME type of \"text/html\"". Firefox: "disallowed MIME type (\"text/html\")".
+  /Failed to load module script.*text\/html/i,
+  /disallowed MIME type \("text\/html/i,
 ] as const;
 
 export function isChunkLoadError(error: unknown): boolean {

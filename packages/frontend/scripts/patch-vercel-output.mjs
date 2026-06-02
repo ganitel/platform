@@ -35,6 +35,11 @@ function main() {
     return;
   }
 
+  if (!config || typeof config !== "object" || Array.isArray(config)) {
+    console.warn("[patch-vercel-output] skip: config is not a JSON object");
+    return;
+  }
+
   const routes = config.routes;
   if (!Array.isArray(routes)) {
     console.warn("[patch-vercel-output] skip: config.routes is not an array");

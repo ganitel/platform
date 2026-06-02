@@ -73,6 +73,22 @@ describe("isChunkLoadError", () => {
   test("does not match unrelated errors", () => {
     expect(isChunkLoadError(new Error("Network request failed"))).toBe(false);
     expect(isChunkLoadError(new TypeError("Cannot read property"))).toBe(false);
+    // A non-text/html MIME failure is a third-party/script issue, not our
+    // deploy-skew SPA fallback — must not trigger a reload.
+    expect(
+      isChunkLoadError(
+        new Error(
+          'Failed to load module script: Expected a JavaScript module but the server responded with a MIME type of "application/json".',
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      isChunkLoadError(
+        new Error(
+          'blocked because of a disallowed MIME type ("application/json").',
+        ),
+      ),
+    ).toBe(false);
     expect(isChunkLoadError(null)).toBe(false);
     expect(isChunkLoadError(undefined)).toBe(false);
     expect(isChunkLoadError(42)).toBe(false);
