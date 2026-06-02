@@ -3,6 +3,9 @@ import { hydrateRoot } from "react-dom/client";
 import { HydratedRouter } from "react-router/dom";
 
 import { setAuthTokenGetter } from "@/shared/api/client";
+import { installChunkReloadHandlers } from "@/shared/lib/chunk-reload";
+
+installChunkReloadHandlers();
 
 setAuthTokenGetter(async () => {
   const { getSupabase } = await import("@/lib/supabase");
