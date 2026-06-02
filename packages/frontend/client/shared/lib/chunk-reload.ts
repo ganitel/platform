@@ -93,16 +93,6 @@ export function markReloadAttempt(opts: ReloadGuardOptions = {}): void {
   }
 }
 
-export function clearReloadMarker(): void {
-  const storage = readStorage();
-  if (!storage) return;
-  try {
-    storage.removeItem(RELOAD_KEY);
-  } catch {
-    // sessionStorage can throw in private mode / quota — fail open.
-  }
-}
-
 // User-initiated reload from the ErrorBoundary CTA bypasses the loop guard.
 export function forceReload(): void {
   if (typeof window === "undefined") return;
@@ -110,8 +100,11 @@ export function forceReload(): void {
   window.location.reload();
 }
 
-function attemptReload(error: unknown): boolean {
-  if (!isChunkLoadError(error)) return false;
+// `trusted` skips the regex pattern check — used for events whose semantics
+// already guarantee a chunk-load failure (e.g. vite:preloadError), so we don't
+// reject them when the browser's error message is localized or rephrased.
+function attemptReload(error: unknown, trusted = false): boolean {
+  if (!trusted && !isChunkLoadError(error)) return false;
   if (typeof window === "undefined") return false;
   if (!shouldAttemptReload()) return false;
   markReloadAttempt();
@@ -127,7 +120,7 @@ export function installChunkReloadHandlers(): () => void {
 
   const onPreloadError = (event: Event) => {
     const payload = (event as Event & { payload?: unknown }).payload;
-    if (attemptReload(payload ?? event)) {
+    if (attemptReload(payload ?? event, true)) {
       event.preventDefault();
     }
   };

@@ -169,7 +169,11 @@ export function ErrorBoundary() {
   const rootData = useRouteLoaderData("root") as
     | { locale?: Locale }
     | undefined;
-  const locale: Locale = rootData?.locale ?? "fr";
+  const locale: Locale =
+    rootData?.locale ??
+    (typeof navigator !== "undefined"
+      ? localeFromAcceptLanguage(navigator.language)
+      : "fr");
   const isResponse = isRouteErrorResponse(error);
   const isChunkError = !isResponse && isChunkLoadError(error);
 
