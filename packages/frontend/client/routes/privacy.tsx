@@ -1,12 +1,12 @@
 import type { Route } from "./+types/privacy";
 
 import { Privacy } from "@/features/legal/privacy";
-import { PUBLIC_CDN_CACHE_LONG } from "@/shared/lib/cache";
+import { PUBLIC_HTML_CACHE_LONG } from "@/shared/lib/cache";
 import { localeFromAcceptLanguage, t as translate } from "@/shared/lib/i18n";
 import { seo } from "@/shared/lib/seo";
 
 export const headers: Route.HeadersFunction = () => ({
-  "Cache-Control": PUBLIC_CDN_CACHE_LONG,
+  "Cache-Control": PUBLIC_HTML_CACHE_LONG,
 });
 
 export const meta: Route.MetaFunction = ({ data }) => {
