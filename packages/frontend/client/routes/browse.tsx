@@ -19,7 +19,7 @@ import {
 } from "@/shared/lib/i18n";
 import { cn } from "@/shared/lib/cn";
 import { serverFetch } from "@/shared/api/server";
-import { PUBLIC_CDN_CACHE } from "@/shared/lib/cache";
+import { PUBLIC_HTML_CACHE } from "@/shared/lib/cache";
 import { seo } from "@/shared/lib/seo";
 import { PageHeader } from "@/shared/ui/page-header";
 import type { PropertyPublic, SearchOut } from "@/features/properties/types";
@@ -29,7 +29,7 @@ import type {
 } from "@/features/experiences/types";
 
 export const headers: Route.HeadersFunction = () => ({
-  "Cache-Control": PUBLIC_CDN_CACHE,
+  "Cache-Control": PUBLIC_HTML_CACHE,
 });
 
 type BrowseKind = "stays" | "experiences";

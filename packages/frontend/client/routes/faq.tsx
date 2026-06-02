@@ -2,12 +2,12 @@ import type { Route } from "./+types/faq";
 
 import { FAQ_ITEMS } from "@/features/legal/faq-items";
 import { Faq } from "@/features/legal/faq";
-import { PUBLIC_CDN_CACHE_LONG } from "@/shared/lib/cache";
+import { PUBLIC_HTML_CACHE } from "@/shared/lib/cache";
 import { localeFromAcceptLanguage, t as translate } from "@/shared/lib/i18n";
 import { seo } from "@/shared/lib/seo";
 
 export const headers: Route.HeadersFunction = () => ({
-  "Cache-Control": PUBLIC_CDN_CACHE_LONG,
+  "Cache-Control": PUBLIC_HTML_CACHE,
 });
 
 export const meta: Route.MetaFunction = ({ data }) => {
