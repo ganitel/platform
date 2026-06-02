@@ -38,6 +38,14 @@ describe("isChunkLoadError", () => {
     ["Loading chunk app failed."],
     ["Loading CSS chunk 42 failed."],
     ["Unable to preload CSS for /assets/index-abc.css"],
+    // Chrome, when a stale chunk path resolves to the 200-HTML SPA fallback:
+    [
+      'Failed to load module script: Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "text/html". Strict MIME type checking is enforced for module scripts per HTML spec.',
+    ],
+    // Firefox equivalent for the same 200-HTML response:
+    [
+      'Loading module from "https://ganitel.com/assets/admin.rentals-OLD.js" was blocked because of a disallowed MIME type ("text/html").',
+    ],
   ])("matches: %s", (message) => {
     expect(isChunkLoadError(new Error(message))).toBe(true);
   });

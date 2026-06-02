@@ -24,6 +24,12 @@ const CHUNK_ERROR_PATTERNS: readonly RegExp[] = [
   /Loading chunk \S+ failed/i,
   /Loading CSS chunk/i,
   /Unable to preload CSS/i,
+  // A stale chunk path that falls through to the 200-HTML SPA fallback never
+  // 404s, so the browser rejects it on MIME grounds instead. Chrome:
+  // "Failed to load module script: Expected a JavaScript … MIME type of text/html".
+  // Firefox: "… blocked because of a disallowed MIME type".
+  /Failed to load module script/i,
+  /disallowed MIME type/i,
 ] as const;
 
 export function isChunkLoadError(error: unknown): boolean {
