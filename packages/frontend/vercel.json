@@ -1,5 +1,6 @@
 {
   "regions": ["fra1"],
+  "buildCommand": "react-router build && node scripts/patch-vercel-output.mjs",
   "rewrites": [
     {
       "source": "/api/:path*",
