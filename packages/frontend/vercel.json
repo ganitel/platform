@@ -1,6 +1,5 @@
 {
   "regions": ["fra1"],
-  "buildCommand": "bun run build && node scripts/patch-vercel-output.mjs",
   "rewrites": [
     {
       "source": "/api/:path*",
