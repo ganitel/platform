@@ -38,6 +38,14 @@ describe("isChunkLoadError", () => {
     ["Loading chunk app failed."],
     ["Loading CSS chunk 42 failed."],
     ["Unable to preload CSS for /assets/index-abc.css"],
+    // Chrome, when a stale chunk path resolves to the 200-HTML SPA fallback:
+    [
+      'Failed to load module script: Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "text/html". Strict MIME type checking is enforced for module scripts per HTML spec.',
+    ],
+    // Firefox equivalent for the same 200-HTML response:
+    [
+      'Loading module from "https://ganitel.com/assets/admin.rentals-OLD.js" was blocked because of a disallowed MIME type ("text/html").',
+    ],
   ])("matches: %s", (message) => {
     expect(isChunkLoadError(new Error(message))).toBe(true);
   });
@@ -65,6 +73,22 @@ describe("isChunkLoadError", () => {
   test("does not match unrelated errors", () => {
     expect(isChunkLoadError(new Error("Network request failed"))).toBe(false);
     expect(isChunkLoadError(new TypeError("Cannot read property"))).toBe(false);
+    // A non-text/html MIME failure is a third-party/script issue, not our
+    // deploy-skew SPA fallback — must not trigger a reload.
+    expect(
+      isChunkLoadError(
+        new Error(
+          'Failed to load module script: Expected a JavaScript module but the server responded with a MIME type of "application/json".',
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      isChunkLoadError(
+        new Error(
+          'blocked because of a disallowed MIME type ("application/json").',
+        ),
+      ),
+    ).toBe(false);
     expect(isChunkLoadError(null)).toBe(false);
     expect(isChunkLoadError(undefined)).toBe(false);
     expect(isChunkLoadError(42)).toBe(false);
