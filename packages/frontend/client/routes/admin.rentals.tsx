@@ -33,6 +33,7 @@ import type {
 } from "@/features/properties/types";
 import { usePropertyTypeLabel } from "@/features/reference/hooks";
 import { AdminGuard } from "@/shared/components/admin-guard";
+import { translateApiError } from "@/shared/lib/form-error";
 import { formatPriceAmount } from "@/shared/lib/format";
 import { pickPriceForLocale } from "@/shared/lib/price";
 import { transformImage } from "@/shared/lib/image";
@@ -170,10 +171,7 @@ function AdminRentalsPage() {
       ) : query.isError ? (
         <AdminCard>
           <p className="px-6 py-12 text-center text-sm text-red-600">
-            {tr("admin.state.error_prefix")}{" "}
-            {query.error instanceof Error
-              ? query.error.message
-              : String(query.error)}
+            {translateApiError(query.error, tr)}
           </p>
         </AdminCard>
       ) : query.data.total === 0 ? (

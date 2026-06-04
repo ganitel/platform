@@ -43,17 +43,20 @@ def _can_view_private_detail(prop: Property, user: User | None) -> bool:
     )
 
 
+def _enforce_visibility(prop: Property, user: User | None) -> None:
+    if prop.status != PropertyStatus.PUBLISHED and not _can_view_private_detail(prop, user):
+        raise NotFoundError(code="property.not_found")
+
+
 def _set_detail_cache_and_enforce_visibility(
     response: Response,
     prop: Property,
     user: User | None,
 ) -> None:
-    if prop.status == PropertyStatus.PUBLISHED:
-        response.headers["Cache-Control"] = PUBLIC_CDN_CACHE
-        return
-    if not _can_view_private_detail(prop, user):
-        raise NotFoundError(code="property.not_found")
-    response.headers["Cache-Control"] = PRIVATE_DETAIL_CACHE
+    _enforce_visibility(prop, user)
+    response.headers["Cache-Control"] = (
+        PUBLIC_CDN_CACHE if prop.status == PropertyStatus.PUBLISHED else PRIVATE_DETAIL_CACHE
+    )
 
 
 async def _detail_with_host(session: DbSession, prop: Property, user: User) -> PropertyDetail:
@@ -276,8 +279,7 @@ async def list_property_rooms(
     currency: str | None = None,
 ) -> list[RoomTypePublic]:
     prop = await service.get(session, property_id)
-    if prop.status != PropertyStatus.PUBLISHED:
-        raise NotFoundError(code="property.not_found")
+    _enforce_visibility(prop, user)
     rooms = await service._load_rooms(session, prop.id)
     out: list[RoomTypePublic] = []
     for room in rooms:

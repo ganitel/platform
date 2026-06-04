@@ -32,6 +32,7 @@ import type {
   PropertyStatus,
 } from "@/features/properties/types";
 import { AdminGuard } from "@/shared/components/admin-guard";
+import { translateApiError } from "@/shared/lib/form-error";
 import { transformImage } from "@/shared/lib/image";
 import { thumbnailUrl } from "@/shared/lib/media";
 import { localeFromAcceptLanguage, t, useT } from "@/shared/lib/i18n";
@@ -166,10 +167,7 @@ function AdminHotelsPage() {
       ) : query.isError ? (
         <AdminCard>
           <p className="px-6 py-12 text-center text-sm text-red-600">
-            {tr("admin.state.error_prefix")}{" "}
-            {query.error instanceof Error
-              ? query.error.message
-              : String(query.error)}
+            {translateApiError(query.error, tr)}
           </p>
         </AdminCard>
       ) : query.data.total === 0 ? (

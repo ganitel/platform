@@ -10,6 +10,7 @@ import {
   itemFromServerMedia,
   type UploaderItem,
 } from "@/shared/components/media-uploader.types";
+import { translateApiError } from "@/shared/lib/form-error";
 import { localeFromAcceptLanguage, t, useT } from "@/shared/lib/i18n";
 import type { Route } from "./+types/admin.experiences.$id.edit";
 
@@ -80,11 +81,7 @@ function AdminExperiencesEditPage() {
         <p className="text-sm text-ganitel-text-body">{tr("common.loading")}</p>
       ) : detail.isError ? (
         <p className="text-sm text-red-600">
-          {tr("common.load_error_prefix")}
-          {": "}
-          {detail.error instanceof Error
-            ? detail.error.message
-            : String(detail.error)}
+          {translateApiError(detail.error, tr)}
         </p>
       ) : (
         <ExperienceForm
