@@ -7,15 +7,17 @@ stack_dir=/opt/ganitel
 git -C "$repo_dir" fetch --quiet origin main
 git -C "$repo_dir" reset --hard --quiet origin/main
 
-caddyfile_before=$(md5sum "$stack_dir/Caddyfile")
+caddy_needs_reload=false
+if [ -f "$stack_dir/Caddyfile" ] && ! cmp -s "$repo_dir/Caddyfile" "$stack_dir/Caddyfile"; then
+  caddy_needs_reload=true
+fi
 cp "$repo_dir/docker-compose.yml" "$repo_dir/Caddyfile" "$stack_dir/"
-caddyfile_after=$(md5sum "$stack_dir/Caddyfile")
 
 cd "$stack_dir"
 docker compose pull --quiet
 docker compose up -d --remove-orphans
 
-if [ "$caddyfile_before" != "$caddyfile_after" ]; then
+if [ "$caddy_needs_reload" = true ]; then
   docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile
 fi
 
