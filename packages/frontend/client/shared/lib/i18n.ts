@@ -1736,16 +1736,10 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
   },
   "admin.hotels.form.category.label": { fr: "Catégorie", en: "Category" },
 
-  // Admin hotels — rooms manager (T22 surface)
-  "admin.hotels.rooms.eyebrow": { fr: "Hôtels", en: "Hotels" },
   "admin.hotels.rooms.title": { fr: "Chambres", en: "Rooms" },
   "admin.hotels.rooms.description": {
     fr: "Ajoutez et organisez les types de chambres de cet hôtel.",
     en: "Add and organise the room types for this hotel.",
-  },
-  "admin.hotels.rooms.meta_title": {
-    fr: "Admin — Chambres",
-    en: "Admin — Rooms",
   },
   "admin.rooms.add": { fr: "Ajouter une chambre", en: "Add a room" },
   "admin.rooms.submit_create": { fr: "Créer la chambre", en: "Create room" },

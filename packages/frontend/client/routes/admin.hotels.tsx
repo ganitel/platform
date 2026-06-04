@@ -257,7 +257,7 @@ function HotelRow({ item }: { item: PropertyAdminListItem }) {
       <AdminCell align="right">
         <div className="flex flex-wrap items-center justify-end gap-1.5">
           <ActionLink
-            to={`/admin/hotels/${item.id}/rooms`}
+            to={`/admin/hotels/${item.id}/edit#rooms`}
             icon={<LayoutGrid className="size-3.5" strokeWidth={1.75} />}
           >
             {tr("admin.hotels.action.manage_rooms")}
