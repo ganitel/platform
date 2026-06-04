@@ -1,7 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { LayoutGrid } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
+import { ActionLink } from "@/features/admin/admin-ui";
 import { getProperty, updateProperty } from "@/features/properties/api";
 import { HotelForm } from "@/features/properties/components/hotel-form";
 import type {
@@ -13,6 +15,7 @@ import {
   itemFromServerMedia,
   type UploaderItem,
 } from "@/shared/components/media-uploader.types";
+import { translateApiError } from "@/shared/lib/form-error";
 import { localeFromAcceptLanguage, t, useT } from "@/shared/lib/i18n";
 import type { Route } from "./+types/admin.hotels.$id.edit";
 
@@ -58,23 +61,27 @@ function AdminHotelsEditPage() {
             </p>
           )}
         </div>
-        <Link
-          to="/admin/hotels"
-          className="text-sm text-ganitel-text-body hover:underline"
-        >
-          {tr("common.back")}
-        </Link>
+        <div className="flex items-center gap-3">
+          <ActionLink
+            to={`/admin/hotels/${id}/rooms`}
+            icon={<LayoutGrid className="size-3.5" strokeWidth={1.75} />}
+          >
+            {tr("admin.hotels.action.manage_rooms")}
+          </ActionLink>
+          <Link
+            to="/admin/hotels"
+            className="text-sm text-ganitel-text-body hover:underline"
+          >
+            {tr("common.back")}
+          </Link>
+        </div>
       </header>
 
       {detail.isPending ? (
         <p className="text-sm text-ganitel-text-body">{tr("common.loading")}</p>
       ) : detail.isError ? (
         <p className="text-sm text-red-600">
-          {tr("common.load_error_prefix")}
-          {": "}
-          {detail.error instanceof Error
-            ? detail.error.message
-            : String(detail.error)}
+          {translateApiError(detail.error, tr)}
         </p>
       ) : (
         <HotelEditFormContainer key={detail.data.id} detail={detail.data} />

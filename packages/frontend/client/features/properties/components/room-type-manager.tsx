@@ -25,6 +25,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/shared/ui/sheet";
+import { translateApiError } from "@/shared/lib/form-error";
 import { useLocale, useT } from "@/shared/lib/i18n";
 
 interface RoomTypeManagerProps {
@@ -61,10 +62,7 @@ export function RoomTypeManager({ propertyId }: RoomTypeManagerProps) {
     return (
       <AdminCard>
         <p className="px-6 py-12 text-center text-sm text-red-600">
-          {tr("admin.state.error_prefix")}{" "}
-          {rooms.error instanceof Error
-            ? rooms.error.message
-            : String(rooms.error)}
+          {translateApiError(rooms.error, tr)}
         </p>
       </AdminCard>
     );
@@ -202,9 +200,7 @@ function RoomRow({ room, propertyId, onEdit }: RoomRowProps) {
       </div>
       {remove.error ? (
         <p className="mt-2 text-right text-xs text-red-600">
-          {remove.error instanceof Error
-            ? remove.error.message
-            : String(remove.error)}
+          {translateApiError(remove.error, tr)}
         </p>
       ) : null}
     </li>

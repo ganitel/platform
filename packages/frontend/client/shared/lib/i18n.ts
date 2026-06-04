@@ -20,6 +20,10 @@ const dict = {
     fr: "Une erreur s'est produite",
     en: "Something went wrong",
   },
+  "common.error.network": {
+    fr: "Problème de connexion. Vérifiez votre réseau et réessayez.",
+    en: "Connection problem. Check your network and try again.",
+  },
   "common.error.detail": {
     fr: "Veuillez réessayer plus tard.",
     en: "Please try again later.",
@@ -970,10 +974,6 @@ const dict = {
   "admin.pagination.of": { fr: "sur", en: "of" },
 
   "admin.state.loading": { fr: "Chargement…", en: "Loading…" },
-  "admin.state.error_prefix": {
-    fr: "Erreur de chargement :",
-    en: "Failed to load:",
-  },
   "admin.confirm.delete": {
     fr: "Supprimer « {title} » ?",
     en: 'Delete "{title}"?',
@@ -1496,10 +1496,6 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
   "common.dash": { fr: "—", en: "—" },
   "common.loading_aria": { fr: "Chargement", en: "Loading" },
   "common.error_prefix": { fr: "Erreur", en: "Error" },
-  "common.load_error_prefix": {
-    fr: "Erreur de chargement",
-    en: "Failed to load",
-  },
 
   "index.meta.title": {
     fr: "ganitel — Là où la lumière prend son temps",
@@ -1557,6 +1553,10 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
   "property.not_found.short": {
     fr: "Logement introuvable",
     en: "Stay not found",
+  },
+  "room.not_found.short": {
+    fr: "Chambre introuvable",
+    en: "Room not found",
   },
   "property.type_in_city": {
     fr: "{type} à {city}, {country}.",

@@ -19,6 +19,27 @@ interface Config {
   timeout?: TranslationKey;
 }
 
+const API_ERROR_CODE_KEYS: Record<string, TranslationKey> = {
+  "property.not_found": "property.not_found.short",
+  "experience.not_found": "experience.not_found.short",
+  "room.not_found": "room.not_found.short",
+};
+
+export function translateApiError(
+  error: unknown,
+  t: (key: TranslationKey) => string,
+): string {
+  if (
+    error instanceof ApiError &&
+    (error.kind === "network" || error.kind === "timeout")
+  ) {
+    return t("common.error.network");
+  }
+  const code = extractErrorCode(error);
+  const codeKey = code ? API_ERROR_CODE_KEYS[code] : undefined;
+  return codeKey ? t(codeKey) : t("common.error.generic");
+}
+
 export function translateFormError(
   error: unknown,
   t: (key: TranslationKey) => string,

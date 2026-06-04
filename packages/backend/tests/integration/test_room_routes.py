@@ -227,3 +227,64 @@ async def test_list_property_rooms_404s_when_not_published(db_session):
             user=None,
         )
     assert exc_info.value.code == "property.not_found"
+
+
+@pytest.mark.asyncio
+async def test_list_property_rooms_allows_owner_when_not_published(db_session):
+    host = await _seed_host(db_session)
+    hotel = await _seed_hotel(db_session, host, status=PropertyStatus.DRAFT)
+    await _seed_room(db_session, host, hotel)
+
+    response = Response()
+    rooms = await list_property_rooms(
+        property_id=hotel.id,
+        response=response,
+        session=db_session,
+        user=host,
+    )
+
+    assert len(rooms) == 1
+
+
+@pytest.mark.asyncio
+async def test_list_property_rooms_allows_admin_when_not_published(db_session):
+    host = await _seed_host(db_session)
+    hotel = await _seed_hotel(db_session, host, status=PropertyStatus.DRAFT)
+    await _seed_room(db_session, host, hotel)
+    admin = User(
+        auth_user_id=uuid4().hex,
+        email=f"admin-{uuid4().hex[:8]}@example.com",
+        display_name="Admin",
+        is_admin=True,
+    )
+    db_session.add(admin)
+    await db_session.commit()
+    await db_session.refresh(admin)
+
+    response = Response()
+    rooms = await list_property_rooms(
+        property_id=hotel.id,
+        response=response,
+        session=db_session,
+        user=admin,
+    )
+
+    assert len(rooms) == 1
+
+
+@pytest.mark.asyncio
+async def test_list_property_rooms_404s_for_unrelated_user_when_not_published(db_session):
+    host = await _seed_host(db_session)
+    hotel = await _seed_hotel(db_session, host, status=PropertyStatus.DRAFT)
+    await _seed_room(db_session, host, hotel)
+    guest = await _seed_guest(db_session)
+
+    response = Response()
+    with pytest.raises(NotFoundError) as exc_info:
+        await list_property_rooms(
+            property_id=hotel.id,
+            response=response,
+            session=db_session,
+            user=guest,
+        )
+    assert exc_info.value.code == "property.not_found"
