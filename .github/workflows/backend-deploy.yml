@@ -1,12 +1,10 @@
-name: Backend Deploy
+name: Backend Image
 
 on:
   push:
     branches: [main]
     paths:
       - "packages/backend/**"
-      - "docker-compose.yml"
-      - "Caddyfile"
       - ".github/workflows/backend-deploy.yml"
   workflow_dispatch:
 
@@ -47,34 +45,3 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Copy compose files to VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
-          source: "docker-compose.yml,Caddyfile"
-          target: "/opt/ganitel/"
-
-      - name: Pull image and restart stack
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
-          script: |
-            set -euo pipefail
-            cd /opt/ganitel
-            docker compose pull
-            docker compose up -d --remove-orphans
-            docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile
-            docker image prune -f
