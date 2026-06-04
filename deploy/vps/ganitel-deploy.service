@@ -1,0 +1,9 @@
+[Unit]
+Description=ganitel pull-based deploy
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=deploy
+ExecStart=/opt/ganitel/repo/deploy/vps/deploy.sh
