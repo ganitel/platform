@@ -1,5 +1,5 @@
 api.ganitel.com {
-	encode zstd br gzip
+	encode zstd gzip
 
 	log {
 		output stdout
