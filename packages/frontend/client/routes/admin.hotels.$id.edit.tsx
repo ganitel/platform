@@ -1,11 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { LayoutGrid } from "lucide-react";
-import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useCallback, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 
-import { ActionLink } from "@/features/admin/admin-ui";
 import { getProperty, updateProperty } from "@/features/properties/api";
 import { HotelForm } from "@/features/properties/components/hotel-form";
+import { RoomTypeManager } from "@/features/properties/components/room-type-manager";
 import type {
   PropertyCreateInput,
   PropertyDetail,
@@ -41,12 +40,22 @@ export default function AdminHotelsEditRoute() {
 function AdminHotelsEditPage() {
   const tr = useT();
   const { id } = useParams<{ id: string }>();
+  const { hash } = useLocation();
 
   const detail = useQuery({
     queryKey: ["properties", "detail", id],
     queryFn: () => getProperty(id!),
     enabled: !!id,
   });
+
+  // The section mounts only after the query resolves, which is too late for
+  // ScrollRestoration's hash handling — scroll when the node appears instead.
+  const scrollToRoomsOnMount = useCallback(
+    (node: HTMLElement | null) => {
+      if (node && hash === "#rooms") node.scrollIntoView();
+    },
+    [hash],
+  );
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -61,20 +70,12 @@ function AdminHotelsEditPage() {
             </p>
           )}
         </div>
-        <div className="flex items-center gap-3">
-          <ActionLink
-            to={`/admin/hotels/${id}/rooms`}
-            icon={<LayoutGrid className="size-3.5" strokeWidth={1.75} />}
-          >
-            {tr("admin.hotels.action.manage_rooms")}
-          </ActionLink>
-          <Link
-            to="/admin/hotels"
-            className="text-sm text-ganitel-text-body hover:underline"
-          >
-            {tr("common.back")}
-          </Link>
-        </div>
+        <Link
+          to="/admin/hotels"
+          className="text-sm text-ganitel-text-body hover:underline"
+        >
+          {tr("common.back")}
+        </Link>
       </header>
 
       {detail.isPending ? (
@@ -84,7 +85,22 @@ function AdminHotelsEditPage() {
           {translateApiError(detail.error, tr)}
         </p>
       ) : (
-        <HotelEditFormContainer key={detail.data.id} detail={detail.data} />
+        <>
+          <HotelEditFormContainer key={detail.data.id} detail={detail.data} />
+          <section
+            id="rooms"
+            ref={scrollToRoomsOnMount}
+            className="mt-12 scroll-mt-8"
+          >
+            <h2 className="text-xl font-semibold text-ganitel-text-title">
+              {tr("admin.hotels.rooms.title")}
+            </h2>
+            <p className="mt-1 mb-6 text-sm text-ganitel-text-body">
+              {tr("admin.hotels.rooms.description")}
+            </p>
+            <RoomTypeManager propertyId={detail.data.id} />
+          </section>
+        </>
       )}
     </div>
   );
