@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useCallback, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 
 import { getProperty, updateProperty } from "@/features/properties/api";
 import { HotelForm } from "@/features/properties/components/hotel-form";
@@ -40,12 +40,22 @@ export default function AdminHotelsEditRoute() {
 function AdminHotelsEditPage() {
   const tr = useT();
   const { id } = useParams<{ id: string }>();
+  const { hash } = useLocation();
 
   const detail = useQuery({
     queryKey: ["properties", "detail", id],
     queryFn: () => getProperty(id!),
     enabled: !!id,
   });
+
+  // The section mounts only after the query resolves, which is too late for
+  // ScrollRestoration's hash handling — scroll when the node appears instead.
+  const scrollToRoomsOnMount = useCallback(
+    (node: HTMLElement | null) => {
+      if (node && hash === "#rooms") node.scrollIntoView();
+    },
+    [hash],
+  );
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -77,7 +87,11 @@ function AdminHotelsEditPage() {
       ) : (
         <>
           <HotelEditFormContainer key={detail.data.id} detail={detail.data} />
-          <section id="rooms" className="mt-12 scroll-mt-8">
+          <section
+            id="rooms"
+            ref={scrollToRoomsOnMount}
+            className="mt-12 scroll-mt-8"
+          >
             <h2 className="text-xl font-semibold text-ganitel-text-title">
               {tr("admin.hotels.rooms.title")}
             </h2>
