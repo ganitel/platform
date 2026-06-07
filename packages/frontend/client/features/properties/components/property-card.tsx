@@ -30,7 +30,10 @@ export function PropertyCard({ property, priority }: Props) {
     : PLACEHOLDER_COVER;
   const cover = transformImage(rawCover, { width: 600, quality: 75 });
   const srcSet = buildSrcSet(rawCover, CARD_WIDTHS, 75);
-  const priceEntry = pickPriceForLocale(property.prices, locale);
+  const isHotel = property.kind === "hotel";
+  const priceEntry = isHotel
+    ? (property.summary?.min_price ?? null)
+    : pickPriceForLocale(property.prices, locale);
   const price = priceEntry ? formatMoney(priceEntry, locale) : "";
 
   return (
@@ -64,15 +67,28 @@ export function PropertyCard({ property, priority }: Props) {
         </div>
 
         <p className="text-[11px] uppercase tracking-[0.14em] text-ganitel-text-placeholder">
-          {property.capacity} {t("property.guests")}
-          <span aria-hidden className="mx-1.5">
-            ·
-          </span>
-          {property.bedrooms} {t("property.bedrooms")}
+          {isHotel ? (
+            <>
+              {property.summary?.total_inventory ?? 0} {t("property.rooms")}
+            </>
+          ) : (
+            <>
+              {property.capacity} {t("property.guests")}
+              <span aria-hidden className="mx-1.5">
+                ·
+              </span>
+              {property.bedrooms} {t("property.bedrooms")}
+            </>
+          )}
         </p>
 
         {price && (
           <p className="text-[15px] leading-snug tracking-tight">
+            {isHotel && (
+              <span className="text-ganitel-text-placeholder">
+                {t("hotels.price.from")}{" "}
+              </span>
+            )}
             <span className="font-semibold text-ganitel-text-title">
               {price}
             </span>

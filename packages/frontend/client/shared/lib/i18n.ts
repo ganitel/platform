@@ -233,6 +233,7 @@ const dict = {
 
   "property.guests": { fr: "voyageurs", en: "guests" },
   "property.bedrooms": { fr: "chambres", en: "bedrooms" },
+  "property.rooms": { fr: "chambres", en: "rooms" },
   "property.beds": { fr: "lits", en: "beds" },
   "property.bathrooms": { fr: "salles de bain", en: "bathrooms" },
   "property.per_night": { fr: "par nuit", en: "per night" },
