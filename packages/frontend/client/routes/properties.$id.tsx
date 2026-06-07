@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { data } from "react-router";
 
 import type { Route } from "./+types/properties.$id";
@@ -6,6 +7,7 @@ import { AMENITY_ICONS } from "@/features/reference/amenity-icons";
 import { HostCard } from "@/features/properties/components/host-card";
 import { PropertyGallery } from "@/features/properties/components/property-gallery";
 import { BookingPanel } from "@/features/properties/components/booking-panel";
+import { RoomCard } from "@/features/properties/components/room-card";
 import { RoomPicker } from "@/features/properties/components/room-picker";
 import {
   useAmenityLabel,
@@ -28,7 +30,10 @@ import {
 import { pickPriceForLocale } from "@/shared/lib/price";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 import { seo, absoluteUrl } from "@/shared/lib/seo";
-import type { PropertyDetail } from "@/features/properties/types";
+import type {
+  PropertyDetail,
+  RoomTypePublic,
+} from "@/features/properties/types";
 
 export const headers: Route.HeadersFunction = () => ({
   "Cache-Control": PRIVATE_NO_STORE_CACHE,
@@ -140,14 +145,22 @@ export default function PropertyDetailRoute({
   const hotelCategoryLabel = useHotelCategoryLabel();
   const amenityLabel = useAmenityLabel();
   const isPrelaunch = usePrelaunch();
+  const [selectedRoom, setSelectedRoom] = useState<RoomTypePublic | null>(null);
 
+  const activeRooms =
+    property.kind === "hotel"
+      ? property.rooms.filter((room) => room.active)
+      : [];
+  const selectedRoomPrice = selectedRoom
+    ? pickPriceForLocale(selectedRoom.prices, locale)
+    : null;
   const pickedPrice =
     property.kind === "hotel"
-      ? (property.summary?.min_price ?? null)
+      ? (selectedRoomPrice ?? property.summary?.min_price ?? null)
       : pickPriceForLocale(property.prices, locale);
   const priceText = pickedPrice ? formatMoney(pickedPrice, locale) : "";
   const priceLabel =
-    property.kind === "hotel"
+    property.kind === "hotel" && !selectedRoomPrice
       ? t("hotels.price.from")
       : t("property.per_night");
   const eyebrow =
@@ -155,14 +168,27 @@ export default function PropertyDetailRoute({
       ? hotelCategoryLabel(property.property_type)
       : propertyTypeLabel(property.property_type);
 
+  const mustPickRoom =
+    isPrelaunch &&
+    property.kind === "hotel" &&
+    activeRooms.length > 0 &&
+    !selectedRoom;
+
   const panel = isPrelaunch ? (
-    <WaitlistPanel
-      itemId={property.id}
-      kind="property"
-      title={property.title}
-      price={pickedPrice ?? { amount: "0", currency: "XAF" }}
-      priceLabel={priceLabel}
-    />
+    mustPickRoom ? (
+      <PickRoomPrompt />
+    ) : (
+      <WaitlistPanel
+        itemId={property.id}
+        kind="property"
+        title={property.title}
+        price={pickedPrice ?? { amount: "0", currency: "XAF" }}
+        priceLabel={priceLabel}
+        collectTravelDates
+        room={selectedRoom}
+        maxGuests={property.capacity ?? undefined}
+      />
+    )
   ) : property.kind === "hotel" ? (
     <RoomPicker property={property} />
   ) : (
@@ -220,6 +246,27 @@ export default function PropertyDetailRoute({
               )}
             </div>
 
+            {isPrelaunch &&
+              property.kind === "hotel" &&
+              activeRooms.length > 0 && (
+                <div>
+                  <h2 className="mb-3 text-xl text-ganitel-text-title">
+                    {t("hotels.room.choose_yours")}
+                  </h2>
+                  <div className="space-y-3">
+                    {activeRooms.map((room) => (
+                      <RoomCard
+                        key={room.id}
+                        room={room}
+                        selected={selectedRoom?.id === room.id}
+                        onSelect={() => setSelectedRoom(room)}
+                        showAvailability={false}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
             {property.amenities.length > 0 ? (
               <div>
                 <h2 className="mb-3 text-xl text-ganitel-text-title">
@@ -264,6 +311,20 @@ export default function PropertyDetailRoute({
         {panel}
       </MobileDetailPanel>
     </>
+  );
+}
+
+function PickRoomPrompt() {
+  const t = useT();
+  return (
+    <div className="rounded-2xl border border-ganitel-stroke-neutral bg-white p-6 shadow-sm">
+      <p className="text-xl font-bold leading-tight tracking-tight text-ganitel-text-title">
+        {t("waitlist.pick_room.title")}
+      </p>
+      <p className="mt-1.5 text-sm leading-relaxed text-ganitel-text-subtitle">
+        {t("waitlist.pick_room.sub")}
+      </p>
+    </div>
   );
 }
 

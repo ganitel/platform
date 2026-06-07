@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { BadgeCheck, Mail } from "lucide-react";
+import type { DateRange } from "react-day-picker";
 
 import { joinWaitlist } from "@/features/waitlist/api";
+import { buildWaitlistPayload } from "@/features/waitlist/payload";
 import { WAITLIST_FIELD_ERROR_KEYS } from "@/features/waitlist/error-keys";
 import { FormErrorAlert } from "@/shared/components/form-error-alert";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
@@ -12,7 +14,8 @@ import { useLocale, useT } from "@/shared/lib/i18n";
 import { translateFormError } from "@/shared/lib/form-error";
 import { INPUT_CLASS } from "@/shared/lib/form-styles";
 import { formatMoney } from "@/shared/lib/format";
-import type { Money } from "@/features/properties/types";
+import { Calendar } from "@/shared/ui/calendar";
+import type { Money, RoomTypePublic } from "@/features/properties/types";
 
 interface Props {
   itemId: string;
@@ -20,6 +23,9 @@ interface Props {
   title: string;
   price: Money;
   priceLabel: string;
+  collectTravelDates?: boolean;
+  room?: RoomTypePublic | null;
+  maxGuests?: number;
 }
 
 type State = "idle" | "submitting" | "done" | "error";
@@ -30,6 +36,9 @@ export function WaitlistPanel({
   title,
   price,
   priceLabel,
+  collectTravelDates = false,
+  room = null,
+  maxGuests,
 }: Props) {
   const locale = useLocale();
   const t = useT();
@@ -41,22 +50,32 @@ export function WaitlistPanel({
   const [phoneValid, setPhoneValid] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [errorDetail, setErrorDetail] = useState("");
+  const [range, setRange] = useState<DateRange | undefined>();
+  const [guests, setGuests] = useState(1);
+
+  const guestCap = room?.max_guests ?? maxGuests ?? 16;
+  const datesReady = Boolean(range?.from && range?.to && range.to > range.from);
+  const travelReady = !collectTravelDates || datesReady;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
+    if (!email || !travelReady) return;
     setState("submitting");
     setErrorMessage("");
     setErrorDetail("");
     try {
-      const result = await joinWaitlist({
-        email,
-        name: name || undefined,
-        phone: phone || undefined,
-        ...(kind === "property"
-          ? { property_id: itemId }
-          : { experience_id: itemId }),
-      });
+      const result = await joinWaitlist(
+        buildWaitlistPayload({
+          email,
+          name,
+          phone,
+          kind,
+          itemId,
+          range: collectTravelDates ? range : undefined,
+          guests: collectTravelDates ? guests : undefined,
+          roomTypeId: room?.id,
+        }),
+      );
       setEmailSent(result.confirmation_email_sent);
       setState("done");
     } catch (error) {
@@ -111,6 +130,70 @@ export function WaitlistPanel({
               </p>
             </div>
 
+            {room && (
+              <div className="rounded-xl border border-ganitel-stroke-neutral bg-ganitel-background-secondary px-4 py-3">
+                <p className="text-[10px] uppercase tracking-[0.16em] text-ganitel-text-placeholder">
+                  {t("waitlist.room")}
+                </p>
+                <p className="mt-0.5 text-sm font-semibold text-ganitel-text-title">
+                  {room.title}
+                </p>
+              </div>
+            )}
+
+            {collectTravelDates && (
+              <div className="space-y-3">
+                <p className="text-xs uppercase tracking-[0.16em] text-ganitel-text-placeholder">
+                  {t("waitlist.dates")}
+                </p>
+                <div data-testid="waitlist-calendar">
+                  <Calendar
+                    mode="range"
+                    selected={range}
+                    onSelect={setRange}
+                    disabled={{ before: new Date() }}
+                    numberOfMonths={1}
+                    className="-mx-2"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-ganitel-text-subtitle">
+                    {t("property.guests")}
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      aria-label={t("booking.remove_guest")}
+                      onClick={() =>
+                        setGuests((current) => Math.max(1, current - 1))
+                      }
+                      disabled={guests <= 1}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-ganitel-stroke-neutral text-base disabled:opacity-40"
+                    >
+                      −
+                    </button>
+                    <span
+                      data-testid="waitlist-guests"
+                      className="w-4 text-center text-sm font-medium"
+                    >
+                      {guests}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label={t("booking.add_guest")}
+                      onClick={() =>
+                        setGuests((current) => Math.min(guestCap, current + 1))
+                      }
+                      disabled={guests >= guestCap}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-ganitel-stroke-neutral text-base disabled:opacity-40"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2.5">
               <IconInput
                 icon={Mail}
@@ -145,7 +228,7 @@ export function WaitlistPanel({
             )}
 
             <FormSubmitButton
-              disabled={!email || !phoneValid}
+              disabled={!email || !phoneValid || !travelReady}
               isSubmitting={state === "submitting"}
               submittingLabel={t("waitlist.submitting")}
             >

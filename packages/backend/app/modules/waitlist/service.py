@@ -24,6 +24,7 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> tuple[Wa
         phone=body.phone,
         property_id=body.property_id,
         experience_id=body.experience_id,
+        room_type_id=body.room_type_id,
         interest=body.interest,
         headcount=body.headcount,
         budget_range=body.budget_range,

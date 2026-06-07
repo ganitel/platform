@@ -35,6 +35,9 @@ class WaitlistEntry(Base):
     experience_id: Mapped[UUID | None] = mapped_column(
         Uuid(), ForeignKey("experiences.id", ondelete="SET NULL"), nullable=True
     )
+    room_type_id: Mapped[UUID | None] = mapped_column(
+        Uuid(), ForeignKey("room_types.id", ondelete="SET NULL"), nullable=True
+    )
     interest: Mapped[str | None] = mapped_column(String(32))
     headcount: Mapped[int | None] = mapped_column(Integer())
     budget_range: Mapped[str | None] = mapped_column(String(32))

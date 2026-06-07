@@ -1,11 +1,12 @@
 import { apiClient } from "@/shared/api/client";
 
-interface WaitlistPayload {
+export interface WaitlistPayload {
   email: string;
   name?: string;
   phone?: string;
   property_id?: string;
   experience_id?: string;
+  room_type_id?: string;
   interest?: "renting" | "experiences" | "both";
   travel_start?: string;
   travel_end?: string;
