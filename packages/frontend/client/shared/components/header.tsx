@@ -80,7 +80,7 @@ export function Header() {
             <Link
               to="/"
               className="hidden items-center text-ganitel-text-title md:inline-flex"
-              aria-label="ganitel"
+              aria-label="Ganitel"
             >
               <LogoMark />
             </Link>
@@ -90,7 +90,7 @@ export function Header() {
             <Link
               to="/"
               className="text-ganitel-text-title md:hidden"
-              aria-label="ganitel"
+              aria-label="Ganitel"
             >
               <LogoMark />
             </Link>

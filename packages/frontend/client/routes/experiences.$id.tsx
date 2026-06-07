@@ -45,7 +45,7 @@ export const meta: Route.MetaFunction = ({
     });
   }
   const e = data.experience;
-  const title = `${e.title} — ${e.city} | ganitel`;
+  const title = `${e.title} — ${e.city} | Ganitel`;
   const description = (
     e.description?.slice(0, 160) ||
     translate("property.type_in_city", locale)

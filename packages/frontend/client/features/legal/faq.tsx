@@ -8,12 +8,17 @@ import {
   AccordionTrigger,
 } from "@/shared/ui/accordion";
 
-import { FAQ_ITEMS } from "./faq-items";
+import { FAQ_CATEGORIES, FAQ_ITEMS } from "./faq-items";
 
 export function Faq() {
   const t = useT();
   const email = t("legal.contact_email");
   const ref = useReveal<HTMLDivElement>();
+
+  const sections = FAQ_CATEGORIES.map((category) => ({
+    ...category,
+    items: FAQ_ITEMS.filter((item) => item.category === category.id),
+  })).filter((section) => section.items.length > 0);
 
   return (
     <>
@@ -32,26 +37,33 @@ export function Faq() {
 
       <section className="px-6 pb-16 md:px-12 md:pb-20">
         <div ref={ref} data-reveal="" className="mx-auto max-w-3xl">
-          <Accordion
-            type="single"
-            collapsible
-            className="border-t border-ganitel-stroke-neutral"
-          >
-            {FAQ_ITEMS.map((item) => (
-              <AccordionItem
-                key={item.id}
-                value={item.id}
-                className="border-ganitel-stroke-neutral"
+          {sections.map((section) => (
+            <div key={section.id} className="mb-12 last:mb-0">
+              <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-ganitel-secondary">
+                {t(section.labelKey)}
+              </h2>
+              <Accordion
+                type="single"
+                collapsible
+                className="border-t border-ganitel-stroke-neutral"
               >
-                <AccordionTrigger className="text-left text-base font-bold tracking-[-0.02em] text-ganitel-text-title md:text-lg">
-                  {t(item.questionKey)}
-                </AccordionTrigger>
-                <AccordionContent className="text-[15px] leading-[1.7] text-ganitel-text-subtitle md:text-base">
-                  {t(item.answerKey)}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+                {section.items.map((item) => (
+                  <AccordionItem
+                    key={item.id}
+                    value={item.id}
+                    className="border-ganitel-stroke-neutral"
+                  >
+                    <AccordionTrigger className="text-left text-base font-bold tracking-[-0.02em] text-ganitel-text-title md:text-lg">
+                      {t(item.questionKey)}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-[15px] leading-[1.7] text-ganitel-text-subtitle md:text-base">
+                      {t(item.answerKey)}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+          ))}
 
           <p className="mt-12 text-sm leading-[1.7] text-ganitel-text-subtitle">
             {t("faq.still_need_help")}{" "}
