@@ -349,6 +349,16 @@ const dict = {
     fr: "À partir de",
     en: "Starting from",
   },
+  "waitlist.room": { fr: "Chambre choisie", en: "Chosen room" },
+  "waitlist.dates": { fr: "Vos dates", en: "Your dates" },
+  "waitlist.pick_room.title": {
+    fr: "Choisissez votre chambre",
+    en: "Choose your room",
+  },
+  "waitlist.pick_room.sub": {
+    fr: "Sélectionnez la chambre que vous souhaitez réserver pour rejoindre la liste d'attente.",
+    en: "Select the room you'd like to book to join the waitlist.",
+  },
 
   "auth.layout.tagline": {
     fr: "Séjours et expériences en Afrique centrale, choisis avec soin.",

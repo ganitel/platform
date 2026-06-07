@@ -232,6 +232,11 @@ class HostPublic(BaseModel):
     display_name: str
     avatar_url: str | None
 
+    @field_validator("display_name")
+    @classmethod
+    def _fallback_to_platform_name(cls, value: str) -> str:
+        return value.strip() or "Ganitel"
+
 
 class PropertyShowcaseAmenities(BaseModel):
     """Curated amenity flags for listing cards and quick filters."""

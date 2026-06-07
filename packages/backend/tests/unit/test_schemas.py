@@ -13,6 +13,7 @@ from app.modules.bookings.schemas import BookingCreateIn, InitiatePaymentIn
 from app.modules.media.schemas import MediaUploadIn
 from app.modules.properties.schemas import (
     GeoPoint,
+    HostPublic,
     PropertyCreateIn,
     PropertyUpdateIn,
 )
@@ -475,3 +476,33 @@ def test_waitlist_rejects_too_many_children() -> None:
 def test_waitlist_traveler_children_defaults_optional() -> None:
     entry = WaitlistEntryIn.model_validate(_traveler_payload(children=None))
     assert entry.children is None
+
+
+def test_waitlist_accepts_room_type_id() -> None:
+    entry = WaitlistEntryIn.model_validate(
+        {"email": "guest@example.com", "property_id": UUID_FIXTURE, "room_type_id": UUID_FIXTURE}
+    )
+    assert str(entry.room_type_id) == UUID_FIXTURE
+
+
+def test_waitlist_room_type_id_defaults_to_none() -> None:
+    entry = WaitlistEntryIn.model_validate({"email": "guest@example.com"})
+    assert entry.room_type_id is None
+
+
+# -------------------- host public --------------------
+
+
+def test_host_public_blank_display_name_falls_back_to_ganitel() -> None:
+    host = HostPublic(id=uuid4(), display_name="", avatar_url=None)
+    assert host.display_name == "Ganitel"
+
+
+def test_host_public_whitespace_display_name_falls_back_to_ganitel() -> None:
+    host = HostPublic(id=uuid4(), display_name="   ", avatar_url=None)
+    assert host.display_name == "Ganitel"
+
+
+def test_host_public_keeps_real_display_name() -> None:
+    host = HostPublic(id=uuid4(), display_name="Aïcha N.", avatar_url=None)
+    assert host.display_name == "Aïcha N."

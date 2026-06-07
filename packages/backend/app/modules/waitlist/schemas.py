@@ -48,6 +48,7 @@ class WaitlistEntryIn(BaseModel):
 
     property_id: UUID | None = None
     experience_id: UUID | None = None
+    room_type_id: UUID | None = None
     interest: Interest | None = None
     headcount: int | None = Field(default=None, ge=1, le=500)
     budget_range: BudgetRange | None = None
