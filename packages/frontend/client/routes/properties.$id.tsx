@@ -46,7 +46,7 @@ export const meta: Route.MetaFunction = ({ data, params }) => {
     });
   }
   const p = data.property;
-  const title = `${p.title} — ${p.city} | ganitel`;
+  const title = `${p.title} — ${p.city} | Ganitel`;
   const description = (
     p.description?.trim().slice(0, 160) ||
     translate("property.type_in_city", locale)

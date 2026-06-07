@@ -78,7 +78,7 @@ export const links: Route.LinksFunction = () => {
 };
 
 export const meta: Route.MetaFunction = () => [
-  { title: "ganitel — séjours et expériences" },
+  { title: "Ganitel — séjours et expériences" },
 ];
 
 export async function loader({ request }: Route.LoaderArgs) {

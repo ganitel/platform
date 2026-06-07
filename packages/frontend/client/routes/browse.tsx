@@ -64,7 +64,7 @@ export const meta: Route.MetaFunction = ({ location, data }) => {
       : "browse.section.stays",
     locale,
   );
-  const title = q ? `${section} « ${q} » — ganitel` : `${section} — ganitel`;
+  const title = q ? `${section} « ${q} » — Ganitel` : `${section} — Ganitel`;
   const description = translate(
     kind === "experiences"
       ? "browse.meta.description.experiences"
