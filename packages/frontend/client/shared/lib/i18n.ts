@@ -131,8 +131,8 @@ const dict = {
     en: "Hand-picked",
   },
   "about.promise.04.body": {
-    fr: "Une sélection volontairement réduite, pas un annuaire.",
-    en: "A small, considered selection, not a directory.",
+    fr: "Une sélection triée sur le volet : le meilleur, pas un annuaire.",
+    en: "A hand-picked selection: the best, not a directory.",
   },
   "landing.statement.eyebrow": { fr: "Notre promesse", en: "Our promise" },
   "landing.statement.body": {
