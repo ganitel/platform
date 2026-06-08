@@ -87,8 +87,8 @@ const dict = {
   "landing.hero.title": { fr: "Bienvenue chez", en: "Welcome to" },
   "landing.hero.title_em": { fr: "Ganitel.", en: "Ganitel." },
   "landing.hero.lede": {
-    fr: "Ganitel est la marketplace de loisirs à haute confiance d'Afrique — pensée pour les professionnels en quête d'un vrai repos, pour la diaspora qui veut renouer avec le continent, et pour les voyageurs en quête de leur prochaine destination inoubliable.",
-    en: "Ganitel is Africa's high-trust leisure marketplace — built for professionals seeking true rest, for the African diaspora reconnecting with the continent, and for travellers chasing their next unforgettable destination.",
+    fr: "Ganitel fait de l'Afrique votre prochaine destination vacances. Pour les professionnels, les familles et les groupes du monde entier, découvrez des séjours et des expériences qui valent le voyage.",
+    en: "Ganitel makes Africa your next holiday. For professionals, families, and groups from anywhere in the world, discover stays and experiences worth the journey.",
   },
   "landing.hero.cta.browse": {
     fr: "Découvrir les séjours",
@@ -131,13 +131,13 @@ const dict = {
     en: "Hand-picked",
   },
   "about.promise.04.body": {
-    fr: "Une sélection volontairement réduite — pas un annuaire.",
-    en: "A small, considered selection — not a directory.",
+    fr: "Une sélection triée sur le volet : le meilleur, pas un annuaire.",
+    en: "A hand-picked selection: the best, not a directory.",
   },
   "landing.statement.eyebrow": { fr: "Notre promesse", en: "Our promise" },
   "landing.statement.body": {
-    fr: "Un réseau choisi d'hôtes, de guides et de chauffeurs au Cameroun — sélectionnés parce qu'on y enverrait notre propre famille.",
-    en: "A vetted network of hosts, guides and drivers across Cameroon — chosen because we'd send our own family to them.",
+    fr: "Un réseau choisi d'hôtes, de guides et de chauffeurs au Cameroun, sélectionnés parce qu'on y enverrait notre propre famille.",
+    en: "A vetted network of hosts, guides and drivers across Cameroon, chosen because we'd send our own family to them.",
   },
   "landing.statement.sub": {
     fr: "Aucun annuaire. Aucun remplissage. Chaque adresse visitée, chaque hôte connu de nom.",
@@ -150,8 +150,8 @@ const dict = {
   },
   "landing.destinations.title_em": { fr: "visages.", en: "faces." },
   "landing.destinations.lede": {
-    fr: "De la côte volcanique du Sud-Ouest aux plateaux de l'Ouest, des forêts de l'Est à la côte du Littoral — choisissez votre Cameroun.",
-    en: "From the volcanic South-West coast to the Western highlands, the Eastern forests to the Littoral shore — pick your Cameroon.",
+    fr: "De la côte volcanique du Sud-Ouest aux plateaux de l'Ouest, des forêts de l'Est à la côte du Littoral. Choisissez votre Cameroun.",
+    en: "From the volcanic South-West coast to the Western highlands, the Eastern forests to the Littoral shore. Pick your Cameroon.",
   },
   "landing.destinations.sw.title": { fr: "Sud-Ouest", en: "South-West" },
   "landing.destinations.sw.blurb": {
@@ -163,8 +163,8 @@ const dict = {
     en: "Western highlands",
   },
   "landing.destinations.highlands.blurb": {
-    fr: "Dschang, Bafang, Bangang — collines vertes et chefferies bamiléké.",
-    en: "Dschang, Bafang, Bangang — green hills and Bamileke chiefdoms.",
+    fr: "Dschang, Bafang, Bafoussam : collines vertes et chefferies bamiléké.",
+    en: "Dschang, Bafang, Bafoussam: green hills and Bamileke chiefdoms.",
   },
   "landing.destinations.east.title": {
     fr: "Forêts de l'Est",
@@ -220,7 +220,7 @@ const dict = {
   },
   "browse.lede.experiences": {
     fr: "Des expériences à vivre autour de nos logements ou en escapade.",
-    en: "Experiences worth the trip — around our stays or as standalone escapes.",
+    en: "Experiences worth the trip, around our stays or as standalone escapes.",
   },
   "browse.empty.stays": {
     fr: "Aucun logement ne correspond à votre recherche.",
@@ -338,8 +338,8 @@ const dict = {
     en: "We'll reach out to you first when this experience opens.",
   },
   "waitlist.success.email": {
-    fr: "Un e-mail de confirmation est en route — vérifiez votre boîte de réception.",
-    en: "A confirmation email is on its way — check your inbox.",
+    fr: "Un e-mail de confirmation est en route. Vérifiez votre boîte de réception.",
+    en: "A confirmation email is on its way. Check your inbox.",
   },
   "waitlist.error": {
     fr: "Une erreur s'est produite. Réessayez.",
@@ -637,21 +637,21 @@ const dict = {
     en: "We'll reach out as soon as we launch. Thank you for your trust.",
   },
   "join.success.email": {
-    fr: "Un e-mail de confirmation est en route — vérifiez votre boîte de réception.",
-    en: "A confirmation email is on its way — check your inbox.",
+    fr: "Un e-mail de confirmation est en route. Vérifiez votre boîte de réception.",
+    en: "A confirmation email is on its way. Check your inbox.",
   },
   "join.success.back": { fr: "Retour à l'accueil", en: "Back to home" },
 
   "nav.about": { fr: "Qui sommes-nous ?", en: "About us" },
   "about.tag": { fr: "Notre histoire", en: "Our story" },
   "about.title": {
-    fr: "Nous aimons le Cameroun —",
-    en: "We love Cameroon —",
+    fr: "Nous aimons le Cameroun,",
+    en: "We love Cameroon,",
   },
   "about.title_em": { fr: "chaque recoin.", en: "every corner of it." },
   "about.lede": {
-    fr: "De la côte volcanique du Sud-Ouest aux plateaux de l'Adamaoua, des forêts de l'Est à l'agitation de Douala — le Cameroun, c'est des dizaines de pays sous un même drapeau, et nous voulons que vous le ressentiez.",
-    en: "From the volcanic coast of the South-West to the highlands of the Adamawa, the rainforests of the East to the bustle of Douala — Cameroon is dozens of countries living under one flag, and we want you to feel it.",
+    fr: "De la côte volcanique du Sud-Ouest aux plateaux de l'Adamaoua, des forêts de l'Est à l'agitation de Douala. Le Cameroun, c'est des dizaines de pays sous un même drapeau, et nous voulons que vous le ressentiez.",
+    en: "From the volcanic coast of the South-West to the highlands of the Adamawa, the rainforests of the East to the bustle of Douala. Cameroon is dozens of countries living under one flag, and we want you to feel it.",
   },
   "about.statement": {
     fr: "En collaborant avec des partenaires locaux d'élite à travers des destinations triées sur le volet, un réseau de guides certifiés et des leaders du transport de confiance, nous garantissons sécurité, confort et une expérience unique sans égal.",
@@ -662,8 +662,8 @@ const dict = {
     en: "Human-Centric Impact",
   },
   "about.impact.body": {
-    fr: "Notre service permet à des milliers de professionnels de se libérer enfin du burn-out et de retrouver leur poste véritablement ressourcés. En restaurant l'énergie des équipes, nous évitons aux entreprises des milliards de revenus perdus en performance dégradée — et nous contribuons directement à la croissance du PIB africain.",
-    en: "Our service ensures that thousands of professionals can finally get rid of work-burnout and return to their workplaces properly rejuvenated. By restoring workforce energy, we are saving businesses billions in revenue lost due to low performance and directly improving Africa's GDP.",
+    fr: "Nous aidons chacun à s'éloigner du burn-out et à se reposer vraiment. Que vous reveniez renouer avec le continent, que vous ralentissiez en famille ou que vous partiez vivre de nouvelles expériences, Ganitel existe pour vous offrir le temps et le lieu de vous retrouver.",
+    en: "We help people step away from burnout and truly rest. Whether you're reconnecting with the continent, slowing down with family, or chasing a new experience, Ganitel gives you the time and the place to come back to yourself.",
   },
   "about.vision.title": { fr: "Notre vision", en: "Our Vision" },
   "about.vision.body": {
@@ -687,8 +687,8 @@ const dict = {
   },
   "about.cta": { fr: "Découvrir les séjours", en: "Browse stays" },
   "about.hero.cta": {
-    fr: "Découvrir notre vision",
-    en: "Discover our vision",
+    fr: "Pourquoi nous faire confiance",
+    en: "Why trust us",
   },
   "about.trust.tag": {
     fr: "Le socle de la confiance",
@@ -1271,7 +1271,7 @@ Ganitel est responsable du traitement de vos données personnelles dans le cadre
 ## 2. Données que nous collectons
 
 - **Identité et contact** : nom, prénom, e-mail, numéro de téléphone, langue préférée.
-- **Données de compte** : identifiant Clerk, rôles (voyageur, hôte, administrateur), statut de vérification.
+- **Données de compte** : identifiant Supabase, rôles (voyageur, hôte, administrateur), statut de vérification.
 - **Données de réservation** : dates, voyageurs, message à l'hôte, montants.
 - **Données de paiement** : transmises directement à Flutterwave ; nous conservons uniquement les identifiants de transaction et les statuts.
 - **Données techniques** : journaux applicatifs, type d'appareil, adresse IP, pour des raisons de sécurité et de qualité de service.
@@ -1293,7 +1293,7 @@ Nous traitons vos données sur la base : (i) de l'exécution du contrat qui nous
 
 Nous partageons uniquement ce qui est nécessaire avec :
 
-- **Clerk** — gestion d'identité et d'authentification.
+- **Supabase** — gestion d'identité et d'authentification.
 - **Flutterwave** — traitement des paiements (Mobile Money, Wave, cartes).
 - **Sendchamp** — envoi de SMS transactionnels (codes, notifications de réservation).
 - **Hébergeurs et CDN** que nous utilisons pour faire fonctionner le site.
@@ -1338,7 +1338,7 @@ Ganitel is the data controller for personal data processed when you use **ganite
 ## 2. Data we collect
 
 - **Identity and contact**: first name, last name, email, phone number, preferred language.
-- **Account data**: Clerk user ID, roles (traveler, host, administrator), verification status.
+- **Account data**: Supabase user ID, roles (traveler, host, administrator), verification status.
 - **Booking data**: dates, traveler count, message to host, amounts.
 - **Payment data**: sent directly to Flutterwave; we only keep transaction IDs and statuses.
 - **Technical data**: application logs, device type, IP address, for security and quality of service.
@@ -1360,7 +1360,7 @@ We process your data based on: (i) the performance of our contract with you, (ii
 
 We share only what is strictly necessary with:
 
-- **Clerk** — identity and authentication management.
+- **Supabase** — identity and authentication management.
 - **Flutterwave** — payment processing (Mobile Money, Wave, cards).
 - **Sendchamp** — transactional SMS (codes, booking notifications).
 - **Hosting and CDN providers** powering the site.
@@ -1464,8 +1464,8 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
     en: "How do I list my place on Ganitel?",
   },
   "faq.q.host_listing.answer": {
-    fr: "Écrivez-nous à hello@ganitel.com avec quelques photos et l'adresse du bien. Chaque logement est visité par notre équipe avant d'être publié — c'est ce qui garantit la qualité du catalogue.",
-    en: "Write to hello@ganitel.com with a few photos and the property address. Every stay is visited by our team before going live — that's what keeps the catalog quality high.",
+    fr: "Écrivez-nous à hello@ganitel.com avec quelques photos et l'adresse du bien. Chaque logement est visité par notre équipe avant d'être publié, c'est ce qui garantit la qualité du catalogue.",
+    en: "Write to hello@ganitel.com with a few photos and the property address. Every stay is visited by our team before going live, and that's what keeps the catalog quality high.",
   },
 
   "faq.q.verification.question": {
@@ -1535,7 +1535,7 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
   },
   "browse.meta.description.experiences": {
     fr: "Expériences à vivre au Cameroun autour de nos logements ou en escapade.",
-    en: "Experiences to live in Cameroon — around our stays or as a getaway.",
+    en: "Experiences to live in Cameroon, around our stays or as a getaway.",
   },
 
   "property.not_found.title": {

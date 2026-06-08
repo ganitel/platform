@@ -1,8 +1,8 @@
-# ganitel
+# Ganitel
 
 **Africa-first marketplace for housing, experiences, and payments.**
 
-ganitel lets travellers browse and book stays and experiences, and lets
+Ganitel lets travellers browse and book stays and experiences, and lets
 hosts list properties and experiences from a single account. The interface
 ships in French and English (mobile-first, anonymous browsing).
 
@@ -20,7 +20,7 @@ ships in French and English (mobile-first, anonymous browsing).
 - **Transactional outbox + per-user idempotency table** as first-class
   modules, ready for event dispatch and safe request replay.
 - **React Router v7 in framework mode with SSR**, Tailwind v4, shadcn/ui on
-  top of Radix, TanStack Query, react-hook-form + Zod, Clerk for auth.
+  top of Radix, TanStack Query, react-hook-form + Zod, Supabase Auth.
 - **Demo data** seeds ~10 properties and 6 experiences across Cameroon,
   Senegal, and Côte d'Ivoire (`make seed`, idempotent).
 
@@ -30,7 +30,7 @@ ships in French and English (mobile-first, anonymous browsing).
 - **Bun** for the frontend
 - **PostgreSQL with PostGIS** on `localhost:5432` (override via
   `DATABASE_URL`)
-- A **Clerk** application for the auth keys referenced in `.env`
+- A **Supabase** project for the auth keys referenced in `.env`
 
 ## Get started
 
