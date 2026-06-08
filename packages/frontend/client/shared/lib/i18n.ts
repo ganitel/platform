@@ -687,8 +687,8 @@ const dict = {
   },
   "about.cta": { fr: "Découvrir les séjours", en: "Browse stays" },
   "about.hero.cta": {
-    fr: "Découvrir notre vision",
-    en: "Discover our vision",
+    fr: "Pourquoi nous faire confiance",
+    en: "Why trust us",
   },
   "about.trust.tag": {
     fr: "Le socle de la confiance",
