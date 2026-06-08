@@ -662,8 +662,8 @@ const dict = {
     en: "Human-Centric Impact",
   },
   "about.impact.body": {
-    fr: "Notre service permet à des milliers de professionnels de se libérer enfin du burn-out et de retrouver leur poste véritablement ressourcés. En restaurant l'énergie des équipes, nous évitons aux entreprises des milliards de revenus perdus en performance dégradée, et nous contribuons directement à la croissance du PIB africain.",
-    en: "Our service ensures that thousands of professionals can finally get rid of work-burnout and return to their workplaces properly rejuvenated. By restoring workforce energy, we are saving businesses billions in revenue lost due to low performance and directly improving Africa's GDP.",
+    fr: "Nous aidons chacun à s'éloigner du burn-out et à se reposer vraiment. Que vous reveniez renouer avec le continent, que vous ralentissiez en famille ou que vous partiez vivre de nouvelles expériences, Ganitel existe pour vous offrir le temps et le lieu de vous retrouver.",
+    en: "We help people step away from burnout and truly rest. Whether you're reconnecting with the continent, slowing down with family, or chasing a new experience, Ganitel gives you the time and the place to come back to yourself.",
   },
   "about.vision.title": { fr: "Notre vision", en: "Our Vision" },
   "about.vision.body": {
