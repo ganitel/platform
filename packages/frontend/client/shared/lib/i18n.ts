@@ -163,8 +163,8 @@ const dict = {
     en: "Western highlands",
   },
   "landing.destinations.highlands.blurb": {
-    fr: "Dschang, Bafang, Bangang : collines vertes et chefferies bamiléké.",
-    en: "Dschang, Bafang, Bangang: green hills and Bamileke chiefdoms.",
+    fr: "Dschang, Bafang, Bafoussam : collines vertes et chefferies bamiléké.",
+    en: "Dschang, Bafang, Bafoussam: green hills and Bamileke chiefdoms.",
   },
   "landing.destinations.east.title": {
     fr: "Forêts de l'Est",
