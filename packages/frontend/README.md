@@ -1,6 +1,6 @@
-# ganitel Frontend
+# Ganitel Frontend
 
-React Router v7 app (framework mode + SSR) for the ganitel marketplace —
+React Router v7 app (framework mode + SSR) for the Ganitel marketplace —
 stays and experiences, mobile-first, fr/en. Auth via Clerk, calls the
 backend at `/api`.
 

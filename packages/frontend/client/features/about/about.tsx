@@ -106,13 +106,13 @@ function Hero() {
         />
         <div className="mt-8 flex justify-center">
           <PillLink
-            to="#vision"
+            to="#trust"
             variant="paper"
             arrow
             onClick={(event) => {
               event.preventDefault();
               document
-                .getElementById("vision")
+                .getElementById("trust")
                 ?.scrollIntoView({ behavior: "smooth" });
             }}
           >
@@ -128,7 +128,10 @@ function Trust() {
   const t = useT();
   const ref = useReveal<HTMLDivElement>();
   return (
-    <section className="px-6 pt-16 pb-0 md:px-12 md:pt-24">
+    <section
+      id="trust"
+      className="scroll-mt-16 px-6 pt-16 pb-0 md:px-12 md:pt-24"
+    >
       <div
         ref={ref}
         data-reveal=""

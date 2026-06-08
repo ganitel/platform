@@ -1,8 +1,8 @@
-# ganitel
+# Ganitel
 
 **Africa-first marketplace for housing, experiences, and payments.**
 
-ganitel lets travellers browse and book stays and experiences, and lets
+Ganitel lets travellers browse and book stays and experiences, and lets
 hosts list properties and experiences from a single account. The interface
 ships in French and English (mobile-first, anonymous browsing).
 
