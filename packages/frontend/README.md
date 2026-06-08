@@ -1,7 +1,7 @@
 # Ganitel Frontend
 
 React Router v7 app (framework mode + SSR) for the Ganitel marketplace —
-stays and experiences, mobile-first, fr/en. Auth via Clerk, calls the
+stays and experiences, mobile-first, fr/en. Auth via Supabase, calls the
 backend at `/api`.
 
 ## Layout
@@ -10,8 +10,8 @@ backend at `/api`.
 client/
   root.tsx                 Root layout, providers
   routes.ts / routes/      File-based routes (RR7 framework mode)
-  entry.client.tsx
-  entry.server.tsx         SSR entry (Clerk middleware bridge lives here)
+  entry.client.tsx         Client entry (Supabase session hydration)
+  lib/supabase.ts          Supabase browser + SSR clients (.server.ts)
   features/                One folder per feature
     auth/   landing/   browse-style entries
     properties/   experiences/   bookings/   profile/   reference/
@@ -36,8 +36,8 @@ client/
 - **Vite 8** + **Tailwind v4** + **shadcn/ui** on Radix primitives
 - **TanStack Query** for server state, **axios** for transport
 - **react-hook-form** + **Zod** for forms and runtime validation
-- **Clerk** (`@clerk/react-router`) for auth, including SSR session
-  validation via `clerkMiddleware()`
+- **Supabase Auth** (`@supabase/ssr` + `@supabase/supabase-js`) for auth,
+  including SSR session validation
 - **Vitest** + Testing Library for tests
 
 ## Conventions

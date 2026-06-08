@@ -1,6 +1,6 @@
 # Ganitel Backend
 
-FastAPI service for the Ganitel platform. Feature-organized; auth via Clerk.
+FastAPI service for the Ganitel platform. Feature-organized; verifies Supabase JWTs.
 
 ## Layout
 

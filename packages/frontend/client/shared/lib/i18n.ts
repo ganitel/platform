@@ -1271,7 +1271,7 @@ Ganitel est responsable du traitement de vos données personnelles dans le cadre
 ## 2. Données que nous collectons
 
 - **Identité et contact** : nom, prénom, e-mail, numéro de téléphone, langue préférée.
-- **Données de compte** : identifiant Clerk, rôles (voyageur, hôte, administrateur), statut de vérification.
+- **Données de compte** : identifiant Supabase, rôles (voyageur, hôte, administrateur), statut de vérification.
 - **Données de réservation** : dates, voyageurs, message à l'hôte, montants.
 - **Données de paiement** : transmises directement à Flutterwave ; nous conservons uniquement les identifiants de transaction et les statuts.
 - **Données techniques** : journaux applicatifs, type d'appareil, adresse IP, pour des raisons de sécurité et de qualité de service.
@@ -1293,7 +1293,7 @@ Nous traitons vos données sur la base : (i) de l'exécution du contrat qui nous
 
 Nous partageons uniquement ce qui est nécessaire avec :
 
-- **Clerk** — gestion d'identité et d'authentification.
+- **Supabase** — gestion d'identité et d'authentification.
 - **Flutterwave** — traitement des paiements (Mobile Money, Wave, cartes).
 - **Sendchamp** — envoi de SMS transactionnels (codes, notifications de réservation).
 - **Hébergeurs et CDN** que nous utilisons pour faire fonctionner le site.
@@ -1338,7 +1338,7 @@ Ganitel is the data controller for personal data processed when you use **ganite
 ## 2. Data we collect
 
 - **Identity and contact**: first name, last name, email, phone number, preferred language.
-- **Account data**: Clerk user ID, roles (traveler, host, administrator), verification status.
+- **Account data**: Supabase user ID, roles (traveler, host, administrator), verification status.
 - **Booking data**: dates, traveler count, message to host, amounts.
 - **Payment data**: sent directly to Flutterwave; we only keep transaction IDs and statuses.
 - **Technical data**: application logs, device type, IP address, for security and quality of service.
@@ -1360,7 +1360,7 @@ We process your data based on: (i) the performance of our contract with you, (ii
 
 We share only what is strictly necessary with:
 
-- **Clerk** — identity and authentication management.
+- **Supabase** — identity and authentication management.
 - **Flutterwave** — payment processing (Mobile Money, Wave, cards).
 - **Sendchamp** — transactional SMS (codes, booking notifications).
 - **Hosting and CDN providers** powering the site.
