@@ -87,8 +87,8 @@ const dict = {
   "landing.hero.title": { fr: "Bienvenue chez", en: "Welcome to" },
   "landing.hero.title_em": { fr: "Ganitel.", en: "Ganitel." },
   "landing.hero.lede": {
-    fr: "Ganitel, c'est l'Afrique qui se ressource. Trouvez votre prochaine escapade et votre prochaine expérience inoubliable, conçues pour les professionnels, les familles et les groupes.",
-    en: "Ganitel is where Africa comes to renew. Find your next escape and unforgettable experience, made for professionals, families, and groups.",
+    fr: "Ganitel fait de l'Afrique votre prochaine destination vacances. Pour les professionnels, les familles et les groupes du monde entier, découvrez des séjours et des expériences qui valent le voyage.",
+    en: "Ganitel makes Africa your next holiday. For professionals, families, and groups from anywhere in the world, discover stays and experiences worth the journey.",
   },
   "landing.hero.cta.browse": {
     fr: "Découvrir les séjours",
