@@ -79,7 +79,10 @@ export function About({ team }: { team: TeamMember[] }) {
 function Hero() {
   const t = useT();
   return (
-    <section className="relative flex min-h-[88vh] items-center justify-center overflow-hidden">
+    <section
+      id="hero"
+      className="relative flex min-h-[88vh] items-center justify-center overflow-hidden"
+    >
       <img
         src={transformImage(HERO_SOURCE, { width: 1440, quality: 70 })}
         srcSet={buildSrcSet(HERO_SOURCE, HERO_WIDTHS, 70)}
@@ -185,7 +188,10 @@ function Trust() {
 function PromiseSections() {
   const t = useT();
   return (
-    <section className="px-6 pb-20 md:px-12 md:pb-24">
+    <section
+      id="promises"
+      className="scroll-mt-16 px-6 pb-20 md:px-12 md:pb-24"
+    >
       <div className="mx-auto max-w-7xl" data-reveal="">
         <p className="text-xs font-medium uppercase tracking-[0.18em] text-ganitel-brown">
           {t("about.promises.eyebrow")}
@@ -230,7 +236,10 @@ function Impact() {
   const t = useT();
   const ref = useReveal<HTMLDivElement>();
   return (
-    <section className="bg-ganitel-olive-soft px-6 py-20 md:px-12 md:py-28">
+    <section
+      id="impact"
+      className="scroll-mt-16 bg-ganitel-olive-soft px-6 py-20 md:px-12 md:py-28"
+    >
       <div ref={ref} data-reveal="" className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="m-0 text-3xl leading-tight tracking-[-0.02em] text-ganitel-olive md:text-4xl">
@@ -290,7 +299,7 @@ function Team({ members }: { members: TeamMember[] }) {
   const ref = useReveal<HTMLUListElement>();
   if (members.length === 0) return null;
   return (
-    <section className="px-6 py-20 md:px-12 md:py-28">
+    <section id="team" className="scroll-mt-16 px-6 py-20 md:px-12 md:py-28">
       <div className="mx-auto max-w-7xl">
         <SectionHeader
           align="center"
@@ -395,7 +404,10 @@ function Closing() {
   const t = useT();
   const ref = useReveal<HTMLDivElement>();
   return (
-    <section className="px-6 pb-20 pt-8 md:px-12 md:pb-28">
+    <section
+      id="closing"
+      className="scroll-mt-16 px-6 pb-20 pt-8 md:px-12 md:pb-28"
+    >
       <div
         ref={ref}
         data-reveal=""
