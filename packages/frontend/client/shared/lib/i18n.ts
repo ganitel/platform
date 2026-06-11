@@ -1496,6 +1496,11 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
   "common.loading_aria": { fr: "Chargement", en: "Loading" },
   "common.error_prefix": { fr: "Erreur", en: "Error" },
 
+  "gallery.view": { fr: "Agrandir l'image", en: "View image full screen" },
+  "gallery.previous": { fr: "Image précédente", en: "Previous image" },
+  "gallery.next": { fr: "Image suivante", en: "Next image" },
+  "gallery.close": { fr: "Fermer la galerie", en: "Close gallery" },
+
   "index.meta.title": {
     fr: "Ganitel — Là où la lumière prend son temps",
     en: "Ganitel — Stay where the light moves slowly",

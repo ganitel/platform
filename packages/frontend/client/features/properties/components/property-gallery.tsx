@@ -2,7 +2,9 @@ import { useCallback, useRef, useState } from "react";
 import { Camera } from "lucide-react";
 
 import type { MediaPublic } from "@/features/properties/types";
+import { GalleryLightbox } from "@/features/properties/components/gallery-lightbox";
 import { buildSrcSet, transformImage } from "@/shared/lib/image";
+import { useT } from "@/shared/lib/i18n";
 
 interface Props {
   photos: MediaPublic[];
@@ -23,6 +25,12 @@ function isSlowNetwork(): boolean {
 }
 
 export function PropertyGallery({ photos, title }: Props) {
+  const [lightbox, setLightbox] = useState({ open: false, index: 0 });
+  const openAt = useCallback(
+    (index: number) => setLightbox({ open: true, index }),
+    [],
+  );
+
   if (photos.length === 0) {
     return (
       <div className="aspect-[16/9] w-full rounded-3xl bg-ganitel-background-neutral2" />
@@ -35,10 +43,15 @@ export function PropertyGallery({ photos, title }: Props) {
 
   return (
     <>
-      <MobileGallery photos={photos} title={title} />
+      <MobileGallery photos={photos} title={title} onOpen={openAt} />
 
       <div className="hidden overflow-hidden rounded-3xl sm:grid sm:grid-cols-4 sm:gap-2">
-        <HeroTile media={hero} title={title} total={total} />
+        <HeroTile
+          media={hero}
+          title={title}
+          total={total}
+          onOpen={() => openAt(0)}
+        />
         {grid.map((m, i) => (
           <GridTile
             key={m.id}
@@ -46,9 +59,18 @@ export function PropertyGallery({ photos, title }: Props) {
             index={i}
             total={total}
             title={title}
+            onOpen={() => openAt(i + 1)}
           />
         ))}
       </div>
+
+      <GalleryLightbox
+        photos={photos}
+        title={title}
+        open={lightbox.open}
+        startIndex={lightbox.index}
+        onOpenChange={(open) => setLightbox((prev) => ({ ...prev, open }))}
+      />
     </>
   );
 }
@@ -57,11 +79,14 @@ function HeroTile({
   media,
   title,
   total,
+  onOpen,
 }: {
   media: MediaPublic;
   title: string;
   total: number;
+  onOpen: () => void;
 }) {
+  const t = useT();
   if (media.kind === "video" && !isSlowNetwork()) {
     return (
       <video
@@ -78,22 +103,29 @@ function HeroTile({
   const stillUrl =
     media.kind === "video" ? (media.poster_url ?? media.url) : media.url;
   return (
-    <img
-      src={transformImage(stillUrl, { width: 1200, quality: 78 })}
-      srcSet={
-        media.kind === "image"
-          ? buildSrcSet(stillUrl, DESKTOP_HERO_WIDTHS, 78)
-          : undefined
-      }
-      sizes="(min-width: 1024px) 600px, 50vw"
-      alt={total > 1 ? `${title} — 1/${total}` : title}
-      loading="eager"
-      decoding="async"
-      fetchPriority="high"
-      width={1200}
-      height={1200}
-      className="col-span-2 row-span-2 aspect-square w-full object-cover"
-    />
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={t("gallery.view")}
+      className="col-span-2 row-span-2 cursor-zoom-in"
+    >
+      <img
+        src={transformImage(stillUrl, { width: 1200, quality: 78 })}
+        srcSet={
+          media.kind === "image"
+            ? buildSrcSet(stillUrl, DESKTOP_HERO_WIDTHS, 78)
+            : undefined
+        }
+        sizes="(min-width: 1024px) 600px, 50vw"
+        alt={total > 1 ? `${title} — 1/${total}` : title}
+        loading="eager"
+        decoding="async"
+        fetchPriority="high"
+        width={1200}
+        height={1200}
+        className="aspect-square w-full object-cover"
+      />
+    </button>
   );
 }
 
@@ -102,12 +134,15 @@ function GridTile({
   index,
   total,
   title,
+  onOpen,
 }: {
   media: MediaPublic;
   index: number;
   total: number;
   title: string;
+  onOpen: () => void;
 }) {
+  const t = useT();
   if (media.kind === "video" && !isSlowNetwork()) {
     return (
       <video
@@ -124,30 +159,39 @@ function GridTile({
   const stillUrl =
     media.kind === "video" ? (media.poster_url ?? media.url) : media.url;
   return (
-    <img
-      src={transformImage(stillUrl, { width: 600, quality: 75 })}
-      srcSet={
-        media.kind === "image"
-          ? buildSrcSet(stillUrl, DESKTOP_TILE_WIDTHS, 75)
-          : undefined
-      }
-      sizes="(min-width: 1024px) 300px, 25vw"
-      alt={`${title} — ${index + 2}/${total}`}
-      loading="lazy"
-      decoding="async"
-      width={600}
-      height={600}
-      className="aspect-square w-full object-cover"
-    />
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={t("gallery.view")}
+      className="cursor-zoom-in"
+    >
+      <img
+        src={transformImage(stillUrl, { width: 600, quality: 75 })}
+        srcSet={
+          media.kind === "image"
+            ? buildSrcSet(stillUrl, DESKTOP_TILE_WIDTHS, 75)
+            : undefined
+        }
+        sizes="(min-width: 1024px) 300px, 25vw"
+        alt={`${title} — ${index + 2}/${total}`}
+        loading="lazy"
+        decoding="async"
+        width={600}
+        height={600}
+        className="aspect-square w-full object-cover"
+      />
+    </button>
   );
 }
 
 function MobileGallery({
   photos,
   title,
+  onOpen,
 }: {
   photos: MediaPublic[];
   title: string;
+  onOpen: (index: number) => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
@@ -173,6 +217,7 @@ function MobileGallery({
               index={i}
               total={photos.length}
               title={title}
+              onOpen={() => onOpen(i)}
             />
           </div>
         ))}
@@ -213,12 +258,15 @@ function MobileTile({
   index,
   total,
   title,
+  onOpen,
 }: {
   media: MediaPublic;
   index: number;
   total: number;
   title: string;
+  onOpen: () => void;
 }) {
+  const t = useT();
   if (media.kind === "video" && !isSlowNetwork()) {
     return (
       <video
@@ -235,21 +283,28 @@ function MobileTile({
   const stillUrl =
     media.kind === "video" ? (media.poster_url ?? media.url) : media.url;
   return (
-    <img
-      src={transformImage(stillUrl, { width: 800, quality: 75 })}
-      srcSet={
-        media.kind === "image"
-          ? buildSrcSet(stillUrl, [480, 720, 960], 75)
-          : undefined
-      }
-      sizes="100vw"
-      alt={total > 1 ? `${title} — ${index + 1}/${total}` : title}
-      loading={index === 0 ? "eager" : "lazy"}
-      fetchPriority={index === 0 ? "high" : "auto"}
-      decoding="async"
-      width={800}
-      height={600}
-      className="aspect-[4/3] w-full object-cover"
-    />
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={t("gallery.view")}
+      className="block w-full"
+    >
+      <img
+        src={transformImage(stillUrl, { width: 800, quality: 75 })}
+        srcSet={
+          media.kind === "image"
+            ? buildSrcSet(stillUrl, [480, 720, 960], 75)
+            : undefined
+        }
+        sizes="100vw"
+        alt={total > 1 ? `${title} — ${index + 1}/${total}` : title}
+        loading={index === 0 ? "eager" : "lazy"}
+        fetchPriority={index === 0 ? "high" : "auto"}
+        decoding="async"
+        width={800}
+        height={600}
+        className="aspect-[4/3] w-full object-cover"
+      />
+    </button>
   );
 }
