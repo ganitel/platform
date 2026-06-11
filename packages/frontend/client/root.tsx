@@ -9,13 +9,21 @@ import {
   useRouteLoaderData,
 } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState, useSyncExternalStore, type ReactNode } from "react";
+import {
+  useCallback,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
 import type { Route } from "./+types/root";
 
 import {
   LocaleContext,
+  SetLocaleContext,
   localeFromAcceptLanguage,
+  localeFromCookie,
+  persistLocale,
   t as translate,
   type Locale,
 } from "@/shared/lib/i18n";
@@ -82,9 +90,9 @@ export const meta: Route.MetaFunction = () => [
 ];
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const locale = localeFromAcceptLanguage(
-    request.headers.get("accept-language"),
-  );
+  const pinned = localeFromCookie(request.headers.get("cookie"));
+  const locale =
+    pinned ?? localeFromAcceptLanguage(request.headers.get("accept-language"));
   return { locale };
 }
 
@@ -143,22 +151,35 @@ export default function App({ loaderData }: Route.ComponentProps) {
         },
       }),
   );
-  const locale = useSyncExternalStore<Locale>(
+  // Auto-detected locale: a pinned cookie wins, otherwise the browser
+  // preference. Server snapshot matches the loader to avoid a hydration flash.
+  const detected = useSyncExternalStore<Locale>(
     NEVER_CHANGES,
-    () =>
-      typeof navigator !== "undefined"
-        ? localeFromAcceptLanguage(navigator.language)
-        : loaderData.locale,
+    () => {
+      const cookie = typeof document !== "undefined" ? document.cookie : null;
+      const language =
+        typeof navigator !== "undefined" ? navigator.language : null;
+      return localeFromCookie(cookie) ?? localeFromAcceptLanguage(language);
+    },
     () => loaderData.locale,
   );
+  const [override, setOverride] = useState<Locale | null>(null);
+  const locale = override ?? detected;
+
+  const setLocale = useCallback((next: Locale) => {
+    persistLocale(next);
+    setOverride(next);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <LocaleContext.Provider value={locale}>
-        <TooltipProvider delayDuration={200}>
-          <Outlet />
-          <Toaster />
-        </TooltipProvider>
+        <SetLocaleContext.Provider value={setLocale}>
+          <TooltipProvider delayDuration={200}>
+            <Outlet />
+            <Toaster />
+          </TooltipProvider>
+        </SetLocaleContext.Provider>
       </LocaleContext.Provider>
     </QueryClientProvider>
   );

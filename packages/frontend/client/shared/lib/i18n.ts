@@ -52,6 +52,9 @@ const dict = {
   "nav.faq": { fr: "FAQ", en: "FAQ" },
   "nav.open_menu": { fr: "Ouvrir le menu", en: "Open menu" },
   "nav.close_menu": { fr: "Fermer le menu", en: "Close menu" },
+  "nav.language": { fr: "Changer de langue", en: "Change language" },
+  "lang.name.fr": { fr: "Français", en: "Français" },
+  "lang.name.en": { fr: "English", en: "English" },
   "nav.brand_long": { fr: "Ganitel", en: "Ganitel" },
   "nav.group.browse": { fr: "Explorer", en: "Browse" },
   "nav.group.account": { fr: "Compte", en: "Account" },
@@ -2024,10 +2027,41 @@ export function localeFromAcceptLanguage(
   return localeFromLanguageTags(header.split(","));
 }
 
+export const LOCALE_COOKIE = "ganitel_locale";
+const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+
+/** Read a pinned locale from a `Cookie` header or `document.cookie`. */
+export function localeFromCookie(
+  cookieHeader: string | null | undefined,
+): Locale | null {
+  if (!cookieHeader) return null;
+  for (const pair of cookieHeader.split(";")) {
+    const [name, ...rest] = pair.trim().split("=");
+    if (name !== LOCALE_COOKIE) continue;
+    const value = rest.join("=").trim();
+    if (value === "fr" || value === "en") return value;
+  }
+  return null;
+}
+
+/** Persist the user's manual language choice in a cookie and on <html lang>. */
+export function persistLocale(locale: Locale): void {
+  if (typeof document === "undefined") return;
+  document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE}; samesite=lax`;
+  document.documentElement.lang = locale;
+}
+
 export const LocaleContext = createContext<Locale>("fr");
+export const SetLocaleContext = createContext<(locale: Locale) => void>(
+  () => {},
+);
 
 export function useLocale(): Locale {
   return useContext(LocaleContext);
+}
+
+export function useSetLocale(): (locale: Locale) => void {
+  return useContext(SetLocaleContext);
 }
 
 export function t(key: TranslationKey, locale: Locale): string {

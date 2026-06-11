@@ -8,6 +8,7 @@ import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
 import { PillLink } from "@/shared/ui/pill-link";
 import { MobileDrawer } from "@/shared/components/mobile-drawer";
+import { LanguageSwitcher } from "@/shared/components/language-switcher";
 import { LogoMark } from "@/shared/components/logo-mark";
 
 const UserMenu = lazy(() =>
@@ -104,6 +105,7 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-2">
+            <LanguageSwitcher className="hidden sm:inline-flex" />
             {!isPending && session ? (
               <Suspense fallback={null}>
                 <UserMenu session={session} />
@@ -157,6 +159,12 @@ export function Header() {
           t={t}
           onNavigate={() => setOpen(false)}
         />
+        <div className="mb-4">
+          <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-ganitel-brown">
+            {t("nav.language")}
+          </p>
+          <LanguageSwitcher className="px-0" />
+        </div>
       </MobileDrawer>
     </>
   );
