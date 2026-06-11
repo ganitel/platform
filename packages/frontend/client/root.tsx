@@ -155,9 +155,12 @@ export default function App({ loaderData }: Route.ComponentProps) {
   // preference. Server snapshot matches the loader to avoid a hydration flash.
   const detected = useSyncExternalStore<Locale>(
     NEVER_CHANGES,
-    () =>
-      localeFromCookie(document.cookie) ??
-      localeFromAcceptLanguage(navigator.language),
+    () => {
+      const cookie = typeof document !== "undefined" ? document.cookie : null;
+      const language =
+        typeof navigator !== "undefined" ? navigator.language : null;
+      return localeFromCookie(cookie) ?? localeFromAcceptLanguage(language);
+    },
     () => loaderData.locale,
   );
   const [override, setOverride] = useState<Locale | null>(null);
