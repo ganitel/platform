@@ -13,10 +13,11 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> tuple[Wa
     Returns (entry, confirmation_sent). The caller surfaces
     confirmation_sent to the frontend so the success UI can tell the
     truth instead of pretending an email went out when it didn't.
-    Duplicates skip the resend — visitor already got an email last time."""
+    Duplicates refresh the stored intent but skip the resend — visitor
+    already got an email last time."""
     existing = await _find_existing(session, body)
     if existing:
-        return existing, False
+        return await _refresh_existing(session, existing, body), False
 
     entry = WaitlistEntry(
         email=body.email,
@@ -45,6 +46,44 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> tuple[Wa
 
     confirmation_sent = await emails.send_confirmation(entry)
     return entry, confirmation_sent
+
+
+_MUTABLE_FIELDS = (
+    "name",
+    "phone",
+    "room_type_id",
+    "interest",
+    "headcount",
+    "budget_range",
+    "budget_currency",
+    "host_city",
+    "host_inventory",
+    "host_status",
+    "notes",
+    "travel_start",
+    "travel_end",
+    "adults",
+    "children",
+)
+
+
+async def _refresh_existing(
+    session: AsyncSession, entry: WaitlistEntry, body: WaitlistEntryIn
+) -> WaitlistEntry:
+    changed = False
+    for field in _MUTABLE_FIELDS:
+        if field not in body.model_fields_set:
+            continue
+        value = getattr(body, field)
+        if getattr(entry, field) == value:
+            continue
+        setattr(entry, field, value)
+        changed = True
+
+    if changed:
+        await session.commit()
+        await session.refresh(entry)
+    return entry
 
 
 async def _find_existing(session: AsyncSession, body: WaitlistEntryIn) -> WaitlistEntry | None:
