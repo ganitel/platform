@@ -1,4 +1,9 @@
-import { Link, useNavigate, useSearchParams } from "react-router";
+import {
+  Link,
+  useNavigate,
+  useNavigation,
+  useSearchParams,
+} from "react-router";
 import type { ReactNode } from "react";
 
 import type { Route } from "./+types/browse";
@@ -139,7 +144,18 @@ export default function BrowseRoute({ loaderData }: Route.ComponentProps) {
   const { kind, q } = loaderData;
   const t = useT();
   const navigate = useNavigate();
+  const navigation = useNavigation();
   const [searchParams] = useSearchParams();
+
+  // The tab header flips as soon as the user taps, while the grid shows a
+  // skeleton until the loader lands — on slow connections the tap must
+  // respond instantly even though the data takes a while.
+  const pendingKind =
+    navigation.location?.pathname === "/browse"
+      ? parseKind(new URLSearchParams(navigation.location.search).get("kind"))
+      : null;
+  const activeKind = pendingKind ?? kind;
+  const switching = pendingKind !== null && pendingKind !== kind;
 
   const handleSearch = (next: string) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -152,17 +168,19 @@ export default function BrowseRoute({ loaderData }: Route.ComponentProps) {
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-20">
       <PageHeader
         eyebrow={t("nav.browse")}
-        title={t(TITLE_KEY[kind])}
-        description={t(LEDE_KEY[kind])}
+        title={t(TITLE_KEY[activeKind])}
+        description={t(LEDE_KEY[activeKind])}
       />
 
-      <BrowseTabs kind={kind} q={q} />
+      <BrowseTabs kind={activeKind} q={q} />
 
       <div className="mb-12 max-w-3xl md:mb-16">
         <SearchBar initialQuery={q ?? ""} onSubmit={handleSearch} />
       </div>
 
-      {loaderData.items.length === 0 ? (
+      {switching ? (
+        <PropertyGridSkeleton count={6} />
+      ) : loaderData.items.length === 0 ? (
         <p className="py-16 text-center text-sm text-ganitel-text-subtitle">
           {t(EMPTY_KEY[kind])}
         </p>
@@ -189,7 +207,7 @@ function BrowseTabs({ kind, q }: { kind: BrowseKind; q: string | null }) {
   return (
     <nav
       aria-label={t("nav.browse")}
-      className="mb-10 flex gap-8 border-b border-ganitel-stroke-neutral md:mb-12"
+      className="-mx-4 mb-10 flex border-b border-ganitel-stroke-neutral px-1 md:mx-0 md:mb-12 md:gap-8 md:px-0"
     >
       <BrowseTab to={hrefFor("stays")} active={kind === "stays"}>
         {t("browse.tabs.stays")}
@@ -213,19 +231,20 @@ function BrowseTab({
   return (
     <Link
       to={to}
+      prefetch="intent"
       aria-current={active ? "page" : undefined}
       className={cn(
-        "relative -mb-px pb-3 text-sm transition-colors duration-150",
+        "relative -mb-px flex min-h-12 touch-manipulation select-none items-center rounded-t-xl px-3 text-[15px] transition-colors duration-150 active:bg-ganitel-surface-2/70 md:min-h-0 md:rounded-none md:px-0 md:pb-3 md:text-sm md:active:bg-transparent",
         active
           ? "font-medium text-ganitel-text-title"
-          : "font-medium text-ganitel-text-placeholder hover:text-ganitel-text-title",
+          : "font-medium text-ganitel-text-subtitle hover:text-ganitel-text-title",
       )}
     >
       {children}
       <span
         aria-hidden
         className={cn(
-          "absolute inset-x-0 -bottom-px h-[2px] origin-left rounded-full bg-ganitel-rule transition-transform duration-200",
+          "absolute inset-x-3 -bottom-px h-[2px] origin-left rounded-full bg-ganitel-rule transition-transform duration-200 md:inset-x-0",
           active ? "scale-x-100" : "scale-x-0",
         )}
       />
