@@ -1,4 +1,5 @@
 import { apiClient } from "@/shared/api/client";
+import { env } from "@/shared/lib/env";
 import type { BookingPublic, InitiatePaymentOut } from "./types";
 
 export interface CreateBookingPayload {
@@ -33,6 +34,34 @@ export async function confirmNoopPayment(intentId: string): Promise<void> {
     intent_id: intentId,
     status: "captured",
   });
+}
+
+export async function completePaymentAction(
+  payment: InitiatePaymentOut,
+): Promise<"done" | "redirected"> {
+  const { client_action: clientAction } = payment;
+
+  if (clientAction.kind === "auto_capture") {
+    await confirmNoopPayment(payment.provider_intent_id);
+    return "done";
+  }
+
+  if (
+    clientAction.kind === "redirect" &&
+    typeof clientAction.url === "string" &&
+    clientAction.url.length > 0
+  ) {
+    window.location.assign(clientAction.url);
+    return "redirected";
+  }
+
+  throw new Error("Unsupported payment action");
+}
+
+export async function initiateConfiguredPayment(
+  bookingId: string,
+): Promise<InitiatePaymentOut> {
+  return initiatePayment(bookingId, env.paymentProvider);
 }
 
 export async function listMyBookings(): Promise<BookingPublic[]> {
