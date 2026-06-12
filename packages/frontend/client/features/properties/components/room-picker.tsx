@@ -5,9 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import type { DateRange } from "react-day-picker";
 
 import {
-  confirmNoopPayment,
+  completePaymentAction,
   createBooking,
-  initiatePayment,
+  initiateConfiguredPayment,
 } from "@/features/bookings/api";
 import { listPropertyRooms } from "@/features/properties/api";
 import { RoomCard } from "@/features/properties/components/room-card";
@@ -98,9 +98,10 @@ export function RoomPicker({ property }: Props) {
         guest_count: guests,
         currency,
       });
-      const payment = await initiatePayment(booking.id, "noop");
-      if (payment.client_action.kind === "auto_capture") {
-        await confirmNoopPayment(payment.provider_intent_id);
+      const payment = await initiateConfiguredPayment(booking.id);
+      const paymentResult = await completePaymentAction(payment);
+      if (paymentResult === "redirected") {
+        return;
       }
       setStep("done");
     } catch (e) {
