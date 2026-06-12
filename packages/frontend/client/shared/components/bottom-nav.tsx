@@ -1,20 +1,21 @@
-import {
-  CalendarDays,
-  Compass,
-  House,
-  Info,
-  User as UserIcon,
-} from "lucide-react";
 import { NavLink, useLocation } from "react-router";
 
 import { cn } from "@/shared/lib/cn";
 import { useT, type TranslationKey } from "@/shared/lib/i18n";
 import { usePrelaunch } from "@/shared/hooks/use-prelaunch";
+import {
+  AboutGlyph,
+  BookingsGlyph,
+  ExploreGlyph,
+  HomeGlyph,
+  ProfileGlyph,
+  type NavGlyphProps,
+} from "@/shared/components/nav-glyphs";
 
 interface NavItem {
   to: string;
   labelKey: TranslationKey;
-  icon: typeof Compass;
+  icon: (props: NavGlyphProps) => React.ReactElement;
   showInPrelaunch?: boolean;
   showAfterLaunch?: boolean;
 }
@@ -23,35 +24,35 @@ const ITEMS: NavItem[] = [
   {
     to: "/",
     labelKey: "nav.home",
-    icon: House,
+    icon: HomeGlyph,
     showInPrelaunch: true,
     showAfterLaunch: true,
   },
   {
     to: "/browse",
     labelKey: "nav.browse",
-    icon: Compass,
+    icon: ExploreGlyph,
     showInPrelaunch: true,
     showAfterLaunch: true,
   },
   {
     to: "/about",
     labelKey: "nav.about",
-    icon: Info,
+    icon: AboutGlyph,
     showInPrelaunch: true,
     showAfterLaunch: false,
   },
   {
     to: "/bookings",
     labelKey: "nav.bookings",
-    icon: CalendarDays,
+    icon: BookingsGlyph,
     showInPrelaunch: false,
     showAfterLaunch: true,
   },
   {
     to: "/profile",
     labelKey: "nav.profile",
-    icon: UserIcon,
+    icon: ProfileGlyph,
     showInPrelaunch: false,
     showAfterLaunch: true,
   },
@@ -97,14 +98,13 @@ export function BottomNav() {
                     )}
                   >
                     <Icon
+                      filled={isActive}
                       className={cn(
                         "size-6",
                         isActive
                           ? "text-ganitel-text-title"
                           : "text-ganitel-text-subtitle",
                       )}
-                      strokeWidth={isActive ? 2.1 : 1.8}
-                      aria-hidden
                     />
                   </span>
                   <span
