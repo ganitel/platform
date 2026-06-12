@@ -70,17 +70,22 @@ export function Header() {
         )}
         <div className="mx-auto grid h-14 w-full max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 md:h-16 md:px-8">
           <div className="flex items-center">
-            <button
-              type="button"
-              aria-label={t("nav.open_menu")}
-              onClick={() => setOpen(true)}
-              className="inline-flex size-10 items-center justify-center rounded-full text-ganitel-text-title transition-colors hover:bg-ganitel-stroke-neutral/40 md:hidden"
-            >
-              <Menu className="size-5" strokeWidth={1.7} />
-            </button>
+            {!isPrelaunch && (
+              <button
+                type="button"
+                aria-label={t("nav.open_menu")}
+                onClick={() => setOpen(true)}
+                className="inline-flex size-10 items-center justify-center rounded-full text-ganitel-text-title transition-colors hover:bg-ganitel-stroke-neutral/40 md:hidden"
+              >
+                <Menu className="size-5" strokeWidth={1.7} />
+              </button>
+            )}
             <Link
               to="/"
-              className="hidden items-center text-ganitel-text-title md:inline-flex"
+              className={cn(
+                "items-center text-ganitel-text-title",
+                isPrelaunch ? "inline-flex" : "hidden md:inline-flex",
+              )}
               aria-label="Ganitel"
             >
               <LogoMark />
@@ -88,13 +93,15 @@ export function Header() {
           </div>
 
           <div className="flex items-center justify-center md:justify-start md:gap-9">
-            <Link
-              to="/"
-              className="text-ganitel-text-title md:hidden"
-              aria-label="Ganitel"
-            >
-              <LogoMark />
-            </Link>
+            {!isPrelaunch && (
+              <Link
+                to="/"
+                className="text-ganitel-text-title md:hidden"
+                aria-label="Ganitel"
+              >
+                <LogoMark />
+              </Link>
+            )}
             <nav className="hidden gap-9 md:inline-flex" aria-label="Primary">
               {desktopItems.map(({ to, labelKey }) => (
                 <HeaderNavItem key={to} to={to}>
@@ -105,7 +112,7 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-2">
-            <LanguageSwitcher className="hidden sm:inline-flex" />
+            <LanguageSwitcher />
             {!isPending && session ? (
               <Suspense fallback={null}>
                 <UserMenu session={session} />
@@ -133,39 +140,33 @@ export function Header() {
         </div>
       </header>
 
-      <MobileDrawer
-        open={open}
-        onOpenChange={setOpen}
-        title={t("nav.brand_long")}
-        closeLabel={t("nav.close_menu")}
-      >
-        <DrawerGroup
-          label={t("nav.group.browse")}
-          items={filter(DRAWER_BROWSE)}
-          t={t}
-          onNavigate={() => setOpen(false)}
-        />
-        {!isPrelaunch && (
+      {!isPrelaunch && (
+        <MobileDrawer
+          open={open}
+          onOpenChange={setOpen}
+          title={t("nav.brand_long")}
+          closeLabel={t("nav.close_menu")}
+        >
+          <DrawerGroup
+            label={t("nav.group.browse")}
+            items={filter(DRAWER_BROWSE)}
+            t={t}
+            onNavigate={() => setOpen(false)}
+          />
           <DrawerGroup
             label={t("nav.group.account")}
             items={filter(DRAWER_ACCOUNT)}
             t={t}
             onNavigate={() => setOpen(false)}
           />
-        )}
-        <DrawerGroup
-          label={t("nav.group.ganitel")}
-          items={filter(DRAWER_GANITEL)}
-          t={t}
-          onNavigate={() => setOpen(false)}
-        />
-        <div className="mb-4">
-          <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-ganitel-brown">
-            {t("nav.language")}
-          </p>
-          <LanguageSwitcher className="px-0" />
-        </div>
-      </MobileDrawer>
+          <DrawerGroup
+            label={t("nav.group.ganitel")}
+            items={filter(DRAWER_GANITEL)}
+            t={t}
+            onNavigate={() => setOpen(false)}
+          />
+        </MobileDrawer>
+      )}
     </>
   );
 }

@@ -112,12 +112,14 @@
   }
 }
 
+/* Keep scale margin larger than the translate at every keyframe so the
+   image always covers the section; the img box itself is exactly inset-0. */
 @keyframes ganitel-kenburns {
   from {
-    transform: scale(1) translate(0, 0);
+    transform: scale(1.03) translate(0, 0);
   }
   to {
-    transform: scale(1.055) translate(-1%, -1.2%);
+    transform: scale(1.075) translate(-1%, -1.2%);
   }
 }
 
