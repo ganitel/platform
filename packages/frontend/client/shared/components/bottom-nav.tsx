@@ -1,4 +1,10 @@
-import { CalendarDays, Compass, House, User as UserIcon } from "lucide-react";
+import {
+  CalendarDays,
+  Compass,
+  House,
+  Info,
+  User as UserIcon,
+} from "lucide-react";
 import { NavLink, useLocation } from "react-router";
 
 import { cn } from "@/shared/lib/cn";
@@ -27,6 +33,13 @@ const ITEMS: NavItem[] = [
     icon: Compass,
     showInPrelaunch: true,
     showAfterLaunch: true,
+  },
+  {
+    to: "/about",
+    labelKey: "nav.about",
+    icon: Info,
+    showInPrelaunch: true,
+    showAfterLaunch: false,
   },
   {
     to: "/bookings",
@@ -71,34 +84,39 @@ export function BottomNav() {
             <NavLink
               to={to}
               end={to === "/"}
-              className={({ isActive }) =>
-                cn(
-                  "relative flex min-h-[56px] flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-1.5 text-[11px] transition-colors duration-150",
-                  isActive
-                    ? "font-semibold text-ganitel-text-title"
-                    : "font-medium text-ganitel-text-subtitle active:bg-ganitel-stroke-neutral/40",
-                )
-              }
+              className="group flex min-h-[58px] touch-manipulation select-none flex-col items-center justify-center gap-1 px-1 pb-1 pt-1.5 text-[11px]"
             >
               {({ isActive }) => (
                 <>
-                  {isActive && (
-                    <span
-                      aria-hidden
-                      className="absolute inset-x-3 top-0 h-0.5 rounded-b-full bg-ganitel-text-title"
-                    />
-                  )}
-                  <Icon
+                  <span
                     className={cn(
-                      "size-[22px] transition-transform duration-150",
+                      "flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-200",
                       isActive
-                        ? "scale-[1.02] text-ganitel-text-title"
-                        : "text-ganitel-text-placeholder",
+                        ? "bg-ganitel-surface-2"
+                        : "group-active:bg-ganitel-stroke-neutral/50",
                     )}
-                    strokeWidth={isActive ? 2.2 : 1.7}
-                    aria-hidden
-                  />
-                  <span className="leading-tight">{t(labelKey)}</span>
+                  >
+                    <Icon
+                      className={cn(
+                        "size-6",
+                        isActive
+                          ? "text-ganitel-text-title"
+                          : "text-ganitel-text-subtitle",
+                      )}
+                      strokeWidth={isActive ? 2.1 : 1.8}
+                      aria-hidden
+                    />
+                  </span>
+                  <span
+                    className={cn(
+                      "leading-none",
+                      isActive
+                        ? "font-semibold text-ganitel-text-title"
+                        : "font-medium text-ganitel-text-subtitle",
+                    )}
+                  >
+                    {t(labelKey)}
+                  </span>
                 </>
               )}
             </NavLink>
