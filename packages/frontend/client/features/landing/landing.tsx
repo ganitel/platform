@@ -122,7 +122,7 @@ function Hero() {
   const t = useT();
   const isPrelaunch = usePrelaunch();
   return (
-    <section className="relative flex min-h-[88vh] items-center justify-center overflow-hidden">
+    <section className="relative flex min-h-[88svh] items-center justify-center overflow-hidden">
       <img
         src={HERO_MOBILE_SRC}
         srcSet={HERO_SRCSET}
@@ -134,9 +134,12 @@ function Hero() {
         width={1440}
         height={960}
         onError={fallbackOnError(HERO_FALLBACK)}
-        className="ganitel-anim-kenburns absolute inset-[-3%] h-[106%] w-[106%] object-cover saturate-[0.92] brightness-[0.92]"
+        className="ganitel-anim-kenburns absolute inset-0 size-full max-w-none object-cover saturate-[0.92] brightness-[0.92]"
       />
-      <div aria-hidden className="absolute inset-0 bg-ganitel-primary/45" />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-ganitel-primary/75 via-ganitel-primary/40 to-ganitel-primary/25"
+      />
       <div className="relative z-10 mx-auto w-full max-w-3xl px-6 text-center">
         <SectionHeader
           level="h1"
