@@ -1,6 +1,8 @@
 from types import SimpleNamespace
+from typing import cast
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ValidationError
 from app.modules.payments import service as payment_service
@@ -46,7 +48,7 @@ async def test_apply_webhook_event_matches_payment_provider() -> None:
     session = Session()
 
     payment = await payment_service.apply_webhook_event(
-        session,
+        cast(AsyncSession, session),
         provider_name="STRIPE",
         event=PaymentEvent(
             provider_intent_id="pi_123",
