@@ -7,7 +7,7 @@ from app.modules.waitlist.schemas import WaitlistEntryIn
 
 
 async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> tuple[WaitlistEntry, bool]:
-    """Insert a new waitlist entry, silently ignoring exact duplicates
+    """Insert a new waitlist entry, refreshing intent on duplicates
     (same email + same role + same property/experience pair).
 
     Returns (entry, confirmation_sent). The caller surfaces
@@ -16,6 +16,9 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> tuple[Wa
     Duplicates skip the resend — visitor already got an email last time."""
     existing = await _find_existing(session, body)
     if existing:
+        _refresh_existing(existing, body)
+        await session.commit()
+        await session.refresh(existing)
         return existing, False
 
     entry = WaitlistEntry(
@@ -47,12 +50,44 @@ async def create_entry(session: AsyncSession, body: WaitlistEntryIn) -> tuple[Wa
     return entry, confirmation_sent
 
 
+def _refresh_existing(entry: WaitlistEntry, body: WaitlistEntryIn) -> None:
+    """Copy latest submitted details without erasing previously collected data.
+
+    Duplicate submissions are common when a visitor changes room/date intent.
+    Optional fields that are omitted from the new form are preserved.
+    """
+    for field in (
+        "name",
+        "phone",
+        "room_type_id",
+        "interest",
+        "headcount",
+        "budget_range",
+        "budget_currency",
+        "host_city",
+        "host_inventory",
+        "host_status",
+        "notes",
+        "travel_start",
+        "travel_end",
+        "adults",
+        "children",
+    ):
+        value = getattr(body, field)
+        if value is not None:
+            setattr(entry, field, value)
+
+
 async def _find_existing(session: AsyncSession, body: WaitlistEntryIn) -> WaitlistEntry | None:
-    stmt = select(WaitlistEntry).where(
-        WaitlistEntry.email == body.email,
-        WaitlistEntry.role == body.role,
-        WaitlistEntry.property_id == body.property_id,
-        WaitlistEntry.experience_id == body.experience_id,
+    stmt = (
+        select(WaitlistEntry)
+        .where(
+            WaitlistEntry.email == body.email,
+            WaitlistEntry.role == body.role,
+            WaitlistEntry.property_id == body.property_id,
+            WaitlistEntry.experience_id == body.experience_id,
+        )
+        .order_by(WaitlistEntry.created_at.desc(), WaitlistEntry.id.desc())
     )
     result = await session.execute(stmt)
-    return result.scalar_one_or_none()
+    return result.scalars().first()
