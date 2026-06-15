@@ -97,7 +97,10 @@ async def apply_webhook_event(
     experience_booking) based on a verified provider event."""
     payment = (
         await session.execute(
-            select(Payment).where(Payment.provider_intent_id == event.provider_intent_id)
+            select(Payment).where(
+                Payment.provider == provider_name.lower(),
+                Payment.provider_intent_id == event.provider_intent_id,
+            )
         )
     ).scalar_one_or_none()
     if payment is None:

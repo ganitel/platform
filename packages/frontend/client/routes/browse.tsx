@@ -120,24 +120,14 @@ export async function loader({
   params.set("limit", "24");
 
   if (kind === "experiences") {
-    try {
-      const data = await serverFetch<ExperienceSearchOut>(
-        `/experiences?${params.toString()}`,
-      );
-      return { kind, q, items: data.items, total: data.total, locale };
-    } catch {
-      return { kind, q, items: [], total: 0, locale };
-    }
-  }
-
-  try {
-    const data = await serverFetch<SearchOut>(
-      `/properties?${params.toString()}`,
+    const data = await serverFetch<ExperienceSearchOut>(
+      `/experiences?${params.toString()}`,
     );
     return { kind, q, items: data.items, total: data.total, locale };
-  } catch {
-    return { kind, q, items: [], total: 0, locale };
   }
+
+  const data = await serverFetch<SearchOut>(`/properties?${params.toString()}`);
+  return { kind, q, items: data.items, total: data.total, locale };
 }
 
 export default function BrowseRoute({ loaderData }: Route.ComponentProps) {

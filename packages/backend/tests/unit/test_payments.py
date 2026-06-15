@@ -1,0 +1,64 @@
+from types import SimpleNamespace
+from typing import cast
+
+import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.errors import ValidationError
+from app.modules.payments import service as payment_service
+from app.modules.payments.providers import get_provider
+from app.modules.payments.providers.base import PaymentEvent
+from app.modules.payments.providers.noop import NoopProvider
+
+
+def test_get_provider_rejects_noop_in_production(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "app.modules.payments.providers.get_settings",
+        lambda: SimpleNamespace(ENVIRONMENT="production"),
+    )
+
+    with pytest.raises(ValidationError) as exc:
+        get_provider("noop")
+
+    assert exc.value.code == "payment.noop_disabled"
+
+
+def test_get_provider_allows_noop_outside_production(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "app.modules.payments.providers.get_settings",
+        lambda: SimpleNamespace(ENVIRONMENT="test"),
+    )
+
+    assert isinstance(get_provider("noop"), NoopProvider)
+
+
+@pytest.mark.asyncio
+async def test_apply_webhook_event_matches_payment_provider() -> None:
+    class Result:
+        def scalar_one_or_none(self) -> None:
+            return None
+
+    class Session:
+        statement = None
+
+        async def execute(self, statement):
+            self.statement = statement
+            return Result()
+
+    session = Session()
+
+    payment = await payment_service.apply_webhook_event(
+        cast(AsyncSession, session),
+        provider_name="STRIPE",
+        event=PaymentEvent(
+            provider_intent_id="pi_123",
+            status="captured",
+            raw={},
+        ),
+    )
+
+    assert payment is None
+    assert session.statement is not None
+    compiled = session.statement.compile()
+    assert "stripe" in compiled.params.values()
+    assert "pi_123" in compiled.params.values()
