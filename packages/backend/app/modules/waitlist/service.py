@@ -79,11 +79,15 @@ def _refresh_existing(entry: WaitlistEntry, body: WaitlistEntryIn) -> None:
 
 
 async def _find_existing(session: AsyncSession, body: WaitlistEntryIn) -> WaitlistEntry | None:
-    stmt = select(WaitlistEntry).where(
-        WaitlistEntry.email == body.email,
-        WaitlistEntry.role == body.role,
-        WaitlistEntry.property_id == body.property_id,
-        WaitlistEntry.experience_id == body.experience_id,
-    ).order_by(WaitlistEntry.created_at.desc(), WaitlistEntry.id.desc())
+    stmt = (
+        select(WaitlistEntry)
+        .where(
+            WaitlistEntry.email == body.email,
+            WaitlistEntry.role == body.role,
+            WaitlistEntry.property_id == body.property_id,
+            WaitlistEntry.experience_id == body.experience_id,
+        )
+        .order_by(WaitlistEntry.created_at.desc(), WaitlistEntry.id.desc())
+    )
     result = await session.execute(stmt)
     return result.scalars().first()
