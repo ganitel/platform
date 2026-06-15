@@ -85,8 +85,8 @@ export const links: Route.LinksFunction = () => {
   ];
 };
 
-export const meta: Route.MetaFunction = () => [
-  { title: "Ganitel — séjours et expériences" },
+export const meta: Route.MetaFunction = ({ data }) => [
+  { title: translate("index.meta.title", data?.locale ?? "fr") },
 ];
 
 export async function loader({ request }: Route.LoaderArgs) {

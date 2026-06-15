@@ -1502,8 +1502,8 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
   "gallery.close": { fr: "Fermer la galerie", en: "Close gallery" },
 
   "index.meta.title": {
-    fr: "Ganitel — Là où la lumière prend son temps",
-    en: "Ganitel — Stay where the light moves slowly",
+    fr: "Ganitel — Où chaque séjour raconte une histoire",
+    en: "Ganitel — Where every stay tells a story",
   },
   "index.meta.description": {
     fr: "Logements et expériences soigneusement sélectionnés au Cameroun.",
