@@ -14,8 +14,11 @@ import { pickPriceForLocale } from "@/shared/lib/price";
 import {
   createBooking,
   initiatePayment,
-  confirmNoopPayment,
 } from "@/features/bookings/api";
+import {
+  defaultPaymentProvider,
+  handlePaymentClientAction,
+} from "@/features/bookings/payment-flow";
 import type { PropertyDetail } from "@/features/properties/types";
 
 function toIsoDate(d: Date): string {
@@ -65,10 +68,9 @@ export function BookingPanel({ property }: Props) {
         guest_count: guests,
         currency,
       });
-      const payment = await initiatePayment(booking.id, "noop");
-      if (payment.client_action.kind === "auto_capture") {
-        await confirmNoopPayment(payment.provider_intent_id);
-      }
+      const payment = await initiatePayment(booking.id, defaultPaymentProvider);
+      const result = await handlePaymentClientAction(payment);
+      if (result === "redirected") return;
       setStep("done");
     } catch (e) {
       // Map known backend error patterns to localized strings rather than

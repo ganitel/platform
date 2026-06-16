@@ -5,10 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 import type { DateRange } from "react-day-picker";
 
 import {
-  confirmNoopPayment,
   createBooking,
   initiatePayment,
 } from "@/features/bookings/api";
+import {
+  defaultPaymentProvider,
+  handlePaymentClientAction,
+} from "@/features/bookings/payment-flow";
 import { listPropertyRooms } from "@/features/properties/api";
 import { RoomCard } from "@/features/properties/components/room-card";
 import type {
@@ -98,10 +101,9 @@ export function RoomPicker({ property }: Props) {
         guest_count: guests,
         currency,
       });
-      const payment = await initiatePayment(booking.id, "noop");
-      if (payment.client_action.kind === "auto_capture") {
-        await confirmNoopPayment(payment.provider_intent_id);
-      }
+      const payment = await initiatePayment(booking.id, defaultPaymentProvider);
+      const result = await handlePaymentClientAction(payment);
+      if (result === "redirected") return;
       setStep("done");
     } catch (e) {
       const code: TranslationKey =

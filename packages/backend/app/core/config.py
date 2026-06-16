@@ -14,6 +14,7 @@ from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 class PaymentSettings(BaseModel):
     """Tranzak + booking payment flow (flat env: TRANZAK_*, PAYMENT_*, BOOKING_*)."""
 
+    PAYMENT_PROVIDER: Literal["tranzak", "stripe", "noop"] | None = None
     TRANZAK_BASE_URL: str = "https://dsapi.tranzak.me"
     TRANZAK_APP_ID: str | None = None
     TRANZAK_APP_KEY: str | None = None
