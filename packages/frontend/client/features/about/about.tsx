@@ -419,7 +419,7 @@ function Closing() {
         <h2 className="m-0 max-w-2xl text-3xl leading-tight tracking-[-0.02em] text-ganitel-on-tan md:text-4xl">
           {t("about.closing")}
         </h2>
-        <PillLink to="/browse" variant="solid" arrow>
+        <PillLink to="/browse?kind=stays" variant="solid" arrow>
           {t("about.cta")}
         </PillLink>
       </div>

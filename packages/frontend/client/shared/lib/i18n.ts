@@ -62,7 +62,27 @@ const dict = {
 
   "landing.nav.properties": { fr: "Logements", en: "Properties" },
   "landing.nav.experiences": { fr: "Expériences", en: "Experiences" },
-  "landing.cta": { fr: "Découvrir les séjours", en: "Browse stays" },
+  "landing.cta": { fr: "Découvrir les expériences", en: "Browse experiences" },
+  "landing.featured.experiences.tag": {
+    fr: "Expériences · 2026",
+    en: "Experiences · 2026",
+  },
+  "landing.featured.experiences.title": {
+    fr: "Des expériences,",
+    en: "Experiences",
+  },
+  "landing.featured.experiences.title_em": {
+    fr: "qui valent le voyage.",
+    en: "worth the trip.",
+  },
+  "landing.featured.experiences.lede": {
+    fr: "Guides locaux, immersions culturelles et escapades nature au Cameroun — choisies parce qu'elles marquent.",
+    en: "Local guides, cultural immersions, and nature escapes across Cameroon — chosen because they stay with you.",
+  },
+  "landing.featured.experiences.see_all": {
+    fr: "Voir toutes les expériences",
+    en: "See all experiences",
+  },
   "landing.featured.tag": { fr: "Sélection · 2026", en: "Selection · 2026" },
   "landing.featured.title": { fr: "Une sélection,", en: "A short list," },
   "landing.featured.title_em": { fr: "un seul ton.", en: "one tone." },
@@ -94,8 +114,8 @@ const dict = {
     en: "Ganitel makes Africa your next holiday. For professionals, families, and groups from anywhere in the world, discover stays and experiences worth the journey.",
   },
   "landing.hero.cta.browse": {
-    fr: "Découvrir les séjours",
-    en: "Browse stays",
+    fr: "Découvrir les expériences",
+    en: "Browse experiences",
   },
   "landing.trust.tag": {
     fr: "Le socle de la confiance",

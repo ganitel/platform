@@ -29,7 +29,7 @@ const ITEMS: NavItem[] = [
     showAfterLaunch: true,
   },
   {
-    to: "/browse",
+    to: "/browse?kind=experiences",
     labelKey: "nav.browse",
     icon: ExploreGlyph,
     showInPrelaunch: true,

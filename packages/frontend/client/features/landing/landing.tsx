@@ -4,7 +4,12 @@ import {
   PropertyGrid,
   PropertyGridSkeleton,
 } from "@/features/properties/components/property-grid";
+import {
+  ExperienceGrid,
+  ExperienceGridSkeleton,
+} from "@/features/experiences/components/experience-grid";
 import { useSearchProperties } from "@/features/properties/hooks";
+import { useSearchExperiences } from "@/features/experiences/hooks";
 import { PillLink } from "@/shared/ui/pill-link";
 import { SectionHeader } from "@/shared/ui/section-header";
 import { Statement } from "@/shared/ui/statement";
@@ -110,6 +115,7 @@ export function Landing() {
       <Hero />
       <TrustStrip />
       <Destinations />
+      <FeaturedExperiences />
       <FeaturedStays />
       <WhyGanitel />
       <VisionMoment />
@@ -160,12 +166,12 @@ function Hero() {
               <PillLink to="/join" variant="paper" arrow>
                 {t("join.submit")}
               </PillLink>
-              <PillLink to="/browse" variant="ghost-inverted">
+              <PillLink to="/browse?kind=experiences" variant="ghost-inverted">
                 {t("landing.hero.cta.browse")}
               </PillLink>
             </>
           ) : (
-            <PillLink to="/browse" variant="paper" arrow>
+            <PillLink to="/browse?kind=experiences" variant="paper" arrow>
               {t("landing.hero.cta.browse")}
             </PillLink>
           )}
@@ -205,7 +211,7 @@ function Destinations() {
           {DESTINATIONS.map((dest) => (
             <li key={dest.key} className="m-0 p-0">
               <a
-                href="/browse"
+                href="/browse?kind=experiences"
                 className="group block overflow-hidden rounded-2xl bg-ganitel-surface-2"
               >
                 <div className="relative aspect-[4/5] overflow-hidden">
@@ -242,6 +248,44 @@ function Destinations() {
   );
 }
 
+function FeaturedExperiences() {
+  const t = useT();
+  const { data, isLoading, isError } = useSearchExperiences({ limit: 8 });
+  const items = data?.items ?? [];
+  const revealRef = useReveal<HTMLDivElement>();
+
+  if (isError) return null;
+  if (!isLoading && items.length === 0) return null;
+
+  return (
+    <section className="px-6 py-20 md:px-12 md:py-28">
+      <SectionHeader
+        className="mx-auto max-w-7xl"
+        tag={t("landing.featured.experiences.tag")}
+        title={t("landing.featured.experiences.title")}
+        emphasis={t("landing.featured.experiences.title_em")}
+        lede={t("landing.featured.experiences.lede")}
+      />
+      <div
+        ref={revealRef}
+        data-reveal=""
+        className="mx-auto mt-12 max-w-7xl md:mt-16"
+      >
+        {isLoading ? (
+          <ExperienceGridSkeleton count={6} />
+        ) : (
+          <ExperienceGrid items={items} />
+        )}
+      </div>
+      <div className="mx-auto mt-10 flex max-w-7xl justify-center md:mt-14">
+        <PillLink to="/browse?kind=experiences" variant="ghost" arrow>
+          {t("landing.featured.experiences.see_all")}
+        </PillLink>
+      </div>
+    </section>
+  );
+}
+
 function FeaturedStays() {
   const t = useT();
   const { data, isLoading, isError } = useSearchProperties({ limit: 8 });
@@ -272,7 +316,7 @@ function FeaturedStays() {
         )}
       </div>
       <div className="mx-auto mt-10 flex max-w-7xl justify-center md:mt-14">
-        <PillLink to="/browse" variant="ghost" arrow>
+        <PillLink to="/browse?kind=stays" variant="ghost" arrow>
           {t("landing.featured.see_all")}
         </PillLink>
       </div>
@@ -364,7 +408,11 @@ function Closing() {
           title={t("landing.cta_section.title")}
           emphasis={t("landing.cta_section.title_em")}
         />
-        <PillLink to={isPrelaunch ? "/join" : "/browse"} variant="solid" arrow>
+        <PillLink
+          to={isPrelaunch ? "/join" : "/browse?kind=experiences"}
+          variant="solid"
+          arrow
+        >
           {t(isPrelaunch ? "join.submit" : "landing.cta")}
         </PillLink>
       </div>

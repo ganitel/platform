@@ -24,13 +24,13 @@ interface NavLinkSpec {
 }
 
 const DESKTOP_NAV: NavLinkSpec[] = [
-  { to: "/browse", labelKey: "nav.browse" },
+  { to: "/browse?kind=experiences", labelKey: "nav.browse" },
   { to: "/about", labelKey: "nav.about" },
 ];
 
 const DRAWER_BROWSE: NavLinkSpec[] = [
   { to: "/", labelKey: "nav.home" },
-  { to: "/browse", labelKey: "nav.browse" },
+  { to: "/browse?kind=experiences", labelKey: "nav.browse" },
 ];
 
 const DRAWER_ACCOUNT: NavLinkSpec[] = [
