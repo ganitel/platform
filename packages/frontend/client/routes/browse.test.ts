@@ -26,9 +26,9 @@ describe("browse loader", () => {
   it("surfaces stays listing failures to the route error boundary", async () => {
     serverFetchMock.mockRejectedValueOnce(new Error("properties unavailable"));
 
-    await expect(loader(argsFor("https://ganitel.test/browse"))).rejects.toThrow(
-      "properties unavailable",
-    );
+    await expect(
+      loader(argsFor("https://ganitel.test/browse?kind=stays")),
+    ).rejects.toThrow("properties unavailable");
     expect(serverFetchMock).toHaveBeenCalledWith("/properties?limit=24");
   });
 
@@ -38,6 +38,8 @@ describe("browse loader", () => {
     await expect(
       loader(argsFor("https://ganitel.test/browse?kind=experiences&q=kribi")),
     ).rejects.toThrow("experiences unavailable");
-    expect(serverFetchMock).toHaveBeenCalledWith("/experiences?q=kribi&limit=24");
+    expect(serverFetchMock).toHaveBeenCalledWith(
+      "/experiences?q=kribi&limit=24",
+    );
   });
 });
