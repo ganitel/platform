@@ -166,12 +166,12 @@ function Hero() {
               <PillLink to="/join" variant="paper" arrow>
                 {t("join.submit")}
               </PillLink>
-              <PillLink to="/browse" variant="ghost-inverted">
+              <PillLink to="/browse?kind=experiences" variant="ghost-inverted">
                 {t("landing.hero.cta.browse")}
               </PillLink>
             </>
           ) : (
-            <PillLink to="/browse" variant="paper" arrow>
+            <PillLink to="/browse?kind=experiences" variant="paper" arrow>
               {t("landing.hero.cta.browse")}
             </PillLink>
           )}
@@ -211,7 +211,7 @@ function Destinations() {
           {DESTINATIONS.map((dest) => (
             <li key={dest.key} className="m-0 p-0">
               <a
-                href="/browse"
+                href="/browse?kind=experiences"
                 className="group block overflow-hidden rounded-2xl bg-ganitel-surface-2"
               >
                 <div className="relative aspect-[4/5] overflow-hidden">
@@ -278,7 +278,7 @@ function FeaturedExperiences() {
         )}
       </div>
       <div className="mx-auto mt-10 flex max-w-7xl justify-center md:mt-14">
-        <PillLink to="/browse" variant="ghost" arrow>
+        <PillLink to="/browse?kind=experiences" variant="ghost" arrow>
           {t("landing.featured.experiences.see_all")}
         </PillLink>
       </div>
@@ -408,7 +408,11 @@ function Closing() {
           title={t("landing.cta_section.title")}
           emphasis={t("landing.cta_section.title_em")}
         />
-        <PillLink to={isPrelaunch ? "/join" : "/browse"} variant="solid" arrow>
+        <PillLink
+          to={isPrelaunch ? "/join" : "/browse?kind=experiences"}
+          variant="solid"
+          arrow
+        >
           {t(isPrelaunch ? "join.submit" : "landing.cta")}
         </PillLink>
       </div>

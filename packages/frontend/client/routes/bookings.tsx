@@ -138,7 +138,7 @@ export default function MyBookingsRoute() {
             {t("booking.empty")}
           </p>
           <Link
-            to="/browse"
+            to="/browse?kind=experiences"
             className="inline-block rounded-xl bg-ganitel-primary px-5 py-2.5 text-sm font-medium text-ganitel-text-button hover:bg-ganitel-primary/90"
           >
             {t("landing.featured.see_all")}
