@@ -12,9 +12,9 @@ import type { TranslationKey } from "@/shared/lib/i18n";
 import { useLocale, useT } from "@/shared/lib/i18n";
 import { pickPriceForLocale } from "@/shared/lib/price";
 import {
+  completePaymentAction,
   createBooking,
-  initiatePayment,
-  confirmNoopPayment,
+  initiateConfiguredPayment,
 } from "@/features/bookings/api";
 import type { PropertyDetail } from "@/features/properties/types";
 
@@ -65,9 +65,10 @@ export function BookingPanel({ property }: Props) {
         guest_count: guests,
         currency,
       });
-      const payment = await initiatePayment(booking.id, "noop");
-      if (payment.client_action.kind === "auto_capture") {
-        await confirmNoopPayment(payment.provider_intent_id);
+      const payment = await initiateConfiguredPayment(booking.id);
+      const paymentResult = await completePaymentAction(payment);
+      if (paymentResult === "redirected") {
+        return;
       }
       setStep("done");
     } catch (e) {
