@@ -4,9 +4,25 @@ import type {
   ExperienceAdminListOut,
   ExperienceCreateInput,
   ExperienceDetail,
+  ExperienceSearchOut,
   ExperienceStatus,
   ExperienceUpdateInput,
 } from "@/features/experiences/types";
+
+export interface ExperienceSearchFilters {
+  q?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export async function searchExperiences(
+  filters: ExperienceSearchFilters = {},
+): Promise<ExperienceSearchOut> {
+  const r = await apiClient.get<ExperienceSearchOut>("/experiences", {
+    params: filters as Record<string, unknown>,
+  });
+  return r.data;
+}
 
 export interface AdminListParams {
   status?: ExperienceStatus[];

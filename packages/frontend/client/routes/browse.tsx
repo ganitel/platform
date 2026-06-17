@@ -40,7 +40,7 @@ export const headers: Route.HeadersFunction = () => ({
 type BrowseKind = "stays" | "experiences";
 
 function parseKind(value: string | null): BrowseKind {
-  return value === "experiences" ? "experiences" : "stays";
+  return value === "stays" ? "stays" : "experiences";
 }
 
 const TITLE_KEY: Record<BrowseKind, TranslationKey> = {
@@ -76,9 +76,8 @@ export const meta: Route.MetaFunction = ({ location, data }) => {
       : "browse.meta.description.stays",
     locale,
   );
-  const ogPath =
-    kind === "experiences" ? "/og/experiences.png" : "/og/stays.png";
-  const pathname = `/browse${kind === "experiences" ? "?kind=experiences" : ""}`;
+  const ogPath = kind === "stays" ? "/og/stays.png" : "/og/experiences.png";
+  const pathname = `/browse${kind === "stays" ? "?kind=stays" : ""}`;
   return seo({
     title,
     description,
@@ -188,7 +187,7 @@ function BrowseTabs({ kind, q }: { kind: BrowseKind; q: string | null }) {
 
   const hrefFor = (target: BrowseKind): string => {
     const params = new URLSearchParams();
-    if (target === "experiences") params.set("kind", "experiences");
+    if (target === "stays") params.set("kind", "stays");
     if (q) params.set("q", q);
     const qs = params.toString();
     return qs ? `/browse?${qs}` : "/browse";
@@ -199,11 +198,11 @@ function BrowseTabs({ kind, q }: { kind: BrowseKind; q: string | null }) {
       aria-label={t("nav.browse")}
       className="-mx-4 mb-10 flex border-b border-ganitel-stroke-neutral px-1 md:mx-0 md:mb-12 md:gap-8 md:px-0"
     >
-      <BrowseTab to={hrefFor("stays")} active={kind === "stays"}>
-        {t("browse.tabs.stays")}
-      </BrowseTab>
       <BrowseTab to={hrefFor("experiences")} active={kind === "experiences"}>
         {t("browse.tabs.experiences")}
+      </BrowseTab>
+      <BrowseTab to={hrefFor("stays")} active={kind === "stays"}>
+        {t("browse.tabs.stays")}
       </BrowseTab>
     </nav>
   );
