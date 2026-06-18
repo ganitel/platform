@@ -13,6 +13,7 @@ from app.modules.experience_bookings.schemas import (
     ExperienceBookingHostConfirmIn,
     ExperienceBookingPublic,
 )
+from app.modules.payments.providers import default_provider_name
 
 router = APIRouter(prefix="/admin/experience-bookings", tags=["experience-bookings", "admin"])
 
@@ -32,7 +33,7 @@ async def confirm(
     user: CurrentUser,
     session: DbSession,
     idempotency_key: str = Header(default="", alias="Idempotency-Key"),
-    provider: str = "noop",
+    provider: str | None = None,
 ) -> ExperienceBookingPublic:
     key = idempotency_key or f"confirm-{booking_id}"
 
@@ -41,7 +42,7 @@ async def confirm(
             session,
             booking_id=booking_id,
             host=user,
-            provider_name=provider,
+            provider_name=default_provider_name(provider),
             idempotency_key=key,
             start_time=payload.start_time,
         )
