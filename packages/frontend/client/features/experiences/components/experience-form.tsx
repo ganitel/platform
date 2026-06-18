@@ -5,6 +5,7 @@ import type {
   ExperienceCancellationPolicy,
   ExperienceCreateInput,
   ExperienceDetail,
+  ExperiencePriceEntry,
 } from "@/features/experiences/types";
 import {
   listCancellationPolicies,
@@ -28,8 +29,12 @@ interface FormState {
   location: LocationPick | null;
   capacity: string;
   duration_minutes: string;
+  start_time: string;
   cancellation_policy: ExperienceCancellationPolicy;
-  prices: { amount: string; currency: string }[];
+  prices: ExperiencePriceEntry[];
+  what_is_included: string;
+  eligibility: string;
+  itinerary: string;
   content_language: "fr" | "en";
 }
 
@@ -40,8 +45,12 @@ const BLANK: FormState = {
   location: null,
   capacity: "8",
   duration_minutes: "120",
+  start_time: "",
   cancellation_policy: "moderate",
-  prices: [{ amount: "", currency: "XAF" }],
+  prices: [{ amount: "", currency: "XAF", group_size: 1 }],
+  what_is_included: "",
+  eligibility: "",
+  itinerary: "",
   content_language: "fr",
 };
 
@@ -60,8 +69,16 @@ function fromDetail(d: ExperienceDetail): FormState {
     },
     capacity: String(d.capacity),
     duration_minutes: String(d.duration_minutes),
+    start_time: d.start_time ?? "",
     cancellation_policy: d.cancellation_policy,
-    prices: d.prices.map((p) => ({ amount: p.amount, currency: p.currency })),
+    prices: d.prices.map((p) => ({
+      amount: p.amount,
+      currency: p.currency,
+      group_size: p.group_size,
+    })),
+    what_is_included: d.what_is_included ?? "",
+    eligibility: d.eligibility ?? "",
+    itinerary: d.itinerary ?? "",
     content_language: (d.content_language as "fr" | "en") ?? "fr",
   };
 }
@@ -125,11 +142,16 @@ export function ExperienceForm({
       location: { lat: form.location.lat, lng: form.location.lng },
       capacity: Number(form.capacity),
       duration_minutes: Number(form.duration_minutes),
+      start_time: form.start_time || null,
       cancellation_policy: form.cancellation_policy,
       prices: form.prices.map((p) => ({
         amount: p.amount,
         currency: p.currency,
+        group_size: p.group_size,
       })),
+      what_is_included: form.what_is_included,
+      eligibility: form.eligibility,
+      itinerary: form.itinerary,
       content_language: form.content_language,
       media_ids:
         mediaState.mode === "draft"
@@ -143,6 +165,48 @@ export function ExperienceForm({
 
   const labelOf = (ref: { label_en: string; label_fr: string }) =>
     locale === "en" ? ref.label_en : ref.label_fr;
+
+  const basePrices = form.prices.filter((p) => p.group_size === 1);
+  const groupPrices = form.prices.filter((p) => p.group_size > 1);
+
+  function updateBasePrice(idx: number, patch: Partial<ExperiencePriceEntry>) {
+    const next = form.prices.map((p) =>
+      p.group_size === 1 && basePrices.indexOf(p) === idx
+        ? { ...p, ...patch }
+        : p,
+    );
+    update("prices", next);
+  }
+
+  function updateGroupPrice(idx: number, patch: Partial<ExperiencePriceEntry>) {
+    const next = form.prices.map((p) =>
+      p.group_size > 1 && groupPrices.indexOf(p) === idx
+        ? { ...p, ...patch }
+        : p,
+    );
+    update("prices", next);
+  }
+
+  function addGroupPrice() {
+    const usedSizes = new Set(groupPrices.map((p) => p.group_size));
+    const nextSize = [2, 3, 4, 5, 6, 7, 8, 9, 10].find(
+      (s) => !usedSizes.has(s),
+    );
+    if (!nextSize) return;
+    const defaultCurrency = basePrices[0]?.currency ?? "XAF";
+    update("prices", [
+      ...form.prices,
+      { amount: "", currency: defaultCurrency, group_size: nextSize },
+    ]);
+  }
+
+  function removeGroupPrice(idx: number) {
+    const target = groupPrices[idx];
+    update(
+      "prices",
+      form.prices.filter((p) => p !== target),
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -226,6 +290,14 @@ export function ExperienceForm({
             />
           </Field>
         </div>
+        <Field label={tr("admin.form.start_time.label")}>
+          <input
+            type="time"
+            value={form.start_time}
+            onChange={(e) => update("start_time", e.target.value)}
+            className={INPUT_CLASS}
+          />
+        </Field>
         <Field label={tr("admin.form.cancellation.label")}>
           <select
             value={form.cancellation_policy}
@@ -247,8 +319,11 @@ export function ExperienceForm({
       </Section>
 
       <Section title={tr("admin.form.section.price")}>
+        <p className="text-sm font-medium text-ganitel-text-subtitle">
+          {tr("admin.form.price.base_label")}
+        </p>
         <div className="space-y-2">
-          {form.prices.map((p, idx) => (
+          {basePrices.map((p, idx) => (
             <div key={idx} className="flex items-end gap-2">
               <Field label={tr("admin.form.price.amount")}>
                 <input
@@ -257,22 +332,18 @@ export function ExperienceForm({
                   min={0}
                   step="any"
                   value={p.amount}
-                  onChange={(e) => {
-                    const next = [...form.prices];
-                    next[idx] = { ...next[idx], amount: e.target.value };
-                    update("prices", next);
-                  }}
+                  onChange={(e) =>
+                    updateBasePrice(idx, { amount: e.target.value })
+                  }
                   className={INPUT_CLASS}
                 />
               </Field>
               <Field label={tr("admin.form.price.currency")}>
                 <select
                   value={p.currency}
-                  onChange={(e) => {
-                    const next = [...form.prices];
-                    next[idx] = { ...next[idx], currency: e.target.value };
-                    update("prices", next);
-                  }}
+                  onChange={(e) =>
+                    updateBasePrice(idx, { currency: e.target.value })
+                  }
                   className={INPUT_CLASS}
                 >
                   <option value="XAF">XAF</option>
@@ -281,7 +352,7 @@ export function ExperienceForm({
                   <option value="USD">USD</option>
                 </select>
               </Field>
-              {form.prices.length > 1 && (
+              {basePrices.length > 1 && (
                 <button
                   type="button"
                   onClick={() => {
@@ -302,7 +373,7 @@ export function ExperienceForm({
             onClick={() => {
               update("prices", [
                 ...form.prices,
-                { amount: "", currency: "XAF" },
+                { amount: "", currency: "XAF", group_size: 1 },
               ]);
             }}
             className="cursor-pointer rounded-md border border-dashed px-4 py-2 text-sm"
@@ -310,6 +381,109 @@ export function ExperienceForm({
             {tr("admin.form.price.add")}
           </button>
         </div>
+
+        {groupPrices.length > 0 && (
+          <div className="mt-6 space-y-2">
+            {groupPrices.map((p, idx) => (
+              <div key={idx} className="flex items-end gap-2">
+                <Field label={tr("admin.form.price.group_size")}>
+                  <select
+                    value={p.group_size}
+                    onChange={(e) =>
+                      updateGroupPrice(idx, {
+                        group_size: Number(e.target.value),
+                      })
+                    }
+                    className={INPUT_CLASS}
+                  >
+                    {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label={tr("admin.form.price.amount")}>
+                  <input
+                    type="number"
+                    required
+                    min={0}
+                    step="any"
+                    value={p.amount}
+                    onChange={(e) =>
+                      updateGroupPrice(idx, { amount: e.target.value })
+                    }
+                    className={INPUT_CLASS}
+                  />
+                </Field>
+                <Field label={tr("admin.form.price.currency")}>
+                  <select
+                    value={p.currency}
+                    onChange={(e) =>
+                      updateGroupPrice(idx, { currency: e.target.value })
+                    }
+                    className={INPUT_CLASS}
+                  >
+                    <option value="XAF">XAF</option>
+                    <option value="XOF">XOF</option>
+                    <option value="EUR">EUR</option>
+                    <option value="USD">USD</option>
+                  </select>
+                </Field>
+                <button
+                  type="button"
+                  onClick={() => removeGroupPrice(idx)}
+                  className="cursor-pointer rounded border px-3 py-2 text-sm"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {groupPrices.length < 9 && (
+          <button
+            type="button"
+            onClick={addGroupPrice}
+            className="mt-4 cursor-pointer rounded-md border border-dashed px-4 py-2 text-sm"
+          >
+            {tr("admin.form.price.add_group")}
+          </button>
+        )}
+      </Section>
+
+      <Section title={tr("admin.form.section.what_is_included")}>
+        <Field label={tr("admin.form.what_is_included.label")}>
+          <MarkdownEditor
+            rows={6}
+            maxLength={5000}
+            value={form.what_is_included}
+            onChange={(v) => update("what_is_included", v)}
+          />
+        </Field>
+      </Section>
+
+      <Section title={tr("admin.form.section.eligibility")}>
+        <Field label={tr("admin.form.eligibility.label")}>
+          <MarkdownEditor
+            rows={4}
+            maxLength={2000}
+            value={form.eligibility}
+            onChange={(v) => update("eligibility", v)}
+          />
+        </Field>
+      </Section>
+
+      <Section title={tr("admin.form.section.itinerary")}>
+        <Field label={tr("admin.form.itinerary.label")}>
+          <MarkdownEditor
+            rows={10}
+            maxLength={10000}
+            value={form.itinerary}
+            onChange={(v) => update("itinerary", v)}
+          />
+        </Field>
       </Section>
 
       {error != null && (

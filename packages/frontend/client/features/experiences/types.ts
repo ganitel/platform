@@ -4,13 +4,18 @@ import type {
   HostPublic,
   MediaItemPublic,
   MediaPublic,
-  Money,
 } from "@/features/properties/types";
 
 export type { AdminStatusSummary };
 
 export type ExperienceCancellationPolicy = "flexible" | "moderate" | "strict";
 export type ExperienceStatus = "draft" | "published" | "unlisted" | "removed";
+
+export interface ExperiencePriceEntry {
+  amount: string;
+  currency: string;
+  group_size: number;
+}
 
 export interface ExperiencePublic {
   id: string;
@@ -22,13 +27,17 @@ export interface ExperiencePublic {
   location: GeoPoint;
   capacity: number;
   duration_minutes: number;
-  prices: Money[];
+  prices: ExperiencePriceEntry[];
   cover_media: MediaPublic | null;
   distance_km: number | null;
 }
 
 export interface ExperienceDetail extends ExperiencePublic {
   description: string | null;
+  what_is_included: string;
+  eligibility: string;
+  itinerary: string;
+  start_time: string | null;
   cancellation_policy: ExperienceCancellationPolicy;
   content_language: string;
   status: ExperienceStatus;
@@ -55,8 +64,12 @@ export interface ExperienceCreateInput {
   location: GeoPoint;
   capacity: number;
   duration_minutes: number;
+  start_time?: string | null;
   cancellation_policy?: ExperienceCancellationPolicy;
-  prices: Money[];
+  prices: ExperiencePriceEntry[];
+  what_is_included?: string;
+  eligibility?: string;
+  itinerary?: string;
   content_language?: "fr" | "en";
   media_ids?: string[];
 }
@@ -69,7 +82,7 @@ export interface ExperienceAdminListItem {
   country_code: string;
   status: ExperienceStatus;
   duration_minutes: number;
-  prices: Money[];
+  prices: ExperiencePriceEntry[];
   cover_media: MediaPublic | null;
   created_at: string;
   published_at: string | null;
