@@ -1,5 +1,5 @@
 from datetime import UTC, datetime
-from typing import cast
+from typing import Any, cast
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,7 +12,14 @@ from app.modules.experience_bookings.models import ExperienceBooking, Experience
 from app.modules.outbox import service as outbox_service
 from app.modules.payments.models import Payment, PaymentStatus
 from app.modules.payments.providers import get_provider
-from app.modules.payments.providers.base import PaymentEvent
+from app.modules.payments.providers.base import PaymentEvent, PaymentIntent
+
+
+def _stored_init_response(intent: PaymentIntent) -> dict[str, Any]:
+    return {
+        "client_action": intent.client_action,
+        "provider_raw": intent.raw,
+    }
 
 
 async def initiate_payment(
@@ -39,7 +46,7 @@ async def initiate_payment(
         payment=payment, return_url=get_settings().PAYMENT_RETURN_URL
     )
     payment.provider_intent_id = intent.provider_intent_id
-    payment.raw_init_response = intent.raw
+    payment.raw_init_response = _stored_init_response(intent)
     booking.payment_id = payment.id
     await session.commit()
     await session.refresh(payment)
@@ -80,7 +87,7 @@ async def initiate_experience_payment(
         payment=payment, return_url=get_settings().PAYMENT_RETURN_URL
     )
     payment.provider_intent_id = intent.provider_intent_id
-    payment.raw_init_response = intent.raw
+    payment.raw_init_response = _stored_init_response(intent)
     await session.flush()
     return InitiatePaymentOut(
         payment_id=payment.id,
