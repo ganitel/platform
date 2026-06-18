@@ -6,9 +6,45 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ValidationError
 from app.modules.payments import service as payment_service
-from app.modules.payments.providers import get_provider
+from app.modules.payments.providers import default_provider_name, get_provider
 from app.modules.payments.providers.base import PaymentEvent, PaymentIntent
 from app.modules.payments.providers.noop import NoopProvider
+
+
+def test_default_provider_name_prefers_explicit_provider() -> None:
+    assert default_provider_name("stripe") == "stripe"
+    assert default_provider_name(" tranzak ") == "tranzak"
+
+
+def test_default_provider_name_uses_configured_provider(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "app.modules.payments.providers.get_settings",
+        lambda: SimpleNamespace(ENVIRONMENT="production", PAYMENT_PROVIDER="stripe"),
+    )
+
+    assert default_provider_name() == "stripe"
+
+
+def test_default_provider_name_uses_real_provider_in_production(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "app.modules.payments.providers.get_settings",
+        lambda: SimpleNamespace(ENVIRONMENT="production", PAYMENT_PROVIDER=None),
+    )
+
+    assert default_provider_name() == "tranzak"
+
+
+def test_default_provider_name_keeps_noop_default_outside_production(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "app.modules.payments.providers.get_settings",
+        lambda: SimpleNamespace(ENVIRONMENT="development", PAYMENT_PROVIDER=None),
+    )
+
+    assert default_provider_name() == "noop"
 
 
 def test_get_provider_rejects_noop_in_production(monkeypatch: pytest.MonkeyPatch) -> None:
