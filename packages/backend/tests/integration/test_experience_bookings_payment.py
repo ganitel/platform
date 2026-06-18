@@ -11,6 +11,7 @@ from shapely.geometry import Point
 from app.core.money import Currency
 from app.modules.experience_bookings import service as eb_service
 from app.modules.experience_bookings.models import ExperienceBookingStatus
+from app.modules.experience_bookings.routes import get_payment_intent
 from app.modules.experience_bookings.schemas import ExperienceBookingCreateIn
 from app.modules.experiences.models import Experience, ExperiencePrice, ExperienceStatus
 from app.modules.payments import service as payments_service
@@ -83,6 +84,37 @@ async def test_host_confirm_creates_payment_intent(session):
     assert confirmed.payment_id is not None
     assert confirmed.hold_expires_at is not None
     assert confirmed.host_confirmed_at is not None
+
+
+@pytest.mark.asyncio
+async def test_guest_pay_returns_stored_payment_client_action(session):
+    host = await _u(session, host=True)
+    guest = await _u(session)
+    exp = await _exp(session, host)
+
+    booking = await eb_service.create_request(
+        session,
+        guest=guest,
+        payload=ExperienceBookingCreateIn(
+            experience_id=exp.id,
+            requested_date=date.today() + timedelta(days=5),
+            party_size=1,
+            currency=Currency.XAF,
+        ),
+    )
+    await eb_service.confirm_as_host(
+        session,
+        booking_id=booking.id,
+        host=host,
+        provider_name="noop",
+        idempotency_key="key-1",
+    )
+    await session.refresh(booking)
+
+    intent = await get_payment_intent(booking.id, guest, session)
+
+    assert intent.client_action["kind"] == "auto_capture"
+    assert intent.client_action["intent_id"] == intent.provider_intent_id
 
 
 @pytest.mark.asyncio

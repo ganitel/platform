@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.errors import ValidationError
 from app.modules.payments import service as payment_service
 from app.modules.payments.providers import default_provider_name, get_provider
-from app.modules.payments.providers.base import PaymentEvent
+from app.modules.payments.providers.base import PaymentEvent, PaymentIntent
 from app.modules.payments.providers.noop import NoopProvider
 
 
@@ -66,6 +66,19 @@ def test_get_provider_allows_noop_outside_production(monkeypatch: pytest.MonkeyP
     )
 
     assert isinstance(get_provider("noop"), NoopProvider)
+
+
+def test_stored_init_response_keeps_client_action() -> None:
+    intent = PaymentIntent(
+        provider_intent_id="noop-123",
+        client_action={"kind": "auto_capture", "intent_id": "noop-123"},
+        raw={"intent_id": "noop-123"},
+    )
+
+    stored = payment_service._stored_init_response(intent)
+
+    assert stored["client_action"] == intent.client_action
+    assert stored["provider_raw"] == intent.raw
 
 
 @pytest.mark.asyncio
