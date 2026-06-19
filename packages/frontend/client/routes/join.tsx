@@ -31,8 +31,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-export const meta: Route.MetaFunction = ({ data }) => {
-  const locale = data?.locale ?? "fr";
+export const meta: Route.MetaFunction = ({ loaderData }) => {
+  const locale = loaderData?.locale ?? "fr";
   return seo({
     title: translate("join.meta.title", locale),
     description: translate("join.meta.description", locale),

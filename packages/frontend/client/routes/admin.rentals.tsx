@@ -52,8 +52,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-export const meta: Route.MetaFunction = ({ data }) => [
-  { title: t("admin.meta.rentals", data?.locale ?? "fr") },
+export const meta: Route.MetaFunction = ({ loaderData }) => [
+  { title: t("admin.meta.rentals", loaderData?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 

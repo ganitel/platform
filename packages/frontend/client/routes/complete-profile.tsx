@@ -18,8 +18,8 @@ import { apiClient } from "@/shared/api/client";
 import { getSupabase } from "@/lib/supabase";
 import { localeFromAcceptLanguage, t, useT } from "@/shared/lib/i18n";
 
-export const meta: Route.MetaFunction = ({ data }) => [
-  { title: t("complete_profile.meta.title", data?.locale ?? "fr") },
+export const meta: Route.MetaFunction = ({ loaderData }) => [
+  { title: t("complete_profile.meta.title", loaderData?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 

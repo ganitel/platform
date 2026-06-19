@@ -39,9 +39,9 @@ export const headers: Route.HeadersFunction = () => ({
   "Cache-Control": PRIVATE_NO_STORE_CACHE,
 });
 
-export const meta: Route.MetaFunction = ({ data, params }) => {
-  const locale = data?.locale ?? "fr";
-  if (!data?.property) {
+export const meta: Route.MetaFunction = ({ loaderData, params }) => {
+  const locale = loaderData?.locale ?? "fr";
+  if (!loaderData?.property) {
     return seo({
       title: translate("property.not_found.title", locale),
       description: translate("property.not_found.description", locale),
@@ -50,7 +50,7 @@ export const meta: Route.MetaFunction = ({ data, params }) => {
       noindex: true,
     });
   }
-  const p = data.property;
+  const p = loaderData.property;
   const title = `${p.title} — ${p.city} | Ganitel`;
   const description = (
     p.description?.trim().slice(0, 160) ||

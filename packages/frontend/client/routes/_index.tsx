@@ -25,8 +25,8 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-export const meta: Route.MetaFunction = ({ data }) => {
-  const locale = data?.locale ?? "fr";
+export const meta: Route.MetaFunction = ({ loaderData }) => {
+  const locale = loaderData?.locale ?? "fr";
   const title = t("index.meta.title", locale);
   return seo({
     title,

@@ -55,8 +55,8 @@ const EMPTY_KEY: Record<BrowseKind, TranslationKey> = {
   experiences: "browse.empty.experiences",
 };
 
-export const meta: Route.MetaFunction = ({ location, data }) => {
-  const locale = data?.locale ?? "fr";
+export const meta: Route.MetaFunction = ({ location, loaderData }) => {
+  const locale = loaderData?.locale ?? "fr";
   const params = new URLSearchParams(location.search);
   const kind = parseKind(params.get("kind"));
   const q = params.get("q");

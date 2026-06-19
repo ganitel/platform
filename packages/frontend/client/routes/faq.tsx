@@ -10,8 +10,8 @@ export const headers: Route.HeadersFunction = () => ({
   "Cache-Control": PUBLIC_HTML_CACHE,
 });
 
-export const meta: Route.MetaFunction = ({ data }) => {
-  const locale = data?.locale ?? "fr";
+export const meta: Route.MetaFunction = ({ loaderData }) => {
+  const locale = loaderData?.locale ?? "fr";
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",

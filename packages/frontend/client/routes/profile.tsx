@@ -12,8 +12,8 @@ import {
 import type { UserMe } from "@/features/auth/api/me";
 import { localeFromAcceptLanguage, t, useT } from "@/shared/lib/i18n";
 
-export const meta: Route.MetaFunction = ({ data }) => [
-  { title: t("profile.meta.title", data?.locale ?? "fr") },
+export const meta: Route.MetaFunction = ({ loaderData }) => [
+  { title: t("profile.meta.title", loaderData?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 
