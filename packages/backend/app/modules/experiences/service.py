@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.errors import ForbiddenError, NotFoundError, ValidationError
-from app.core.money import Currency, Money
+from app.core.money import Currency
 from app.modules.experiences.models import (
     Experience,
     ExperienceMediaItem,
@@ -27,6 +27,7 @@ from app.modules.experiences.schemas import (
     ExperienceAdminListItem,
     ExperienceCreateIn,
     ExperienceDetail,
+    ExperiencePriceEntry,
     ExperiencePublic,
     ExperienceUpdateIn,
 )
@@ -87,7 +88,11 @@ async def create_draft(
         location=_point(payload.location),
         capacity=payload.capacity,
         duration_minutes=payload.duration_minutes,
+        start_time=payload.start_time,
         cancellation_policy=payload.cancellation_policy,
+        what_is_included=payload.what_is_included,
+        eligibility=payload.eligibility,
+        itinerary=payload.itinerary,
         content_language=payload.content_language,
         status=ExperienceStatus.DRAFT,
     )
@@ -100,6 +105,7 @@ async def create_draft(
                 experience_id=exp.id,
                 currency=price.currency.value,
                 amount=price.amount,
+                group_size=price.group_size,
             )
         )
 
@@ -134,12 +140,13 @@ async def update(
         )
         await session.flush()
         for raw in new_prices:
-            price = Money.model_validate(raw)
+            price = ExperiencePriceEntry.model_validate(raw)
             session.add(
                 ExperiencePrice(
                     experience_id=experience.id,
                     currency=price.currency.value,
                     amount=price.amount,
+                    group_size=price.group_size,
                 )
             )
     for k, v in data.items():
@@ -302,7 +309,12 @@ async def to_public(
         location=_point_out(experience.location),
         capacity=experience.capacity,
         duration_minutes=experience.duration_minutes,
-        prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in experience.prices],
+        prices=[
+            ExperiencePriceEntry(
+                amount=p.amount, currency=Currency(p.currency), group_size=p.group_size
+            )
+            for p in experience.prices
+        ],
         cover_media=await _cover(session, experience.media),
         distance_km=distance_km,
     )
@@ -320,9 +332,18 @@ async def to_detail(session: AsyncSession, experience: Experience, host: User) -
         location=_point_out(experience.location),
         capacity=experience.capacity,
         duration_minutes=experience.duration_minutes,
-        prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in experience.prices],
+        start_time=experience.start_time,
+        prices=[
+            ExperiencePriceEntry(
+                amount=p.amount, currency=Currency(p.currency), group_size=p.group_size
+            )
+            for p in experience.prices
+        ],
         cover_media=media_items[0] if media_items else None,
         description=experience.description,
+        what_is_included=experience.what_is_included,
+        eligibility=experience.eligibility,
+        itinerary=experience.itinerary,
         cancellation_policy=experience.cancellation_policy,
         content_language=cast(Literal["fr", "en"], experience.content_language),
         status=experience.status,
@@ -344,7 +365,12 @@ async def to_admin_list_item(
         country_code=experience.country_code,
         status=experience.status,
         duration_minutes=experience.duration_minutes,
-        prices=[Money(amount=p.amount, currency=Currency(p.currency)) for p in experience.prices],
+        prices=[
+            ExperiencePriceEntry(
+                amount=p.amount, currency=Currency(p.currency), group_size=p.group_size
+            )
+            for p in experience.prices
+        ],
         cover_media=await _cover(session, experience.media),
         created_at=experience.created_at,
         published_at=experience.published_at,

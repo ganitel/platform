@@ -1963,6 +1963,66 @@ For any question or to exercise your rights, write to **hello@ganitel.com**.`,
     fr: "Durée (minutes)",
     en: "Duration (minutes)",
   },
+  "admin.form.start_time.label": {
+    fr: "Heure de départ",
+    en: "Start time",
+  },
+  "admin.form.section.what_is_included": {
+    fr: "Ce qui est inclus",
+    en: "What's included",
+  },
+  "admin.form.what_is_included.label": {
+    fr: "Décrivez ce qui est inclus (transport, repas, équipement…)",
+    en: "Describe what's included (transport, meals, equipment…)",
+  },
+  "admin.form.section.eligibility": {
+    fr: "Conditions de participation",
+    en: "Eligibility",
+  },
+  "admin.form.eligibility.label": {
+    fr: "Précisez qui ne peut pas participer à cette expérience",
+    en: "State who cannot take part in this experience",
+  },
+  "admin.form.section.itinerary": {
+    fr: "Programme",
+    en: "Itinerary",
+  },
+  "admin.form.itinerary.label": {
+    fr: "Décrivez le déroulement de l'expérience étape par étape",
+    en: "Describe the experience step by step",
+  },
+  "admin.form.price.group_size": {
+    fr: "Groupe de",
+    en: "Group of",
+  },
+  "admin.form.price.base_label": {
+    fr: "Prix par personne",
+    en: "Price per person",
+  },
+  "admin.form.price.add_group": {
+    fr: "Ajouter un tarif groupe",
+    en: "Add group price",
+  },
+  "experience.what_is_included": {
+    fr: "Ce qui est inclus",
+    en: "What's included",
+  },
+  "experience.eligibility": {
+    fr: "Conditions de participation",
+    en: "Eligibility",
+  },
+  "experience.itinerary": {
+    fr: "Programme",
+    en: "Itinerary",
+  },
+  "experience.start_time": {
+    fr: "Heure de départ",
+    en: "Start time",
+  },
+  "experience.price_for_group": {
+    fr: "pour {n} personnes",
+    en: "for {n} people",
+  },
 
   "admin.publish_error.intro": {
     fr: "Impossible de publier :",

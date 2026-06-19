@@ -395,7 +395,7 @@ EXPERIENCES: list[dict[str, Any]] = [
             "et poisson braisé à la flamme, dégustation à table autour d'un thé "
             "à la menthe. Tablier fourni, recettes à emporter."
         ),
-        "experience_type": "workshop",
+        "experience_type": "food_culinary",
         "city": "Douala",
         "country_code": "CM",
         "lat": 4.0464,
@@ -414,7 +414,7 @@ EXPERIENCES: list[dict[str, Any]] = [
             "Dakar — étoffes wax, épices, tisanes, percussions. Guide local "
             "francophone, dégustation de bissap incluse."
         ),
-        "experience_type": "tour",
+        "experience_type": "culture_heritage",
         "city": "Dakar",
         "country_code": "SN",
         "lat": 14.6760,
@@ -433,7 +433,7 @@ EXPERIENCES: list[dict[str, Any]] = [
             "et l'île aux coquillages. Apéritif servi à bord ; capitaine "
             "lebou natif du village."
         ),
-        "experience_type": "boat_trip",
+        "experience_type": "water",
         "city": "Joal-Fadiouth",
         "country_code": "SN",
         "lat": 14.1647,
@@ -452,7 +452,7 @@ EXPERIENCES: list[dict[str, Any]] = [
             "teinture à l'indigo et au pagne tissé. Repartez avec votre "
             "carré de tissu teint à la main et séché au soleil."
         ),
-        "experience_type": "workshop",
+        "experience_type": "arts_workshops",
         "city": "Saint-Louis",
         "country_code": "SN",
         "lat": 16.0303,
@@ -471,7 +471,7 @@ EXPERIENCES: list[dict[str, Any]] = [
             "de Bandia, avec bols tibétains, gongs et chants. Coussin et "
             "couverture fournis ; arrivée 15 minutes avant."
         ),
-        "experience_type": "sound_bath",
+        "experience_type": "wellness",
         "city": "Bandia",
         "country_code": "SN",
         "lat": 14.5833,
@@ -490,7 +490,7 @@ EXPERIENCES: list[dict[str, Any]] = [
             "fermentation, séchage, dégustation. Déjeuner ivoirien partagé "
             "(attiéké poisson) en bord de plantation."
         ),
-        "experience_type": "tour",
+        "experience_type": "farm_rural",
         "city": "Yamoussoukro",
         "country_code": "CI",
         "lat": 6.8276,

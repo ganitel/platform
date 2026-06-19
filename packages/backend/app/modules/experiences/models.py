@@ -7,7 +7,7 @@ boat trips, …). Distinct from `Property` — different shape (no
 bedrooms/amenities, has duration_minutes), different lifecycle.
 """
 
-from datetime import datetime
+from datetime import datetime, time
 from decimal import Decimal
 from enum import StrEnum
 from typing import Any
@@ -24,6 +24,7 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
+    Time,
     UniqueConstraint,
     Uuid,
     func,
@@ -73,6 +74,11 @@ class Experience(Base):
 
     capacity: Mapped[int] = mapped_column(Integer, nullable=False)
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
+    start_time: Mapped[time | None] = mapped_column(Time(timezone=False), nullable=True)
+
+    what_is_included: Mapped[str] = mapped_column(Text(), nullable=False, server_default="")
+    eligibility: Mapped[str] = mapped_column(Text(), nullable=False, server_default="")
+    itinerary: Mapped[str] = mapped_column(Text(), nullable=False, server_default="")
 
     cancellation_policy: Mapped[ExperienceCancellationPolicy] = mapped_column(
         Enum(
@@ -132,13 +138,18 @@ class ExperiencePrice(Base):
     )
     currency: Mapped[str] = mapped_column(String(3), nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric(19, 4), nullable=False)
+    group_size: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
     __table_args__ = (
+        CheckConstraint("group_size BETWEEN 1 AND 10", name="ck_experience_prices_group_size"),
         UniqueConstraint(
-            "experience_id", "currency", name="uq_experience_prices_experience_currency"
+            "experience_id",
+            "currency",
+            "group_size",
+            name="uq_experience_prices_experience_currency_group",
         ),
     )
 

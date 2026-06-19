@@ -139,7 +139,8 @@ export default function ExperienceDetailRoute({
   const locale = useLocale();
   const experienceTypeLabel = useExperienceTypeLabel();
 
-  const pickedPrice = pickPriceForLocale(experience.prices, locale);
+  const basePrices = experience.prices.filter((p) => p.group_size === 1);
+  const pickedPrice = pickPriceForLocale(basePrices, locale);
   const priceText = pickedPrice ? formatMoney(pickedPrice, locale) : "";
   const priceLabel = t("experience.per_person");
 
@@ -179,6 +180,12 @@ export default function ExperienceDetailRoute({
                 {experience.capacity} {t("property.guests")}
               </li>
               <li>{formatDuration(experience.duration_minutes)}</li>
+              {experience.start_time ? (
+                <li>
+                  {t("experience.start_time")}{" "}
+                  {experience.start_time.slice(0, 5)}
+                </li>
+              ) : null}
             </ul>
 
             {experience.description ? (
@@ -187,6 +194,33 @@ export default function ExperienceDetailRoute({
                   {t("property.description")}
                 </h2>
                 <Markdown source={experience.description} />
+              </div>
+            ) : null}
+
+            {experience.what_is_included ? (
+              <div>
+                <h2 className="mb-3 text-xl text-ganitel-text-title">
+                  {t("experience.what_is_included")}
+                </h2>
+                <Markdown source={experience.what_is_included} />
+              </div>
+            ) : null}
+
+            {experience.itinerary ? (
+              <div>
+                <h2 className="mb-3 text-xl text-ganitel-text-title">
+                  {t("experience.itinerary")}
+                </h2>
+                <Markdown source={experience.itinerary} />
+              </div>
+            ) : null}
+
+            {experience.eligibility ? (
+              <div>
+                <h2 className="mb-3 text-xl text-ganitel-text-title">
+                  {t("experience.eligibility")}
+                </h2>
+                <Markdown source={experience.eligibility} />
               </div>
             ) : null}
 

@@ -143,12 +143,33 @@ CANCELLATION_POLICIES: list[dict[str, str]] = [
 ]
 
 EXPERIENCE_TYPES: list[dict[str, str]] = [
-    {"code": "tour", "label_en": "Guided tour", "label_fr": "Visite guidée"},
-    {"code": "food_tasting", "label_en": "Food & drink", "label_fr": "Gastronomie"},
-    {"code": "workshop", "label_en": "Workshop", "label_fr": "Atelier"},
-    {"code": "boat", "label_en": "Boat trip", "label_fr": "Sortie en bateau"},
-    {"code": "adventure", "label_en": "Adventure", "label_fr": "Aventure"},
-    {"code": "wellness", "label_en": "Wellness", "label_fr": "Bien-être"},
-    {"code": "music", "label_en": "Music & nightlife", "label_fr": "Musique & soirées"},
-    {"code": "nature", "label_en": "Nature & wildlife", "label_fr": "Nature & faune"},
+    {"code": "nature_wildlife", "label_en": "Nature & Wildlife", "label_fr": "Nature & Faune"},
+    {"code": "water", "label_en": "Water Experience", "label_fr": "Expérience aquatique"},
+    {"code": "adventure", "label_en": "Adventure & Outdoor", "label_fr": "Aventure & Plein air"},
+    {
+        "code": "culture_heritage",
+        "label_en": "Culture & Heritage",
+        "label_fr": "Culture & Patrimoine",
+    },
+    {"code": "food_culinary", "label_en": "Food & Culinary", "label_fr": "Gastronomie"},
+    {
+        "code": "industrial",
+        "label_en": "Industrial & Innovation",
+        "label_fr": "Industrie & Innovation",
+    },
+    {
+        "code": "arts_workshops",
+        "label_en": "Arts & Creative Workshops",
+        "label_fr": "Arts & Ateliers créatifs",
+    },
+    {"code": "wellness", "label_en": "Wellness & Relaxation", "label_fr": "Bien-être & Relaxation"},
+    {"code": "city_lifestyle", "label_en": "City & Lifestyle", "label_fr": "Ville & Art de vivre"},
+    {
+        "code": "sports_recreation",
+        "label_en": "Sports & Recreation",
+        "label_fr": "Sports & Loisirs",
+    },
+    {"code": "music", "label_en": "Music & Entertainment", "label_fr": "Musique & Divertissement"},
+    {"code": "farm_rural", "label_en": "Farm & Rural Life", "label_fr": "Vie rurale & Ferme"},
+    {"code": "luxury", "label_en": "Luxury & Exclusive", "label_fr": "Luxe & Exclusif"},
 ]

@@ -9,6 +9,7 @@ export default [
   // Every public page shares the same chrome (Header + BottomNav).
   layout("routes/_app.tsx", [
     index("routes/_index.tsx"),
+    route("index", "routes/index.tsx"),
     route("browse", "routes/browse.tsx"),
     route("properties/:id", "routes/properties.$id.tsx"),
     route("experiences/:id", "routes/experiences.$id.tsx"),
