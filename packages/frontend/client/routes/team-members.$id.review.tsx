@@ -7,8 +7,8 @@ import { getForReviewServer } from "@/features/team/api.server";
 import { ReviewForm } from "@/features/team/review-form";
 import { localeFromAcceptLanguage, t } from "@/shared/lib/i18n";
 
-export const meta: Route.MetaFunction = ({ data }) => [
-  { title: t("team_review.meta.title", data?.locale ?? "fr") },
+export const meta: Route.MetaFunction = ({ loaderData }) => [
+  { title: t("team_review.meta.title", loaderData?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 

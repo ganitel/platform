@@ -15,8 +15,8 @@ import {
   type TranslationKey,
 } from "@/shared/lib/i18n";
 
-export const meta: Route.MetaFunction = ({ data }) => [
-  { title: t("bookings.meta.title", data?.locale ?? "fr") },
+export const meta: Route.MetaFunction = ({ loaderData }) => [
+  { title: t("bookings.meta.title", loaderData?.locale ?? "fr") },
   { name: "robots", content: "noindex" },
 ];
 

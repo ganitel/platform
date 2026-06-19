@@ -28,14 +28,17 @@ export const headers: Route.HeadersFunction = () => ({
 });
 
 export const meta: Route.MetaFunction = ({
-  data,
+  loaderData,
   params,
 }: {
-  data: { experience: ExperienceDetail; locale: Locale } | null | undefined;
+  loaderData:
+    | { experience: ExperienceDetail; locale: Locale }
+    | null
+    | undefined;
   params: { id?: string };
 }) => {
-  const locale = data?.locale ?? "fr";
-  if (!data?.experience) {
+  const locale = loaderData?.locale ?? "fr";
+  if (!loaderData?.experience) {
     return seo({
       title: translate("experience.not_found.title", locale),
       description: translate("experience.not_found.description", locale),
@@ -44,7 +47,7 @@ export const meta: Route.MetaFunction = ({
       noindex: true,
     });
   }
-  const e = data.experience;
+  const e = loaderData.experience;
   const title = `${e.title} — ${e.city} | Ganitel`;
   const description = (
     e.description?.slice(0, 160) ||
