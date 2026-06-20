@@ -102,6 +102,37 @@ async def test_create_request_happy_path(session):
 
 
 @pytest.mark.asyncio
+async def test_create_request_uses_exact_group_price_override(session):
+    host = await _make_user(session, is_host=True)
+    guest = await _make_user(session)
+    exp = await _make_experience(session, host, amount=Decimal("10000"))
+    exp.prices.append(
+        ExperiencePrice(
+            experience_id=exp.id,
+            currency="XAF",
+            amount=Decimal("35000"),
+            group_size=4,
+        )
+    )
+    await session.commit()
+
+    booking = await eb_service.create_request(
+        session,
+        guest=guest,
+        payload=ExperienceBookingCreateIn(
+            experience_id=exp.id,
+            requested_date=date.today() + timedelta(days=5),
+            party_size=4,
+            currency=Currency.XAF,
+        ),
+    )
+
+    assert booking.subtotal_amount == Decimal("35000")
+    assert booking.total_amount == Decimal("35000")
+    assert booking.host_payout_amount == Decimal("35000")
+
+
+@pytest.mark.asyncio
 async def test_create_request_rejects_past_date(session):
     host = await _make_user(session, is_host=True)
     guest = await _make_user(session)
