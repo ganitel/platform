@@ -208,6 +208,14 @@ export function ExperienceForm({
     );
   }
 
+  function removeBasePrice(idx: number) {
+    const target = basePrices[idx];
+    update(
+      "prices",
+      form.prices.filter((p) => p !== target),
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       <Section title={tr("admin.form.section.info")}>
@@ -355,12 +363,7 @@ export function ExperienceForm({
               {basePrices.length > 1 && (
                 <button
                   type="button"
-                  onClick={() => {
-                    update(
-                      "prices",
-                      form.prices.filter((_, i) => i !== idx),
-                    );
-                  }}
+                  onClick={() => removeBasePrice(idx)}
                   className="cursor-pointer rounded border px-3 py-2 text-sm"
                 >
                   ×

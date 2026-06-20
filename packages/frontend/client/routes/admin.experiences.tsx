@@ -35,7 +35,7 @@ import { useExperienceTypeLabel } from "@/features/reference/hooks";
 import { AdminGuard } from "@/shared/components/admin-guard";
 import { translateApiError } from "@/shared/lib/form-error";
 import { formatPriceAmount } from "@/shared/lib/format";
-import { pickPriceForLocale } from "@/shared/lib/price";
+import { pickBasePriceForLocale } from "@/shared/lib/price";
 import { transformImage } from "@/shared/lib/image";
 import { thumbnailUrl } from "@/shared/lib/media";
 import {
@@ -278,7 +278,7 @@ function ExperienceRow({ item }: { item: ExperienceAdminListItem }) {
       </AdminCell>
       <AdminCell>
         {(() => {
-          const p = pickPriceForLocale(item.prices, locale);
+          const p = pickBasePriceForLocale(item.prices, locale);
           return p ? (
             <>
               <span className="font-medium tabular-nums text-ganitel-text-title">

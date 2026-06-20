@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import type { ExperiencePublic } from "@/features/experiences/types";
 import { formatMoney } from "@/shared/lib/format";
 import { useLocale, useT } from "@/shared/lib/i18n";
-import { pickPriceForLocale } from "@/shared/lib/price";
+import { pickBasePriceForLocale } from "@/shared/lib/price";
 import { thumbnailUrl } from "@/shared/lib/media";
 import {
   buildSrcSet,
@@ -37,7 +37,7 @@ export function ExperienceCard({ experience, priority }: Props) {
     : PLACEHOLDER_COVER;
   const cover = transformImage(rawCover, { width: 600, quality: 75 });
   const srcSet = buildSrcSet(rawCover, CARD_WIDTHS, 75);
-  const priceEntry = pickPriceForLocale(experience.prices, locale);
+  const priceEntry = pickBasePriceForLocale(experience.prices, locale);
   const price = priceEntry ? formatMoney(priceEntry, locale) : "";
   const duration = formatDuration(experience.duration_minutes);
 

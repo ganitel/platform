@@ -83,8 +83,22 @@ async def create_request(
             extra={"field": "party_size", "max": exp.capacity},
         )
 
-    price = next((p for p in exp.prices if p.currency == payload.currency.value), None)
-    if price is None:
+    requested_currency = payload.currency.value
+    exact_group_price = next(
+        (
+            p
+            for p in exp.prices
+            if p.currency == requested_currency
+            and p.group_size == payload.party_size
+            and p.group_size > 1
+        ),
+        None,
+    )
+    base_price = next(
+        (p for p in exp.prices if p.currency == requested_currency and p.group_size == 1),
+        None,
+    )
+    if exact_group_price is None and base_price is None:
         raise ValidationError(code="experience.currency_unavailable", extra={"field": "currency"})
 
     now = datetime.now(UTC)
@@ -100,7 +114,13 @@ async def create_request(
             extra={"available": exp.capacity - used},
         )
 
-    subtotal = price.amount * Decimal(payload.party_size)
+    if exact_group_price is not None:
+        price = exact_group_price
+        subtotal = price.amount
+    else:
+        assert base_price is not None
+        price = base_price
+        subtotal = price.amount * Decimal(payload.party_size)
     confirm_deadline = datetime.now(UTC) + timedelta(hours=DEFAULT_CONFIRM_DEADLINE_HOURS)
 
     booking = ExperienceBooking(
