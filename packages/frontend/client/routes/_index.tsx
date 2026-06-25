@@ -2,11 +2,7 @@ import type { Route } from "./+types/_index";
 
 import { Landing } from "@/features/landing/landing";
 import { PUBLIC_HTML_CACHE } from "@/shared/lib/cache";
-import {
-  HERO_MOBILE_SRC,
-  HERO_SIZES,
-  HERO_SRCSET,
-} from "@/features/landing/hero-source";
+import { HERO_MOBILE_SRC, HERO_SRCSET } from "@/features/landing/hero-source";
 import { localeFromAcceptLanguage, t } from "@/shared/lib/i18n";
 import { seo } from "@/shared/lib/seo";
 
@@ -20,7 +16,7 @@ export const links: Route.LinksFunction = () => [
     as: "image",
     href: HERO_MOBILE_SRC,
     imageSrcSet: HERO_SRCSET,
-    imageSizes: HERO_SIZES,
+    imageSizes: "(min-width: 1024px) 40vw, 92vw",
     fetchPriority: "high",
   },
 ];
