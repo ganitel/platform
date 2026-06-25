@@ -244,6 +244,14 @@ const dict = {
     en: "Start exploring",
   },
   "landing.see_all": { fr: "Voir tout", en: "See all" },
+  "landing.hero.eyebrow": {
+    fr: "Cameroun · Expériences locales",
+    en: "Cameroon · Local experiences",
+  },
+  "landing.featured.experiences.eyebrow": { fr: "Sélection", en: "Curated" },
+  "landing.unforgettable.eyebrow": { fr: "Coups de cœur", en: "Favorites" },
+  "landing.confidence.eyebrow": { fr: "Notre promesse", en: "Our promise" },
+  "landing.stories.eyebrow": { fr: "Témoignages", en: "Voices" },
   "landing.cities.title": { fr: "Lieux à visiter", en: "Places to visit" },
   "landing.featured.experiences.heading": {
     fr: "Expériences en vedette",

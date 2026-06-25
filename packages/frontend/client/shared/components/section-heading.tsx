@@ -6,6 +6,7 @@ import { cn } from "@/shared/lib/cn";
 interface SectionHeadingProps {
   title: string;
   subtitle?: string;
+  eyebrow?: string;
   action?: { to: string; label: string };
   className?: string;
   align?: "start" | "center";
@@ -13,11 +14,13 @@ interface SectionHeadingProps {
 
 /**
  * The repeated "Title + subtitle + See all" header above home sections and
- * rails. Title uses the display face (Manrope); subtitle is muted body.
+ * rails. An optional eyebrow (with a small accent rule) adds editorial
+ * character. Title uses the display face (Manrope); subtitle is muted body.
  */
 export function SectionHeading({
   title,
   subtitle,
+  eyebrow,
   action,
   className,
   align = "start",
@@ -31,6 +34,17 @@ export function SectionHeading({
       )}
     >
       <div className="min-w-0">
+        {eyebrow && (
+          <span
+            className={cn(
+              "mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ganitel-olive",
+              align === "center" && "justify-center",
+            )}
+          >
+            <span aria-hidden className="h-px w-6 bg-ganitel-olive/50" />
+            {eyebrow}
+          </span>
+        )}
         <h2 className="text-2xl font-semibold tracking-[-0.02em] text-ganitel-text-title md:text-[28px]">
           {title}
         </h2>

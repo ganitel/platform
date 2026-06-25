@@ -48,7 +48,7 @@ export function ExperienceRailCard({ experience, inRail, priority }: Props) {
     <Link
       to={`/experiences/${experience.id}`}
       className={cn(
-        "group flex flex-col overflow-hidden rounded-card border border-ganitel-outline-soft/50 bg-ganitel-surface-card transition-shadow duration-300 hover:shadow-[0_14px_40px_-12px_rgba(128,85,45,0.18)]",
+        "group flex flex-col overflow-hidden rounded-card border border-ganitel-outline-soft/50 bg-ganitel-surface-card transition-[transform,box-shadow,border-color] duration-500 ease-out will-change-transform hover:-translate-y-1.5 hover:border-ganitel-outline-soft hover:shadow-[0_22px_48px_-18px_rgba(128,85,45,0.28)] motion-reduce:hover:translate-y-0",
         inRail && "w-[280px] shrink-0 snap-start md:w-[320px]",
       )}
     >
@@ -63,7 +63,11 @@ export function ExperienceRailCard({ experience, inRail, priority }: Props) {
           decoding="async"
           width={600}
           height={413}
-          className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+          className="size-full object-cover transition-transform duration-[900ms] ease-out will-change-transform group-hover:scale-[1.06] motion-reduce:group-hover:scale-100"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         />
         <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-ganitel-text-title shadow-sm backdrop-blur-md">
           {experience.experience_type}

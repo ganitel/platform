@@ -89,21 +89,40 @@ export function Landing() {
 function Hero({ onStart }: { onStart: () => void }) {
   const t = useT();
   return (
-    <section className="px-5 pb-10 pt-12 md:px-12 md:pb-14 md:pt-20">
+    <section className="relative overflow-hidden px-5 pb-12 pt-14 md:px-12 md:pb-16 md:pt-24">
+      <div
+        aria-hidden
+        className="hero-atmosphere pointer-events-none absolute inset-0 -z-10"
+      />
       <div className="max-w-2xl">
-        <h1 className="text-balance text-[42px] font-semibold leading-[1.04] tracking-[-0.02em] text-ganitel-text-title md:text-6xl">
+        <span
+          className="hero-rise flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-ganitel-olive"
+          style={{ animationDelay: "0.05s" }}
+        >
+          <span aria-hidden className="h-px w-8 bg-ganitel-olive/50" />
+          {t("landing.hero.eyebrow")}
+        </span>
+        <h1
+          className="hero-rise mt-5 text-balance text-[44px] font-semibold leading-[1.02] tracking-[-0.025em] text-ganitel-text-title md:text-[68px]"
+          style={{ animationDelay: "0.13s" }}
+        >
           {t("landing.hero.h2.title")}
         </h1>
-        <p className="mt-4 text-lg leading-relaxed text-ganitel-text-subtitle md:text-xl">
+        <p
+          className="hero-rise mt-5 max-w-xl text-lg leading-relaxed text-ganitel-text-subtitle md:text-xl"
+          style={{ animationDelay: "0.24s" }}
+        >
           {t("landing.hero.h2.lede")}
         </p>
-        <Button
-          onClick={onStart}
-          size="cta"
-          className="mt-8 w-full sm:w-auto sm:min-w-[280px]"
-        >
-          {t("landing.hero.cta.start")}
-        </Button>
+        <div className="hero-rise mt-9" style={{ animationDelay: "0.34s" }}>
+          <Button
+            onClick={onStart}
+            size="cta"
+            className="w-full sm:w-auto sm:min-w-[280px]"
+          >
+            {t("landing.hero.cta.start")}
+          </Button>
+        </div>
       </div>
     </section>
   );
@@ -148,6 +167,7 @@ function FeaturedExperiences() {
       <section className="py-8 md:py-12">
         <SectionHeading
           className="mb-5 px-5 md:px-12"
+          eyebrow={t("landing.featured.experiences.eyebrow")}
           title={t("landing.featured.experiences.heading")}
           subtitle={t("landing.featured.experiences.sub")}
           action={{
@@ -177,6 +197,7 @@ function FeaturedExperiences() {
         <section className="bg-ganitel-surface-2 py-10 md:py-14">
           <SectionHeading
             className="mb-5 px-5 md:px-12"
+            eyebrow={t("landing.unforgettable.eyebrow")}
             title={t("landing.unforgettable.heading")}
             subtitle={t("landing.unforgettable.sub")}
             action={{
@@ -201,15 +222,21 @@ function FeaturedExperiences() {
 
 function ExploreWithConfidence() {
   const t = useT();
-  const ref = useReveal<HTMLElement>();
+  const gridRef = useReveal<HTMLDivElement>({ rootMargin: "0px 0px -8% 0px" });
   return (
-    <section ref={ref} data-reveal="" className="px-5 py-10 md:px-12 md:py-16">
+    <section className="px-5 py-10 md:px-12 md:py-16">
       <SectionHeading
         className="mb-6"
+        eyebrow={t("landing.confidence.eyebrow")}
         title={t("landing.confidence.heading")}
         subtitle={t("landing.confidence.sub")}
       />
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div
+        ref={gridRef}
+        data-reveal=""
+        data-reveal-children=""
+        className="grid grid-cols-2 gap-4 lg:grid-cols-4"
+      >
         {TRUST_CARDS.map((card) => (
           <TrustCard
             key={card.key}
@@ -230,6 +257,7 @@ function TravelerStories() {
     <section className="py-10 md:py-14">
       <SectionHeading
         className="mb-5 px-5 md:px-12"
+        eyebrow={t("landing.stories.eyebrow")}
         title={t("landing.stories.heading")}
         subtitle={t("landing.stories.sub")}
       />
