@@ -260,7 +260,6 @@ const dict = {
     fr: "Ganitel · Expériences · Cameroun · ",
     en: "Ganitel · Experiences · Cameroon · ",
   },
-  "landing.hero.scroll": { fr: "Découvrir", en: "Scroll" },
   "landing.hero.stat.guides": {
     fr: "Guides locaux vérifiés",
     en: "Verified local guides",

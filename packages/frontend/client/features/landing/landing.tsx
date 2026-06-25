@@ -3,12 +3,11 @@ import { Link } from "react-router";
 import {
   ArrowRight,
   BadgeCheck,
+  CalendarCheck,
   Compass,
   Headset,
   MapPin,
-  MoveDown,
   ShieldCheck,
-  Sparkles,
   Users,
 } from "lucide-react";
 
@@ -41,7 +40,7 @@ const HERO_STATS = [
   },
   {
     key: "cancel",
-    icon: Sparkles,
+    icon: CalendarCheck,
     labelKey: "landing.hero.stat.cancel" as const,
   },
 ];
@@ -209,13 +208,6 @@ function Hero({ onStart }: { onStart: () => void }) {
             <HeroSeal label={t("landing.hero.seal")} />
           </div>
         </div>
-      </div>
-
-      <div className="pointer-events-none hidden justify-center pb-6 lg:flex">
-        <span className="ganitel-anim-scroll-hint inline-flex flex-col items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-ganitel-text-placeholder">
-          {t("landing.hero.scroll")}
-          <MoveDown className="size-4" />
-        </span>
       </div>
     </section>
   );

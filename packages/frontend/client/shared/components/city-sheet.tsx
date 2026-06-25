@@ -75,7 +75,7 @@ export function CitySheet({ open, onOpenChange }: Props) {
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg gap-0 overflow-hidden rounded-[24px] border-ganitel-outline-soft/60 bg-ganitel-surface-card p-0">
+        <DialogContent className="max-w-lg gap-0 overflow-hidden rounded-[24px] border-ganitel-outline-soft/60 bg-ganitel-surface-card p-0 duration-150 [--tw-enter-scale:1] [--tw-enter-translate-x:0px] [--tw-enter-translate-y:0px] [--tw-exit-scale:1] [--tw-exit-translate-x:0px] [--tw-exit-translate-y:0px]">
           <div className="px-6 pb-0 pt-7">
             <DialogTitle className="text-2xl font-semibold tracking-[-0.02em] text-ganitel-text-title">
               {t("citysheet.title")}
