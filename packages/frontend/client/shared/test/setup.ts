@@ -15,3 +15,18 @@ if (typeof Element !== "undefined") {
     };
   }
 }
+
+// jsdom doesn't implement matchMedia; responsive hooks rely on it.
+if (typeof window !== "undefined" && !window.matchMedia) {
+  window.matchMedia = (query: string): MediaQueryList =>
+    ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    }) as unknown as MediaQueryList;
+}

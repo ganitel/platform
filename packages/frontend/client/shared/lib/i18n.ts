@@ -244,7 +244,7 @@ const dict = {
     en: "Start exploring",
   },
   "landing.see_all": { fr: "Voir tout", en: "See all" },
-  "landing.cities.title": { fr: "Villes populaires", en: "Popular cities" },
+  "landing.cities.title": { fr: "Lieux à visiter", en: "Places to visit" },
   "landing.featured.experiences.heading": {
     fr: "Expériences en vedette",
     en: "Featured experiences",
@@ -351,7 +351,6 @@ const dict = {
     fr: "Rechercher une ville",
     en: "Search a city",
   },
-  "citysheet.active": { fr: "Sélection active", en: "Active selection" },
   "citysheet.continue": {
     fr: "Continuer l'exploration",
     en: "Continue exploring",
