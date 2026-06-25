@@ -11,10 +11,10 @@ single-host version of this script). On each run we:
 3. Re-insert the canonical demo set, with each listing/experience tied
    to its assigned host via `host_key`.
 
-Photos use seeded `picsum.photos` URLs stored directly as `media.key`.
-The storage layer treats full URLs as a pass-through, so the public URL
-resolves without any S3/Supabase setup. See
-`app/core/storage.public_or_signed_url`.
+Photos are stored directly as `media.key` (full URLs): properties use
+`picsum.photos`, experiences use known-good Cameroon Unsplash imagery. The
+storage layer treats full URLs as a pass-through, so the public URL resolves
+without any S3/Supabase setup. See `app/core/storage.public_or_signed_url`.
 
 Usage:
     uv run python -m scripts.seed_demo
@@ -37,6 +37,7 @@ from app.modules.experiences.models import (
     Experience,
     ExperienceCancellationPolicy,
     ExperienceMediaItem,
+    ExperiencePrice,
     ExperienceStatus,
 )
 from app.modules.media.models import Media
@@ -44,6 +45,7 @@ from app.modules.properties.models import (
     CancellationPolicy,
     Property,
     PropertyMediaItem,
+    PropertyPrice,
     PropertyStatus,
 )
 from app.modules.users.models import User
@@ -105,6 +107,28 @@ def _picsum(seed: str, w: int = 1200, h: int = 800) -> str:
 
 def _photo_set(seed_prefix: str, count: int = 5) -> list[str]:
     return [_picsum(f"{seed_prefix}-{i}") for i in range(count)]
+
+
+def _unsplash(photo_id: str, w: int = 1200) -> str:
+    """Full Unsplash URL stored as media.key (pass-through in storage). The
+    frontend image helper re-sizes via query params, so a base URL is enough."""
+    return f"https://images.unsplash.com/{photo_id}?auto=format&fit=crop&w={w}&q=80"
+
+
+# Known-good Cameroon imagery (Edouard TAMBA's Unsplash portfolio) — already
+# used live on the landing page, so these resolve reliably.
+CM_PHOTO_IDS: list[str] = [
+    "photo-1659947234291-13d4843d0e75",
+    "photo-1615463531521-201b9e68ae96",
+    "photo-1615463668140-d294c94ec8ef",
+    "photo-1615463669098-521a22047a1e",
+    "photo-1615463738213-b9381d217b4e",
+    "photo-1637244018403-785e7fa8707a",
+]
+
+
+def _cm_photos(*indices: int) -> list[str]:
+    return [_unsplash(CM_PHOTO_IDS[i % len(CM_PHOTO_IDS)]) for i in indices]
 
 
 def _currency_for(country_code: str) -> str:
@@ -384,122 +408,316 @@ LISTINGS: list[dict[str, Any]] = [
 ]
 
 
-# Six published experiences across CM / SN / CI. Distinct shape from
-# LISTINGS — duration_minutes replaces bedrooms/beds/bathrooms.
+# Twelve published experiences across Cameroon — enough to fill both home
+# rails (Featured + Unforgettable). Distinct shape from LISTINGS:
+# duration_minutes replaces bedrooms/beds/bathrooms; photos are Unsplash URLs.
+_INCLUDED = (
+    "- Guide local expérimenté\n- Équipement et sécurité\n"
+    "- Boissons et collation\n- Transferts depuis le point de rendez-vous"
+)
+_ELIGIBILITY = (
+    "Ouvert à partir de 8 ans. Bonne condition physique de base recommandée. "
+    "Non recommandé aux femmes enceintes pour les activités sportives."
+)
+
 EXPERIENCES: list[dict[str, Any]] = [
     {
         "host_key": "ekambi",
-        "title": "Cours de cuisine traditionnelle — Bonanjo",
+        "title": "Kayak au coucher de soleil vers les chutes de la Lobé",
         "description": (
-            "Trois heures aux côtés d'une cheffe douala : marché du matin, ndolé "
-            "et poisson braisé à la flamme, dégustation à table autour d'un thé "
-            "à la menthe. Tablier fourni, recettes à emporter."
+            "Pagayez à travers les mangroves sereines tandis que le soleil se "
+            "couche sur l'Atlantique, jusqu'aux célèbres chutes de la Lobé qui "
+            "se jettent directement dans l'océan."
         ),
-        "experience_type": "food_culinary",
-        "city": "Douala",
+        "experience_type": "Nautique",
+        "city": "Kribi",
         "country_code": "CM",
-        "lat": 4.0464,
-        "lng": 9.6960,
+        "lat": 2.9404,
+        "lng": 9.9097,
+        "capacity": 8,
+        "duration_minutes": 180,
+        "what_is_included": _INCLUDED,
+        "eligibility": _ELIGIBILITY,
+        "itinerary": (
+            "1. Briefing sécurité et initiation au kayak.\n"
+            "2. Traversée guidée des mangroves.\n"
+            "3. Approche des chutes de la Lobé.\n"
+            "4. Pause photo et retour au coucher du soleil."
+        ),
+        "cancellation_policy": ExperienceCancellationPolicy.FLEXIBLE,
+        "price": Decimal("25000"),
+        "photos": _cm_photos(2, 5, 4),
+    },
+    {
+        "host_key": "ekambi",
+        "title": "Sentiers cachés de la forêt tropicale",
+        "description": (
+            "Explorez les mangroves luxuriantes et les chemins secrets de la "
+            "jungle de Kribi en compagnie d'un guide naturaliste."
+        ),
+        "experience_type": "Nature",
+        "city": "Kribi",
+        "country_code": "CM",
+        "lat": 2.9521,
+        "lng": 9.9180,
+        "capacity": 10,
+        "duration_minutes": 240,
+        "what_is_included": _INCLUDED,
+        "eligibility": _ELIGIBILITY,
+        "itinerary": (
+            "1. Départ depuis le village.\n2. Randonnée guidée en forêt.\n"
+            "3. Découverte de la faune et de la flore.\n4. Retour et rafraîchissements."
+        ),
+        "cancellation_policy": ExperienceCancellationPolicy.FLEXIBLE,
+        "price": Decimal("30000"),
+        "photos": _cm_photos(3, 4, 1),
+    },
+    {
+        "host_key": "ekambi",
+        "title": "Masterclass de fruits de mer traditionnels",
+        "description": (
+            "Apprenez les mélanges d'épices authentiques de Kribi et les "
+            "techniques de cuisson du poisson braisé, suivi d'une dégustation "
+            "face à l'océan."
+        ),
+        "experience_type": "Gastronomie",
+        "city": "Kribi",
+        "country_code": "CM",
+        "lat": 2.9388,
+        "lng": 9.9105,
         "capacity": 6,
         "duration_minutes": 180,
+        "what_is_included": _INCLUDED,
+        "eligibility": "Ouvert à tous. Régimes alimentaires sur demande à la réservation.",
+        "itinerary": (
+            "1. Marché aux poissons du matin.\n2. Préparation des épices.\n"
+            "3. Cuisson au feu de bois.\n4. Dégustation à table."
+        ),
+        "cancellation_policy": ExperienceCancellationPolicy.FLEXIBLE,
+        "price": Decimal("20000"),
+        "photos": _cm_photos(0, 2, 5),
+    },
+    {
+        "host_key": "ekambi",
+        "title": "Traversée en pirogue vers les chutes de la Lobé",
+        "description": (
+            "Une traversée tranquille en pirogue traditionnelle jusqu'au pied "
+            "des chutes de la Lobé, l'une des rares cascades au monde à se jeter "
+            "dans la mer."
+        ),
+        "experience_type": "Nautique",
+        "city": "Kribi",
+        "country_code": "CM",
+        "lat": 2.8861,
+        "lng": 9.8772,
+        "capacity": 8,
+        "duration_minutes": 120,
+        "what_is_included": _INCLUDED,
+        "eligibility": _ELIGIBILITY,
+        "itinerary": (
+            "1. Embarquement au village de pêcheurs.\n2. Navigation vers les chutes.\n"
+            "3. Arrêt baignade.\n4. Retour."
+        ),
+        "cancellation_policy": ExperienceCancellationPolicy.MODERATE,
+        "price": Decimal("15000"),
+        "photos": _cm_photos(5, 2, 3),
+    },
+    {
+        "host_key": "mvondo",
+        "title": "Exploration du fleuve Nyong",
+        "description": (
+            "Un voyage paisible au cœur du système fluvial du Cameroun, entre "
+            "villages riverains, oiseaux et forêt-galerie."
+        ),
+        "experience_type": "Nature",
+        "city": "Yaoundé",
+        "country_code": "CM",
+        "lat": 3.5833,
+        "lng": 11.5167,
+        "capacity": 10,
+        "duration_minutes": 480,
+        "what_is_included": _INCLUDED,
+        "eligibility": _ELIGIBILITY,
+        "itinerary": (
+            "1. Transfert depuis Yaoundé.\n2. Navigation sur le Nyong.\n"
+            "3. Déjeuner en bord de fleuve.\n4. Visite d'un village riverain."
+        ),
+        "cancellation_policy": ExperienceCancellationPolicy.MODERATE,
+        "price": Decimal("45000"),
+        "photos": _cm_photos(4, 3, 0),
+    },
+    {
+        "host_key": "ekambi",
+        "title": "Marche culturelle à Grand Batanga",
+        "description": (
+            "Histoire et patrimoine du peuple Batanga, à travers ses villages "
+            "côtiers, ses traditions de pêche et ses récits."
+        ),
+        "experience_type": "Culture",
+        "city": "Kribi",
+        "country_code": "CM",
+        "lat": 2.8667,
+        "lng": 9.8833,
+        "capacity": 12,
+        "duration_minutes": 120,
+        "what_is_included": _INCLUDED,
+        "eligibility": "Ouvert à tous, accessible aux familles.",
+        "itinerary": (
+            "1. Accueil par un aîné du village.\n2. Marche commentée.\n"
+            "3. Rencontre avec des artisans.\n4. Collation traditionnelle."
+        ),
         "cancellation_policy": ExperienceCancellationPolicy.FLEXIBLE,
         "price": Decimal("12000"),
-        "photos_seed": "douala-cooking",
+        "photos": _cm_photos(1, 5, 4),
     },
     {
-        "host_key": "sow",
-        "title": "Visite guidée du marché Sandaga",
+        "host_key": "mvondo",
+        "title": "Randonnée sur les contreforts du mont Cameroun",
         "description": (
-            "Une plongée de deux heures et demie dans le poumon commerçant de "
-            "Dakar — étoffes wax, épices, tisanes, percussions. Guide local "
-            "francophone, dégustation de bissap incluse."
+            "Une ascension guidée des contreforts du mont Cameroun, le plus haut "
+            "sommet d'Afrique de l'Ouest, à travers forêts et coulées de lave."
         ),
-        "experience_type": "culture_heritage",
-        "city": "Dakar",
-        "country_code": "SN",
-        "lat": 14.6760,
-        "lng": -17.4408,
-        "capacity": 8,
-        "duration_minutes": 150,
-        "cancellation_policy": ExperienceCancellationPolicy.FLEXIBLE,
-        "price": Decimal("8000"),
-        "photos_seed": "dakar-sandaga",
-    },
-    {
-        "host_key": "faye",
-        "title": "Pirogue au coucher de soleil — Joal-Fadiouth",
-        "description": (
-            "Deux heures à bord d'une pirogue traditionnelle entre les bolongs "
-            "et l'île aux coquillages. Apéritif servi à bord ; capitaine "
-            "lebou natif du village."
-        ),
-        "experience_type": "water",
-        "city": "Joal-Fadiouth",
-        "country_code": "SN",
-        "lat": 14.1647,
-        "lng": -16.8367,
-        "capacity": 6,
-        "duration_minutes": 120,
-        "cancellation_policy": ExperienceCancellationPolicy.MODERATE,
-        "price": Decimal("18000"),
-        "photos_seed": "joal-pirogue",
-    },
-    {
-        "host_key": "faye",
-        "title": "Atelier de teinture indigo",
-        "description": (
-            "Quatre heures dans un atelier de Saint-Louis pour apprendre la "
-            "teinture à l'indigo et au pagne tissé. Repartez avec votre "
-            "carré de tissu teint à la main et séché au soleil."
-        ),
-        "experience_type": "arts_workshops",
-        "city": "Saint-Louis",
-        "country_code": "SN",
-        "lat": 16.0303,
-        "lng": -16.5023,
-        "capacity": 4,
-        "duration_minutes": 240,
-        "cancellation_policy": ExperienceCancellationPolicy.MODERATE,
-        "price": Decimal("22000"),
-        "photos_seed": "saintlouis-indigo",
-    },
-    {
-        "host_key": "faye",
-        "title": "Bain de son sous les baobabs",
-        "description": (
-            "Une heure trente d'écoute allongée sous les baobabs de la réserve "
-            "de Bandia, avec bols tibétains, gongs et chants. Coussin et "
-            "couverture fournis ; arrivée 15 minutes avant."
-        ),
-        "experience_type": "wellness",
-        "city": "Bandia",
-        "country_code": "SN",
-        "lat": 14.5833,
-        "lng": -17.0167,
-        "capacity": 8,
-        "duration_minutes": 90,
-        "cancellation_policy": ExperienceCancellationPolicy.FLEXIBLE,
-        "price": Decimal("14000"),
-        "photos_seed": "bandia-soundbath",
-    },
-    {
-        "host_key": "konan",
-        "title": "Plantations de cacao — N'duékro",
-        "description": (
-            "Six heures avec une coopérative de planteurs : visite des cabosses, "
-            "fermentation, séchage, dégustation. Déjeuner ivoirien partagé "
-            "(attiéké poisson) en bord de plantation."
-        ),
-        "experience_type": "farm_rural",
-        "city": "Yamoussoukro",
-        "country_code": "CI",
-        "lat": 6.8276,
-        "lng": -5.2893,
+        "experience_type": "Aventure",
+        "city": "Buéa",
+        "country_code": "CM",
+        "lat": 4.1537,
+        "lng": 9.2920,
         "capacity": 10,
         "duration_minutes": 360,
+        "what_is_included": _INCLUDED,
+        "eligibility": (
+            "Bonne condition physique requise. À partir de 14 ans. "
+            "Chaussures de marche indispensables."
+        ),
+        "itinerary": (
+            "1. Briefing à Buéa.\n2. Montée guidée des contreforts.\n"
+            "3. Pause panorama et déjeuner.\n4. Descente."
+        ),
         "cancellation_policy": ExperienceCancellationPolicy.MODERATE,
-        "price": Decimal("25000"),
-        "photos_seed": "yamoussoukro-cacao",
+        "price": Decimal("35000"),
+        "photos": _cm_photos(3, 1, 2),
+    },
+    {
+        "host_key": "mvondo",
+        "title": "Jardin botanique et faune de Limbé",
+        "description": (
+            "Une visite du jardin botanique historique de Limbé et de son centre "
+            "de faune, à deux pas des plages de sable noir volcanique."
+        ),
+        "experience_type": "Nature",
+        "city": "Limbé",
+        "country_code": "CM",
+        "lat": 4.0186,
+        "lng": 9.2096,
+        "capacity": 15,
+        "duration_minutes": 180,
+        "what_is_included": _INCLUDED,
+        "eligibility": "Ouvert à tous, accessible aux familles.",
+        "itinerary": (
+            "1. Entrée au jardin botanique.\n2. Visite guidée des espèces.\n"
+            "3. Centre de faune.\n4. Temps libre en bord de mer."
+        ),
+        "cancellation_policy": ExperienceCancellationPolicy.FLEXIBLE,
+        "price": Decimal("18000"),
+        "photos": _cm_photos(4, 2, 5),
+    },
+    {
+        "host_key": "ekambi",
+        "title": "Tournée gastronomique nocturne de Douala",
+        "description": (
+            "Une plongée gourmande dans les rues animées de Douala à la tombée "
+            "de la nuit : brochettes, poisson braisé, jus de gingembre."
+        ),
+        "experience_type": "Gastronomie",
+        "city": "Douala",
+        "country_code": "CM",
+        "lat": 4.0511,
+        "lng": 9.7679,
+        "capacity": 8,
+        "duration_minutes": 180,
+        "what_is_included": _INCLUDED,
+        "eligibility": "Ouvert à tous. Régimes alimentaires sur demande.",
+        "itinerary": (
+            "1. Rendez-vous à Akwa.\n2. Dégustations de rue.\n3. Marché de nuit.\n4. Dessert local."
+        ),
+        "cancellation_policy": ExperienceCancellationPolicy.FLEXIBLE,
+        "price": Decimal("16000"),
+        "photos": _cm_photos(0, 5, 1),
+    },
+    {
+        "host_key": "ekambi",
+        "title": "Yoga sur la plage à l'aube",
+        "description": (
+            "Une séance de yoga en douceur sur le sable de Kribi, au lever du "
+            "soleil, bercée par le bruit des vagues."
+        ),
+        "experience_type": "Bien-être",
+        "city": "Kribi",
+        "country_code": "CM",
+        "lat": 2.9350,
+        "lng": 9.9070,
+        "capacity": 12,
+        "duration_minutes": 90,
+        "what_is_included": (
+            "- Professeur de yoga certifié\n- Tapis et accessoires\n"
+            "- Tisane et fruits\n- Petit-déjeuner léger"
+        ),
+        "eligibility": "Tous niveaux. Arrivée 15 minutes avant le début.",
+        "itinerary": (
+            "1. Accueil et installation.\n2. Échauffement.\n"
+            "3. Séance face à l'océan.\n4. Relaxation et collation."
+        ),
+        "cancellation_policy": ExperienceCancellationPolicy.FLEXIBLE,
+        "price": Decimal("10000"),
+        "photos": _cm_photos(2, 4, 3),
+    },
+    {
+        "host_key": "mvondo",
+        "title": "Sentier mémoriel de Bimbia",
+        "description": (
+            "Une marche chargée d'histoire sur le site de l'ancien port négrier "
+            "de Bimbia, guidée par un historien local."
+        ),
+        "experience_type": "Culture",
+        "city": "Limbé",
+        "country_code": "CM",
+        "lat": 3.9833,
+        "lng": 9.3167,
+        "capacity": 12,
+        "duration_minutes": 150,
+        "what_is_included": _INCLUDED,
+        "eligibility": "À partir de 12 ans. Marche sur terrain naturel.",
+        "itinerary": (
+            "1. Accueil et contexte historique.\n2. Marche sur le sentier.\n"
+            "3. Visite des vestiges.\n4. Temps de recueillement."
+        ),
+        "cancellation_policy": ExperienceCancellationPolicy.MODERATE,
+        "price": Decimal("14000"),
+        "photos": _cm_photos(1, 3, 0),
+    },
+    {
+        "host_key": "ekambi",
+        "title": "Safari en barque dans la mangrove du Wouri",
+        "description": (
+            "Une exploration en barque de l'estuaire du Wouri, entre palétuviers, "
+            "oiseaux et villages de pêcheurs aux portes de Douala."
+        ),
+        "experience_type": "Nautique",
+        "city": "Douala",
+        "country_code": "CM",
+        "lat": 4.0300,
+        "lng": 9.6900,
+        "capacity": 10,
+        "duration_minutes": 240,
+        "what_is_included": _INCLUDED,
+        "eligibility": _ELIGIBILITY,
+        "itinerary": (
+            "1. Embarquement sur le Wouri.\n2. Traversée de la mangrove.\n"
+            "3. Observation des oiseaux.\n4. Halte dans un village de pêcheurs."
+        ),
+        "cancellation_policy": ExperienceCancellationPolicy.MODERATE,
+        "price": Decimal("28000"),
+        "photos": _cm_photos(5, 0, 2),
     },
 ]
 
@@ -633,14 +851,20 @@ async def _create_listing(session: Any, host: User, listing: dict[str, Any]) -> 
         amenities=listing["amenities"],
         house_rules=listing["house_rules"],
         cancellation_policy=listing["cancellation_policy"],
-        base_price_amount=listing["price"],
-        base_price_currency=_currency_for(listing["country_code"]),
         content_language="fr",
         status=PropertyStatus.PUBLISHED,
         published_at=datetime.now(UTC),
     )
     session.add(prop)
     await session.flush()  # populate prop.id
+
+    session.add(
+        PropertyPrice(
+            property_id=prop.id,
+            currency=_currency_for(listing["country_code"]),
+            amount=listing["price"],
+        )
+    )
 
     for position, media in enumerate(photos):
         session.add(PropertyMediaItem(property_id=prop.id, media_id=media.id, position=position))
@@ -650,7 +874,7 @@ async def _create_listing(session: Any, host: User, listing: dict[str, Any]) -> 
 
 async def _create_experience(session: Any, host: User, item: dict[str, Any]) -> Experience:
     photos: list[Media] = []
-    for url in _photo_set(item["photos_seed"], count=4):
+    for url in item["photos"]:
         m = Media(
             owner_user_id=host.id,
             bucket="seed",
@@ -672,15 +896,26 @@ async def _create_experience(session: Any, host: User, item: dict[str, Any]) -> 
         location=from_shape(Point(item["lng"], item["lat"]), srid=4326),
         capacity=item["capacity"],
         duration_minutes=item["duration_minutes"],
+        what_is_included=item.get("what_is_included", ""),
+        eligibility=item.get("eligibility", ""),
+        itinerary=item.get("itinerary", ""),
         cancellation_policy=item["cancellation_policy"],
-        base_price_amount=item["price"],
-        base_price_currency=_currency_for(item["country_code"]),
         content_language="fr",
         status=ExperienceStatus.PUBLISHED,
         published_at=datetime.now(UTC),
     )
     session.add(exp)
     await session.flush()
+
+    # Per-person price (group_size=1) per the per-person pricing model.
+    session.add(
+        ExperiencePrice(
+            experience_id=exp.id,
+            currency=_currency_for(item["country_code"]),
+            amount=item["price"],
+            group_size=1,
+        )
+    )
 
     for position, media in enumerate(photos):
         session.add(ExperienceMediaItem(experience_id=exp.id, media_id=media.id, position=position))
