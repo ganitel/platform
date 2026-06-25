@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { BadgeCheck, Compass, Headset, ShieldCheck, Users } from "lucide-react";
+import {
+  ArrowRight,
+  BadgeCheck,
+  Compass,
+  Headset,
+  MapPin,
+  MoveDown,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from "lucide-react";
 
 import { useT } from "@/shared/lib/i18n";
 import { useSearchExperiences } from "@/features/experiences/hooks";
@@ -10,10 +20,31 @@ import { SectionHeading } from "@/shared/components/section-heading";
 import { CitySheet } from "@/shared/components/city-sheet";
 import { Button } from "@/shared/ui/button";
 import { useReveal } from "@/shared/hooks/use-reveal";
+import { fallbackOnError } from "@/shared/lib/image";
 import { POPULAR_CITIES } from "./popular-cities";
+import { HERO_FALLBACK, HERO_MOBILE_SRC, HERO_SRCSET } from "./hero-source";
 import { CityCard } from "./components/city-card";
+import { HeroSeal } from "./components/hero-seal";
 import { TrustCard } from "./components/trust-card";
 import { QuoteCard } from "./components/quote-card";
+
+const HERO_STATS = [
+  {
+    key: "guides",
+    icon: ShieldCheck,
+    labelKey: "landing.hero.stat.guides" as const,
+  },
+  {
+    key: "cities",
+    icon: MapPin,
+    labelKey: "landing.hero.stat.cities" as const,
+  },
+  {
+    key: "cancel",
+    icon: Sparkles,
+    labelKey: "landing.hero.stat.cancel" as const,
+  },
+];
 
 const TRUST_CARDS = [
   {
@@ -89,40 +120,102 @@ export function Landing() {
 function Hero({ onStart }: { onStart: () => void }) {
   const t = useT();
   return (
-    <section className="relative overflow-hidden px-5 pb-12 pt-14 md:px-12 md:pb-16 md:pt-24">
+    <section className="relative overflow-hidden">
       <div
         aria-hidden
-        className="hero-atmosphere pointer-events-none absolute inset-0 -z-10"
+        className="hero-atmosphere paper-grain pointer-events-none absolute inset-0 -z-10"
       />
-      <div className="max-w-2xl">
-        <span
-          className="hero-rise flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-ganitel-olive"
-          style={{ animationDelay: "0.05s" }}
-        >
-          <span aria-hidden className="h-px w-8 bg-ganitel-olive/50" />
-          {t("landing.hero.eyebrow")}
-        </span>
-        <h1
-          className="hero-rise mt-5 text-balance text-[44px] font-semibold leading-[1.02] tracking-[-0.025em] text-ganitel-text-title md:text-[68px]"
-          style={{ animationDelay: "0.13s" }}
-        >
-          {t("landing.hero.h2.title")}
-        </h1>
-        <p
-          className="hero-rise mt-5 max-w-xl text-lg leading-relaxed text-ganitel-text-subtitle md:text-xl"
-          style={{ animationDelay: "0.24s" }}
-        >
-          {t("landing.hero.h2.lede")}
-        </p>
-        <div className="hero-rise mt-9" style={{ animationDelay: "0.34s" }}>
-          <Button
-            onClick={onStart}
-            size="cta"
-            className="w-full sm:w-auto sm:min-w-[280px]"
+      <div className="grid items-center gap-12 px-5 pb-14 pt-12 md:px-12 md:pb-20 md:pt-20 lg:grid-cols-12 lg:gap-10">
+        <div className="lg:col-span-6 xl:col-span-7">
+          <span
+            className="hero-rise flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-ganitel-olive"
+            style={{ animationDelay: "0.05s" }}
           >
-            {t("landing.hero.cta.start")}
-          </Button>
+            <span aria-hidden className="h-px w-8 bg-ganitel-olive/50" />
+            {t("landing.hero.eyebrow")}
+          </span>
+          <h1
+            className="hero-rise mt-5 text-balance text-[clamp(2.75rem,7vw,4.75rem)] font-semibold leading-[0.98] tracking-[-0.03em] text-ganitel-text-title"
+            style={{ animationDelay: "0.13s" }}
+          >
+            {t("landing.hero.h2.title")}
+          </h1>
+          <p
+            className="hero-rise mt-6 max-w-md text-lg leading-relaxed text-ganitel-text-subtitle md:text-xl"
+            style={{ animationDelay: "0.24s" }}
+          >
+            {t("landing.hero.h2.lede")}
+          </p>
+          <div
+            className="hero-rise mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center"
+            style={{ animationDelay: "0.34s" }}
+          >
+            <Button
+              onClick={onStart}
+              size="cta"
+              className="w-full sm:w-auto sm:min-w-[260px]"
+            >
+              {t("landing.hero.cta.start")}
+            </Button>
+            <Link
+              to="/browse?kind=experiences"
+              className="group inline-flex items-center gap-1.5 text-sm font-semibold text-ganitel-text-title"
+            >
+              {t("landing.hero.secondary")}
+              <ArrowRight className="size-4 text-ganitel-accent transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </div>
+          <ul
+            className="hero-rise mt-10 flex flex-wrap gap-x-6 gap-y-3 border-t border-ganitel-outline-soft/40 pt-6"
+            style={{ animationDelay: "0.44s" }}
+          >
+            {HERO_STATS.map((stat) => (
+              <li
+                key={stat.key}
+                className="inline-flex items-center gap-2 text-[13px] font-medium text-ganitel-text-subtitle"
+              >
+                <stat.icon className="size-4 text-ganitel-olive" />
+                {t(stat.labelKey)}
+              </li>
+            ))}
+          </ul>
         </div>
+
+        <div
+          className="hero-rise relative lg:col-span-6 xl:col-span-5"
+          style={{ animationDelay: "0.2s" }}
+        >
+          <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-ganitel-outline-soft/60 shadow-[0_30px_60px_-30px_rgba(24,16,12,0.5)]">
+            <img
+              src={HERO_MOBILE_SRC}
+              srcSet={HERO_SRCSET}
+              sizes="(min-width: 1024px) 40vw, 92vw"
+              alt={t("landing.alt.hero")}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              width={720}
+              height={900}
+              onError={fallbackOnError(HERO_FALLBACK)}
+              className="ganitel-anim-kenburns absolute inset-0 size-full object-cover"
+            />
+            <div aria-hidden className="image-scrim absolute inset-0" />
+            <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/85 px-3 py-1.5 text-[12px] font-semibold text-ganitel-text-title backdrop-blur-md">
+              <MapPin className="size-3.5 text-ganitel-accent" />
+              {t("landing.hero.caption")}
+            </span>
+          </div>
+          <div className="absolute -left-4 -top-4 md:-left-6 md:-top-6">
+            <HeroSeal label={t("landing.hero.seal")} />
+          </div>
+        </div>
+      </div>
+
+      <div className="pointer-events-none hidden justify-center pb-6 lg:flex">
+        <span className="ganitel-anim-scroll-hint inline-flex flex-col items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-ganitel-text-placeholder">
+          {t("landing.hero.scroll")}
+          <MoveDown className="size-4" />
+        </span>
       </div>
     </section>
   );

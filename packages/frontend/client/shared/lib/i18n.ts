@@ -248,6 +248,31 @@ const dict = {
     fr: "Cameroun · Expériences locales",
     en: "Cameroon · Local experiences",
   },
+  "landing.hero.caption": {
+    fr: "Chutes de la Lobé · Kribi",
+    en: "Lobé Falls · Kribi",
+  },
+  "landing.hero.secondary": {
+    fr: "Parcourir toutes les expériences",
+    en: "Browse all experiences",
+  },
+  "landing.hero.seal": {
+    fr: "Ganitel · Expériences · Cameroun · ",
+    en: "Ganitel · Experiences · Cameroon · ",
+  },
+  "landing.hero.scroll": { fr: "Découvrir", en: "Scroll" },
+  "landing.hero.stat.guides": {
+    fr: "Guides locaux vérifiés",
+    en: "Verified local guides",
+  },
+  "landing.hero.stat.cities": {
+    fr: "5 villes au Cameroun",
+    en: "5 cities across Cameroon",
+  },
+  "landing.hero.stat.cancel": {
+    fr: "Annulation flexible",
+    en: "Flexible cancellation",
+  },
   "landing.featured.experiences.eyebrow": { fr: "Sélection", en: "Curated" },
   "landing.unforgettable.eyebrow": { fr: "Coups de cœur", en: "Favorites" },
   "landing.confidence.eyebrow": { fr: "Notre promesse", en: "Our promise" },

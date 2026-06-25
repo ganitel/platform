@@ -2,12 +2,24 @@ import type { Route } from "./+types/_index";
 
 import { Landing } from "@/features/landing/landing";
 import { PUBLIC_HTML_CACHE } from "@/shared/lib/cache";
+import { HERO_MOBILE_SRC, HERO_SRCSET } from "@/features/landing/hero-source";
 import { localeFromAcceptLanguage, t } from "@/shared/lib/i18n";
 import { seo } from "@/shared/lib/seo";
 
 export const headers: Route.HeadersFunction = () => ({
   "Cache-Control": PUBLIC_HTML_CACHE,
 });
+
+export const links: Route.LinksFunction = () => [
+  {
+    rel: "preload",
+    as: "image",
+    href: HERO_MOBILE_SRC,
+    imageSrcSet: HERO_SRCSET,
+    imageSizes: "(min-width: 1024px) 40vw, 92vw",
+    fetchPriority: "high",
+  },
+];
 
 export const meta: Route.MetaFunction = ({ loaderData }) => {
   const locale = loaderData?.locale ?? "fr";
