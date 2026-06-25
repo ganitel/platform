@@ -1,8 +1,7 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
-@import "@fontsource/instrument-serif/400.css";
-@import "@fontsource/instrument-serif/400-italic.css";
+@import "@fontsource-variable/manrope/wght.css";
 @import "@fontsource-variable/inter/wght.css";
 
 /* Subtle film-grain overlay for atmospheric photo backdrops. */
@@ -21,47 +20,63 @@
 }
 
 @theme {
-  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  /* Heritage & Horizon: Manrope (geometric-humanist) headings + Inter body. */
+  --font-display:
+    "Manrope Variable", "Manrope", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-sans:
     "Inter Variable", "Inter", system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
+  /* Paper-warm editorial surface. Body lives on `surface`; cards on white. */
+  --color-ganitel-surface: #fbf9f8;
+  --color-ganitel-surface-card: #ffffff;
+  --color-ganitel-surface-2: #f6f3f2;
+  --color-ganitel-surface-3: #f0edec;
+
+  /* Two-accent system: tan = primary CTA, olive = brand / secondary action. */
+  --color-ganitel-accent: #d39e70;
+  --color-ganitel-accent-strong: #b87f50;
+  --color-ganitel-olive: #5b6144;
+  --color-ganitel-olive-soft: #e6ecc7;
+  --color-ganitel-brown: #80552d;
+  --color-ganitel-on-tan: #5a3510;
+  --color-ganitel-tan-soft: #ffdcc1;
+  --color-ganitel-sage: #bbc8b2;
+  --color-ganitel-sage-soft: #d9e7d0;
+
+  /* Ink + neutrals. Onyx instead of pure black for an organic, warm feel. */
   --color-ganitel-primary: #18100c;
   --color-ganitel-secondary: #d39e70;
-  --color-ganitel-neutral-1: #fafafa;
-  --color-ganitel-neutral-2: #f6f5f5;
-  --color-ganitel-neutral-3: #edecec;
   --color-ganitel-text-title: #18100c;
-  --color-ganitel-text-subtitle: #4d4744;
-  --color-ganitel-text-placeholder: #67615f;
+  --color-ganitel-text-subtitle: #46473e;
+  --color-ganitel-text-placeholder: #77786d;
   --color-ganitel-text-label: #67615f;
   --color-ganitel-text-active: #18100c;
-  --color-ganitel-text-badge: #4d4744;
+  --color-ganitel-text-badge: #46473e;
   --color-ganitel-text-button: #ffffff;
-  --color-ganitel-stroke-neutral: #edecec;
+  --color-ganitel-neutral-1: #fafafa;
+  --color-ganitel-neutral-2: #f6f3f2;
+  --color-ganitel-neutral-3: #eae8e6;
+  --color-ganitel-stroke-neutral: #eae8e6;
+  --color-ganitel-outline: #c5c3c2;
+  --color-ganitel-outline-soft: #c7c7bb;
+  --color-ganitel-rule: #80552d;
+
   --color-ganitel-background-primary: #18100c;
   --color-ganitel-background-secondary: #ffffff;
   --color-ganitel-background-neutral1: #fafafa;
-  --color-ganitel-background-neutral2: #f6f5f5;
+  --color-ganitel-background-neutral2: #f6f3f2;
   --color-ganitel-accent-green: #eaeee7;
   --color-ganitel-accent-grey: #e1e0df;
   --color-ganitel-paper: #f6f3ea;
   --color-ganitel-paper-warm: #efe9d6;
   --color-ganitel-moss: #2e3a25;
-  --color-ganitel-surface: #fff8f6;
-  --color-ganitel-surface-2: #fceae3;
-  --color-ganitel-surface-3: #f6e5dd;
-  --color-ganitel-brown: #80552d;
-  --color-ganitel-on-tan: #5a3510;
-  --color-ganitel-tan-soft: #ffdcc1;
-  --color-ganitel-sage: #566250;
-  --color-ganitel-sage-soft: #d9e7d0;
-  --color-ganitel-olive: #5b6144;
-  --color-ganitel-olive-soft: #e0e6c1;
-  --color-ganitel-outline: #d5c3b7;
-  --color-ganitel-rule: #80552d;
   --color-ganitel-overlay-warm: rgba(24, 16, 12, 0.5);
 
+  /* Shapes: cards 24px, CTAs/inputs 18px, chips pill. */
+  --radius-card: 1.5rem;
+  --radius-cta: 1.125rem;
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -217,35 +232,37 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Heritage & Horizon palette mapped onto shadcn role tokens.
+       Primary = sunlight tan (#d39e70); base components inherit it. */
+    --background: 30 33% 98%;
+    --foreground: 24 33% 9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 24 33% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 24 33% 9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 28 53% 63%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 36 20% 96%;
+    --secondary-foreground: 24 33% 9%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 36 20% 96%;
+    --muted-foreground: 67 7% 31%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 70 48% 85%;
+    --accent-foreground: 67 23% 23%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 42%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 30 3% 77%;
+    --input: 30 3% 77%;
+    --ring: 28 53% 63%;
 
-    --radius: 0.5rem;
+    --radius: 0.875rem;
   }
 
   .dark {
@@ -294,8 +311,8 @@
 
   :where(h1, h2):not([data-no-serif]) {
     font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.01em;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
 
   :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {

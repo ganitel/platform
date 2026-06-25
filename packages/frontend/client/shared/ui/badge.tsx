@@ -15,6 +15,11 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
+        // Organic category chip — sage at low opacity with onyx text.
+        sage: "border-transparent bg-ganitel-sage/25 text-ganitel-text-title",
+        // For chips sitting on top of photography.
+        overlay:
+          "border-transparent bg-white/90 text-ganitel-text-title backdrop-blur-md shadow-sm",
       },
     },
     defaultVariants: {

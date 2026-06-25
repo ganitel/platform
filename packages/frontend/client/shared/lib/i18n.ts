@@ -229,6 +229,138 @@ const dict = {
     fr: "Ville côtière camerounaise au bord de l'eau",
     en: "A Cameroonian coastal town by the water",
   },
+
+  // Heritage & Horizon homepage redesign.
+  "landing.hero.h2.title": {
+    fr: "Votre plus belle journée commence ici",
+    en: "Your best day starts here",
+  },
+  "landing.hero.h2.lede": {
+    fr: "Découvrez des expériences dont vous parlerez toujours.",
+    en: "Discover experiences you'll talk about forever.",
+  },
+  "landing.hero.cta.start": {
+    fr: "Commencer l'exploration",
+    en: "Start exploring",
+  },
+  "landing.see_all": { fr: "Voir tout", en: "See all" },
+  "landing.cities.title": { fr: "Villes populaires", en: "Popular cities" },
+  "landing.featured.experiences.heading": {
+    fr: "Expériences en vedette",
+    en: "Featured experiences",
+  },
+  "landing.featured.experiences.sub": {
+    fr: "Des aventures triées sur le volet à travers le Cameroun.",
+    en: "Handpicked adventures across Cameroon.",
+  },
+  "landing.unforgettable.heading": {
+    fr: "Expériences inoubliables",
+    en: "Unforgettable experiences",
+  },
+  "landing.unforgettable.sub": {
+    fr: "Des moments dont vous vous souviendrez longtemps.",
+    en: "Moments you'll remember long after.",
+  },
+  "landing.confidence.heading": {
+    fr: "Explorez en toute confiance",
+    en: "Explore with confidence",
+  },
+  "landing.confidence.sub": {
+    fr: "Chaque expérience est pensée autour de la confiance et de la sérénité.",
+    en: "Every experience is designed around trust and peace of mind.",
+  },
+  "landing.confidence.security.title": {
+    fr: "Sécurité garantie",
+    en: "Security guarantee",
+  },
+  "landing.confidence.security.body": {
+    fr: "Transactions et protocoles de voyage sécurisés.",
+    en: "Safe transactions and travel protocols.",
+  },
+  "landing.confidence.guides.title": {
+    fr: "Guides locaux",
+    en: "Local guides",
+  },
+  "landing.confidence.guides.body": {
+    fr: "Des experts du patrimoine sélectionnés avec soin.",
+    en: "Hand-picked heritage experts.",
+  },
+  "landing.confidence.verified.title": {
+    fr: "Moments vérifiés",
+    en: "Verified moments",
+  },
+  "landing.confidence.verified.body": {
+    fr: "Des contrôles qualité sur chaque aventure.",
+    en: "Quality checks on every adventure.",
+  },
+  "landing.confidence.support.title": {
+    fr: "Assistance instantanée",
+    en: "Instant support",
+  },
+  "landing.confidence.support.body": {
+    fr: "Une assistance 24/7 tout au long de votre voyage.",
+    en: "24/7 assistance throughout your journey.",
+  },
+  "landing.stories.heading": {
+    fr: "Témoignages de voyageurs",
+    en: "Traveler stories",
+  },
+  "landing.stories.sub": {
+    fr: "Des expériences réelles de notre communauté.",
+    en: "Real experiences from our community.",
+  },
+  "landing.stories.q1.body": {
+    fr: "Ganitel a transformé mon regard sur le Cameroun. La sortie en kayak à Kribi était d'une sérénité absolue.",
+    en: "Ganitel transformed how I see Cameroon. The Kribi kayaking trip was pure serenity.",
+  },
+  "landing.stories.q1.name": { fr: "Elena M.", en: "Elena M." },
+  "landing.stories.q1.place": { fr: "Madrid, Espagne", en: "Madrid, Spain" },
+  "landing.stories.q2.body": {
+    fr: "Les guides étaient de véritables encyclopédies vivantes. Authentiques et profondément professionnels.",
+    en: "The guides were like walking encyclopedias. Authentic and deeply professional.",
+  },
+  "landing.stories.q2.name": { fr: "David K.", en: "David K." },
+  "landing.stories.q2.place": { fr: "Londres, R.-U.", en: "London, UK" },
+  "landing.stories.q3.body": {
+    fr: "Chaque détail était soigné, de la réservation au retour. Je reviendrai sans hésiter.",
+    en: "Every detail was considered, from booking to the journey home. I'll be back without hesitation.",
+  },
+  "landing.stories.q3.name": { fr: "Amara D.", en: "Amara D." },
+  "landing.stories.q3.place": { fr: "Dakar, Sénégal", en: "Dakar, Senegal" },
+  "landing.final.heading": {
+    fr: "Votre prochaine histoire commence ici",
+    en: "Your next story starts here",
+  },
+  "landing.final.sub": {
+    fr: "Ne faites pas que voyager. Vivez l'âme du Cameroun avec Ganitel.",
+    en: "Don't just travel. Experience the soul of Cameroon with Ganitel.",
+  },
+  "landing.final.about_link": {
+    fr: "En savoir plus sur Ganitel",
+    en: "Learn more about Ganitel",
+  },
+  "citysheet.title": {
+    fr: "Quelle ville aimeriez-vous explorer ?",
+    en: "Which city would you love to explore?",
+  },
+  "citysheet.sub": {
+    fr: "Choisissez une destination et découvrez des expériences conçues pour des moments inoubliables.",
+    en: "Choose a destination and discover experiences curated for unforgettable moments.",
+  },
+  "citysheet.search.placeholder": {
+    fr: "Rechercher une ville",
+    en: "Search a city",
+  },
+  "citysheet.active": { fr: "Sélection active", en: "Active selection" },
+  "citysheet.continue": {
+    fr: "Continuer l'exploration",
+    en: "Continue exploring",
+  },
+  "citysheet.empty": {
+    fr: "Aucune ville ne correspond à votre recherche.",
+    en: "No city matches your search.",
+  },
+
   "footer.regions": {
     fr: "Cameroun",
     en: "Cameroon",
